@@ -1,6 +1,6 @@
 ﻿namespace Apache.Druid.Querying
 {
-    public abstract class Aggregator : WithType
+    internal abstract class Aggregator : WithType
     {
         public Aggregator(string name, string fieldName, string? type = null) : base(type)
         {

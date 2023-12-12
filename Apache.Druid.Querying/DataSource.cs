@@ -1,6 +1,6 @@
 ﻿namespace Apache.Druid.Querying
 {
-    internal sealed class DataSource<TItem>
+    public sealed class DataSource<TItem>
     {
         private readonly string id;
 
