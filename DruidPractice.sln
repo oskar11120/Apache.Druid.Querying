@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34031.279
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DruidPractice", "DruidPractice\DruidPractice.csproj", "{3200E49A-9EDC-45B0-ADB7-5FBCCA0ACCA9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apache.Druid.Querying", "Apache.Druid.Querying\Apache.Druid.Querying.csproj", "{2282F04F-D8AB-4E2A-8774-310A74D7816E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3200E49A-9EDC-45B0-ADB7-5FBCCA0ACCA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3200E49A-9EDC-45B0-ADB7-5FBCCA0ACCA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3200E49A-9EDC-45B0-ADB7-5FBCCA0ACCA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3200E49A-9EDC-45B0-ADB7-5FBCCA0ACCA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2282F04F-D8AB-4E2A-8774-310A74D7816E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2282F04F-D8AB-4E2A-8774-310A74D7816E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2282F04F-D8AB-4E2A-8774-310A74D7816E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2282F04F-D8AB-4E2A-8774-310A74D7816E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {887AD640-0A68-48A9-BCFA-88DDEC69BF24}
+	EndGlobalSection
+EndGlobal
