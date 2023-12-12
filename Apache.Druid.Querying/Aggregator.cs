@@ -1,61 +1,60 @@
-﻿namespace Apache.Druid.Querying
+﻿
+namespace Apache.Druid.Querying
 {
-    internal abstract class Aggregator : WithType
+    public class Aggregator : WithType
     {
-        public Aggregator(string name, string fieldName, string? type = null) : base(type)
+        public Aggregator(string name, string? type = null) : base(type)
         {
             Name = name;
-            FieldName = fieldName;
         }
 
         public string Name { get; }
-        public string FieldName { get; }
 
-        public abstract class WithEnumType<TType> : Aggregator where TType : System.Enum
+        public class WithFieldName : Aggregator
         {
-            protected WithEnumType(string name, string fieldName, TType type) : base(name, fieldName, type.ToString())
+            public WithFieldName(string name, string fieldName, string? type = null) : base(name, type)
             {
+                FieldName = fieldName;
+            }
+
+            public string FieldName { get; }
+
+            public class WithExpression : WithFieldName
+            {
+                public WithExpression(string name, string fieldName, string? expression = null, string? type = null) : base(name, fieldName, type)
+                {
+                    Expression = expression;
+                }
+
+                public string? Expression { get; }
+            }
+
+            public class WithTimeColumn : WithFieldName
+            {
+                public WithTimeColumn(string name, string fieldName, string timeColumn, string? type = null) : base(name, fieldName, type)
+                {
+                    TimeColumn = timeColumn;
+                }
+
+                public string TimeColumn { get; }
             }
         }
 
-        public enum SumMinMaxTypes
+
+        internal enum SumMinMaxTypes
         {
-            LongSum,
-            DoubleSum,
-            FloatSum,
-            DoubleMin,
-            DoubleMax,
-            FloatMin,
-            FloatMax,
-            LongMin,
-            LongMax
+            Sum,
+            Min,
+            Max
         }
 
-        public sealed class SumMinMax : WithEnumType<SumMinMaxTypes>
+        internal enum MeanAnyTypes
         {
-            public SumMinMax(string name, string fieldName, SumMinMaxTypes type) : base(name, fieldName, type)
-            {
-            }
+            Mean,
+            Any
         }
 
-        public enum CountMinAnyTypes
-        {
-            Count,
-            DoubleMean,
-            DoubleAny,
-            LongAny,
-            CountAny,
-            StringAny
-        }
-
-        public sealed class CountMinAny : WithEnumType<CountMinAnyTypes>
-        {
-            public CountMinAny(string name, string fieldName, CountMinAnyTypes type) : base(name, fieldName, type)
-            {
-            }
-        }
-
-        public enum FirstLastTypes
+        internal enum FirstLastTypes
         {
             DoubleFirst,
             DoubleLast,
@@ -65,16 +64,6 @@
             LongLast,
             StringFirst,
             StringLast
-        }
-
-        public sealed class FirstLast : WithEnumType<FirstLastTypes>
-        {
-            public FirstLast(string name, string fieldName, string timeColumn, FirstLastTypes type) : base(name, fieldName, type)
-            {
-                TimeColumn = timeColumn;
-            }
-
-            public string TimeColumn { get; }
         }
     }
 }
