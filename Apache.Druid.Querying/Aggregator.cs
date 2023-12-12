@@ -31,12 +31,12 @@ namespace Apache.Druid.Querying
 
             public class WithTimeColumn : WithFieldName
             {
-                public WithTimeColumn(string name, string fieldName, string timeColumn, string? type = null) : base(name, fieldName, type)
+                public WithTimeColumn(string name, string fieldName, string? timeColumn = null, string? type = null) : base(name, fieldName, type)
                 {
                     TimeColumn = timeColumn;
                 }
 
-                public string TimeColumn { get; }
+                public string? TimeColumn { get; }
             }
         }
 
