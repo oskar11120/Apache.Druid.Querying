@@ -6,7 +6,7 @@ namespace Apache.Druid.Querying
 {
     public delegate TColumn FactoryColumnSelector<TSource, TColumn>(TSource source);
 
-    internal class Factory<TSource>
+    public class Factory<TSource>
     {
         public delegate TColumn SourceColumnSelector<TColumn>(TSource source);
 
