@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
+using static Apache.Druid.Querying.TimeSeriesQuery<TSource>;
 
 namespace Apache.Druid.Querying
 {
@@ -50,15 +51,14 @@ namespace Apache.Druid.Querying
         Year,
         All
     }
-    public sealed record SourceWithVirtualColumns<TSource, TVirtualColumns>(TSource Source, TVirtualColumns Columns);
+    public sealed record SourceWithVirtualColumns<TSource, TVirtualColumns>(TSource Source, TVirtualColumns VirtualColumns);
 
     public static class IQueryWith
     {
-        public interface VirtualColumns<TSource, TVirtualColumns, TQuery, TQueryWithVirtualColumns>
-            : IQuery<TSource, TQuery>
-            where TQueryWithVirtualColumns : IQuery<SourceWithVirtualColumns<TSource, TVirtualColumns>, TQueryWithVirtualColumns>
+        public interface VirtualColumns<TSource, TQuery> : IQuery<TSource, TQuery>
         {
-            internal TQueryWithVirtualColumns AsTypeWithVirtualColumns { get; }
+            internal TQueryWithVirtualColumns As<TQueryWithVirtualColumns, TVirtualColumns>() where
+                TQueryWithVirtualColumns : IQuery<SourceWithVirtualColumns<TSource, TVirtualColumns>, TQueryWithVirtualColumns>;
         }
 
         public interface Filter<TSource, TQuery> : IQuery<TSource, TQuery>
@@ -93,14 +93,14 @@ namespace Apache.Druid.Querying
     public static class QueryExtensions
     {
         public static TQueryWithVirtualColumns WithVirtualColumns<TSource, TVirtualColumns, TQuery, TQueryWithVirtualColumns>(
-            this IQueryWith.VirtualColumns<TSource, TVirtualColumns, TQuery, TQueryWithVirtualColumns> query,
+            this IQueryWith.VirtualColumns<TSource, TQuery> query,
             Func<Factory<TSource>.VirtualColumns<TVirtualColumns>, IEnumerable<VirtualColumn>> factory)
             where TQueryWithVirtualColumns : IQuery<SourceWithVirtualColumns<TSource, TVirtualColumns>, TQueryWithVirtualColumns>
         {
             var factory_ = new Factory<TSource>.VirtualColumns<TVirtualColumns>();
             var virtualColumns = factory(factory_);
             query.AddOrUpdateComponent(nameof(virtualColumns), virtualColumns);
-            return query.AsTypeWithVirtualColumns;
+            return query.As<TQueryWithVirtualColumns, TVirtualColumns>();
         }
 
         public static TQuery WithFilter<TSource, TQuery>(this IQuery<TSource, TQuery> query, Func<Factory<TSource>.Filter, Filter> factory)
@@ -119,8 +119,8 @@ namespace Apache.Druid.Querying
             var factory_ = new Factory<TSource>.Aggregators<TAggregations>();
             var aggregations = factory(factory_).ToArray();
             var aggregatorNames = aggregations.Select(aggregator => aggregator.Name);
-            var resultPropertyNames = IQueryWith.Aggregators<TSource, TAggregations, TQuery>.ResultPropertyNames;
-            var match = resultPropertyNames.SetEquals(aggregatorNames);
+            var propertyNames = IQueryWith.Aggregators<TSource, TAggregations, TQuery>.ResultPropertyNames;
+            var match = propertyNames.SetEquals(aggregatorNames);
             if (match)
             {
                 query.AddOrUpdateComponent(nameof(aggregations), aggregations);
@@ -132,7 +132,7 @@ namespace Apache.Druid.Querying
                 Data =
                 {
                     [nameof(aggregatorNames)] = aggregatorNames,
-                    [nameof(resultPropertyNames)] = resultPropertyNames
+                    [nameof(propertyNames)] = propertyNames
                 }
             };
         }
@@ -171,25 +171,30 @@ namespace Apache.Druid.Querying
         }
     }
 
-    public abstract class TimeSeriesQueryBase<TSource> :
-        IQueryWith.Order,
-        IQueryWith.Intervals
+    public static class TimeSeriesQuery<TSource>
     {
-        public string QueryType { get; } = "timeseries";
-        Dictionary<string, Action<JsonObject>> IQuery.ComponentWrites { get; } = new();
-    }
+        public abstract class AfterSpecifyingVirtualColumns<TNewSource, TSelf> :
+            IQueryWith.Order,
+            IQueryWith.Intervals,
+            IQueryWith.Filter<TNewSource, TSelf>
+        {
+            public string QueryType { get; } = "timeseries";
+            Dictionary<string, Action<JsonObject>> IQuery.ComponentWrites { get; } = new();
 
-    public class TimeSeriesQuery<TSource> :
-        TimeSeriesQueryBase<TSource>,
-        IQueryWith.Filter<TSource, TimeSeriesQuery<TSource>>
+            public class WithAggregations<TAggregations> :
+                AfterSpecifyingVirtualColumns<TNewSource, WithAggregations<TAggregations>>,
+                IQueryWith.Aggregators<TNewSource, TAggregations, WithAggregations<TAggregations>>
+            {
+            }
+        }
 
-    {
-    }
+        public class WithVirtualColumns<TVirtualColumns> : 
+            AfterSpecifyingVirtualColumns<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>
+        {
+        }
 
-    public sealed class TimeSeriesQuery<TSource, TAggregations> :
-        TimeSeriesQueryBase<TSource>,
-        IQueryWith.Filter<TSource, TimeSeriesQuery<TSource, TAggregations>>,
-        IQueryWith.Aggregators<TSource, TAggregations, TimeSeriesQuery<TSource, TAggregations>>
-    {
+        public class WithNoVirtualColumns : AfterSpecifyingVirtualColumns<TSource, WithNoVirtualColumns>
+        {
+        }
     }
 }

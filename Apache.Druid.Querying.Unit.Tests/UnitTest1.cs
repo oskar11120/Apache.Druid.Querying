@@ -5,7 +5,9 @@ namespace Apache.Druid.Querying.Unit.Tests
         [Test]
         public void Test1()
         {
-            new TimeSeriesQuery<Message, Aggregations>()
+            var test0 = new TimeSeriesQuery<Message>
+                .WithNoVirtualColumns
+                .WithAggregations<Aggregations>()
                 .WithInterval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .WithOrder(Order.Ascending)
                 .WithFilter(filter => filter.Or(
@@ -13,13 +15,35 @@ namespace Apache.Druid.Querying.Unit.Tests
                     filter.Equals(
                         message => message.ObjectId,
                         Guid.NewGuid())))
-                .WithAggregators(aggregators => new[]
+                .WithAggregators(aggregators => new Aggregator[]
                 {
                     aggregators.Last(
+                        aggregations => aggregations.LastValue,
+                        message => message.Value),
+                    aggregators.Max(
                         aggregations => aggregations.TMax,
                         message => message.Timestamp)
                 });
 
+            var test1 = new TimeSeriesQuery<Message>
+                .WithVirtualColumns<VirtualColumns>
+                .WithAggregations<Aggregations>()
+                .WithInterval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
+                .WithOrder(Order.Ascending)
+                .WithFilter(filter => filter.Or(
+                    filter.Null(pair => pair.VirtualColumns.TReal),
+                    filter.Equals(
+                        pair => pair.Source.ObjectId,
+                        Guid.NewGuid())))
+                .WithAggregators(aggregators => new Aggregator[]
+                {
+                    aggregators.Last(
+                        aggregations => aggregations.LastValue,
+                        pair => pair.Source.Value),
+                    aggregators.Max(
+                        aggregations => aggregations.TMax,
+                        pair => pair.Source.Timestamp)
+                });
         }
 
         record Message(string Variable, Guid ObjectId, double Value, DateTimeOffset Timestamp, DateTimeOffset ProcessedTimestmap);
