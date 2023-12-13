@@ -7,7 +7,7 @@ namespace Apache.Druid.Querying.Unit.Tests
         {
             new TimeSeriesQuery<Message>()
                 .WithInterval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
-                .WithOrder(QueryOrder.Ascending)
+                .WithOrder(Order.Ascending)
                 .WithFilter(filter => filter.Or(
                     filter.Null(message => message.Value),
                     filter.Equals(

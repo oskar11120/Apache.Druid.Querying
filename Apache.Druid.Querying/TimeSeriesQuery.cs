@@ -4,6 +4,8 @@ using System.Globalization;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using static System.Net.Mime.MediaTypeNames;
+using System.Text.RegularExpressions;
 
 namespace Apache.Druid.Querying
 {
@@ -24,11 +26,30 @@ namespace Apache.Druid.Querying
         public TSelf AsSelf => (TSelf)this;
     }
 
-    public sealed record QueryInterval(DateTimeOffset From, DateTimeOffset To);
-    public enum QueryOrder
+    public sealed record Interval(DateTimeOffset From, DateTimeOffset To);
+    public enum Order
     {
         Ascending,
         Descending
+    }
+    public enum Granularity
+    {
+        None,
+        Second,
+        Minute,
+        FiveMinutes,
+        TenMinutes,
+        FifteenMinutes,
+        ThrityMinutes,
+        Hour,
+        SixHours,
+        EightHours,
+        Day,
+        Week,
+        Month,
+        Quarter,
+        Year,
+        All
     }
 
     public static class IQueryWith
@@ -54,6 +75,10 @@ namespace Apache.Druid.Querying
         }
 
         public interface Order : IQuery
+        {
+        }
+
+        public interface Granularity : IQuery
         {
         }
     }
@@ -94,7 +119,7 @@ namespace Apache.Druid.Querying
             };
         }
 
-        public static TQuery WithIntervals<TQuery>(this TQuery query, IEnumerable<QueryInterval> intervals)
+        public static TQuery WithIntervals<TQuery>(this TQuery query, IEnumerable<Interval> intervals)
             where TQuery : IQueryWith.Intervals
         {
             static string ToIsoString(DateTimeOffset t) => t.ToString("o", CultureInfo.InvariantCulture);
@@ -103,15 +128,27 @@ namespace Apache.Druid.Querying
             return query;
         }
 
-        public static TQuery WithInterval<TQuery>(this TQuery query, QueryInterval interval)
+        public static TQuery WithInterval<TQuery>(this TQuery query, Interval interval)
             where TQuery : IQueryWith.Intervals
             => WithIntervals(query, new[] { interval });
 
-        public static TQuery WithOrder<TQuery>(this TQuery query, QueryOrder order)
+        public static TQuery WithOrder<TQuery>(this TQuery query, Order order)
             where TQuery : IQueryWith.Order
         {
-            var descending = order is QueryOrder.Descending;
+            var descending = order is Order.Descending;
             query.AddOrUpdateComponent(nameof(descending), descending);
+            return query;
+        }
+
+        private static string ToSnake(this string @string)
+            => Regex.Replace(Regex.Replace(@string, "(.)([A-Z][a-z]+)", "$1_$2"), "([a-z0-9])([A-Z])", "$1_$2").ToLower();
+        private static readonly Dictionary<Granularity, string> granularityMap = Enum
+            .GetValues<Granularity>()
+            .ToDictionary(granularity => granularity, granularity => granularity.ToString().TrimEnd('s').ToSnake());
+        public static TQuery WithGranularity<TQuery>(this TQuery query, Granularity granularity)
+            where TQuery : IQueryWith.Granularity
+        {
+            query.AddOrUpdateComponent(nameof(granularity), granularityMap[granularity]);
             return query;
         }
     }
