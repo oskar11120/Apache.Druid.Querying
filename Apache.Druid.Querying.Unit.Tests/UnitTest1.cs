@@ -8,14 +8,14 @@ namespace Apache.Druid.Querying.Unit.Tests
             var test0 = new TimeSeriesQuery<Message>
                 .WithNoVirtualColumns
                 .WithAggregations<Aggregations>()
-                .WithInterval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
-                .WithOrder(Order.Ascending)
-                .WithFilter(filter => filter.Or(
+                .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
+                .Order(Order.Ascending)
+                .Filter(filter => filter.Or(
                     filter.Null(message => message.Value),
                     filter.Equals(
                         message => message.ObjectId,
                         Guid.NewGuid())))
-                .WithAggregators(aggregators => new Aggregator[]
+                .Aggregations(aggregators => new Aggregator[]
                 {
                     aggregators.Last(
                         aggregations => aggregations.LastValue,
@@ -28,14 +28,14 @@ namespace Apache.Druid.Querying.Unit.Tests
             var test1 = new TimeSeriesQuery<Message>
                 .WithVirtualColumns<VirtualColumns>
                 .WithAggregations<Aggregations>()
-                .WithInterval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
-                .WithOrder(Order.Ascending)
-                .WithFilter(filter => filter.Or(
+                .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
+                .Order(Order.Ascending)
+                .Filter(filter => filter.Or(
                     filter.Null(pair => pair.VirtualColumns.TReal),
                     filter.Equals(
                         pair => pair.Source.ObjectId,
                         Guid.NewGuid())))
-                .WithAggregators(aggregators => new Aggregator[]
+                .Aggregations(aggregators => new Aggregator[]
                 {
                     aggregators.Last(
                         aggregations => aggregations.LastValue,

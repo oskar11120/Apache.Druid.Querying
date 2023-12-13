@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
-using static Apache.Druid.Querying.TimeSeriesQuery<TSource>;
 
 namespace Apache.Druid.Querying
 {
@@ -103,7 +102,7 @@ namespace Apache.Druid.Querying
             return query.As<TQueryWithVirtualColumns, TVirtualColumns>();
         }
 
-        public static TQuery WithFilter<TSource, TQuery>(this IQuery<TSource, TQuery> query, Func<Factory<TSource>.Filter, Filter> factory)
+        public static TQuery Filter<TSource, TQuery>(this IQuery<TSource, TQuery> query, Func<Factory<TSource>.Filter, Filter> factory)
             where TQuery : IQueryWith.Filter<TSource, TQuery>
         {
             var factory_ = new Factory<TSource>.Filter();
@@ -112,7 +111,7 @@ namespace Apache.Druid.Querying
             return query.AsSelf;
         }
 
-        public static TQuery WithAggregators<TSource, TQuery, TAggregations>(
+        public static TQuery Aggregations<TSource, TQuery, TAggregations>(
             this IQueryWith.Aggregators<TSource, TAggregations, TQuery> query, Func<Factory<TSource>.Aggregators<TAggregations>, IEnumerable<Aggregator>> factory)
             where TQuery : IQueryWith.Aggregators<TSource, TAggregations, TQuery>
         {
@@ -146,14 +145,14 @@ namespace Apache.Druid.Querying
             return query;
         }
 
-        public static TQuery WithInterval<TQuery>(this TQuery query, Interval interval)
+        public static TQuery Interval<TQuery>(this TQuery query, Interval interval)
             where TQuery : IQueryWith.Intervals
             => WithIntervals(query, new[] { interval });
 
-        public static TQuery WithOrder<TQuery>(this TQuery query, Order order)
+        public static TQuery Order<TQuery>(this TQuery query, Order order)
             where TQuery : IQueryWith.Order
         {
-            var descending = order is Order.Descending;
+            var descending = order is Querying.Order.Descending;
             query.AddOrUpdateComponent(nameof(descending), descending);
             return query;
         }
