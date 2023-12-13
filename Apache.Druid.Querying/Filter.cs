@@ -131,4 +131,3 @@ namespace Apache.Druid.Querying
         }
     }
 }
-}

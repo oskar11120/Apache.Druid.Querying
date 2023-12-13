@@ -1,6 +1,7 @@
 ﻿using Apache.Druid.Querying.Internal;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using static Apache.Druid.Querying.Factory<TSource>.VirtualColumns<TColumns>;
 
 namespace Apache.Druid.Querying
 {
@@ -126,6 +127,14 @@ namespace Apache.Druid.Querying
                 Expression<ResultColumnSelector<TColumn>> name,
                 Expression<SourceColumnSelector<TColumn>> fieldName)
                 => Map_(name, fieldName, nameof(Last));
+        }
+
+        public sealed class VirtualColumns<TColumns>
+        {
+            public delegate TColumn VirtualColumnSelector<TColumn>(TColumns columns);
+
+            public VirtualColumn.Expression_ Expression<TColumn>(Expression<VirtualColumnSelector<TColumn>> name, string expression)
+                => new(GetColumnName(name), expression, DataType.Get<TColumn>());
         }
     }
 }
