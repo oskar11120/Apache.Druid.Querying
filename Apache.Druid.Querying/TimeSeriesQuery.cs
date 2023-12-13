@@ -19,6 +19,11 @@ namespace Apache.Druid.Querying
         }
     }
 
+    public interface IQuery<TSource, TSelf> : IQuery
+    {
+        public TSelf AsSelf => (TSelf)this;
+    }
+
     public sealed record QueryInterval(DateTimeOffset From, DateTimeOffset To);
     public enum QueryOrder
     {
@@ -28,7 +33,7 @@ namespace Apache.Druid.Querying
 
     public static class IQueryWith
     {
-        public interface Filter<TSource> : IQuery
+        public interface Filter<TSource, TQuery> : IQuery<TSource, TQuery>
         {
         }
 
@@ -55,13 +60,13 @@ namespace Apache.Druid.Querying
 
     public static class QueryExtensions
     {
-        public static TQuery WithFilter<TSource, TQuery>(this TQuery query, Func<Factory<TSource>.Filter, Filter<TSource>> factory)
-            where TQuery : IQueryWith.Filter<TSource>
+        public static TQuery WithFilter<TSource, TQuery>(this IQuery<TSource, TQuery> query, Func<Factory<TSource>.Filter, Filter> factory)
+            where TQuery : IQueryWith.Filter<TSource, TQuery>
         {
             var factory_ = new Factory<TSource>.Filter();
             var filter = factory(factory_);
             query.AddOrUpdateComponent(nameof(filter), filter);
-            return query;
+            return query.AsSelf;
         }
 
         public static TQuery WithAggregators<TSource, TQuery, TAggregatorsResult>(
@@ -89,7 +94,7 @@ namespace Apache.Druid.Querying
             };
         }
 
-        public static TQuery WithIntervals<TSource, TQuery>(this TQuery query, IEnumerable<QueryInterval> intervals)
+        public static TQuery WithIntervals<TQuery>(this TQuery query, IEnumerable<QueryInterval> intervals)
             where TQuery : IQueryWith.Intervals
         {
             static string ToIsoString(DateTimeOffset t) => t.ToString("o", CultureInfo.InvariantCulture);
@@ -98,11 +103,11 @@ namespace Apache.Druid.Querying
             return query;
         }
 
-        public static TQuery WithInterval<TSource, TQuery>(this TQuery query, QueryInterval interval)
+        public static TQuery WithInterval<TQuery>(this TQuery query, QueryInterval interval)
             where TQuery : IQueryWith.Intervals
-            => WithIntervals<TSource, TQuery>(query, new[] { interval });
+            => WithIntervals(query, new[] { interval });
 
-        public static TQuery WithOrder<TSource, TQuery>(this TQuery query, QueryOrder order)
+        public static TQuery WithOrder<TQuery>(this TQuery query, QueryOrder order)
             where TQuery : IQueryWith.Order
         {
             var descending = order is QueryOrder.Descending;
@@ -112,7 +117,7 @@ namespace Apache.Druid.Querying
     }
 
     public class TimeSeriesQuery<TSource> :
-        IQueryWith.Filter<TSource>,
+        IQueryWith.Filter<TSource, TimeSeriesQuery<TSource>>,
         IQueryWith.Order,
         IQueryWith.Intervals
     {
