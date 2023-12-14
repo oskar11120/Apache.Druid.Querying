@@ -53,7 +53,7 @@ namespace Apache.Druid.Querying
 
         public sealed class FieldAccess : PostAggregator
         {
-            public FieldAccess(string name, string fieldName, bool finalizing = false) : base(name, finalizing ? "finalizingFieldAccess" : "fieldAccess")
+            public FieldAccess(string name, string fieldName, bool finalizing) : base(name, finalizing ? "finalizingFieldAccess" : "fieldAccess")
             {
                 FieldName = fieldName;
             }

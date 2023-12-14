@@ -159,6 +159,25 @@ namespace Apache.Druid.Querying
 
         public sealed class PostAggregators<TAggregations, TPostAggregations> : DependentOn.Aggregations<TAggregations>.AndPostAggregations<TPostAggregations>
         {
+            public PostAggregator Arithmetic<TColumn>(
+                Expression<PostAggregationsColumnSelector<TColumn>> name,
+                IEnumerable<PostAggregator> fields,
+                ArithmeticFunction fn) => new PostAggregator.Arithmetic(GetColumnName(name), fields, fn);
+
+            public PostAggregator FieldAccess<TColumn>(
+                Expression<PostAggregationsColumnSelector<TColumn>> name,
+                Expression<AggregationsColumnSelector<TColumn>> fieldName,
+                bool finalizing) => new PostAggregator.FieldAccess(GetColumnName(name), GetColumnName(fieldName), finalizing);
+
+            public PostAggregator Constant<TColumn>(
+                Expression<PostAggregationsColumnSelector<TColumn>> name,
+                TColumn value)
+                => new PostAggregator.Constant<TColumn>(GetColumnName(name), value);
+
+            public PostAggregator Expression<TColumn>(
+                Expression<PostAggregationsColumnSelector<TColumn>> name,
+                string expression)
+                => new PostAggregator.Expression_(GetColumnName(name), DataType.Get<TColumn>(), expression);
         }
     }
 }
