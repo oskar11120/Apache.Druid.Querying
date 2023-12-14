@@ -93,29 +93,29 @@ namespace Apache.Druid.Querying
     {
         public static TQueryWithVirtualColumns WithVirtualColumns<TSource, TVirtualColumns, TQuery, TQueryWithVirtualColumns>(
             this IQueryWith.VirtualColumns<TSource, TQuery> query,
-            Func<Factory<TSource>.VirtualColumns<TVirtualColumns>, IEnumerable<VirtualColumn>> factory)
+            Func<Factory.VirtualColumns<TVirtualColumns>, IEnumerable<VirtualColumn>> factory)
             where TQueryWithVirtualColumns : IQuery<SourceWithVirtualColumns<TSource, TVirtualColumns>, TQueryWithVirtualColumns>
         {
-            var factory_ = new Factory<TSource>.VirtualColumns<TVirtualColumns>();
+            var factory_ = new Factory.VirtualColumns<TVirtualColumns>();
             var virtualColumns = factory(factory_);
             query.AddOrUpdateComponent(nameof(virtualColumns), virtualColumns);
             return query.As<TQueryWithVirtualColumns, TVirtualColumns>();
         }
 
-        public static TQuery Filter<TSource, TQuery>(this IQuery<TSource, TQuery> query, Func<Factory<TSource>.Filter, Filter> factory)
+        public static TQuery Filter<TSource, TQuery>(this IQuery<TSource, TQuery> query, Func<Factory.Filter<TSource>, Filter> factory)
             where TQuery : IQueryWith.Filter<TSource, TQuery>
         {
-            var factory_ = new Factory<TSource>.Filter();
+            var factory_ = new Factory.Filter<TSource>();
             var filter = factory(factory_);
             query.AddOrUpdateComponent(nameof(filter), filter);
             return query.AsSelf;
         }
 
         public static TQuery Aggregations<TSource, TQuery, TAggregations>(
-            this IQueryWith.Aggregators<TSource, TAggregations, TQuery> query, Func<Factory<TSource>.Aggregators<TAggregations>, IEnumerable<Aggregator>> factory)
+            this IQueryWith.Aggregators<TSource, TAggregations, TQuery> query, Func<Factory.Aggregators<TSource, TAggregations>, IEnumerable<Aggregator>> factory)
             where TQuery : IQueryWith.Aggregators<TSource, TAggregations, TQuery>
         {
-            var factory_ = new Factory<TSource>.Aggregators<TAggregations>();
+            var factory_ = new Factory.Aggregators<TSource, TAggregations>();
             var aggregations = factory(factory_).ToArray();
             var aggregatorNames = aggregations.Select(aggregator => aggregator.Name);
             var propertyNames = IQueryWith.Aggregators<TSource, TAggregations, TQuery>.ResultPropertyNames;
