@@ -1,5 +1,6 @@
 ﻿using Apache.Druid.Querying.Internal;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace Apache.Druid.Querying
@@ -167,16 +168,18 @@ namespace Apache.Druid.Querying
             public PostAggregator Arithmetic<TColumn>(
                 Expression<PostAggregationsColumnSelector<TColumn>> name,
                 ArithmeticFunction fn,
-                params PostAggregator[] fields) => Arithmetic(name, fn, fields);
+                params PostAggregator[] fields) => Arithmetic(name, fn, fields.AsEnumerable());
 
             public PostAggregator FieldAccess<TColumn>(
                 Expression<PostAggregationsColumnSelector<TColumn>> name,
                 Expression<AggregationsColumnSelector<TColumn>> fieldName,
-                bool finalizing) => new PostAggregator.FieldAccess(GetColumnName(name), GetColumnName(fieldName), finalizing);
+                bool finalizing = false) 
+                => new PostAggregator.FieldAccess(GetColumnName(name), GetColumnName(fieldName), finalizing);
 
             public PostAggregator FieldAccess<TColumn>(
                 Expression<AggregationsColumnSelector<TColumn>> fieldName,
-                bool finalizing) => new PostAggregator.FieldAccess(GetColumnName(fieldName), GetColumnName(fieldName), finalizing);
+                bool finalizing = false) 
+                => new PostAggregator.FieldAccess(GetColumnName(fieldName), GetColumnName(fieldName), finalizing);
 
             public PostAggregator Constant<TColumn>(
                 Expression<PostAggregationsColumnSelector<TColumn>> name,

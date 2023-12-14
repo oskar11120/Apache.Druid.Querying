@@ -2,21 +2,22 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
 namespace Apache.Druid.Querying
 {
+    public sealed record QuerySection(Type Type, object? Value);
+
     public interface IQuery
     {
         string QueryType { get; }
 
-        private protected Dictionary<string, Action<JsonObject>> ComponentWrites { get; }
-        internal void AddOrUpdateComponent<TComponent>(string key, TComponent component)
+        private protected Dictionary<string, QuerySection> State { get; }
+        public IReadOnlyDictionary<string, QuerySection> GetState() => State;
+        internal void AddOrUpdateSection<TSection>(string key, TSection section)
         {
-            ComponentWrites.Remove(key);
-            ComponentWrites.Add(key, json => json[key] = JsonSerializer.SerializeToNode(component));
+            State.Remove(key);
+            State.Add(key, new(typeof(TSection), section));
         }
     }
 
@@ -100,7 +101,7 @@ namespace Apache.Druid.Querying
         {
             var factory_ = new Factory.VirtualColumns<TVirtualColumns>();
             var virtualColumns = factory(factory_);
-            query.AddOrUpdateComponent(nameof(virtualColumns), virtualColumns);
+            query.AddOrUpdateSection(nameof(virtualColumns), virtualColumns);
             return query.As<TQueryWithVirtualColumns, TVirtualColumns>();
         }
 
@@ -109,7 +110,7 @@ namespace Apache.Druid.Querying
         {
             var factory_ = new Factory.Filter<TSource>();
             var filter = factory(factory_);
-            query.AddOrUpdateComponent(nameof(filter), filter);
+            query.AddOrUpdateSection(nameof(filter), filter);
             return query.AsSelf;
         }
 
@@ -137,7 +138,7 @@ namespace Apache.Druid.Querying
             var aggregatorNames = aggregators.Select(aggregator => aggregator.Name);
             var propertyNames = IQueryWith.Aggregations<TSource, TAggregations, TQuery>.AggregationsPropertyNames;
             EnsureMatch<TAggregations>(propertyNames, aggregatorNames, nameof(aggregators));
-            query.AddOrUpdateComponent(nameof(Aggregations).ToLower(), aggregators);
+            query.AddOrUpdateSection(nameof(Aggregations).ToLower(), aggregators);
             return query.AsSelf;
         }
 
@@ -150,7 +151,7 @@ namespace Apache.Druid.Querying
             var postAggregatorNames = postAggregators.Select(aggregator => aggregator.Name);
             var propertyNames = IQueryWith.PostAggregations<TAggregations, TPostAggregations, TQuery>.PostAggregationsPropertyNames;
             EnsureMatch<TPostAggregations>(propertyNames, postAggregatorNames, nameof(postAggregators));
-            query.AddOrUpdateComponent(nameof(PostAggregations).ToLower(), postAggregators);
+            query.AddOrUpdateSection(nameof(PostAggregations), postAggregators);
             return query.AsSelf;
         }
 
@@ -159,7 +160,7 @@ namespace Apache.Druid.Querying
         {
             static string ToIsoString(DateTimeOffset t) => t.ToString("o", CultureInfo.InvariantCulture);
             var mapped = intervals.Select(interval => $"{ToIsoString(interval.From)}/{ToIsoString(interval.To)}");
-            query.AddOrUpdateComponent(nameof(intervals), mapped);
+            query.AddOrUpdateSection(nameof(intervals), mapped);
             return query;
         }
 
@@ -171,7 +172,7 @@ namespace Apache.Druid.Querying
             where TQuery : IQueryWith.Order
         {
             var descending = order is Querying.Order.Descending;
-            query.AddOrUpdateComponent(nameof(descending), descending);
+            query.AddOrUpdateSection(nameof(descending), descending);
             return query;
         }
 
@@ -183,7 +184,7 @@ namespace Apache.Druid.Querying
         public static TQuery Granularity<TQuery>(this TQuery query, Granularity granularity)
             where TQuery : IQueryWith.Granularity
         {
-            query.AddOrUpdateComponent(nameof(granularity), granularityMap[granularity]);
+            query.AddOrUpdateSection(nameof(granularity), granularityMap[granularity]);
             return query;
         }
     }
@@ -197,9 +198,8 @@ namespace Apache.Druid.Querying
             IQueryWith.Filter<TNewSource, TSelf>
         {
             public string QueryType { get; } = "timeseries";
-            Dictionary<string, Action<JsonObject>> IQuery.ComponentWrites { get; } = new();
+            Dictionary<string, QuerySection> IQuery.State { get; } = new();
 
-            
             public class WithAggregations<TAggregations> : AfterSpecifyingAggregations<TNewSource, TAggregations, WithAggregations<TAggregations>>
             {
             }

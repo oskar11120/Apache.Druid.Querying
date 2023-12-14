@@ -1,3 +1,7 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 namespace Apache.Druid.Querying.Unit.Tests
 {
     public class Tests
@@ -24,7 +28,8 @@ namespace Apache.Druid.Querying.Unit.Tests
                     aggregators.Max(
                         aggregations => aggregations.TMax,
                         message => message.Timestamp)
-                });
+                })
+                .ToJson();
 
             var test1 = new TimeSeriesQuery<Message>
                 .WithVirtualColumns<VirtualColumns>
@@ -45,7 +50,8 @@ namespace Apache.Druid.Querying.Unit.Tests
                     aggregators.Max(
                         aggregations => aggregations.TMax,
                         pair => pair.Source.Timestamp)
-                });
+                })
+                .ToJson();
 
             var test2 = new TimeSeriesQuery<Message>
                 .WithNoVirtualColumns
@@ -76,7 +82,8 @@ namespace Apache.Druid.Querying.Unit.Tests
                         postAggregators.FieldAccess(
                             aggregations => aggregations.LastValue,
                             finalizing: true))
-                });
+                })
+                .ToJson();
 
             var test3 = new TimeSeriesQuery<Message>
                 .WithVirtualColumns<VirtualColumns>
@@ -107,7 +114,8 @@ namespace Apache.Druid.Querying.Unit.Tests
                         postAggregators.FieldAccess(
                             aggregations => aggregations.LastValue,
                             finalizing: true))
-                });
+                })
+                .ToJson();
 
         }
 
@@ -115,5 +123,46 @@ namespace Apache.Druid.Querying.Unit.Tests
         record VirtualColumns(DateTimeOffset TReal);
         record Aggregations(DateTimeOffset TMax, double LastValue);
         record PostAggregations(double Sum);
+    }
+
+    internal static class TestExtensions
+    {
+        public static string ToJson(this IQuery query)
+        {
+            var asDictionary = query
+                .GetState()
+                .ToDictionary(pair => pair.Key, pair => pair.Value.Value);
+            return JsonSerializer.Serialize<object>(asDictionary, new JsonSerializerOptions(JsonSerializerDefaults.Web)
+            {
+                WriteIndented = true,
+                Converters =
+                {
+                    new JsonStringEnumConverter(),
+                    new PolymorphicSerializer<Filter>(),
+                    new PolymorphicSerializer<Aggregator>(),
+                    new PolymorphicSerializer<PostAggregator>(),
+                    new PolymorphicSerializer<VirtualColumn>()
+                }
+            });
+        }
+
+        public class PolymorphicSerializer<T> : JsonConverter<T> where T : class
+        {
+            public override T Read(
+                ref Utf8JsonReader reader,
+                Type typeToConvert,
+                JsonSerializerOptions options)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void Write(
+                Utf8JsonWriter writer,
+                [DisallowNull] T value,
+                JsonSerializerOptions options)
+            {
+                JsonSerializer.Serialize(writer, value, value.GetType(), options);
+            }
+        }
     }
 }
