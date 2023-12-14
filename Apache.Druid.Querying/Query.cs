@@ -20,9 +20,13 @@ namespace Apache.Druid.Querying
         }
     }
 
-    public interface IQuery<TSource, TSelf> : IQuery
+    public interface IQuery<TSelf> : IQuery
     {
         public TSelf AsSelf => (TSelf)this;
+    }
+
+    public interface IQuery<TSource, TSelf> : IQuery<TSelf>
+    {
     }
 
     public sealed record Interval(DateTimeOffset From, DateTimeOffset To);
@@ -64,16 +68,18 @@ namespace Apache.Druid.Querying
         {
         }
 
-        public interface Aggregators<TSource, TAggregations, TSelf> : IQuery<TSource, TSelf>
+        private static HashSet<string> GetPropertyNames<T>() => typeof(T)
+            .GetProperties()
+            .Select(property => property.Name)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        public interface Aggregations<TSource, TAggregations, TSelf> : IQuery<TSource, TSelf>
         {
-            internal static readonly HashSet<string> ResultPropertyNames = typeof(TAggregations)
-                .GetProperties()
-                .Select(property => property.Name)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            internal static readonly HashSet<string> AggregationsPropertyNames = GetPropertyNames<TAggregations>();
+        }
 
-            internal interface AndPostAggregators<TPostAggregations> : Aggregators<TSource, TAggregations, TSelf>
-            {
-            }
+        public interface PostAggregations<TAggregations, TPostAggregations, TSelf> : IQuery<TSelf>
+        {
+            internal static readonly HashSet<string> PostAggregationsPropertyNames = GetPropertyNames<TPostAggregations>();
         }
 
         public interface Intervals : IQuery
@@ -91,7 +97,7 @@ namespace Apache.Druid.Querying
 
     public static class QueryExtensions
     {
-        public static TQueryWithVirtualColumns WithVirtualColumns<TSource, TVirtualColumns, TQuery, TQueryWithVirtualColumns>(
+        public static TQueryWithVirtualColumns VirtualColumns<TSource, TVirtualColumns, TQuery, TQueryWithVirtualColumns>(
             this IQueryWith.VirtualColumns<TSource, TQuery> query,
             Func<Factory.VirtualColumns<TVirtualColumns>, IEnumerable<VirtualColumn>> factory)
             where TQueryWithVirtualColumns : IQuery<SourceWithVirtualColumns<TSource, TVirtualColumns>, TQueryWithVirtualColumns>
@@ -111,32 +117,48 @@ namespace Apache.Druid.Querying
             return query.AsSelf;
         }
 
+        private static void EnsureMatch<TAggregations>(HashSet<string> aggregationPropertyNames, IEnumerable<string> aggregatorNames, string aggregatorsLogName)
+        {
+            var match = aggregationPropertyNames.SetEquals(aggregatorNames);
+            if (!match)
+            {
+                throw new InvalidOperationException($"Added {aggregatorsLogName} names did not match property names of {typeof(TAggregations)}.")
+                {
+                    Data =
+                    {
+                        [aggregatorsLogName + "Names"] = aggregatorNames,
+                        ["propertyNames"] = aggregationPropertyNames
+                    }
+                };
+            }
+        }
         public static TQuery Aggregations<TSource, TQuery, TAggregations>(
-            this IQueryWith.Aggregators<TSource, TAggregations, TQuery> query, Func<Factory.Aggregators<TSource, TAggregations>, IEnumerable<Aggregator>> factory)
-            where TQuery : IQueryWith.Aggregators<TSource, TAggregations, TQuery>
+            this IQueryWith.Aggregations<TSource, TAggregations, TQuery> query, Func<Factory.Aggregators<TSource, TAggregations>, IEnumerable<Aggregator>> factory)
+            where TQuery : IQueryWith.Aggregations<TSource, TAggregations, TQuery>
         {
             var factory_ = new Factory.Aggregators<TSource, TAggregations>();
-            var aggregations = factory(factory_).ToArray();
-            var aggregatorNames = aggregations.Select(aggregator => aggregator.Name);
-            var propertyNames = IQueryWith.Aggregators<TSource, TAggregations, TQuery>.ResultPropertyNames;
-            var match = propertyNames.SetEquals(aggregatorNames);
-            if (match)
-            {
-                query.AddOrUpdateComponent(nameof(aggregations), aggregations);
-                return query.AsSelf;
-            }
-
-            throw new InvalidOperationException($"Added aggregator names did not match property names of {typeof(TAggregations)}.")
-            {
-                Data =
-                {
-                    [nameof(aggregatorNames)] = aggregatorNames,
-                    [nameof(propertyNames)] = propertyNames
-                }
-            };
+            var aggregators = factory(factory_).ToArray();
+            var aggregatorNames = aggregators.Select(aggregator => aggregator.Name);
+            var propertyNames = IQueryWith.Aggregations<TSource, TAggregations, TQuery>.AggregationsPropertyNames;
+            EnsureMatch<TAggregations>(propertyNames, aggregatorNames, nameof(aggregators));
+            query.AddOrUpdateComponent(nameof(Aggregations).ToLower(), aggregators);
+            return query.AsSelf;
         }
 
-        public static TQuery WithIntervals<TQuery>(this TQuery query, IEnumerable<Interval> intervals)
+        public static TQuery PostAggregations<TQuery, TAggregations, TPostAggregations>(
+            this IQueryWith.PostAggregations<TAggregations, TPostAggregations, TQuery> query, Func<Factory.PostAggregators<TAggregations, TPostAggregations>, IEnumerable<PostAggregator>> factory)
+            where TQuery : IQueryWith.PostAggregations<TAggregations, TPostAggregations, TQuery>
+        {
+            var factory_ = new Factory.PostAggregators<TAggregations, TPostAggregations>();
+            var postAggregators = factory(factory_).ToArray();
+            var postAggregatorNames = postAggregators.Select(aggregator => aggregator.Name);
+            var propertyNames = IQueryWith.PostAggregations<TAggregations, TPostAggregations, TQuery>.PostAggregationsPropertyNames;
+            EnsureMatch<TPostAggregations>(propertyNames, postAggregatorNames, nameof(postAggregators));
+            query.AddOrUpdateComponent(nameof(PostAggregations).ToLower(), postAggregators);
+            return query.AsSelf;
+        }
+
+        public static TQuery Intervals<TQuery>(this TQuery query, IEnumerable<Interval> intervals)
             where TQuery : IQueryWith.Intervals
         {
             static string ToIsoString(DateTimeOffset t) => t.ToString("o", CultureInfo.InvariantCulture);
@@ -147,7 +169,7 @@ namespace Apache.Druid.Querying
 
         public static TQuery Interval<TQuery>(this TQuery query, Interval interval)
             where TQuery : IQueryWith.Intervals
-            => WithIntervals(query, new[] { interval });
+            => Intervals(query, new[] { interval });
 
         public static TQuery Order<TQuery>(this TQuery query, Order order)
             where TQuery : IQueryWith.Order
@@ -183,12 +205,17 @@ namespace Apache.Druid.Querying
 
             public class WithAggregations<TAggregations> :
                 AfterSpecifyingVirtualColumns<TNewSource, WithAggregations<TAggregations>>,
-                IQueryWith.Aggregators<TNewSource, TAggregations, WithAggregations<TAggregations>>
+                IQueryWith.Aggregations<TNewSource, TAggregations, WithAggregations<TAggregations>>
             {
+                public class WithPostAggregations<TPostAggregations> : 
+                    WithAggregations<TAggregations>,
+                    IQueryWith.PostAggregations<TAggregations, TPostAggregations, WithPostAggregations<TPostAggregations>>
+                {
+                }
             }
         }
 
-        public class WithVirtualColumns<TVirtualColumns> : 
+        public class WithVirtualColumns<TVirtualColumns> :
             AfterSpecifyingVirtualColumns<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>
         {
         }

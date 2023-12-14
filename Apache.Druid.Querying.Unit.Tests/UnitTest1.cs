@@ -46,10 +46,49 @@ namespace Apache.Druid.Querying.Unit.Tests
                         aggregations => aggregations.TMax,
                         pair => pair.Source.Timestamp)
                 });
+
+            TimeSeriesQuery<Message>
+                .AfterSpecifyingVirtualColumns<
+                    SourceWithVirtualColumns<Message, VirtualColumns>,
+                    TimeSeriesQuery<Message>.WithVirtualColumns<VirtualColumns>>
+                .WithAggregations<Aggregations>.WithPostAggregations<PostAggregation> test2_0 
+                
+                = new TimeSeriesQuery<Message>
+               .WithVirtualColumns<VirtualColumns>
+               .WithAggregations<Aggregations>
+               .WithPostAggregations<PostAggregation>()
+               .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
+               .Order(Order.Ascending)
+               .Granularity(Granularity.Minute);
+
+            TimeSeriesQuery<Message>
+                .AfterSpecifyingVirtualColumns<
+                    SourceWithVirtualColumns<Message, VirtualColumns>, 
+                    TimeSeriesQuery<Message>.AfterSpecifyingVirtualColumns<SourceWithVirtualColumns<Message, VirtualColumns>, 
+                    TimeSeriesQuery<Message>.WithVirtualColumns<VirtualColumns>>.WithAggregations<Aggregations>>
+                .WithAggregations<Aggregations> test2_1 
+                
+                = test2_0
+               .Filter(filter => filter.Or(
+                   filter.Null(pair => pair.VirtualColumns.TReal),
+                   filter.Equals(
+                       pair => pair.Source.ObjectId,
+                       Guid.NewGuid())));
+            var test2_2 = test2_1
+               .Aggregations(aggregators => new Aggregator[]
+               {
+                    aggregators.Last(
+                        aggregations => aggregations.LastValue,
+                        pair => pair.Source.Value),
+                    aggregators.Max(
+                        aggregations => aggregations.TMax,
+                        pair => pair.Source.Timestamp)
+               });
         }
 
         record Message(string Variable, Guid ObjectId, double Value, DateTimeOffset Timestamp, DateTimeOffset ProcessedTimestmap);
         record VirtualColumns(DateTimeOffset TReal);
         record Aggregations(DateTimeOffset TMax, double LastValue);
+        record PostAggregation(double Sum);
     }
 }
