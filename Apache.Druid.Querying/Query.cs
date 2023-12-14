@@ -21,9 +21,9 @@ namespace Apache.Druid.Querying
         }
     }
 
-    public interface IQuery<TSelf> : IQuery
+    public interface IQuery<TSelf> : IQuery where TSelf : IQuery<TSelf>
     {
-        public TSelf AsSelf => (TSelf)this;
+        public TSelf Unwrapped => (TSelf)this;
     }
 
     public sealed record Interval(DateTimeOffset From, DateTimeOffset To);
@@ -55,13 +55,11 @@ namespace Apache.Druid.Querying
 
     public static class IQueryWith
     {
-        public interface VirtualColumns<TSource, TQuery> : IQuery<TQuery>
+        public interface VirtualColumns<TVirtualColumns, TQuery> : IQuery<TQuery> where TQuery : IQuery<TQuery>
         {
-            internal TQueryWithVirtualColumns As<TQueryWithVirtualColumns, TVirtualColumns>() where
-                TQueryWithVirtualColumns : IQuery<TQueryWithVirtualColumns>;
         }
 
-        public interface Filter<TSource, TQuery> : IQuery<TQuery>
+        public interface Filter<TSource, TQuery> : IQuery<TQuery> where TQuery : IQuery<TQuery>
         {
         }
 
@@ -69,12 +67,12 @@ namespace Apache.Druid.Querying
             .GetProperties()
             .Select(property => property.Name)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        public interface Aggregations<TSource, TAggregations, TSelf> : IQuery<TSelf>
+        public interface Aggregations<TSource, TAggregations, TSelf> : IQuery<TSelf> where TSelf : IQuery<TSelf>
         {
             internal static readonly HashSet<string> AggregationsPropertyNames = GetPropertyNames<TAggregations>();
         }
 
-        public interface PostAggregations<TAggregations, TPostAggregations, TSelf> : IQuery<TSelf>
+        public interface PostAggregations<TAggregations, TPostAggregations, TSelf> : IQuery<TSelf> where TSelf : IQuery<TSelf>
         {
             internal static readonly HashSet<string> PostAggregationsPropertyNames = GetPropertyNames<TPostAggregations>();
         }
@@ -94,24 +92,24 @@ namespace Apache.Druid.Querying
 
     public static class QueryExtensions
     {
-        public static TQueryWithVirtualColumns VirtualColumns<TSource, TVirtualColumns, TQuery, TQueryWithVirtualColumns>(
-            this IQueryWith.VirtualColumns<TSource, TQuery> query,
+        public static TQuery VirtualColumns<TVirtualColumns, TQuery>(
+            this IQueryWith.VirtualColumns<TVirtualColumns, TQuery> query,
             Func<Factory.VirtualColumns<TVirtualColumns>, IEnumerable<VirtualColumn>> factory)
-            where TQueryWithVirtualColumns : IQuery<TQueryWithVirtualColumns>
+            where TQuery : IQuery<TQuery>
         {
             var factory_ = new Factory.VirtualColumns<TVirtualColumns>();
             var virtualColumns = factory(factory_);
             query.AddOrUpdateSection(nameof(virtualColumns), virtualColumns);
-            return query.As<TQueryWithVirtualColumns, TVirtualColumns>();
+            return query.Unwrapped;
         }
 
         public static TQuery Filter<TSource, TQuery>(this IQueryWith.Filter<TSource, TQuery> query, Func<Factory.Filter<TSource>, Filter> factory)
-            where TQuery : IQueryWith.Filter<TSource, TQuery>
+           where TQuery : IQuery<TQuery>
         {
             var factory_ = new Factory.Filter<TSource>();
             var filter = factory(factory_);
             query.AddOrUpdateSection(nameof(filter), filter);
-            return query.AsSelf;
+            return query.Unwrapped;
         }
 
         private static void EnsureMatch<TAggregations>(HashSet<string> aggregationPropertyNames, IEnumerable<string> aggregatorNames, string aggregatorsLogName)
@@ -131,7 +129,7 @@ namespace Apache.Druid.Querying
         }
         public static TQuery Aggregations<TSource, TQuery, TAggregations>(
             this IQueryWith.Aggregations<TSource, TAggregations, TQuery> query, Func<Factory.Aggregators<TSource, TAggregations>, IEnumerable<Aggregator>> factory)
-            where TQuery : IQueryWith.Aggregations<TSource, TAggregations, TQuery>
+            where TQuery : IQuery<TQuery>
         {
             var factory_ = new Factory.Aggregators<TSource, TAggregations>();
             var aggregators = factory(factory_).ToArray();
@@ -139,12 +137,12 @@ namespace Apache.Druid.Querying
             var propertyNames = IQueryWith.Aggregations<TSource, TAggregations, TQuery>.AggregationsPropertyNames;
             EnsureMatch<TAggregations>(propertyNames, aggregatorNames, nameof(aggregators));
             query.AddOrUpdateSection(nameof(Aggregations).ToLower(), aggregators);
-            return query.AsSelf;
+            return query.Unwrapped;
         }
 
         public static TQuery PostAggregations<TQuery, TAggregations, TPostAggregations>(
             this IQueryWith.PostAggregations<TAggregations, TPostAggregations, TQuery> query, Func<Factory.PostAggregators<TAggregations, TPostAggregations>, IEnumerable<PostAggregator>> factory)
-            where TQuery : IQueryWith.PostAggregations<TAggregations, TPostAggregations, TQuery>
+            where TQuery : IQuery<TQuery>
         {
             var factory_ = new Factory.PostAggregators<TAggregations, TPostAggregations>();
             var postAggregators = factory(factory_).ToArray();
@@ -152,7 +150,7 @@ namespace Apache.Druid.Querying
             var propertyNames = IQueryWith.PostAggregations<TAggregations, TPostAggregations, TQuery>.PostAggregationsPropertyNames;
             EnsureMatch<TPostAggregations>(propertyNames, postAggregatorNames, nameof(postAggregators));
             query.AddOrUpdateSection(nameof(PostAggregations), postAggregators);
-            return query.AsSelf;
+            return query.Unwrapped;
         }
 
         public static TQuery Intervals<TQuery>(this TQuery query, IEnumerable<Interval> intervals)
@@ -189,41 +187,52 @@ namespace Apache.Druid.Querying
         }
     }
 
-    public static class TimeSeriesQuery<TSource>
+    public abstract class TimeSeriesQueryBase<TSource, TSelf> :
+        IQueryWith.Order,
+        IQueryWith.Intervals,
+        IQueryWith.Granularity,
+        IQueryWith.Filter<TSource, TSelf>
+        where TSelf : IQuery<TSelf>
     {
-        public abstract class AfterSpecifyingVirtualColumns<TNewSource, TSelf> :
-            IQueryWith.Order,
-            IQueryWith.Intervals,
-            IQueryWith.Granularity,
-            IQueryWith.Filter<TNewSource, TSelf>
-        {
-            public string QueryType { get; } = "timeseries";
-            Dictionary<string, QuerySection> IQuery.State { get; } = new();
+        public string QueryType { get; } = "timeseries";
+        Dictionary<string, QuerySection> IQuery.State { get; } = new();
+    }
 
-            public class WithAggregations<TAggregations> : AfterSpecifyingAggregations<TNewSource, TAggregations, WithAggregations<TAggregations>>
+
+    public class TimeSeriesQuery<TSource> : TimeSeriesQueryBase<TSource, TimeSeriesQuery<TSource>>
+    {
+        public class WithVirtualColumns<TVirtualColumns> : 
+            TimeSeriesQueryBase<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>,
+            IQueryWith.VirtualColumns<TVirtualColumns, WithVirtualColumns<TVirtualColumns>>
+        {
+            public class WithAggregations<TAggregations> :
+                TimeSeriesQueryBase<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>,
+                IQueryWith.VirtualColumns<TVirtualColumns, WithAggregations<TAggregations>>,
+                IQueryWith.Aggregations<SourceWithVirtualColumns<TSource, TVirtualColumns>, TAggregations, WithAggregations<TAggregations>>
             {
+                public class WithPostAggregations<TPostAggregations> :
+                    TimeSeriesQueryBase<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>, 
+                    IQueryWith.VirtualColumns<TVirtualColumns, WithPostAggregations<TPostAggregations>>,
+                    IQueryWith.Aggregations<SourceWithVirtualColumns<TSource, TVirtualColumns>, TAggregations, WithPostAggregations<TPostAggregations>>,
+                    IQueryWith.PostAggregations<TAggregations, TPostAggregations, WithPostAggregations<TPostAggregations>>
+                {
+                }
             }
         }
 
-        public abstract class AfterSpecifyingAggregations<TNewSource, TAggregations, TSelf> :
-            AfterSpecifyingVirtualColumns<TNewSource, TSelf>,
-            IQueryWith.Aggregations<TNewSource, TAggregations, TSelf>
+        public class WithNoVirtualColumns : TimeSeriesQueryBase<TSource, WithNoVirtualColumns>
         {
-            public class WithPostAggregations<TPostAggregations> :
-                AfterSpecifyingAggregations<TNewSource, TAggregations, WithPostAggregations<TPostAggregations>>,
-                IQueryWith.PostAggregations<TAggregations, TPostAggregations, WithPostAggregations<TPostAggregations>>
+            public class WithAggregations<TAggregations> :
+                TimeSeriesQueryBase<TSource, WithAggregations<TAggregations>>,
+                IQueryWith.Aggregations<TSource, TAggregations, WithAggregations<TAggregations>>
             {
+                public class WithPostAggregations<TPostAggregations> :
+                    TimeSeriesQueryBase<TSource, WithPostAggregations<TPostAggregations>>,
+                    IQueryWith.Aggregations<TSource, TAggregations, WithPostAggregations<TPostAggregations>>,
+                    IQueryWith.PostAggregations<TAggregations, TPostAggregations, WithPostAggregations<TPostAggregations>>
+                {
+                }
             }
-        }
-
-
-        public class WithVirtualColumns<TVirtualColumns> :
-            AfterSpecifyingVirtualColumns<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>
-        {
-        }
-
-        public class WithNoVirtualColumns : AfterSpecifyingVirtualColumns<TSource, WithNoVirtualColumns>
-        {
         }
     }
 }

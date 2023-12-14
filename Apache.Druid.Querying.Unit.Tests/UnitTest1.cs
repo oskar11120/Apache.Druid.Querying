@@ -37,6 +37,12 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .Order(Order.Ascending)
                 .Granularity(Granularity.Minute)
+                .VirtualColumns(columns => new[] 
+                {
+                    columns.Expression(
+                        virtualColumns => virtualColumns.TReal,
+                        "__time")
+                })
                 .Filter(filter => filter.Or(
                     filter.Null(pair => pair.VirtualColumns.TReal),
                     filter.Equals(
@@ -92,6 +98,12 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .Order(Order.Ascending)
                 .Granularity(Granularity.Minute)
+                .VirtualColumns(columns => new[]
+                {
+                    columns.Expression(
+                        virtualColumns => virtualColumns.TReal,
+                        "__time")
+                })
                 .Filter(filter => filter.Or(
                     filter.Null(pair => pair.VirtualColumns.TReal),
                     filter.Equals(
@@ -112,8 +124,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                         postAggregations => postAggregations.Sum,
                         ArithmeticFunction.Add,
                         postAggregators.FieldAccess(
-                            aggregations => aggregations.LastValue,
-                            finalizing: true))
+                            aggregations => aggregations.LastValue))
                 })
                 .ToJson();
 

@@ -47,6 +47,8 @@ namespace Apache.Druid.Querying
         public sealed class VirtualColumns<TColumns>
         {
             public delegate TColumn VirtualColumnSelector<TColumn>(TColumns columns);
+            private static string GetColumnName<TColumn>(Expression<VirtualColumnSelector<TColumn>> aggregations)
+                => Factory.GetColumnName(aggregations.Body);
 
             public VirtualColumn.Expression_ Expression<TColumn>(Expression<VirtualColumnSelector<TColumn>> name, string expression)
                 => new(GetColumnName(name), expression, DataType.Get<TColumn>());
