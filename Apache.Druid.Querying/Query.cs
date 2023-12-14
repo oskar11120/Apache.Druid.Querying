@@ -25,10 +25,6 @@ namespace Apache.Druid.Querying
         public TSelf AsSelf => (TSelf)this;
     }
 
-    public interface IQuery<TSource, TSelf> : IQuery<TSelf>
-    {
-    }
-
     public sealed record Interval(DateTimeOffset From, DateTimeOffset To);
     public enum Order
     {
@@ -58,13 +54,13 @@ namespace Apache.Druid.Querying
 
     public static class IQueryWith
     {
-        public interface VirtualColumns<TSource, TQuery> : IQuery<TSource, TQuery>
+        public interface VirtualColumns<TSource, TQuery> : IQuery<TQuery>
         {
             internal TQueryWithVirtualColumns As<TQueryWithVirtualColumns, TVirtualColumns>() where
-                TQueryWithVirtualColumns : IQuery<SourceWithVirtualColumns<TSource, TVirtualColumns>, TQueryWithVirtualColumns>;
+                TQueryWithVirtualColumns : IQuery<TQueryWithVirtualColumns>;
         }
 
-        public interface Filter<TSource, TQuery> : IQuery<TSource, TQuery>
+        public interface Filter<TSource, TQuery> : IQuery<TQuery>
         {
         }
 
@@ -72,7 +68,7 @@ namespace Apache.Druid.Querying
             .GetProperties()
             .Select(property => property.Name)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        public interface Aggregations<TSource, TAggregations, TSelf> : IQuery<TSource, TSelf>
+        public interface Aggregations<TSource, TAggregations, TSelf> : IQuery<TSelf>
         {
             internal static readonly HashSet<string> AggregationsPropertyNames = GetPropertyNames<TAggregations>();
         }
@@ -100,7 +96,7 @@ namespace Apache.Druid.Querying
         public static TQueryWithVirtualColumns VirtualColumns<TSource, TVirtualColumns, TQuery, TQueryWithVirtualColumns>(
             this IQueryWith.VirtualColumns<TSource, TQuery> query,
             Func<Factory.VirtualColumns<TVirtualColumns>, IEnumerable<VirtualColumn>> factory)
-            where TQueryWithVirtualColumns : IQuery<SourceWithVirtualColumns<TSource, TVirtualColumns>, TQueryWithVirtualColumns>
+            where TQueryWithVirtualColumns : IQuery<TQueryWithVirtualColumns>
         {
             var factory_ = new Factory.VirtualColumns<TVirtualColumns>();
             var virtualColumns = factory(factory_);
@@ -108,7 +104,7 @@ namespace Apache.Druid.Querying
             return query.As<TQueryWithVirtualColumns, TVirtualColumns>();
         }
 
-        public static TQuery Filter<TSource, TQuery>(this IQuery<TSource, TQuery> query, Func<Factory.Filter<TSource>, Filter> factory)
+        public static TQuery Filter<TSource, TQuery>(this IQueryWith.Filter<TSource, TQuery> query, Func<Factory.Filter<TSource>, Filter> factory)
             where TQuery : IQueryWith.Filter<TSource, TQuery>
         {
             var factory_ = new Factory.Filter<TSource>();
@@ -203,17 +199,23 @@ namespace Apache.Druid.Querying
             public string QueryType { get; } = "timeseries";
             Dictionary<string, Action<JsonObject>> IQuery.ComponentWrites { get; } = new();
 
-            public class WithAggregations<TAggregations> :
-                AfterSpecifyingVirtualColumns<TNewSource, WithAggregations<TAggregations>>,
-                IQueryWith.Aggregations<TNewSource, TAggregations, WithAggregations<TAggregations>>
+            
+            public class WithAggregations<TAggregations> : AfterSpecifyingAggregations<TNewSource, TAggregations, WithAggregations<TAggregations>>
             {
-                public class WithPostAggregations<TPostAggregations> : 
-                    WithAggregations<TAggregations>,
-                    IQueryWith.PostAggregations<TAggregations, TPostAggregations, WithPostAggregations<TPostAggregations>>
-                {
-                }
             }
         }
+
+        public abstract class AfterSpecifyingAggregations<TNewSource, TAggregations, TSelf> :
+            AfterSpecifyingVirtualColumns<TNewSource, TSelf>,
+            IQueryWith.Aggregations<TNewSource, TAggregations, TSelf>
+        {
+            public class WithPostAggregations<TPostAggregations> :
+                AfterSpecifyingAggregations<TNewSource, TAggregations, WithPostAggregations<TPostAggregations>>,
+                IQueryWith.PostAggregations<TAggregations, TPostAggregations, WithPostAggregations<TPostAggregations>>
+            {
+            }
+        }
+
 
         public class WithVirtualColumns<TVirtualColumns> :
             AfterSpecifyingVirtualColumns<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>

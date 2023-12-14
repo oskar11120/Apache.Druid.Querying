@@ -161,13 +161,22 @@ namespace Apache.Druid.Querying
         {
             public PostAggregator Arithmetic<TColumn>(
                 Expression<PostAggregationsColumnSelector<TColumn>> name,
-                IEnumerable<PostAggregator> fields,
-                ArithmeticFunction fn) => new PostAggregator.Arithmetic(GetColumnName(name), fields, fn);
+                ArithmeticFunction fn,
+                IEnumerable<PostAggregator> fields) => new PostAggregator.Arithmetic(GetColumnName(name), fields, fn);
+
+            public PostAggregator Arithmetic<TColumn>(
+                Expression<PostAggregationsColumnSelector<TColumn>> name,
+                ArithmeticFunction fn,
+                params PostAggregator[] fields) => Arithmetic(name, fn, fields);
 
             public PostAggregator FieldAccess<TColumn>(
                 Expression<PostAggregationsColumnSelector<TColumn>> name,
                 Expression<AggregationsColumnSelector<TColumn>> fieldName,
                 bool finalizing) => new PostAggregator.FieldAccess(GetColumnName(name), GetColumnName(fieldName), finalizing);
+
+            public PostAggregator FieldAccess<TColumn>(
+                Expression<AggregationsColumnSelector<TColumn>> fieldName,
+                bool finalizing) => new PostAggregator.FieldAccess(GetColumnName(fieldName), GetColumnName(fieldName), finalizing);
 
             public PostAggregator Constant<TColumn>(
                 Expression<PostAggregationsColumnSelector<TColumn>> name,
