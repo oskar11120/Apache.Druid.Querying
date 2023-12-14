@@ -76,21 +76,21 @@ namespace Apache.Druid.Querying
             private static string GetSimpleDataType<TColumn>(string suffix)
                 => DataType.GetSimple<TColumn>().ToString() + suffix;
 
-            private static Aggregator.WithFieldName.WithExpression Map<TSourceColumn, TAggregationsColumn>(
+            private static Aggregator Map<TSourceColumn, TAggregationsColumn>(
                 Expression<AggregationsColumnSelector<TAggregationsColumn>> name,
                 Expression<SourceColumnSelector<TSourceColumn>> fieldName,
-            string typeSuffix,
-            string? expression = null)
-                => new(GetColumnName(name), GetColumnName(fieldName), expression, GetSimpleDataType<TAggregationsColumn>(typeSuffix));
+                string typeSuffix,
+                string? expression = null)
+                => new Aggregator.WithFieldName.WithExpression(GetColumnName(name), GetColumnName(fieldName), expression, GetSimpleDataType<TAggregationsColumn>(typeSuffix));
 
-            private static Aggregator.WithFieldName.WithTimeColumn Map<TColumn, TTimeColumn>(
+            private static Aggregator Map<TColumn, TTimeColumn>(
                 Expression<AggregationsColumnSelector<TColumn>> name,
                 Expression<SourceColumnSelector<TColumn>> fieldName,
-            string typeSuffix,
-            Expression<SourceColumnSelector<TTimeColumn>>? timeColumn)
-            => new(GetColumnName(name), GetColumnName(fieldName), timeColumn is null ? null : GetColumnName(timeColumn), GetSimpleDataType<TColumn>(typeSuffix));
+                string typeSuffix,
+                Expression<SourceColumnSelector<TTimeColumn>>? timeColumn)
+            => new Aggregator.WithFieldName.WithTimeColumn(GetColumnName(name), GetColumnName(fieldName), timeColumn is null ? null : GetColumnName(timeColumn), GetSimpleDataType<TColumn>(typeSuffix));
 
-            private static Aggregator.WithFieldName.WithTimeColumn Map_<TColumn>(
+            private static Aggregator Map_<TColumn>(
                 Expression<AggregationsColumnSelector<TColumn>> name,
                 Expression<SourceColumnSelector<TColumn>> fieldName,
                 string typeSuffix)
@@ -98,59 +98,59 @@ namespace Apache.Druid.Querying
 
             public Aggregator Count<TAggregationsColumn>(Expression<AggregationsColumnSelector<TAggregationsColumn>> name) => new(GetColumnName(name), "Count");
 
-            public Aggregator.WithFieldName Mean<TSourceColumn, TAggregationsColumn>(
+            public Aggregator Mean<TSourceColumn, TAggregationsColumn>(
                 Expression<AggregationsColumnSelector<TAggregationsColumn>> name,
                 Expression<SourceColumnSelector<TSourceColumn>> fieldName)
-                => new(GetColumnName(name), GetColumnName(fieldName), "DoubleMean");
+                => new Aggregator.WithFieldName(GetColumnName(name), GetColumnName(fieldName), "DoubleMean");
 
-            public Aggregator.WithFieldName Any<TSourceColumn, TAggregationsColumn>(
+            public Aggregator Any<TSourceColumn, TAggregationsColumn>(
                 Expression<AggregationsColumnSelector<TAggregationsColumn>> name,
             Expression<SourceColumnSelector<TSourceColumn>> fieldName)
-                => new(GetColumnName(name), GetColumnName(fieldName), GetSimpleDataType<TAggregationsColumn>("Any"));
+                => new Aggregator.WithFieldName(GetColumnName(name), GetColumnName(fieldName), GetSimpleDataType<TAggregationsColumn>("Any"));
 
-            public Aggregator.WithFieldName.WithExpression Sum<TColumn>(
+            public Aggregator Sum<TColumn>(
                 Expression<AggregationsColumnSelector<TColumn>> name,
                 Expression<SourceColumnSelector<TColumn>> fieldName)
                 => Map(name, fieldName, nameof(Sum));
-            public Aggregator.WithFieldName.WithExpression Min<TColumn>(
+            public Aggregator Min<TColumn>(
                 Expression<AggregationsColumnSelector<TColumn>> name,
                 Expression<SourceColumnSelector<TColumn>> fieldName)
                 => Map(name, fieldName, nameof(Min));
-            public Aggregator.WithFieldName.WithExpression Max<TColumn>(
+            public Aggregator Max<TColumn>(
                 Expression<AggregationsColumnSelector<TColumn>> name,
                 Expression<SourceColumnSelector<TColumn>> fieldName)
                 => Map(name, fieldName, nameof(Max));
-            public Aggregator.WithFieldName.WithExpression Sum<TSourceColumn, TAggregationsColumn>(
+            public Aggregator Sum<TSourceColumn, TAggregationsColumn>(
                 Expression<AggregationsColumnSelector<TAggregationsColumn>> name,
                 Expression<SourceColumnSelector<TSourceColumn>> fieldName,
                 string expression)
                 => Map(name, fieldName, nameof(Sum));
-            public Aggregator.WithFieldName.WithExpression Min<TSourceColumn, TAggregationsColumn>(
+            public Aggregator Min<TSourceColumn, TAggregationsColumn>(
                 Expression<AggregationsColumnSelector<TAggregationsColumn>> name,
                 Expression<SourceColumnSelector<TSourceColumn>> fieldName,
                 string expression)
                 => Map(name, fieldName, nameof(Min));
-            public Aggregator.WithFieldName.WithExpression Max<TSourceColumn, TAggregationsColumn>(
+            public Aggregator Max<TSourceColumn, TAggregationsColumn>(
                 Expression<AggregationsColumnSelector<TAggregationsColumn>> name,
                 Expression<SourceColumnSelector<TSourceColumn>> fieldName,
                 string expression)
                 => Map(name, fieldName, nameof(Max));
 
-            public Aggregator.WithFieldName.WithTimeColumn First<TColumn, TTimeColumn>(
+            public Aggregator First<TColumn, TTimeColumn>(
                 Expression<AggregationsColumnSelector<TColumn>> name,
                 Expression<SourceColumnSelector<TColumn>> fieldName,
                 Expression<SourceColumnSelector<TTimeColumn>> timeColumn)
                 => Map(name, fieldName, nameof(First), timeColumn);
-            public Aggregator.WithFieldName.WithTimeColumn Last<TColumn, TTimeColumn>(
+            public Aggregator Last<TColumn, TTimeColumn>(
                 Expression<AggregationsColumnSelector<TColumn>> name,
                 Expression<SourceColumnSelector<TColumn>> fieldName,
                 Expression<SourceColumnSelector<TTimeColumn>> timeColumn)
                 => Map(name, fieldName, nameof(Last), timeColumn);
-            public Aggregator.WithFieldName.WithTimeColumn First<TColumn>(
+            public Aggregator First<TColumn>(
                Expression<AggregationsColumnSelector<TColumn>> name,
                Expression<SourceColumnSelector<TColumn>> fieldName)
                => Map_(name, fieldName, nameof(First));
-            public Aggregator.WithFieldName.WithTimeColumn Last<TColumn>(
+            public Aggregator Last<TColumn>(
                 Expression<AggregationsColumnSelector<TColumn>> name,
                 Expression<SourceColumnSelector<TColumn>> fieldName)
                 => Map_(name, fieldName, nameof(Last));
