@@ -39,31 +39,5 @@ namespace Apache.Druid.Querying
                 public string? TimeColumn { get; }
             }
         }
-
-
-        internal enum SumMinMaxTypes
-        {
-            Sum,
-            Min,
-            Max
-        }
-
-        internal enum MeanAnyTypes
-        {
-            Mean,
-            Any
-        }
-
-        internal enum FirstLastTypes
-        {
-            DoubleFirst,
-            DoubleLast,
-            FloatFirst,
-            FloatLast,
-            LongFirst,
-            LongLast,
-            StringFirst,
-            StringLast
-        }
     }
 }

@@ -72,7 +72,6 @@ var results = await client.GroupByAsync<Result>(with => with
 var v = results
     .Data
     .GroupBy(result => result.Timestamp);
-
 var c = v;
 
 record ColumnCompareFilter(params string[] Dimensions) : IFilterSpec

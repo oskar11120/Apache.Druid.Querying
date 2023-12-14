@@ -3,9 +3,13 @@ namespace Apache.Druid.Querying
 {
     public abstract class VirtualColumn : WithType
     {
+        public VirtualColumn(string? type = null) : base(type)
+        {
+        }
+
         public sealed class Expression_ : VirtualColumn
         {
-            public Expression_(string name, string expression, string outputType)
+            public Expression_(string name, string expression, string outputType) : base(nameof(expression))
             {
                 Name = name;
                 Expression = expression;

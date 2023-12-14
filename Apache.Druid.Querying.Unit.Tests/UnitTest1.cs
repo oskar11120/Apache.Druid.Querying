@@ -10,6 +10,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .WithAggregations<Aggregations>()
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .Order(Order.Ascending)
+                .Granularity(Granularity.Minute)
                 .Filter(filter => filter.Or(
                     filter.Null(message => message.Value),
                     filter.Equals(
@@ -30,6 +31,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .WithAggregations<Aggregations>()
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .Order(Order.Ascending)
+                .Granularity(Granularity.Minute)
                 .Filter(filter => filter.Or(
                     filter.Null(pair => pair.VirtualColumns.TReal),
                     filter.Equals(

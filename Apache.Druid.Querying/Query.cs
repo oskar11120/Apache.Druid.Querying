@@ -162,7 +162,7 @@ namespace Apache.Druid.Querying
         private static readonly Dictionary<Granularity, string> granularityMap = Enum
             .GetValues<Granularity>()
             .ToDictionary(granularity => granularity, granularity => granularity.ToString().TrimEnd('s').ToSnake());
-        public static TQuery WithGranularity<TQuery>(this TQuery query, Granularity granularity)
+        public static TQuery Granularity<TQuery>(this TQuery query, Granularity granularity)
             where TQuery : IQueryWith.Granularity
         {
             query.AddOrUpdateComponent(nameof(granularity), granularityMap[granularity]);
@@ -175,6 +175,7 @@ namespace Apache.Druid.Querying
         public abstract class AfterSpecifyingVirtualColumns<TNewSource, TSelf> :
             IQueryWith.Order,
             IQueryWith.Intervals,
+            IQueryWith.Granularity,
             IQueryWith.Filter<TNewSource, TSelf>
         {
             public string QueryType { get; } = "timeseries";
