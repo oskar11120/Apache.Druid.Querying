@@ -1,7 +1,9 @@
 ﻿using Apache.Druid.Querying.Internal;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Apache.Druid.Querying
 {
@@ -17,9 +19,42 @@ namespace Apache.Druid.Querying
         {
             public abstract class Source<TSource>
             {
+                private static IReadOnlyDictionary<string, string>? customColumnNames = null;
+
                 public delegate TColumn SourceColumnSelector<TColumn>(TSource source);
                 protected static string GetColumnName<TColumn>(Expression<SourceColumnSelector<TColumn>> selector)
-                    => Factory.GetColumnName(selector.Body);
+                {
+                    if (customColumnNames is null)
+                    {
+                        var type = typeof(TSource);
+                        type = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(SourceWithVirtualColumns<,>) ?
+                            type.GetGenericArguments()[0] :
+                            type;
+                        var properties = type.GetProperties();
+                        customColumnNames = properties.ToDictionary(
+                            property => property.Name,
+                            property => property.GetCustomAttribute<DataSourceColumn>(true)?.Name ?? property.Name);
+                        var hasTimeColumn = customColumnNames.Values.Any(name => name == DataSourceTimeColumn.Name);
+                        if (!hasTimeColumn)
+                        {
+                            var timeProperties = properties
+                                .Where(property =>
+                                    property.PropertyType == typeof(DateTime) ||
+                                    property.PropertyType == typeof(DateTimeOffset))
+                                .ToArray();
+                            var timeColumnName = timeProperties.Length is 1 ?
+                                timeProperties[0].Name :
+                                throw new InvalidOperationException(
+                                    $"Could not match any property of {type} with column {DataSourceTimeColumn.Name}. " +
+                                    $"A property is matched with column {DataSourceTimeColumn.Name} when either:" +
+                                    $"{Environment.NewLine}- it's decorated with {nameof(Attribute)} {typeof(DataSourceTimeColumn)}" +
+                                    $"{Environment.NewLine}- it's the only property of type {typeof(DateTime)} or {typeof(DateTimeOffset)}.");
+                        }
+                    }
+
+                    var name = Factory.GetColumnName(selector.Body);
+                    return customColumnNames.GetValueOrDefault(name) ?? name;
+                }
 
                 public abstract class AndAggregations<TAggregations> : Source<TSource>
                 {
@@ -91,7 +126,7 @@ namespace Apache.Druid.Querying
                 Expression<SourceColumnSelector<TColumn>> fieldName,
                 string typeSuffix,
                 Expression<SourceColumnSelector<TTimeColumn>>? timeColumn)
-            => new Aggregator.WithFieldName.WithTimeColumn(GetColumnName(name), GetColumnName(fieldName), timeColumn is null ? null : GetColumnName(timeColumn), GetSimpleDataType<TColumn>(typeSuffix));
+                => new Aggregator.WithFieldName.WithTimeColumn(GetColumnName(name), GetColumnName(fieldName), timeColumn is null ? null : GetColumnName(timeColumn), GetSimpleDataType<TColumn>(typeSuffix));
 
             private static Aggregator Map_<TColumn>(
                 Expression<AggregationsColumnSelector<TColumn>> name,
@@ -99,7 +134,8 @@ namespace Apache.Druid.Querying
                 string typeSuffix)
                 => Map<TColumn, object?>(name, fieldName, typeSuffix, null);
 
-            public Aggregator Count<TAggregationsColumn>(Expression<AggregationsColumnSelector<TAggregationsColumn>> name) => new(GetColumnName(name), "Count");
+            public Aggregator Count<TAggregationsColumn>(Expression<AggregationsColumnSelector<TAggregationsColumn>> name)
+                => new(GetColumnName(name), "Count");
 
             public Aggregator Mean<TSourceColumn, TAggregationsColumn>(
                 Expression<AggregationsColumnSelector<TAggregationsColumn>> name,
@@ -175,12 +211,12 @@ namespace Apache.Druid.Querying
             public PostAggregator FieldAccess<TColumn>(
                 Expression<PostAggregationsColumnSelector<TColumn>> name,
                 Expression<AggregationsColumnSelector<TColumn>> fieldName,
-                bool finalizing = false) 
+                bool finalizing = false)
                 => new PostAggregator.FieldAccess(GetColumnName(name), GetColumnName(fieldName), finalizing);
 
             public PostAggregator FieldAccess<TColumn>(
                 Expression<AggregationsColumnSelector<TColumn>> fieldName,
-                bool finalizing = false) 
+                bool finalizing = false)
                 => new PostAggregator.FieldAccess(GetColumnName(fieldName), GetColumnName(fieldName), finalizing);
 
             public PostAggregator Constant<TColumn>(

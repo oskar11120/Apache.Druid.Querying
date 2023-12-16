@@ -37,7 +37,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .Order(Order.Ascending)
                 .Granularity(Granularity.Minute)
-                .VirtualColumns(columns => new[] 
+                .VirtualColumns(columns => new[]
                 {
                     columns.Expression(
                         virtualColumns => virtualColumns.TReal,
@@ -130,7 +130,11 @@ namespace Apache.Druid.Querying.Unit.Tests
 
         }
 
-        record Message(string Variable, Guid ObjectId, double Value, DateTimeOffset Timestamp, DateTimeOffset ProcessedTimestmap);
+        record Message(
+            [property: DataSourceColumn("variable")] string VariableName,
+            Guid ObjectId,
+            double Value,
+            DateTimeOffset Timestamp);
         record VirtualColumns(DateTimeOffset TReal);
         record Aggregations(DateTimeOffset TMax, double LastValue);
         record PostAggregations(double Sum);
