@@ -77,10 +77,13 @@ namespace Apache.Druid.Querying.AspNetCore
 
     public static class ServiceCollectionExtensions
     {
-        public static DruidQueryingBuilder AddDruidQuerying(this IServiceCollection services)
+        public static DruidQueryingBuilder AddDruidQuerying(
+            this IServiceCollection services,
+            Uri druidApiUri)
         {
             var clientId = Guid.NewGuid().ToString();
             var clientBuilder = services.AddHttpClient(clientId);
+            clientBuilder.ConfigureHttpClient(client => client.BaseAddress = druidApiUri);
             var serlializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web)
             {
                 Converters =
