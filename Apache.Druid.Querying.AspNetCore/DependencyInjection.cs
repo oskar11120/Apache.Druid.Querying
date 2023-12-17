@@ -95,12 +95,12 @@ namespace Apache.Druid.Querying.AspNetCore
                     new PolymorphicSerializer<Aggregator>(),
                     new PolymorphicSerializer<PostAggregator>(),
                     new PolymorphicSerializer<VirtualColumn>(),
-                    new UnixMilisecondsConverter<DateTimeOffset>(
-                        DateTimeOffset.FromUnixTimeMilliseconds,
-                        Utf8Formatter.TryFormat),
-                    new UnixMilisecondsConverter<DateTime>(
-                        static miliseconds => DateTimeOffset.FromUnixTimeMilliseconds(miliseconds).UtcDateTime,
-                        Utf8Formatter.TryFormat)
+                //    new UnixMilisecondsConverter<DateTimeOffset>(
+                //        DateTimeOffset.FromUnixTimeMilliseconds,
+                //        Utf8Formatter.TryFormat),
+                //    new UnixMilisecondsConverter<DateTime>(
+                //        static miliseconds => DateTimeOffset.FromUnixTimeMilliseconds(miliseconds).UtcDateTime,
+                //        Utf8Formatter.TryFormat)
                 }
             };
             return new(

@@ -16,7 +16,7 @@ internal class MessageSourceTests
             .WithNoVirtualColumns
             .WithAggregations<Aggregations>()
             .Interval(new(t, t.AddDays(1)))
-            .Granularity(Granularity.Minute)
+            .Granularity(Granularity.SixHours)
             .Filter(filter => filter.And(
                 filter.Selector(
                     message => message.VariableName,
@@ -38,20 +38,21 @@ internal class MessageSourceTests
                     message => message.VariableName),
                 aggregations.First(
                     aggregations => aggregations.FirstValue,
-                    message => message.Value)
+                    message => message.Value,
+                    SimpleDataType.String)
             });
         try
         {
             var result = await Messages
             .ExecuteQuery(query)
-            .Where(result => result.Count != 0)
+            .Where(pair => pair.Result.Count != 0)
             .ToListAsync();
         }
-        catch(Exception ex) 
+        catch (Exception ex)
         {
             throw;
         }
     }
 
-    private sealed record Aggregations(double Sum, int Count, string Variable, double FirstValue);
+    private sealed record Aggregations(double Sum, int Count, string Variable, double? FirstValue);
 }

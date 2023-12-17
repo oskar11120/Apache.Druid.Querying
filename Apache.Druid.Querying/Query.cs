@@ -196,6 +196,8 @@ namespace Apache.Druid.Querying
         }
     }
 
+    public readonly record struct WithTimestamp<TResult>(DateTimeOffset Timestamp, TResult Result);
+
     public abstract class TimeSeriesQueryBase<TSource, TSelf> :
         Query,
         IQueryWith.Order,
@@ -219,7 +221,7 @@ namespace Apache.Druid.Querying
                 TimeSeriesQueryBase<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>,
                 IQueryWith.VirtualColumns<TVirtualColumns, WithAggregations<TAggregations>>,
                 IQueryWith.Aggregations<SourceWithVirtualColumns<TSource, TVirtualColumns>, TAggregations, WithAggregations<TAggregations>>,
-                IQueryWithResult<TAggregations>
+                IQueryWithResult<WithTimestamp<TAggregations>>
             {
                 public class WithPostAggregations<TPostAggregations> :
                     TimeSeriesQueryBase<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>,
@@ -236,7 +238,7 @@ namespace Apache.Druid.Querying
             public class WithAggregations<TAggregations> :
                 TimeSeriesQueryBase<TSource, WithAggregations<TAggregations>>,
                 IQueryWith.Aggregations<TSource, TAggregations, WithAggregations<TAggregations>>,
-                IQueryWithResult<TAggregations>
+                IQueryWithResult<WithTimestamp<TAggregations>>
             {
                 public class WithPostAggregations<TPostAggregations> :
                     TimeSeriesQueryBase<TSource, WithPostAggregations<TPostAggregations>>,

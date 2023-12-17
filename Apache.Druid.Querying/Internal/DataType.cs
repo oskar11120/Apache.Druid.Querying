@@ -8,23 +8,15 @@ namespace Apache.Druid.Querying.Internal
 {
     internal static class DataType
     {
-        public enum Simple
-        {
-            String,
-            Double,
-            Float,
-            Long
-        }
-
         private const char
             L = '<',
             R = '>';
-        private static readonly Dictionary<Type, Simple> simpleMap = new[]
+        private static readonly Dictionary<Type, SimpleDataType> simpleMap = new[]
         {
-            (new[] { typeof(string), typeof(Guid), typeof(char), typeof(Uri), typeof(Enum) }, Simple.String),
-            (new[] { typeof(double) }, Simple.Double),
-            (new[] { typeof(float) }, Simple.Float),
-            (new[] { typeof(short), typeof(int), typeof(long), typeof(DateTime), typeof(DateTimeOffset) }, Simple.Long)
+            (new[] { typeof(string), typeof(Guid), typeof(char), typeof(Uri), typeof(Enum) }, SimpleDataType.String),
+            (new[] { typeof(double) }, SimpleDataType.Double),
+            (new[] { typeof(float) }, SimpleDataType.Float),
+            (new[] { typeof(short), typeof(int), typeof(long), typeof(DateTime), typeof(DateTimeOffset) }, SimpleDataType.Long)
         }
         .SelectMany(pair => pair.Item1.Select(type => KeyValuePair.Create(type, pair.Item2)))
         .ToDictionary(pair => pair.Key, pair => pair.Value);
@@ -36,12 +28,12 @@ namespace Apache.Druid.Querying.Internal
             return result.ToString();
         }
 
-        public static Simple GetSimple<TValue>()
+        public static SimpleDataType GetSimple<TValue>()
         {
             var type = typeof(TValue);
             return TryGetSimple(type, out var simple) ?
                 simple :
-                throw new InvalidOperationException($"No matching {nameof(Simple)} {nameof(DataType)} exists for {nameof(type)}.");
+                throw new InvalidOperationException($"No matching {nameof(SimpleDataType)} {nameof(DataType)} exists for {nameof(type)}.");
         }
 
         private static void Set(Type type, StringBuilder result)
@@ -60,9 +52,9 @@ namespace Apache.Druid.Querying.Internal
             throw new NotSupportedException($"No matching {nameof(DataType)} exists for {nameof(type)}.");
         }
 
-        private static bool TryGetSimple(Type type, out Simple result)
+        private static bool TryGetSimple(Type type, out SimpleDataType result)
         {
-            if (simpleMap.TryGetValue(type, out Simple simple))
+            if (simpleMap.TryGetValue(type, out SimpleDataType simple))
             {
                 result = simple;
                 return true;
@@ -70,7 +62,7 @@ namespace Apache.Druid.Querying.Internal
 
             if (type is { IsPrimitive: true, IsEnum: true })
             {
-                result = Simple.String;
+                result = SimpleDataType.String;
                 return true;
             }
 
