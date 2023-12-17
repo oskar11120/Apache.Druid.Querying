@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DruidPractice", "DruidPract
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Apache.Druid.Querying", "Apache.Druid.Querying\Apache.Druid.Querying.csproj", "{2282F04F-D8AB-4E2A-8774-310A74D7816E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apache.Druid.Querying.Unit.Tests", "Apache.Druid.Querying.Unit.Tests\Apache.Druid.Querying.Unit.Tests.csproj", "{5F5A3093-B5CE-4F91-811A-05BD9C0D7769}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Apache.Druid.Querying.Unit.Tests", "Apache.Druid.Querying.Unit.Tests\Apache.Druid.Querying.Unit.Tests.csproj", "{5F5A3093-B5CE-4F91-811A-05BD9C0D7769}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apache.Druid.Querying.AspNetCore", "Apache.Druid.Querying.AspNetCore\Apache.Druid.Querying.AspNetCore.csproj", "{6230B620-71CE-4089-AE37-DA84E0E73AD1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{5F5A3093-B5CE-4F91-811A-05BD9C0D7769}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5F5A3093-B5CE-4F91-811A-05BD9C0D7769}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5F5A3093-B5CE-4F91-811A-05BD9C0D7769}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6230B620-71CE-4089-AE37-DA84E0E73AD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6230B620-71CE-4089-AE37-DA84E0E73AD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6230B620-71CE-4089-AE37-DA84E0E73AD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6230B620-71CE-4089-AE37-DA84E0E73AD1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

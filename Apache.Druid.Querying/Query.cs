@@ -55,11 +55,11 @@ namespace Apache.Druid.Querying
 
     public static class IQueryWith
     {
-        public interface VirtualColumns<TVirtualColumns, TQuery> : IQuery<TQuery> where TQuery : IQuery<TQuery>
+        public interface VirtualColumns<TVirtualColumns, TSelf> : IQuery<TSelf> where TSelf : IQuery<TSelf>
         {
         }
 
-        public interface Filter<TSource, TQuery> : IQuery<TQuery> where TQuery : IQuery<TQuery>
+        public interface Filter<TSource, TSelf> : IQuery<TSelf> where TSelf : IQuery<TSelf>
         {
         }
 
