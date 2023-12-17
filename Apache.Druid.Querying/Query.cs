@@ -208,7 +208,8 @@ namespace Apache.Druid.Querying
             public class WithAggregations<TAggregations> :
                 TimeSeriesQueryBase<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>,
                 IQueryWith.VirtualColumns<TVirtualColumns, WithAggregations<TAggregations>>,
-                IQueryWith.Aggregations<SourceWithVirtualColumns<TSource, TVirtualColumns>, TAggregations, WithAggregations<TAggregations>>
+                IQueryWith.Aggregations<SourceWithVirtualColumns<TSource, TVirtualColumns>, TAggregations, WithAggregations<TAggregations>>,
+                IQueryWithResult<TAggregations>
             {
                 public class WithPostAggregations<TPostAggregations> :
                     TimeSeriesQueryBase<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>, 
@@ -224,7 +225,8 @@ namespace Apache.Druid.Querying
         {
             public class WithAggregations<TAggregations> :
                 TimeSeriesQueryBase<TSource, WithAggregations<TAggregations>>,
-                IQueryWith.Aggregations<TSource, TAggregations, WithAggregations<TAggregations>>
+                IQueryWith.Aggregations<TSource, TAggregations, WithAggregations<TAggregations>>,
+                IQueryWithResult<TAggregations>
             {
                 public class WithPostAggregations<TPostAggregations> :
                     TimeSeriesQueryBase<TSource, WithPostAggregations<TPostAggregations>>,

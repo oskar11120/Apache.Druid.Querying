@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Buffers.Text;
 using System.Buffers;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -92,10 +91,12 @@ namespace Apache.Druid.Querying.AspNetCore
                 Converters =
                 {
                     new JsonStringEnumConverter(),
-                    new PolymorphicSerializer<Filter>(),
-                    new PolymorphicSerializer<Aggregator>(),
-                    new PolymorphicSerializer<PostAggregator>(),
-                    new PolymorphicSerializer<VirtualColumn>(),
+                    new PolymorphicSerializer<WithType>(),
+                    new PolymorphicSerializer<IQuery>(),
+                    //new PolymorphicSerializer<Filter>(),
+                    //new PolymorphicSerializer<Aggregator>(),
+                    //new PolymorphicSerializer<PostAggregator>(),
+                    //new PolymorphicSerializer<VirtualColumn>(),
                     new UnixMilisecondsConverter<DateTimeOffset>(
                         DateTimeOffset.FromUnixTimeMilliseconds,
                         Utf8Formatter.TryFormat),
@@ -115,6 +116,8 @@ namespace Apache.Druid.Querying.AspNetCore
 
         private sealed class PolymorphicSerializer<T> : JsonConverter<T> where T : class
         {
+            private JsonSerializerOptions? withoutPolymorphicSerializer;
+
             public override T Read(
                 ref Utf8JsonReader reader,
                 Type typeToConvert,
@@ -125,7 +128,22 @@ namespace Apache.Druid.Querying.AspNetCore
                 Utf8JsonWriter writer,
                 [DisallowNull] T value,
                 JsonSerializerOptions options)
-                => JsonSerializer.Serialize(writer, value, value.GetType(), options);
+            {
+                var type = value.GetType();
+                if (type == typeof(T))
+                {
+                    if (withoutPolymorphicSerializer is null)
+                    {
+
+                        withoutPolymorphicSerializer = new(options);
+                        withoutPolymorphicSerializer.Converters.Remove(this);
+                    }
+
+                    options = withoutPolymorphicSerializer;
+                }
+
+                JsonSerializer.Serialize(writer, value, type, options);
+            }
         }
 
         private sealed class UnixMilisecondsConverter<T> : JsonConverter<T>
