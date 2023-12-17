@@ -129,5 +129,15 @@ namespace Apache.Druid.Querying
             public bool LowerOpen { get; }
             public bool UpperOpen { get; }
         }
+
+        public sealed class Selector : WithDimension
+        {
+            public Selector(string dimension, TColumn value) : base(dimension)
+            {
+                Value = value;
+            }
+
+            public TColumn Value { get; }
+        }
     }
 }

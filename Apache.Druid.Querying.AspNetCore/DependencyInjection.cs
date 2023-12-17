@@ -91,12 +91,10 @@ namespace Apache.Druid.Querying.AspNetCore
                 Converters =
                 {
                     new JsonStringEnumConverter(),
-                    new PolymorphicSerializer<WithType>(),
-                    new PolymorphicSerializer<IQuery>(),
-                    //new PolymorphicSerializer<Filter>(),
-                    //new PolymorphicSerializer<Aggregator>(),
-                    //new PolymorphicSerializer<PostAggregator>(),
-                    //new PolymorphicSerializer<VirtualColumn>(),
+                    new PolymorphicSerializer<Filter>(),
+                    new PolymorphicSerializer<Aggregator>(),
+                    new PolymorphicSerializer<PostAggregator>(),
+                    new PolymorphicSerializer<VirtualColumn>(),
                     new UnixMilisecondsConverter<DateTimeOffset>(
                         DateTimeOffset.FromUnixTimeMilliseconds,
                         Utf8Formatter.TryFormat),

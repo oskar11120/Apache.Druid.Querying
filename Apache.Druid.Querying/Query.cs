@@ -10,8 +10,6 @@ namespace Apache.Druid.Querying
 
     public interface IQuery
     {
-        string QueryType { get; }
-
         private protected Dictionary<string, QuerySection> State { get; }
         public IReadOnlyDictionary<string, QuerySection> GetState() => State;
         internal void AddOrUpdateSection<TSection>(string key, TSection section)
@@ -19,6 +17,17 @@ namespace Apache.Druid.Querying
             State.Remove(key);
             State.Add(key, new(typeof(TSection), section));
         }
+    }
+
+    public abstract class Query : IQuery
+    {
+        public Query(string type)
+        {
+            state = new() { ["queryType"] = new(typeof(string), type) };
+        }
+
+        private readonly Dictionary<string, QuerySection> state;
+        Dictionary<string, QuerySection> IQuery.State => state;
     }
 
     public interface IQuery<TSelf> : IQuery where TSelf : IQuery<TSelf>
@@ -188,20 +197,21 @@ namespace Apache.Druid.Querying
     }
 
     public abstract class TimeSeriesQueryBase<TSource, TSelf> :
+        Query,
         IQueryWith.Order,
         IQueryWith.Intervals,
         IQueryWith.Granularity,
         IQueryWith.Filter<TSource, TSelf>
         where TSelf : IQuery<TSelf>
     {
-        public string QueryType { get; } = "timeseries";
-        Dictionary<string, QuerySection> IQuery.State { get; } = new();
+        protected TimeSeriesQueryBase() : base("timeseries")
+        {
+        }
     }
-
 
     public class TimeSeriesQuery<TSource> : TimeSeriesQueryBase<TSource, TimeSeriesQuery<TSource>>
     {
-        public class WithVirtualColumns<TVirtualColumns> : 
+        public class WithVirtualColumns<TVirtualColumns> :
             TimeSeriesQueryBase<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>,
             IQueryWith.VirtualColumns<TVirtualColumns, WithVirtualColumns<TVirtualColumns>>
         {
@@ -212,7 +222,7 @@ namespace Apache.Druid.Querying
                 IQueryWithResult<TAggregations>
             {
                 public class WithPostAggregations<TPostAggregations> :
-                    TimeSeriesQueryBase<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>, 
+                    TimeSeriesQueryBase<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>,
                     IQueryWith.VirtualColumns<TVirtualColumns, WithPostAggregations<TPostAggregations>>,
                     IQueryWith.Aggregations<SourceWithVirtualColumns<TSource, TVirtualColumns>, TAggregations, WithPostAggregations<TPostAggregations>>,
                     IQueryWith.PostAggregations<TAggregations, TPostAggregations, WithPostAggregations<TPostAggregations>>

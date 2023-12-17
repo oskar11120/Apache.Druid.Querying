@@ -29,7 +29,7 @@ namespace Apache.Druid.Querying
             var asDictionary = query
                 .GetState()
                 .ToDictionary(pair => pair.Key, pair => pair.Value.Value);
-            asDictionary.Add(nameof(DataSource<TSource>), id);
+            asDictionary.Add("dataSource", id);
             return executor.Execute<TResult>(asDictionary, token);
         }
     }

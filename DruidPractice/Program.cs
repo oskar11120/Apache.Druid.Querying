@@ -33,13 +33,13 @@ var results = await client.TimeseriesAsync<JsonElement>(with => with
         new CountAggregator("count"),
         new StringFirstAggregator("variable", "variable"),
         new StringFirstAggregator("first", "value"))
-    .PostAggregations(
-        new ArithmeticPostAggregator(
-            "average",
-            ArithmeticFunction.Divide,
-            null,
-            new FieldAccessPostAggregator("sum", "sum"),
-            new FieldAccessPostAggregator("count", "count")))
+    //.PostAggregations(
+    //    new ArithmeticPostAggregator(
+    //        "average",
+    //        ArithmeticFunction.Divide,
+    //        null,
+    //        new FieldAccessPostAggregator("sum", "sum"),
+    //        new FieldAccessPostAggregator("count", "count")))
     .Context(skipEmptyBuckets: true));
 
 //var results = await client.GroupByAsync<Result>(with => with

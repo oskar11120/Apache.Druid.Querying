@@ -6,7 +6,7 @@
 
         public WithType(string? type = null)
         {
-            Type = type ?? GetType().Name;
+            Type = type ?? GetType().Name.ToLowerInvariant();
         }
     }
 }

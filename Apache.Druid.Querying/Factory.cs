@@ -20,6 +20,14 @@ namespace Apache.Druid.Querying
             public abstract class Source<TSource>
             {
                 private static IReadOnlyDictionary<string, string>? customColumnNames = null;
+                private static string ToCamelCase(string pascalCase) => string.Create(
+                    pascalCase.Length,
+                    pascalCase,
+                    (span, pascalCase) =>
+                    {
+                        pascalCase.CopyTo(span);
+                        span[0] = char.ToLowerInvariant(pascalCase[0]);
+                    });
 
                 public delegate TColumn SourceColumnSelector<TColumn>(TSource source);
                 protected static string GetColumnName<TColumn>(Expression<SourceColumnSelector<TColumn>> selector)
@@ -53,7 +61,8 @@ namespace Apache.Druid.Querying
                     }
 
                     var name = Factory.GetColumnName(selector.Body);
-                    return customColumnNames.GetValueOrDefault(name) ?? name;
+                    name = customColumnNames.GetValueOrDefault(name) ?? name;
+                    return ToCamelCase(name);
                 }
 
                 public abstract class AndAggregations<TAggregations> : Source<TSource>
@@ -107,12 +116,14 @@ namespace Apache.Druid.Querying
                 bool lowerStrict = false,
                 bool upperStrict = false)
                 => new Querying.Filter<TColumn>.Range(GetColumnName(column), matchValueType ?? DataType.Get<TColumn>(), lower, upper, lowerStrict, upperStrict);
+            public Filter Selector<TColumn>(Expression<SourceColumnSelector<TColumn>> dimension, TColumn value)
+                => new Querying.Filter<TColumn>.Selector(GetColumnName(dimension), value);
         }
 
         public sealed class Aggregators<TSource, TAggregations> : DependentOn.Source<TSource>.AndAggregations<TAggregations>
         {
             private static string GetSimpleDataType<TColumn>(string suffix)
-                => DataType.GetSimple<TColumn>().ToString() + suffix;
+                => DataType.GetSimple<TColumn>().ToString().ToLowerInvariant() + suffix;
 
             private static Aggregator Map<TSourceColumn, TAggregationsColumn>(
                 Expression<AggregationsColumnSelector<TAggregationsColumn>> name,
@@ -135,17 +146,17 @@ namespace Apache.Druid.Querying
                 => Map<TColumn, object?>(name, fieldName, typeSuffix, null);
 
             public Aggregator Count<TAggregationsColumn>(Expression<AggregationsColumnSelector<TAggregationsColumn>> name)
-                => new(GetColumnName(name), "Count");
+                => new(GetColumnName(name), "count");
 
             public Aggregator Mean<TSourceColumn, TAggregationsColumn>(
                 Expression<AggregationsColumnSelector<TAggregationsColumn>> name,
                 Expression<SourceColumnSelector<TSourceColumn>> fieldName)
-                => new Aggregator.WithFieldName(GetColumnName(name), GetColumnName(fieldName), "DoubleMean");
+                => new Aggregator.WithFieldName(GetColumnName(name), GetColumnName(fieldName), "doubleMean");
 
             public Aggregator Any<TSourceColumn, TAggregationsColumn>(
                 Expression<AggregationsColumnSelector<TAggregationsColumn>> name,
             Expression<SourceColumnSelector<TSourceColumn>> fieldName)
-                => new Aggregator.WithFieldName(GetColumnName(name), GetColumnName(fieldName), GetSimpleDataType<TAggregationsColumn>("Any"));
+                => new Aggregator.WithFieldName(GetColumnName(name), GetColumnName(fieldName), GetSimpleDataType<TAggregationsColumn>("any"));
 
             public Aggregator Sum<TColumn>(
                 Expression<AggregationsColumnSelector<TColumn>> name,

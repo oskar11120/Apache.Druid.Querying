@@ -11,20 +11,20 @@ internal class MessageSourceTests
     [Test]
     public async Task Works()
     {
-        var t = DateTime.Parse("2023-10-15T16:57:00.000Z", null, DateTimeStyles.AssumeUniversal).ToUniversalTime();
+        var t = DateTime.Parse("2023-10-19T16:57:00.000Z", null, DateTimeStyles.AssumeUniversal).ToUniversalTime();
         var query = new TimeSeriesQuery<Message>
             .WithNoVirtualColumns
             .WithAggregations<Aggregations>()
-            .Interval(new(t, t.AddHours(1)))
+            .Interval(new(t, t.AddDays(1)))
             .Granularity(Granularity.Minute)
             .Filter(filter => filter.And(
-                filter.Equals(
+                filter.Selector(
                     message => message.VariableName,
                     "pmPAct"),
-                filter.Equals(
+                filter.Selector(
                     message => message.TenantId,
                     Guid.Parse("55022f5d-d9c4-4773-86e5-fbce823cd287")),
-                filter.Equals(
+                filter.Selector(
                     message => message.ObjectId,
                     Guid.Parse("4460391b-b713-44eb-b422-2dbe7de91856"))))
             .Aggregations(aggregations => new[]
@@ -44,6 +44,7 @@ internal class MessageSourceTests
         {
             var result = await Messages
             .ExecuteQuery(query)
+            .Where(result => result.Count != 0)
             .ToListAsync();
         }
         catch(Exception ex) 
