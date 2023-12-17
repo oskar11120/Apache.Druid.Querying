@@ -1,4 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using System.Buffers.Text;
+using System.Buffers;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -42,7 +45,7 @@ namespace Apache.Druid.Querying.AspNetCore
         }
 
         public DruidQueryingBuilder AddDataSource<TService>(
-            string id, 
+            string id,
             Func<IServiceProvider, IDataSourceFactory<TService>> getFactory)
             where TService : class
         {
@@ -68,7 +71,7 @@ namespace Apache.Druid.Querying.AspNetCore
             public static readonly DefaultDataSourceFactory<TSource> Singleton = new();
 
             private DefaultDataSourceFactory()
-            {                   
+            {
             }
 
             public DataSource<TSource> Create(string id, IQueryExecutor queryExecutor) => new(id, queryExecutor);
@@ -92,7 +95,13 @@ namespace Apache.Druid.Querying.AspNetCore
                     new PolymorphicSerializer<Filter>(),
                     new PolymorphicSerializer<Aggregator>(),
                     new PolymorphicSerializer<PostAggregator>(),
-                    new PolymorphicSerializer<VirtualColumn>()
+                    new PolymorphicSerializer<VirtualColumn>(),
+                    new UnixMilisecondsConverter<DateTimeOffset>(
+                        DateTimeOffset.FromUnixTimeMilliseconds,
+                        Utf8Formatter.TryFormat),
+                    new UnixMilisecondsConverter<DateTimeOffset>(
+                        static miliseconds => DateTimeOffset.FromUnixTimeMilliseconds(miliseconds).UtcDateTime,
+                        Utf8Formatter.TryFormat)
                 }
             };
             return new(
@@ -117,6 +126,39 @@ namespace Apache.Druid.Querying.AspNetCore
                 [DisallowNull] T value,
                 JsonSerializerOptions options)
                 => JsonSerializer.Serialize(writer, value, value.GetType(), options);
+        }
+
+        private sealed class UnixMilisecondsConverter<T> : JsonConverter<T>
+        {
+            public delegate bool TryFormatUTf8(T value, Span<byte> destination, out int bytesWritten, StandardFormat format);
+
+            private readonly Func<long, T> convert;
+            private readonly TryFormatUTf8 tryFormat;
+
+            public UnixMilisecondsConverter(Func<long, T> convert, TryFormatUTf8 tryFormat)
+            {
+                this.convert = convert;
+                this.tryFormat = tryFormat;
+            }
+
+            public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                var number = reader.TokenType switch
+                {
+                    JsonTokenType.Number => reader.GetInt64(),
+                    JsonTokenType.String => long.Parse(reader.GetString()!),
+                    _ => throw new NotSupportedException()
+                };
+                return convert(number);
+            }
+
+            public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
+            {
+                // The "R" standard format will always be 29 bytes.
+                Span<byte> utf8Date = stackalloc byte[29];
+                tryFormat(value, utf8Date, out _, new StandardFormat('R'));
+                writer.WriteStringValue(utf8Date);
+            }
         }
     }
 }

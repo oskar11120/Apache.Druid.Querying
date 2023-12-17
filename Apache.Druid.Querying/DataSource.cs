@@ -15,22 +15,22 @@ namespace Apache.Druid.Querying
 
     public class DataSource<TSource>
     {
-        protected readonly string Id;
-        protected readonly IQueryExecutor Executor;
+        private readonly string id;
+        private readonly IQueryExecutor executor;
 
         public DataSource(string id, IQueryExecutor executor)
         {
-            Id = id;
-            Executor = executor;
+            this.id = id;
+            this.executor = executor;
         }
 
-        public virtual IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQueryWithResult<TResult> query, CancellationToken token = default)
+        public IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQueryWithResult<TResult> query, CancellationToken token = default)
         {
             var asDictionary = query
                 .GetState()
                 .ToDictionary(pair => pair.Key, pair => pair.Value.Value);
-            asDictionary.Add(nameof(DataSource<TSource>), Id);
-            return Executor.Execute<TResult>(asDictionary, token);
+            asDictionary.Add(nameof(DataSource<TSource>), id);
+            return executor.Execute<TResult>(asDictionary, token);
         }
     }
 }
