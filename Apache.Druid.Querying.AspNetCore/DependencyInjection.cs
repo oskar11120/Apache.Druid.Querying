@@ -99,7 +99,7 @@ namespace Apache.Druid.Querying.AspNetCore
                     new UnixMilisecondsConverter<DateTimeOffset>(
                         DateTimeOffset.FromUnixTimeMilliseconds,
                         Utf8Formatter.TryFormat),
-                    new UnixMilisecondsConverter<DateTimeOffset>(
+                    new UnixMilisecondsConverter<DateTime>(
                         static miliseconds => DateTimeOffset.FromUnixTimeMilliseconds(miliseconds).UtcDateTime,
                         Utf8Formatter.TryFormat)
                 }
