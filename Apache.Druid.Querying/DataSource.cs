@@ -24,7 +24,7 @@ namespace Apache.Druid.Querying
             this.executor = executor;
         }
 
-        public IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQueryWithResult<TResult> query, CancellationToken token = default)
+        public virtual IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQueryWithResult<TResult> query, CancellationToken token = default)
         {
             var asDictionary = query
                 .GetState()
