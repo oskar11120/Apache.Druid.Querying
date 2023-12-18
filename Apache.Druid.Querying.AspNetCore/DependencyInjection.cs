@@ -38,20 +38,25 @@ namespace Apache.Druid.Querying.AspNetCore
             return this;
         }
 
-        public DruidQueryingBuilder AddDataSource<TDataSource, TSource>(string id) where TDataSource : DataSource<TSource>
+        public DruidQueryingBuilder AddDataSource<TService, TImplementation, TSource>(string id) 
+            where TService : DataSource<TSource>
+            where TImplementation : TService
         {
             Services
-                .AddSingleton<IDataSourceInitializer<TSource>, TDataSource>()
+                .AddSingleton<IDataSourceInitializer<TSource>, TImplementation>()
                 .AddSingleton(provider =>
                 {
                     var factory = provider.GetRequiredService<IHttpClientFactory>();
                     var state = new DataSourceInitlializationState(id, SerializerOptions, () => factory.CreateClient(clientId));
                     var implementation = provider.GetRequiredService<IDataSourceInitializer<TSource>>();
                     implementation.Initialize(state);
-                    return (TDataSource)implementation;
+                    return (TService)implementation;
                 });
             return this;
         }
+
+        public DruidQueryingBuilder AddDataSource<TService, TSource>(string id) where TService : DataSource<TSource>
+            => AddDataSource<TService, TService, TSource>(id);
 
         public DruidQueryingBuilder AddDataSource<TSource>(string id)
             => AddDataSource<DataSource<TSource>, TSource>(id);
