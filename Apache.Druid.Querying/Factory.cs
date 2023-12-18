@@ -23,14 +23,6 @@ namespace Apache.Druid.Querying
             public abstract class Source<TSource>
             {
                 private static IReadOnlyDictionary<string, string>? customColumnNames = null;
-                private static string ToCamelCase(string pascalCase) => string.Create(
-                    pascalCase.Length,
-                    pascalCase,
-                    (span, pascalCase) =>
-                    {
-                        pascalCase.CopyTo(span);
-                        span[0] = char.ToLowerInvariant(pascalCase[0]);
-                    });
 
                 public delegate TColumn SourceColumnSelector<TColumn>(TSource source);
                 protected static string GetColumnName<TColumn>(Expression<SourceColumnSelector<TColumn>> selector)
@@ -65,7 +57,7 @@ namespace Apache.Druid.Querying
 
                     var name = Factory.GetColumnName(selector.Body);
                     name = customColumnNames.GetValueOrDefault(name) ?? name;
-                    return ToCamelCase(name);
+                    return name.ToCamelCase();
                 }
 
                 public abstract class AndAggregations<TAggregations> : Source<TSource>

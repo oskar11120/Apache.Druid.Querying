@@ -15,7 +15,8 @@ internal class MessageSourceTests
         var query = new Query<Message>
             .TimeSeries
             .WithNoVirtualColumns
-            .WithAggregations<Aggregations>()
+            .WithAggregations<Aggregations>
+            .WithPostAggregations<PostAggregations>()
             .Interval(new(t, t.AddDays(1)))
             .Granularity(Granularity.SixHours)
             .Filter(filter => filter.And(
@@ -28,25 +29,33 @@ internal class MessageSourceTests
                 filter.Selector(
                     message => message.ObjectId,
                     Guid.Parse("4460391b-b713-44eb-b422-2dbe7de91856"))))
-            .Aggregations(aggregations => new[]
+            .Aggregations(aggregators => new[]
             {
-                aggregations.Sum(
+                aggregators.Sum(
                     aggregations => aggregations.Sum,
                     message => message.Value),
-                aggregations.Count(aggregations => aggregations.Count),
-                aggregations.First(
+                aggregators.Count(aggregations => aggregations.Count),
+                aggregators.First(
                     aggregations => aggregations.Variable,
                     message => message.VariableName),
-                aggregations.First(
+                aggregators.First(
                     aggregations => aggregations.FirstValue,
                     message => message.Value,
                     SimpleDataType.String)
+            })
+            .PostAggregations(postAggregators => new[] 
+            {
+                postAggregators.Arithmetic(
+                    postAggregations => postAggregations.Average,
+                    ArithmeticFunction.Divide,
+                    postAggregators.FieldAccess(aggrgations => aggrgations.Sum),
+                    postAggregators.FieldAccess(aggregations => aggregations.Count))
             });
         try
         {
             var result = await Messages
             .ExecuteQuery(query)
-            .Where(pair => pair.Result.Count != 0)
+            .Where(pair => pair.Result.Aggregations.Count != 0)
             .ToListAsync();
         }
         catch (Exception ex)
@@ -56,4 +65,5 @@ internal class MessageSourceTests
     }
 
     private sealed record Aggregations(double Sum, int Count, string Variable, double? FirstValue);
+    private sealed record PostAggregations(double Average);
 }

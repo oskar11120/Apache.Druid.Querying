@@ -1,6 +1,9 @@
 ﻿
 
+using Apache.Druid.Querying.Internal;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 
 namespace Apache.Druid.Querying
@@ -26,9 +29,19 @@ namespace Apache.Druid.Querying
 
     public readonly record struct WithTimestamp<TResult>(DateTimeOffset Timestamp, TResult Result)
     {
-        internal static MapQueryResult<WithTimestamp<TResult>> Map(MapQueryResult<TResult> map) => (json, options) => new(
-            json.GetProperty(nameof(WithTimestamp<TResult>.Timestamp)).GetDateTimeOffset(),
-            map(json.GetProperty(nameof(WithTimestamp<TResult>.Result)), options));
+        private static readonly Dictionary<string, string> camelCaseNames = typeof(WithTimestamp<TResult>)
+            .GetProperties()
+            .ToDictionary(property => property.Name, property => property.Name.ToCamelCase());
+
+        internal static MapQueryResult<WithTimestamp<TResult>> Map(MapQueryResult<TResult> map) => (json, options) =>
+        {
+            var t = json
+                .GetProperty(camelCaseNames[nameof(WithTimestamp<TResult>.Timestamp)])
+                .Deserialize<DateTimeOffset>(options);
+            var resultJson = json.GetProperty(camelCaseNames[nameof(WithTimestamp<TResult>.Result)]);
+            var result = map(resultJson, options);
+            return new(t, result);
+        };
     }
 
     public readonly record struct Pair<TAggregations, TPostAggregations>(TAggregations Aggregations, TPostAggregations PostAggregations)
@@ -63,7 +76,7 @@ namespace Apache.Druid.Querying
                         IQueryWithMappedResult<WithTimestamp<Pair<TAggregations, TPostAggregations>>>
                     {
                         MapQueryResult<WithTimestamp<Pair<TAggregations, TPostAggregations>>> IQueryWithMappedResult<WithTimestamp<Pair<TAggregations, TPostAggregations>>>.Map
-                            { get; } = WithTimestamp<Pair<TAggregations, TPostAggregations>>.Map(Pair<TAggregations, TPostAggregations>.Map);
+                        { get; } = WithTimestamp<Pair<TAggregations, TPostAggregations>>.Map(Pair<TAggregations, TPostAggregations>.Map);
                     }
                 }
             }
@@ -84,7 +97,7 @@ namespace Apache.Druid.Querying
                         IQueryWithMappedResult<WithTimestamp<Pair<TAggregations, TPostAggregations>>>
                     {
                         MapQueryResult<WithTimestamp<Pair<TAggregations, TPostAggregations>>> IQueryWithMappedResult<WithTimestamp<Pair<TAggregations, TPostAggregations>>>.Map
-                            { get; } = WithTimestamp<Pair<TAggregations, TPostAggregations>>.Map(Pair<TAggregations, TPostAggregations>.Map);
+                        { get; } = WithTimestamp<Pair<TAggregations, TPostAggregations>>.Map(Pair<TAggregations, TPostAggregations>.Map);
                     }
                 }
             }

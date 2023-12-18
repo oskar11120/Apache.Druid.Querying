@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Apache.Druid.Querying.Internal;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -145,7 +146,7 @@ namespace Apache.Druid.Querying
             var aggregatorNames = aggregators.Select(aggregator => aggregator.Name);
             var propertyNames = IQueryWith.Aggregations<TSource, TAggregations, TQuery>.AggregationsPropertyNames;
             EnsureMatch<TAggregations>(propertyNames, aggregatorNames, nameof(aggregators));
-            query.AddOrUpdateSection(nameof(Aggregations).ToLower(), aggregators);
+            query.AddOrUpdateSection(nameof(Aggregations).ToCamelCase(), aggregators);
             return query.Unwrapped;
         }
 
@@ -158,7 +159,7 @@ namespace Apache.Druid.Querying
             var postAggregatorNames = postAggregators.Select(aggregator => aggregator.Name);
             var propertyNames = IQueryWith.PostAggregations<TAggregations, TPostAggregations, TQuery>.PostAggregationsPropertyNames;
             EnsureMatch<TPostAggregations>(propertyNames, postAggregatorNames, nameof(postAggregators));
-            query.AddOrUpdateSection(nameof(PostAggregations), postAggregators);
+            query.AddOrUpdateSection(nameof(PostAggregations).ToCamelCase(), postAggregators);
             return query.Unwrapped;
         }
 
