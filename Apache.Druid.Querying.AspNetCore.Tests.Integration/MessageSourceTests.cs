@@ -55,7 +55,6 @@ internal class MessageSourceTests
         {
             var result = await Messages
             .ExecuteQuery(query)
-            .Where(pair => pair.Result.Aggregations.Count != 0)
             .ToListAsync();
         }
         catch (Exception ex)

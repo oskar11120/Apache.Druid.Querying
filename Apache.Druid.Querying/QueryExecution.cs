@@ -26,6 +26,9 @@ namespace Apache.Druid.Querying
         DataSourceInitlializationState? IDataSourceInitializer<TSource>.state { get; set; }
         private DataSourceInitlializationState State => (this as IDataSourceInitializer<TSource>).State;
 
+        public virtual IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQuery query, CancellationToken token = default)
+            => Execute<TResult>(query, token);
+
         public virtual IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQueryWithResult<TResult> query, CancellationToken token = default)
             => Execute<TResult>(query, token);
 

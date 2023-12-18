@@ -6,4 +6,4 @@ internal record Message(
     Guid ObjectId,
     double Value,
     [property: DataSourceTimeColumn] DateTimeOffset Timestamp,
-    DateTimeOffset ProcessedTimestmap);
+    DateTimeOffset ProcessedTimestamp);
