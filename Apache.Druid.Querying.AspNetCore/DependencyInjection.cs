@@ -1,30 +1,25 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System.Buffers.Text;
 using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Apache.Druid.Querying.DependencyInjection;
 
 namespace Apache.Druid.Querying.AspNetCore
 {
-    public interface IDataSourceFactory<TService>
-    {
-        TService Create(string id, IQueryExecutor queryExecutor);
-    }
-
     public class DruidQueryingBuilder
     {
-        private readonly Func<IServiceProvider, JsonSerializerOptions, IQueryExecutor> queryExecutorFactory;
+        private readonly string clientId;
 
         public DruidQueryingBuilder(
             IHttpClientBuilder clientBuilder,
             JsonSerializerOptions serializerOptions,
-            Func<IServiceProvider, JsonSerializerOptions, IQueryExecutor> queryExecutorFactory)
+            string clientId)
         {
             ClientBuilder = clientBuilder;
             SerializerOptions = serializerOptions;
             Services = clientBuilder.Services;
-            this.queryExecutorFactory = queryExecutorFactory;
+            this.clientId = clientId;
         }
 
         public IServiceCollection Services { get; }
@@ -43,38 +38,23 @@ namespace Apache.Druid.Querying.AspNetCore
             return this;
         }
 
-        public DruidQueryingBuilder AddDataSource<TService>(
-            string id,
-            Func<IServiceProvider, IDataSourceFactory<TService>> getFactory)
-            where TService : class
+        public DruidQueryingBuilder AddDataSource<TDataSource, TSource>(string id) where TDataSource : DataSource<TSource>
         {
-            Services.AddSingleton(provider => getFactory(provider).Create(
-                id,
-                queryExecutorFactory(provider, SerializerOptions)));
+            Services
+                .AddSingleton<IDataSourceInitializer<TSource>, TDataSource>()
+                .AddSingleton(provider =>
+                {
+                    var factory = provider.GetRequiredService<IHttpClientFactory>();
+                    var state = new DataSourceInitlializationState(id, SerializerOptions, () => factory.CreateClient(clientId));
+                    var implementation = provider.GetRequiredService<IDataSourceInitializer<TSource>>();
+                    implementation.Initialize(state);
+                    return (TDataSource)implementation;
+                });
             return this;
         }
 
-        public DruidQueryingBuilder AddDataSource<TService, TSource, TFactory>(string id)
-            where TService : DataSource<TSource>
-            where TFactory : class, IDataSourceFactory<TService>
-        {
-            Services.AddSingleton<TFactory>();
-            return AddDataSource(id, provider => provider.GetRequiredService<TFactory>());
-        }
-
         public DruidQueryingBuilder AddDataSource<TSource>(string id)
-            => AddDataSource(id, provider => DefaultDataSourceFactory<TSource>.Singleton);
-
-        private sealed class DefaultDataSourceFactory<TSource> : IDataSourceFactory<DataSource<TSource>>
-        {
-            public static readonly DefaultDataSourceFactory<TSource> Singleton = new();
-
-            private DefaultDataSourceFactory()
-            {
-            }
-
-            public DataSource<TSource> Create(string id, IQueryExecutor queryExecutor) => new(id, queryExecutor);
-        }
+            => AddDataSource<DataSource<TSource>, TSource>(id);
     }
 
     public static class ServiceCollectionExtensions
@@ -103,13 +83,7 @@ namespace Apache.Druid.Querying.AspNetCore
                 //        Utf8Formatter.TryFormat)
                 }
             };
-            return new(
-                clientBuilder,
-                serlializerOptions,
-                (provider, serializerOptions) => new QueryExecutor(
-                    provider.GetRequiredService<IHttpClientFactory>(),
-                    serializerOptions,
-                    clientId));
+            return new(clientBuilder, serlializerOptions, clientId);
         }
 
         private sealed class PolymorphicSerializer<T> : JsonConverter<T> where T : class

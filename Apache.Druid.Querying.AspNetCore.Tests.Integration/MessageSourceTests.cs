@@ -12,7 +12,8 @@ internal class MessageSourceTests
     public async Task Works()
     {
         var t = DateTime.Parse("2023-10-19T16:57:00.000Z", null, DateTimeStyles.AssumeUniversal).ToUniversalTime();
-        var query = new TimeSeriesQuery<Message>
+        var query = new Query<Message>
+            .TimeSeries
             .WithNoVirtualColumns
             .WithAggregations<Aggregations>()
             .Interval(new(t, t.AddDays(1)))

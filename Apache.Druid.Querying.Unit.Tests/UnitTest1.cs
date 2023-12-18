@@ -9,7 +9,8 @@ namespace Apache.Druid.Querying.Unit.Tests
         [Test]
         public void Test1()
         {
-            var test0 = new TimeSeriesQuery<Message>
+            var test0 = new Query<Message>
+                .TimeSeries
                 .WithNoVirtualColumns
                 .WithAggregations<Aggregations>()
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
@@ -31,7 +32,8 @@ namespace Apache.Druid.Querying.Unit.Tests
                 })
                 .ToJson();
 
-            var test1 = new TimeSeriesQuery<Message>
+            var test1 = new Query<Message>
+                .TimeSeries
                 .WithVirtualColumns<VirtualColumns>
                 .WithAggregations<Aggregations>()
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
@@ -59,7 +61,8 @@ namespace Apache.Druid.Querying.Unit.Tests
                 })
                 .ToJson();
 
-            var test2 = new TimeSeriesQuery<Message>
+            var test2 = new Query<Message>
+                .TimeSeries
                 .WithNoVirtualColumns
                 .WithAggregations<Aggregations>
                 .WithPostAggregations<PostAggregations>()
@@ -91,7 +94,8 @@ namespace Apache.Druid.Querying.Unit.Tests
                 })
                 .ToJson();
 
-            var test3 = new TimeSeriesQuery<Message>
+            var test3 = new Query<Message>
+                .TimeSeries
                 .WithVirtualColumns<VirtualColumns>
                 .WithAggregations<Aggregations>
                 .WithPostAggregations<PostAggregations>()

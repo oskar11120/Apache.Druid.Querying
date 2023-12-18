@@ -1,6 +1,5 @@
-﻿using System;
+﻿using Apache.Druid.Querying.DependencyInjection;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -10,89 +9,62 @@ using System.Threading;
 
 namespace Apache.Druid.Querying
 {
+    public delegate TResult MapQueryResult<TResult>(JsonElement from, JsonSerializerOptions serializerOptions);
+
     public interface IQueryWithMappedResult<TResult> : IQuery
     {
-        TResult Map(JsonElement from, JsonSerializerOptions serializerOptions);
+        MapQueryResult<TResult> Map { get; }
     }
 
     public interface IQueryWithResult<TResult> : IQuery
     {
     }
 
-    public interface IQueryExecutor
+    public class DataSource<TSource> : IDataSourceInitializer<TSource>
     {
-        IAsyncEnumerable<TResult> Execute<TResult>(Dictionary<string, object?> query, CancellationToken token);
-    }
+        private JsonSerializerOptions? serializerOptionsWithFormatting;
+        DataSourceInitlializationState? IDataSourceInitializer<TSource>.state { get; set; }
+        private DataSourceInitlializationState State => (this as IDataSourceInitializer<TSource>).State;
 
-    public interface IDataSource<TSource>
-    {
-        public class Implementation : IInitializer
+        public virtual IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQueryWithResult<TResult> query, CancellationToken token = default)
+            => Execute<TResult>(query, token);
+
+        public virtual async IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQueryWithMappedResult<TResult> query, [EnumeratorCancellation] CancellationToken token = default)
         {
-            private JsonSerializerOptions? serializerOptionsWithFormatting;
-            IDataSource<TSource>.Context? IDataSource<TSource>.IInitializer.context { get; set; }
-            private Context Context => (this as IInitializer).Context;
-
-            public IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQueryWithResult<TResult> query, CancellationToken token = default)
-                => Execute<TResult>(query, token);
-
-            public async IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQueryWithMappedResult<TResult> query, [EnumeratorCancellation] CancellationToken token = default)
-            {
-                var json = Execute<JsonElement>(query, token);
-                await foreach (var result in json)
-                    yield return query.Map(result, Context.SerializerOptions);
-            }
-
-            private async IAsyncEnumerable<TResult> Execute<TResult>(IQuery query, [EnumeratorCancellation] CancellationToken token = default)
-            {
-                var (id, serializerOptions, clientFactory) = Context;
-                serializerOptionsWithFormatting ??= new(serializerOptions) { WriteIndented = true };
-                var asDictionary = query
-                    .GetState()
-                    .ToDictionary(pair => pair.Key, pair => pair.Value.Value);
-                asDictionary.Add("dataSource", id);
-                using var content = JsonContent.Create(query, options: serializerOptions);
-                using var request = new HttpRequestMessage(HttpMethod.Post, "druid/v2") { Content = content };
-                using var client = clientFactory();
-                using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token);
-
-                try
-                {
-                    response.EnsureSuccessStatusCode();
-                }
-                catch (HttpRequestException exception)
-                {
-                    var responseContent = await response.Content.ReadAsStringAsync(token);
-                    exception.Data.Add("requestContent", JsonSerializer.Serialize(query, serializerOptionsWithFormatting));
-                    exception.Data.Add(nameof(responseContent), responseContent);
-                    throw;
-                }
-
-                using var stream = await response.Content.ReadAsStreamAsync(token);
-                var results = JsonSerializer.DeserializeAsyncEnumerable<TResult>(stream, serializerOptions, token);
-                await foreach (var result in results)
-                    yield return result!;
-            }
+            var json = Execute<JsonElement>(query, token);
+            await foreach (var result in json)
+                yield return query.Map(result, State.SerializerOptions);
         }
 
-        public interface IInitializer
+        private async IAsyncEnumerable<TResult> Execute<TResult>(IQuery query, [EnumeratorCancellation] CancellationToken token = default)
         {
-            [SuppressMessage("Style", "IDE1006:Naming Styles")]
-            private protected Context? context { get; set; }
+            var (id, serializerOptions, clientFactory) = State;
+            serializerOptionsWithFormatting ??= new(serializerOptions) { WriteIndented = true };
+            var asDictionary = query
+                .GetState()
+                .ToDictionary(pair => pair.Key, pair => pair.Value.Value);
+            asDictionary.Add("dataSource", id);
+            using var content = JsonContent.Create(asDictionary, options: serializerOptions);
+            using var request = new HttpRequestMessage(HttpMethod.Post, "druid/v2") { Content = content };
+            using var client = clientFactory();
+            using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token);
 
-            internal Context Context => context ??
-                throw new InvalidOperationException($"Attempted to use an uninitialized instance of {typeof(IDataSource<TSource>)}.");
-
-            public void Initialize(Context context)
+            try
             {
-                if (this.context is not null)
-                    throw new InvalidOperationException("Already initialized.");
-                this.context = context;
+                response.EnsureSuccessStatusCode();
             }
-        }
+            catch (HttpRequestException exception)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync(token);
+                exception.Data.Add("requestContent", JsonSerializer.Serialize(asDictionary, serializerOptionsWithFormatting));
+                exception.Data.Add(nameof(responseContent), responseContent);
+                throw;
+            }
 
-        public sealed record Context(
-            string Id,
-            JsonSerializerOptions SerializerOptions,
-            Func<HttpClient> HttpClientFactory);
+            using var stream = await response.Content.ReadAsStreamAsync(token);
+            var results = JsonSerializer.DeserializeAsyncEnumerable<TResult>(stream, serializerOptions, token);
+            await foreach (var result in results)
+                yield return result!;
+        }
     }
 }
