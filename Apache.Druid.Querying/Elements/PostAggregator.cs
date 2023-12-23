@@ -2,16 +2,6 @@
 
 namespace Apache.Druid.Querying.Elements
 {
-    public enum ArithmeticFunction
-    {
-        Add,
-        Subtract,
-        Multiply,
-        Divide,
-        QuotientDivide,
-        Exponentiate
-    }
-
     public abstract class PostAggregator : WithType
     {
         public PostAggregator(string Name, string? type = null) : base(type)

@@ -251,5 +251,18 @@ namespace Apache.Druid.Querying
                 string expression)
                 => new PostAggregator.Expression_(GetColumnName(name), DataType.Get<TColumn>(), expression);
         }
+
+        public sealed class Dimensions<TSource, TDimensions> : DependentOn.Source<TSource>
+        {
+            public delegate TColumn DimensionsColumnSelector<TColumn>(TDimensions dimensions);
+            private static string GetColumnName<TColumn>(Expression<DimensionsColumnSelector<TColumn>> dimensions)
+                => Factory.GetColumnName(dimensions.Body);
+
+            public Dimension Default<TSourceColumn, TDimensionColumn>(
+                Expression<SourceColumnSelector<TSourceColumn>> dimension,
+                Expression<DimensionsColumnSelector<TDimensionColumn>> outputName,
+                SimpleDataType? outputType = null)
+                => new Dimension.Default(GetColumnName(dimension), GetColumnName(outputName), outputType ?? DataType.GetSimple<TDimensionColumn>());
+        }
     }
 }

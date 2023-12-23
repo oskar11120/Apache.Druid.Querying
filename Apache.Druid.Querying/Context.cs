@@ -1,4 +1,4 @@
-﻿namespace Apache.Druid.Querying.Elements
+﻿namespace Apache.Druid.Querying
 {
     public class Context
     {
@@ -32,7 +32,7 @@
         public int? InSubQueryThreshold { get; set; }
 
         public class WithVectorization : Context
-        {           
+        {
             public VectorizeMode? Vectorize { get; set; }
             public int? VectorSize { get; set; }
             public VectorizeMode? VectorizeVirtualColumns { get; set; }

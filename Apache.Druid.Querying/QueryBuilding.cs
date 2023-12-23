@@ -23,8 +23,9 @@ namespace Apache.Druid.Querying
 
     public abstract class Query : IQuery
     {
-        public Query(string type)
+        public Query(string? type = null)
         {
+            type ??= GetType().Name.ToCamelCase();
             state = new() { ["queryType"] = new(typeof(string), type) };
         }
 

@@ -9,6 +9,8 @@ using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Globalization;
+using Newtonsoft.Json.Linq;
+using System.Text.Json.Nodes;
 
 Console.WriteLine("Hello, World!");
 
@@ -20,53 +22,53 @@ var options = new ConfigurationOptions
 var t = DateTime.Parse("2023-10-19T16:57:00.000Z", null, DateTimeStyles.AssumeUniversal).ToUniversalTime();
 //var t1 = DateTime.Parse("2023-11-01T17:57:00.000Z", null, DateTimeStyles.AssumeUniversal).ToUniversalTime();
 var client = new DruidClient(options);
-var results = await client.TimeseriesAsync<JsonElement>(with => with
-    .Interval(t, t.AddHours(1))
-    .Granularity(Granularities.Minute)
-    .DataSource("data-variables")
-    .Filter(new AndFilter(
-        new SelectorFilter("variable", "pmPAct"),
-        new SelectorFilter("tenantId", "55022f5d-d9c4-4773-86e5-fbce823cd287"),
-        new SelectorFilter("objectId", "4460391b-b713-44eb-b422-2dbe7de91856")))
-    .Aggregations(
-        new DoubleSumAggregator("sum", "value"),
-        new CountAggregator("count"),
-        new StringFirstAggregator("variable", "variable"),
-        new StringFirstAggregator("first", "value"))
-    .PostAggregations(
-        new ArithmeticPostAggregator(
-            "average",
-            ArithmeticFunction.Divide,
-            null,
-            new FieldAccessPostAggregator("sum", "sum"),
-            new FieldAccessPostAggregator("count", "count")))
-    .Context(skipEmptyBuckets: true));
-
-//var results = await client.GroupByAsync<Result>(with => with
-//    .Interval(t, DateTime.MaxValue)
+//var results = await client.TimeseriesAsync<JsonElement>(with => with
+//    .Interval(t, t.AddHours(1))
+//    .Granularity(Granularities.Minute)
 //    .DataSource("data-variables")
-//    .Dimensions("objectId", "variable")
-//    .VirtualColumns(new[]
-//    {
-//        new ExpressionVirtualColumn(
-//            "tReal",
-//            "__time",
-//            ExpressionOutputType.LONG),
-//        new ExpressionVirtualColumn(
-//            "t",
-//            "timestamp(processedTimestamp)",
-//            ExpressionOutputType.LONG)
-//    })
-//    .Aggregations(
-//        new LongMaxAggregator("tMax", "t"),
-//        new ActualStringLastAggregator("value", "value", "t"))
 //    .Filter(new AndFilter(
-//        new OrFilter(
-//            new SelectorFilter("objectId", "0c8e5828-4e40-43c1-83d1-a3a6ba309866"),
-//            new SelectorFilter("variable", "priceFrcst")),
-//        new SelectorFilter("tenantId", "958b85b3-e45f-454e-81ad-3f9edec557ec")))
-//    .Granularity(Granularities.Hour)
-//    .Context(finalize: true, useCache: false));
+//        new SelectorFilter("variable", "pmPAct"),
+//        new SelectorFilter("tenantId", "55022f5d-d9c4-4773-86e5-fbce823cd287"),
+//        new SelectorFilter("objectId", "4460391b-b713-44eb-b422-2dbe7de91856")))
+//    .Aggregations(
+//        new DoubleSumAggregator("sum", "value"),
+//        new CountAggregator("count"),
+//        new StringFirstAggregator("variable", "variable"),
+//        new StringFirstAggregator("first", "value"))
+//    .PostAggregations(
+//        new ArithmeticPostAggregator(
+//            "average",
+//            ArithmeticFunction.Divide,
+//            null,
+//            new FieldAccessPostAggregator("sum", "sum"),
+//            new FieldAccessPostAggregator("count", "count")))
+//    .Context(skipEmptyBuckets: true));
+
+var results = await client.GroupByAsync<JsonElement>(with => with
+    .Interval(t, DateTime.MaxValue)
+    .DataSource("data-variables")
+    .Dimensions("objectId", "variable")
+    .VirtualColumns(new[]
+    {
+        new ExpressionVirtualColumn(
+            "tReal",
+            "__time",
+            ExpressionOutputType.LONG),
+        new ExpressionVirtualColumn(
+            "t",
+            "timestamp(processedTimestamp)",
+            ExpressionOutputType.LONG)
+    })
+    .Aggregations(
+        new LongMaxAggregator("tMax", "t"),
+        new ActualStringLastAggregator("value", "value", "t"))
+    .Filter(new AndFilter(
+        new OrFilter(
+            new SelectorFilter("objectId", "0c8e5828-4e40-43c1-83d1-a3a6ba309866"),
+            new SelectorFilter("variable", "priceFrcst")),
+        new SelectorFilter("tenantId", "958b85b3-e45f-454e-81ad-3f9edec557ec")))
+    .Granularity(Granularities.Hour)
+    .Context(finalize: true, useCache: false));
 
 
 var v = results

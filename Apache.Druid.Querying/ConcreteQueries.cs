@@ -1,7 +1,4 @@
-﻿
-
-using Apache.Druid.Querying.Elements;
-using Apache.Druid.Querying.Internal;
+﻿using Apache.Druid.Querying.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,6 +39,11 @@ namespace Apache.Druid.Querying
         public class TimeSeries : Context.WithVectorization
         {
             public bool? SkipEmptyBuckets { get; set; }
+        }
+
+        public class TopN : Context
+        {
+            public bool? MinTopNThreshold { get; set; }
         }
     }
 
