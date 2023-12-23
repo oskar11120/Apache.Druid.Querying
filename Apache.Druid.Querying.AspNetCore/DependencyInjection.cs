@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Apache.Druid.Querying.DependencyInjection;
+using Apache.Druid.Querying.Elements;
 
 namespace Apache.Druid.Querying.AspNetCore
 {

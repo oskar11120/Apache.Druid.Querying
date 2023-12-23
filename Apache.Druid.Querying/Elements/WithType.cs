@@ -1,4 +1,4 @@
-﻿namespace Apache.Druid.Querying
+﻿namespace Apache.Druid.Querying.Elements
 {
     public abstract class WithType
     {

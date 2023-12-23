@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Apache.Druid.Querying.Elements;
+using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 using static Apache.Druid.Querying.AspNetCore.Tests.Integration.ServiceProvider;
 

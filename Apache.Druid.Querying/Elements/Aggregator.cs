@@ -1,5 +1,4 @@
-﻿
-namespace Apache.Druid.Querying
+﻿namespace Apache.Druid.Querying.Elements
 {
     public class Aggregator : WithType
     {

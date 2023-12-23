@@ -1,4 +1,5 @@
-﻿using Apache.Druid.Querying.Internal;
+﻿using Apache.Druid.Querying.Elements;
+using Apache.Druid.Querying.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -100,9 +101,9 @@ namespace Apache.Druid.Querying
             public Filter Not(Filter filter) => new Filter.Not(filter);
             public Filter Null<TColumn>(Expression<SourceColumnSelector<TColumn?>> column) => new Filter.Null(GetColumnName(column));
             public Filter In<TColumn>(Expression<SourceColumnSelector<TColumn>> column, IEnumerable<TColumn> values)
-                => new Querying.Filter<TColumn>.In(GetColumnName(column), values);
+                => new Elements.Filter<TColumn>.In(GetColumnName(column), values);
             public Filter Equals<TColumn>(Expression<SourceColumnSelector<TColumn>> column, TColumn matchValue, string? matchValueType = null)
-                => new Querying.Filter<TColumn>.Equals(GetColumnName(column), matchValue, matchValueType ?? DataType.Get<TColumn>());
+                => new Elements.Filter<TColumn>.Equals(GetColumnName(column), matchValue, matchValueType ?? DataType.Get<TColumn>());
             public Filter Range<TColumn>(
                 Expression<SourceColumnSelector<TColumn>> column,
                 TColumn? lower = default,
@@ -110,9 +111,9 @@ namespace Apache.Druid.Querying
                 string? matchValueType = null,
                 bool lowerStrict = false,
                 bool upperStrict = false)
-                => new Querying.Filter<TColumn>.Range(GetColumnName(column), matchValueType ?? DataType.Get<TColumn>(), lower, upper, lowerStrict, upperStrict);
+                => new Elements.Filter<TColumn>.Range(GetColumnName(column), matchValueType ?? DataType.Get<TColumn>(), lower, upper, lowerStrict, upperStrict);
             public Filter Selector<TColumn>(Expression<SourceColumnSelector<TColumn>> dimension, TColumn value)
-                => new Querying.Filter<TColumn>.Selector(GetColumnName(dimension), value);
+                => new Elements.Filter<TColumn>.Selector(GetColumnName(dimension), value);
         }
 
         public sealed class Aggregators<TSource, TAggregations> : DependentOn.Source<TSource>.AndAggregations<TAggregations>

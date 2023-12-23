@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Apache.Druid.Querying
+namespace Apache.Druid.Querying.Elements
 {
     public abstract class Filter : WithType
     {

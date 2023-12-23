@@ -1,4 +1,5 @@
-﻿using Apache.Druid.Querying.Internal;
+﻿using Apache.Druid.Querying.Elements;
+using Apache.Druid.Querying.Internal;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
