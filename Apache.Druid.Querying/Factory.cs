@@ -252,7 +252,7 @@ namespace Apache.Druid.Querying
                 => new PostAggregator.Expression_(GetColumnName(name), DataType.Get<TColumn>(), expression);
         }
 
-        public sealed class Dimensions<TSource, TDimensions> : DependentOn.Source<TSource>
+        public sealed class DimensionSpec<TSource, TDimensions> : DependentOn.Source<TSource>
         {
             public delegate TColumn DimensionsColumnSelector<TColumn>(TDimensions dimensions);
             private static string GetColumnName<TColumn>(Expression<DimensionsColumnSelector<TColumn>> dimensions)
@@ -263,6 +263,48 @@ namespace Apache.Druid.Querying
                 Expression<DimensionsColumnSelector<TDimensionColumn>> outputName,
                 SimpleDataType? outputType = null)
                 => new Dimension.Default(GetColumnName(dimension), GetColumnName(outputName), outputType ?? DataType.GetSimple<TDimensionColumn>());
+        }
+
+        public class TopNMetricSpec<TDimension>
+        {
+            public delegate TColumn MetricColumnSelector<TColumn>(TDimension dimension);
+            private static string GetColumnName<TColumn>(Expression<MetricColumnSelector<TColumn>> dimension)
+                => Factory.GetColumnName(dimension.Body);
+
+            public TopNMetric Dimension<TColumn>(
+                TColumn previousStop,
+                SortingOrder ordering = SortingOrder.Lexicographic)
+                => new TopNMetric.Dimension<TColumn>(ordering, previousStop);
+
+            public TopNMetric Dimension(
+                SortingOrder ordering = SortingOrder.Lexicographic)
+                => new TopNMetric.Dimension<object?>(ordering, null);
+
+            public TopNMetric Inverted(TopNMetric metric)
+                => new TopNMetric.Inverted(metric);
+
+            public TopNMetric Numeric<TColumn>(Expression<MetricColumnSelector<TColumn>> metric)
+                => new TopNMetric.Numeric(GetColumnName(metric));
+
+            public class WithAggregations<TAggregations> : TopNMetricSpec<TDimension>
+            {
+                public new delegate TColumn MetricColumnSelector<TColumn>(TDimension dimension, TAggregations aggregations);
+                private static string GetColumnName<TColumn>(Expression<MetricColumnSelector<TColumn>> dimension)
+                    => Factory.GetColumnName(dimension.Body);
+
+                public TopNMetric Numeric<TColumn>(Expression<MetricColumnSelector<TColumn>> metric)
+                    => new TopNMetric.Numeric(GetColumnName(metric));
+
+                public sealed class AndPostAggregations<TPostAggregations> : WithAggregations<TAggregations>
+                {
+                    public new delegate TColumn MetricColumnSelector<TColumn>(TDimension dimension, TAggregations aggregations, TPostAggregations postAggregations);
+                    private static string GetColumnName<TColumn>(Expression<MetricColumnSelector<TColumn>> dimension)
+                        => Factory.GetColumnName(dimension.Body);
+
+                    public TopNMetric Numeric<TColumn>(Expression<MetricColumnSelector<TColumn>> metric)
+                        => new TopNMetric.Numeric(GetColumnName(metric));
+                }
+            }
         }
     }
 }

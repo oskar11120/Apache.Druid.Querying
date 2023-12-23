@@ -8,6 +8,62 @@ using System.Text.RegularExpressions;
 
 namespace Apache.Druid.Querying
 {
+    public sealed record Interval(DateTimeOffset From, DateTimeOffset To);
+
+    public enum Order
+    {
+        Ascending,
+        Descending
+    }
+
+    public enum Granularity
+    {
+        None,
+        Second,
+        Minute,
+        FiveMinutes,
+        TenMinutes,
+        FifteenMinutes,
+        ThrityMinutes,
+        Hour,
+        SixHours,
+        EightHours,
+        Day,
+        Week,
+        Month,
+        Quarter,
+        Year,
+        All
+    }
+
+    public enum SimpleDataType
+    {
+        String,
+        Double,
+        Float,
+        Long
+    }
+
+    public enum ArithmeticFunction
+    {
+        Add,
+        Subtract,
+        Multiply,
+        Divide,
+        QuotientDivide,
+        Exponentiate
+    }
+
+    public enum SortingOrder
+    {
+        Lexicographic,
+        Alphanumeric,
+        Numeric,
+        Strlen
+    }
+
+    public sealed record SourceWithVirtualColumns<TSource, TVirtualColumns>(TSource Source, TVirtualColumns VirtualColumns);
+
     public sealed record QuerySection(Type Type, object? Value);
 
     public interface IQuery
@@ -37,33 +93,6 @@ namespace Apache.Druid.Querying
     {
         public TSelf Unwrapped => (TSelf)this;
     }
-
-    public sealed record Interval(DateTimeOffset From, DateTimeOffset To);
-    public enum Order
-    {
-        Ascending,
-        Descending
-    }
-    public enum Granularity
-    {
-        None,
-        Second,
-        Minute,
-        FiveMinutes,
-        TenMinutes,
-        FifteenMinutes,
-        ThrityMinutes,
-        Hour,
-        SixHours,
-        EightHours,
-        Day,
-        Week,
-        Month,
-        Quarter,
-        Year,
-        All
-    }
-    public sealed record SourceWithVirtualColumns<TSource, TVirtualColumns>(TSource Source, TVirtualColumns VirtualColumns);
 
     public static class IQueryWith
     {
