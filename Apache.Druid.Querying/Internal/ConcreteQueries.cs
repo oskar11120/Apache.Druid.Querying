@@ -7,7 +7,8 @@
             IQueryWith.Order,
             IQueryWith.Intervals,
             IQueryWith.Granularity,
-            IQueryWith.Filter<TSource, TSelf>
+            IQueryWith.Filter<TSource, TSelf>,
+            IQueryWith.Context<QueryContext.TimeSeries, TSelf>
         {
             protected TimeSeries() : base("timeseries")
             {

@@ -88,6 +88,12 @@ namespace Apache.Druid.Querying
             internal static readonly HashSet<string> PostAggregationsPropertyNames = GetPropertyNames<TPostAggregations>();
         }
 
+        public interface Context<TContext, TSelf> : IQuery<TSelf>
+            where TSelf : IQuery<TSelf>
+            where TContext : Context
+        {
+        }
+
         public interface Intervals : IQuery
         {
         }
@@ -152,7 +158,8 @@ namespace Apache.Druid.Querying
         }
 
         public static TQuery PostAggregations<TQuery, TAggregations, TPostAggregations>(
-            this IQueryWith.PostAggregations<TAggregations, TPostAggregations, TQuery> query, Func<Factory.PostAggregators<TAggregations, TPostAggregations>, IEnumerable<PostAggregator>> factory)
+            this IQueryWith.PostAggregations<TAggregations, TPostAggregations, TQuery> query,
+            Func<Factory.PostAggregators<TAggregations, TPostAggregations>, IEnumerable<PostAggregator>> factory)
             where TQuery : IQuery<TQuery>
         {
             var factory_ = new Factory.PostAggregators<TAggregations, TPostAggregations>();
@@ -183,6 +190,14 @@ namespace Apache.Druid.Querying
             var descending = order is Querying.Order.Descending;
             query.AddOrUpdateSection(nameof(descending), descending);
             return query;
+        }
+
+        public static TQuery Context<TQuery, TContext>(this IQueryWith.Context<TContext, TQuery> query, TContext context)
+            where TQuery : IQuery<TQuery>
+            where TContext : Context
+        {
+            query.AddOrUpdateSection(nameof(context), context);
+            return query.Unwrapped;
         }
 
         private static string ToSnake(this string @string)

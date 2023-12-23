@@ -39,7 +39,7 @@ namespace Apache.Druid.Querying.AspNetCore
             return this;
         }
 
-        public DruidQueryingBuilder AddDataSource<TService, TImplementation, TSource>(string id) 
+        public DruidQueryingBuilder AddDataSource<TService, TImplementation, TSource>(string id)
             where TService : DataSource<TSource>
             where TImplementation : TService
         {
@@ -74,6 +74,7 @@ namespace Apache.Druid.Querying.AspNetCore
             clientBuilder.ConfigureHttpClient(client => client.BaseAddress = druidApiUri);
             var serlializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web)
             {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
                 Converters =
                 {
                     new JsonStringEnumConverter(),

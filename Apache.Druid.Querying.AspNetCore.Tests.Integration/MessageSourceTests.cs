@@ -19,7 +19,7 @@ internal class MessageSourceTests
             .WithAggregations<Aggregations>
             .WithPostAggregations<PostAggregations>()
             .Interval(new(t, t.AddDays(1)))
-            .Granularity(Granularity.SixHours)
+            .Granularity(Granularity.FifteenMinutes)
             .Filter(filter => filter.And(
                 filter.Selector(
                     message => message.VariableName,
@@ -44,14 +44,15 @@ internal class MessageSourceTests
                     message => message.Value,
                     SimpleDataType.String)
             })
-            .PostAggregations(postAggregators => new[] 
-            {
-                postAggregators.Arithmetic(
-                    postAggregations => postAggregations.Average,
-                    ArithmeticFunction.Divide,
-                    postAggregators.FieldAccess(aggrgations => aggrgations.Sum),
-                    postAggregators.FieldAccess(aggregations => aggregations.Count))
-            });
+            //.PostAggregations(postAggregators => new[]
+            //{
+            //    postAggregators.Arithmetic(
+            //        postAggregations => postAggregations.Average,
+            //        ArithmeticFunction.Divide,
+            //        postAggregators.FieldAccess(aggrgations => aggrgations.Sum),
+            //        postAggregators.FieldAccess(aggregations => aggregations.Count))
+            //})
+            .Context(new() { SkipEmptyBuckets = true });
         try
         {
             var result = await Messages

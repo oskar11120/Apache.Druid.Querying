@@ -1,6 +1,6 @@
 ﻿namespace Apache.Druid.Querying.Elements
 {
-    internal class Context
+    public class Context
     {
         public long? Timeout { get; set; }
         public int? Priority { get; set; }
@@ -31,6 +31,18 @@
         public int? MaxNumericInFilters { get; set; }
         public int? InSubQueryThreshold { get; set; }
 
+        public class WithVectorization : Context
+        {           
+            public VectorizeMode? Vectorize { get; set; }
+            public int? VectorSize { get; set; }
+            public VectorizeMode? VectorizeVirtualColumns { get; set; }
 
+            public enum VectorizeMode
+            {
+                True,
+                False,
+                Force
+            }
+        }
     }
 }

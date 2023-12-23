@@ -1,5 +1,6 @@
 ﻿
 
+using Apache.Druid.Querying.Elements;
 using Apache.Druid.Querying.Internal;
 using System;
 using System.Collections.Generic;
@@ -34,6 +35,14 @@ namespace Apache.Druid.Querying
         internal static MapQueryResult<Pair<TAggregations, TPostAggregations>> Map { get; } = (json, options) => new(
             json.Deserialize<TAggregations>(options)!,
             json.Deserialize<TPostAggregations>(options)!);
+    }
+
+    public static class QueryContext
+    {
+        public class TimeSeries : Context.WithVectorization
+        {
+            public bool? SkipEmptyBuckets { get; set; }
+        }
     }
 
     public static class Query<TSource>
