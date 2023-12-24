@@ -13,6 +13,9 @@ namespace Apache.Druid.Querying.Internal
             IQueryWith.Filter<TSource, TSelf>,
             IQueryWith.Context<QueryContext.TimeSeries, TSelf>
         {
+            public TimeSeries() : base("timeseries")
+            {
+            }
         }
 
         public abstract class TimeSeries<TAggregations> :
@@ -35,9 +38,13 @@ namespace Apache.Druid.Querying.Internal
             IQueryWith.Filter<TSource, TSelf>,
             IQueryWith.Context<QueryContext.TopN, TSelf>
         {
+            public TopN() : base("topN")
+            {
+            }
+
             private IQuery<TSelf> Self => this;
 
-            public TSelf Dimension(Func<Factory.DimensionSpec<TSource, TDimension>, TDimension> factory)
+            public TSelf Dimension(Func<Factory.DimensionSpec<TSource, TDimension>, Dimension> factory)
             {
                 var factory_ = new Factory.DimensionSpec<TSource, TDimension>();
                 var dimension = factory(factory_);

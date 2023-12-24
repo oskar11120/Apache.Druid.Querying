@@ -8,6 +8,40 @@ namespace Apache.Druid.Querying.Unit.Tests
     public class Tests
     {
         [Test]
+        public void TopNQuery_Builds()
+        {
+            var zero = new Query<Message>
+                .TopN<TopNDimension>
+                .WithNoVirtualColumns
+                .WithAggregations<Aggregations>()
+                .Dimension(dimension => dimension.Default(
+                    message => message.ObjectId,
+                    dimension => dimension.ObjectId))
+                .Threshold(5)
+                .Granularity(Granularity.Minute)
+                .Filter(filter => filter.Or(
+                    filter.Null(message => message.Value),
+                    filter.Equals(
+                        message => message.ObjectId,
+                        Guid.NewGuid())))
+                .Aggregations(aggregators => new[]
+                {
+                    aggregators.Last(
+                        aggregations => aggregations.LastValue,
+                        message => message.Value),
+                    aggregators.Max(
+                        aggregations => aggregations.TMax,
+                        message => message.Timestamp)
+                })
+                .Metric(metric => metric.Numeric(
+                    dimension => dimension.ObjectId))
+                .Metric(metric => metric.Numeric(
+                    (dimension, aggregations) => aggregations.LastValue))
+                .Context(new() { MinTopNThreshold = 5 })
+                .ToJson();
+        }
+
+        [Test]
         public void TimeSeriesQuery_Builds()
         {
             var test0 = new Query<Message>
@@ -143,6 +177,7 @@ namespace Apache.Druid.Querying.Unit.Tests
         record VirtualColumns(DateTimeOffset TReal);
         record Aggregations(DateTimeOffset TMax, double LastValue);
         record PostAggregations(double Sum);
+        record TopNDimension(Guid ObjectId);
     }
 
     internal static class TestExtensions

@@ -65,7 +65,7 @@ namespace Apache.Druid.Querying
 
         public class TopN : Context
         {
-            public bool? MinTopNThreshold { get; set; }
+            public int? MinTopNThreshold { get; set; }
         }
     }
 
