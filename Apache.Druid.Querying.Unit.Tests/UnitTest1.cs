@@ -1,7 +1,5 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using Apache.Druid.Querying.Elements;
+using Apache.Druid.Querying.DependencyInjection;
 
 namespace Apache.Druid.Querying.Unit.Tests
 {
@@ -313,37 +311,9 @@ namespace Apache.Druid.Querying.Unit.Tests
             var asDictionary = query
                 .GetState()
                 .ToDictionary(pair => pair.Key, pair => pair.Value.Value);
-            return JsonSerializer.Serialize<object>(asDictionary, new JsonSerializerOptions(JsonSerializerDefaults.Web)
-            {
-                WriteIndented = true,
-                Converters =
-                {
-                    new JsonStringEnumConverter(),
-                    new PolymorphicSerializer<Filter>(),
-                    new PolymorphicSerializer<Aggregator>(),
-                    new PolymorphicSerializer<PostAggregator>(),
-                    new PolymorphicSerializer<VirtualColumn>()
-                }
-            });
-        }
-
-        public class PolymorphicSerializer<T> : JsonConverter<T> where T : class
-        {
-            public override T Read(
-                ref Utf8JsonReader reader,
-                Type typeToConvert,
-                JsonSerializerOptions options)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override void Write(
-                Utf8JsonWriter writer,
-                [DisallowNull] T value,
-                JsonSerializerOptions options)
-            {
-                JsonSerializer.Serialize(writer, value, value.GetType(), options);
-            }
+            var options = DefaultSerializerOptions.Create();
+            options.WriteIndented = true;
+            return JsonSerializer.Serialize<object>(asDictionary, options);
         }
     }
 }
