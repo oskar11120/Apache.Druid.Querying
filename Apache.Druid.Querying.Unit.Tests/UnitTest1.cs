@@ -8,7 +8,7 @@ namespace Apache.Druid.Querying.Unit.Tests
     public class Tests
     {
         [Test]
-        public void Test1()
+        public void TimeSeriesQuery_Builds()
         {
             var test0 = new Query<Message>
                 .TimeSeries

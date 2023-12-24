@@ -81,16 +81,13 @@ namespace Apache.Druid.Querying
                 IQueryWithResult<WithTimestamp<None>>
             {
                 public class WithAggregations<TAggregations> :
-                    QueryBase<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>.TimeSeries,
+                    QueryBase<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>.TimeSeries<TAggregations>,
                     IQueryWith.VirtualColumns<TVirtualColumns, WithAggregations<TAggregations>>,
-                    IQueryWith.Aggregations<SourceWithVirtualColumns<TSource, TVirtualColumns>, TAggregations, WithAggregations<TAggregations>>,
                     IQueryWithResult<WithTimestamp<TAggregations>>
                 {
                     public class WithPostAggregations<TPostAggregations> :
-                        QueryBase<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>.TimeSeries,
+                        QueryBase<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>.TimeSeries<TAggregations, TPostAggregations>,
                         IQueryWith.VirtualColumns<TVirtualColumns, WithPostAggregations<TPostAggregations>>,
-                        IQueryWith.Aggregations<SourceWithVirtualColumns<TSource, TVirtualColumns>, TAggregations, WithPostAggregations<TPostAggregations>>,
-                        IQueryWith.PostAggregations<TAggregations, TPostAggregations, WithPostAggregations<TPostAggregations>>,
                         IQueryWithMappedResult<WithTimestamp<AggregationsAndPostAggregations<TAggregations, TPostAggregations>>>
                     {
                         MapQueryResult<WithTimestamp<AggregationsAndPostAggregations<TAggregations, TPostAggregations>>> IQueryWithMappedResult<WithTimestamp<AggregationsAndPostAggregations<TAggregations, TPostAggregations>>>.Map
@@ -104,14 +101,11 @@ namespace Apache.Druid.Querying
                 IQueryWithResult<WithTimestamp<None>>
             {
                 public class WithAggregations<TAggregations> :
-                    QueryBase<TSource, WithAggregations<TAggregations>>.TimeSeries,
-                    IQueryWith.Aggregations<TSource, TAggregations, WithAggregations<TAggregations>>,
+                    QueryBase<TSource, WithAggregations<TAggregations>>.TimeSeries<TAggregations>,
                     IQueryWithResult<WithTimestamp<TAggregations>>
                 {
                     public class WithPostAggregations<TPostAggregations> :
-                        QueryBase<TSource, WithPostAggregations<TPostAggregations>>.TimeSeries,
-                        IQueryWith.Aggregations<TSource, TAggregations, WithPostAggregations<TPostAggregations>>,
-                        IQueryWith.PostAggregations<TAggregations, TPostAggregations, WithPostAggregations<TPostAggregations>>,
+                        QueryBase<TSource, WithPostAggregations<TPostAggregations>>.TimeSeries<TAggregations, TPostAggregations>,
                         IQueryWithMappedResult<WithTimestamp<AggregationsAndPostAggregations<TAggregations, TPostAggregations>>>
                     {
                         MapQueryResult<WithTimestamp<AggregationsAndPostAggregations<TAggregations, TPostAggregations>>> IQueryWithMappedResult<WithTimestamp<AggregationsAndPostAggregations<TAggregations, TPostAggregations>>>.Map

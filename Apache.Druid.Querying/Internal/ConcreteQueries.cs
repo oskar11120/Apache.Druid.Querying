@@ -15,6 +15,19 @@ namespace Apache.Druid.Querying.Internal
         {
         }
 
+        public abstract class TimeSeries<TAggregations> :
+            TimeSeries,
+            IQueryWith.Aggregations<TSource, TAggregations, TSelf>
+
+        {
+        }
+
+        public abstract class TimeSeries<TAggregations, TPostAggregations> :
+            TimeSeries<TAggregations>,
+            IQueryWith.PostAggregations<TAggregations, TPostAggregations, TSelf>
+        {
+        }
+
         public abstract class TopN<TDimension> :
             Query,
             IQueryWith.Intervals,
