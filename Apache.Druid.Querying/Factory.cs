@@ -2,9 +2,11 @@
 using Apache.Druid.Querying.Internal;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using static Apache.Druid.Querying.Elements.TopNMetric;
 
 namespace Apache.Druid.Querying
 {
@@ -265,7 +267,7 @@ namespace Apache.Druid.Querying
                 => new Dimension.Default(GetColumnName(dimension), GetColumnName(outputName), outputType ?? DataType.GetSimple<TDimensionColumn>());
         }
 
-        public class TopNMetricSpec<TDimension>
+        public class MetricSpec<TDimension>
         {
             public delegate TColumn MetricColumnSelector<TColumn>(TDimension dimension);
             private static string GetColumnName<TColumn>(Expression<MetricColumnSelector<TColumn>> dimension)
@@ -286,7 +288,7 @@ namespace Apache.Druid.Querying
             public TopNMetric Numeric<TColumn>(Expression<MetricColumnSelector<TColumn>> metric)
                 => new TopNMetric.Numeric(GetColumnName(metric));
 
-            public class WithAggregations<TAggregations> : TopNMetricSpec<TDimension>
+            public class WithAggregations<TAggregations> : MetricSpec<TDimension>
             {
                 public new delegate TColumn MetricColumnSelector<TColumn>(TDimension dimension, TAggregations aggregations);
                 private static string GetColumnName<TColumn>(Expression<MetricColumnSelector<TColumn>> dimension)
@@ -303,6 +305,45 @@ namespace Apache.Druid.Querying
 
                     public TopNMetric Numeric<TColumn>(Expression<MetricColumnSelector<TColumn>> metric)
                         => new TopNMetric.Numeric(GetColumnName(metric));
+                }
+            }
+        }
+
+        public class OrderByColumnSpec<TDimensions>
+        {
+            public delegate TColumn OrderByColumnSelector<TColumn>(TDimensions dimensions);
+            private static string GetColumnName<TColumn>(Expression<OrderByColumnSelector<TColumn>> dimension)
+                => Factory.GetColumnName(dimension.Body);
+
+            public GroupByLimit.OrderBy OrderBy<TColumn>(
+                Expression<OrderByColumnSelector<TColumn>> dimension,
+                OrderDirection direction,
+                SortingOrder dimensionOrder = SortingOrder.Lexicographic)
+                => new(GetColumnName(dimension), direction, dimensionOrder);
+
+            public class WithAggregations<TAggregations> : OrderByColumnSpec<TDimensions> 
+            {
+                public new delegate TColumn OrderByColumnSelector<TColumn>(TDimensions dimensions, TAggregations aggregations);
+                private static string GetColumnName<TColumn>(Expression<OrderByColumnSelector<TColumn>> dimension)
+                    => Factory.GetColumnName(dimension.Body);
+
+                public GroupByLimit.OrderBy OrderBy<TColumn>(
+                    Expression<OrderByColumnSelector<TColumn>> dimension,
+                    OrderDirection direction,
+                    SortingOrder dimensionOrder = SortingOrder.Lexicographic)
+                    => new(GetColumnName(dimension), direction, dimensionOrder);
+
+                public class AndPostAggregations<TPostAggregations> : WithAggregations<TAggregations>
+                {
+                    public new delegate TColumn OrderByColumnSelector<TColumn>(TDimensions dimensions, TAggregations aggregations, TPostAggregations postAggregations);
+                    private static string GetColumnName<TColumn>(Expression<OrderByColumnSelector<TColumn>> dimension)
+                        => Factory.GetColumnName(dimension.Body);
+
+                    public GroupByLimit.OrderBy OrderBy<TColumn>(
+                        Expression<OrderByColumnSelector<TColumn>> dimension,
+                        OrderDirection direction,
+                        SortingOrder dimensionOrder = SortingOrder.Lexicographic)
+                        => new(GetColumnName(dimension), direction, dimensionOrder);
                 }
             }
         }

@@ -58,9 +58,9 @@ namespace Apache.Druid.Querying.Internal
                 return Self.Unwrapped;
             }
 
-            public TSelf Metric(Func<Factory.TopNMetricSpec<TDimension>, TopNMetric> factory)
+            public TSelf Metric(Func<Factory.MetricSpec<TDimension>, TopNMetric> factory)
             {
-                var factory_ = new Factory.TopNMetricSpec<TDimension>();
+                var factory_ = new Factory.MetricSpec<TDimension>();
                 var metric = factory(factory_);
                 return Metric(metric);
             }
@@ -76,9 +76,9 @@ namespace Apache.Druid.Querying.Internal
             TopN<TDimension>,
             IQueryWith.Aggregations<TSource, TAggregations, TSelf>
         {
-            public TSelf Metric(Func<Factory.TopNMetricSpec<TDimension>.WithAggregations<TAggregations>, TopNMetric> factory)
+            public TSelf Metric(Func<Factory.MetricSpec<TDimension>.WithAggregations<TAggregations>, TopNMetric> factory)
             {
-                var factory_ = new Factory.TopNMetricSpec<TDimension>.WithAggregations<TAggregations>();
+                var factory_ = new Factory.MetricSpec<TDimension>.WithAggregations<TAggregations>();
                 var metric = factory(factory_);
                 return Metric(metric);
             }
@@ -88,9 +88,9 @@ namespace Apache.Druid.Querying.Internal
             TopN<TDimension, TAggregations>,
             IQueryWith.PostAggregations<TAggregations, TPostAggregations, TSelf>
         {
-            public TSelf Metric(Func<Factory.TopNMetricSpec<TDimension>.WithAggregations<TAggregations>.AndPostAggregations<TPostAggregations>, TopNMetric> factory)
+            public TSelf Metric(Func<Factory.MetricSpec<TDimension>.WithAggregations<TAggregations>.AndPostAggregations<TPostAggregations>, TopNMetric> factory)
             {
-                var factory_ = new Factory.TopNMetricSpec<TDimension>.WithAggregations<TAggregations>.AndPostAggregations<TPostAggregations>();
+                var factory_ = new Factory.MetricSpec<TDimension>.WithAggregations<TAggregations>.AndPostAggregations<TPostAggregations>();
                 var metric = factory(factory_);
                 return Metric(metric);
             }

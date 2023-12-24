@@ -10,7 +10,7 @@ namespace Apache.Druid.Querying
 {
     public sealed record Interval(DateTimeOffset From, DateTimeOffset To);
 
-    public enum Order
+    public enum OrderDirection
     {
         Ascending,
         Descending
@@ -214,10 +214,10 @@ namespace Apache.Druid.Querying
             where TQuery : IQueryWith.Intervals
             => Intervals(query, new[] { interval });
 
-        public static TQuery Order<TQuery>(this TQuery query, Order order)
+        public static TQuery Order<TQuery>(this TQuery query, OrderDirection order)
             where TQuery : IQueryWith.Order
         {
-            var descending = order is Querying.Order.Descending;
+            var descending = order is Querying.OrderDirection.Descending;
             query.AddOrUpdateSection(nameof(descending), descending);
             return query;
         }

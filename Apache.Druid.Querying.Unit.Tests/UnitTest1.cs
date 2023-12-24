@@ -173,7 +173,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .WithNoVirtualColumns
                 .WithAggregations<Aggregations>()
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
-                .Order(Order.Ascending)
+                .Order(OrderDirection.Ascending)
                 .Granularity(Granularity.Minute)
                 .Filter(filter => filter.Or(
                     filter.Null(message => message.Value),
@@ -196,7 +196,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .WithVirtualColumns<VirtualColumns>
                 .WithAggregations<Aggregations>()
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
-                .Order(Order.Ascending)
+                .Order(OrderDirection.Ascending)
                 .Granularity(Granularity.Minute)
                 .VirtualColumns(columns => new[]
                 {
@@ -226,7 +226,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .WithAggregations<Aggregations>
                 .WithPostAggregations<PostAggregations>()
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
-                .Order(Order.Ascending)
+                .Order(OrderDirection.Ascending)
                 .Granularity(Granularity.Minute)
                 .Filter(filter => filter.Or(
                     filter.Null(message => message.Value),
@@ -259,7 +259,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .WithAggregations<Aggregations>
                 .WithPostAggregations<PostAggregations>()
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
-                .Order(Order.Ascending)
+                .Order(OrderDirection.Ascending)
                 .Granularity(Granularity.Minute)
                 .VirtualColumns(columns => new[]
                 {
