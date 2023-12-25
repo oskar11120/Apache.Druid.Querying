@@ -1,5 +1,6 @@
 ﻿using Apache.Druid.Querying.Elements;
 using System;
+using System.Collections.Generic;
 
 namespace Apache.Druid.Querying.Internal
 {
@@ -58,14 +59,14 @@ namespace Apache.Druid.Querying.Internal
                 return Self.Unwrapped;
             }
 
-            public TSelf Metric(Func<Factory.MetricSpec<TDimension>, TopNMetric> factory)
+            public TSelf Metric(Func<Factory.MetricSpec<TDimension>, Metric> factory)
             {
                 var factory_ = new Factory.MetricSpec<TDimension>();
                 var metric = factory(factory_);
                 return Metric(metric);
             }
 
-            protected TSelf Metric(TopNMetric metric)
+            protected TSelf Metric(Metric metric)
             {
                 Self.AddOrUpdateSection(nameof(metric), metric);
                 return Self.Unwrapped;
@@ -76,7 +77,7 @@ namespace Apache.Druid.Querying.Internal
             TopN<TDimension>,
             IQueryWith.Aggregations<TSource, TAggregations, TSelf>
         {
-            public TSelf Metric(Func<Factory.MetricSpec<TDimension>.WithAggregations<TAggregations>, TopNMetric> factory)
+            public TSelf Metric(Func<Factory.MetricSpec<TDimension>.WithAggregations<TAggregations>, Metric> factory)
             {
                 var factory_ = new Factory.MetricSpec<TDimension>.WithAggregations<TAggregations>();
                 var metric = factory(factory_);
@@ -88,11 +89,44 @@ namespace Apache.Druid.Querying.Internal
             TopN<TDimension, TAggregations>,
             IQueryWith.PostAggregations<TAggregations, TPostAggregations, TSelf>
         {
-            public TSelf Metric(Func<Factory.MetricSpec<TDimension>.WithAggregations<TAggregations>.AndPostAggregations<TPostAggregations>, TopNMetric> factory)
+            public TSelf Metric(Func<Factory.MetricSpec<TDimension>.WithAggregations<TAggregations>.AndPostAggregations<TPostAggregations>, Metric> factory)
             {
                 var factory_ = new Factory.MetricSpec<TDimension>.WithAggregations<TAggregations>.AndPostAggregations<TPostAggregations>();
                 var metric = factory(factory_);
                 return Metric(metric);
+            }
+        }
+
+        public abstract class GroupBy<TDimensions> :
+            Query,
+            IQueryWith.Intervals,
+            IQueryWith.Granularity,
+            IQueryWith.Filter<TSource, TSelf>,
+            IQueryWith.Context<Context.WithVectorization, TSelf> // TODO
+        {
+            public GroupBy() : base("groupBy")
+            {
+            }
+
+            private IQuery<TSelf> Self => this;
+
+            public TSelf Dimensions(Func<Factory.DimensionSpec<TSource, TDimensions>, IEnumerable<Dimension>> factory)
+            {
+                var factory_ = new Factory.DimensionSpec<TSource, TDimensions>();
+                var dimensions = factory(factory_);
+                Self.AddOrUpdateSection(nameof(dimensions), dimensions);
+                return Self.Unwrapped;
+            }
+
+            public TSelf LimitSpec(
+                int? limit = null,
+                int? offset = null,
+                Func<Factory.OrderByColumnSpec<TDimensions>, IEnumerable<LimitSpec.OrderBy>>? columns = null)
+            {
+                var factory_ = new Factory.OrderByColumnSpec<TDimensions>();
+                var limitSpec = new LimitSpec(limit, offset, columns?.Invoke(factory_));
+                Self.AddOrUpdateSection(nameof(limitSpec), limitSpec);
+                return Self.Unwrapped;
             }
         }
     }

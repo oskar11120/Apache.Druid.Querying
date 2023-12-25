@@ -2,11 +2,9 @@
 using Apache.Druid.Querying.Internal;
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using static Apache.Druid.Querying.Elements.TopNMetric;
 
 namespace Apache.Druid.Querying
 {
@@ -273,20 +271,20 @@ namespace Apache.Druid.Querying
             private static string GetColumnName<TColumn>(Expression<MetricColumnSelector<TColumn>> dimension)
                 => Factory.GetColumnName(dimension.Body);
 
-            public TopNMetric Dimension<TColumn>(
+            public Metric Dimension<TColumn>(
                 TColumn previousStop,
                 SortingOrder ordering = SortingOrder.Lexicographic)
-                => new TopNMetric.Dimension<TColumn>(ordering, previousStop);
+                => new Metric.Dimension<TColumn>(ordering, previousStop);
 
-            public TopNMetric Dimension(
+            public Metric Dimension(
                 SortingOrder ordering = SortingOrder.Lexicographic)
-                => new TopNMetric.Dimension<object?>(ordering, null);
+                => new Metric.Dimension<object?>(ordering, null);
 
-            public TopNMetric Inverted(TopNMetric metric)
-                => new TopNMetric.Inverted(metric);
+            public Metric Inverted(Metric metric)
+                => new Metric.Inverted(metric);
 
-            public TopNMetric Numeric<TColumn>(Expression<MetricColumnSelector<TColumn>> metric)
-                => new TopNMetric.Numeric(GetColumnName(metric));
+            public Metric Numeric<TColumn>(Expression<MetricColumnSelector<TColumn>> metric)
+                => new Metric.Numeric(GetColumnName(metric));
 
             public class WithAggregations<TAggregations> : MetricSpec<TDimension>
             {
@@ -294,8 +292,8 @@ namespace Apache.Druid.Querying
                 private static string GetColumnName<TColumn>(Expression<MetricColumnSelector<TColumn>> dimension)
                     => Factory.GetColumnName(dimension.Body);
 
-                public TopNMetric Numeric<TColumn>(Expression<MetricColumnSelector<TColumn>> metric)
-                    => new TopNMetric.Numeric(GetColumnName(metric));
+                public Metric Numeric<TColumn>(Expression<MetricColumnSelector<TColumn>> metric)
+                    => new Metric.Numeric(GetColumnName(metric));
 
                 public sealed class AndPostAggregations<TPostAggregations> : WithAggregations<TAggregations>
                 {
@@ -303,8 +301,8 @@ namespace Apache.Druid.Querying
                     private static string GetColumnName<TColumn>(Expression<MetricColumnSelector<TColumn>> dimension)
                         => Factory.GetColumnName(dimension.Body);
 
-                    public TopNMetric Numeric<TColumn>(Expression<MetricColumnSelector<TColumn>> metric)
-                        => new TopNMetric.Numeric(GetColumnName(metric));
+                    public Metric Numeric<TColumn>(Expression<MetricColumnSelector<TColumn>> metric)
+                        => new Metric.Numeric(GetColumnName(metric));
                 }
             }
         }
@@ -315,7 +313,7 @@ namespace Apache.Druid.Querying
             private static string GetColumnName<TColumn>(Expression<OrderByColumnSelector<TColumn>> dimension)
                 => Factory.GetColumnName(dimension.Body);
 
-            public GroupByLimit.OrderBy OrderBy<TColumn>(
+            public LimitSpec.OrderBy OrderBy<TColumn>(
                 Expression<OrderByColumnSelector<TColumn>> dimension,
                 OrderDirection direction,
                 SortingOrder dimensionOrder = SortingOrder.Lexicographic)
@@ -327,7 +325,7 @@ namespace Apache.Druid.Querying
                 private static string GetColumnName<TColumn>(Expression<OrderByColumnSelector<TColumn>> dimension)
                     => Factory.GetColumnName(dimension.Body);
 
-                public GroupByLimit.OrderBy OrderBy<TColumn>(
+                public LimitSpec.OrderBy OrderBy<TColumn>(
                     Expression<OrderByColumnSelector<TColumn>> dimension,
                     OrderDirection direction,
                     SortingOrder dimensionOrder = SortingOrder.Lexicographic)
@@ -339,7 +337,7 @@ namespace Apache.Druid.Querying
                     private static string GetColumnName<TColumn>(Expression<OrderByColumnSelector<TColumn>> dimension)
                         => Factory.GetColumnName(dimension.Body);
 
-                    public GroupByLimit.OrderBy OrderBy<TColumn>(
+                    public LimitSpec.OrderBy OrderBy<TColumn>(
                         Expression<OrderByColumnSelector<TColumn>> dimension,
                         OrderDirection direction,
                         SortingOrder dimensionOrder = SortingOrder.Lexicographic)

@@ -2,9 +2,9 @@
 
 namespace Apache.Druid.Querying.Elements
 {
-    public class GroupByLimit : WithType
+    public class LimitSpec : WithType
     {
-        public GroupByLimit(int? limit, int? offset, IEnumerable<OrderBy>? columns) : base("default")
+        public LimitSpec(int? limit, int? offset, IEnumerable<OrderBy>? columns) : base("default")
         {
             Limit = limit;
             Offset = offset;

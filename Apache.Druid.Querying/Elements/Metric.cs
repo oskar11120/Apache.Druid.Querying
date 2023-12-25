@@ -1,8 +1,8 @@
 ﻿namespace Apache.Druid.Querying.Elements
 {
-    public abstract class TopNMetric : WithType
+    public abstract class Metric : WithType
     {
-        public sealed class Numeric : TopNMetric
+        public sealed class Numeric : Metric
         {
             public Numeric(string metric)
             {
@@ -13,7 +13,7 @@
 
         }
 
-        public sealed class Dimension<TColumn> : TopNMetric
+        public sealed class Dimension<TColumn> : Metric
         {
             public Dimension(SortingOrder ordering, TColumn? previousStop)
             {
@@ -25,11 +25,11 @@
             public TColumn? PreviousStop { get; }
         }
 
-        public sealed class Inverted : TopNMetric
+        public sealed class Inverted : Metric
         {
-            public TopNMetric Metric { get; }
+            public Metric Metric { get; }
 
-            public Inverted(TopNMetric metric)
+            public Inverted(Metric metric)
             {
                 Metric = metric;
             }
