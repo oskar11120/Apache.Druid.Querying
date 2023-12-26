@@ -16,7 +16,7 @@ namespace Apache.Druid.Querying.Internal
                 var t = json
                     .GetProperty(nameof(WithTimestamp<TResult>.Timestamp).ToCamelCase())
                     .Deserialize<DateTimeOffset>(options);
-                var resultJson = json.GetProperty(nameof(WithTimestamp<TResult>.Timestamp).ToCamelCase());
+                var resultJson = json.GetProperty(nameof(WithTimestamp<TResult>.Result).ToCamelCase());
                 var result = MapResult(resultJson, options);
                 return new(t, result);
             }
