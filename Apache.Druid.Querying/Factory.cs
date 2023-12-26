@@ -31,7 +31,7 @@ namespace Apache.Druid.Querying
                     if (customColumnNames is null)
                     {
                         var type = typeof(TSource);
-                        type = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(SourceWithVirtualColumns<,>) ?
+                        type = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Source_VirtualColumns<,>) ?
                             type.GetGenericArguments()[0] :
                             type;
                         var properties = type.GetProperties();
@@ -265,11 +265,11 @@ namespace Apache.Druid.Querying
                 => new Dimension.Default(GetColumnName(dimension), GetColumnName(outputName), outputType ?? DataType.GetSimple<TDimensionColumn>());
         }
 
-        public class MetricSpec<TDimension>
+        public class MetricSpec<TArguments>
         {
-            public delegate TColumn MetricColumnSelector<TColumn>(TDimension dimension);
-            private static string GetColumnName<TColumn>(Expression<MetricColumnSelector<TColumn>> dimension)
-                => Factory.GetColumnName(dimension.Body);
+            public delegate TColumn MetricColumnSelector<TColumn>(TArguments arguments);
+            private static string GetColumnName<TColumn>(Expression<MetricColumnSelector<TColumn>> selector)
+                => Factory.GetColumnName(selector.Body);
 
             public Metric Dimension<TColumn>(
                 TColumn previousStop,
@@ -285,26 +285,6 @@ namespace Apache.Druid.Querying
 
             public Metric Numeric<TColumn>(Expression<MetricColumnSelector<TColumn>> metric)
                 => new Metric.Numeric(GetColumnName(metric));
-
-            public class WithAggregations<TAggregations> : MetricSpec<TDimension>
-            {
-                public new delegate TColumn MetricColumnSelector<TColumn>(TDimension dimension, TAggregations aggregations);
-                private static string GetColumnName<TColumn>(Expression<MetricColumnSelector<TColumn>> dimension)
-                    => Factory.GetColumnName(dimension.Body);
-
-                public Metric Numeric<TColumn>(Expression<MetricColumnSelector<TColumn>> metric)
-                    => new Metric.Numeric(GetColumnName(metric));
-
-                public sealed class AndPostAggregations<TPostAggregations> : WithAggregations<TAggregations>
-                {
-                    public new delegate TColumn MetricColumnSelector<TColumn>(TDimension dimension, TAggregations aggregations, TPostAggregations postAggregations);
-                    private static string GetColumnName<TColumn>(Expression<MetricColumnSelector<TColumn>> dimension)
-                        => Factory.GetColumnName(dimension.Body);
-
-                    public Metric Numeric<TColumn>(Expression<MetricColumnSelector<TColumn>> metric)
-                        => new Metric.Numeric(GetColumnName(metric));
-                }
-            }
         }
 
         public class OrderByColumnSpec<TDimensions>

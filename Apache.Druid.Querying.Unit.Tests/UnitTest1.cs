@@ -32,9 +32,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                         message => message.Timestamp)
                 })
                 .Metric(metric => metric.Numeric(
-                    dimension => dimension.ObjectId))
-                .Metric(metric => metric.Numeric(
-                    (dimension, aggregations) => aggregations.LastValue))
+                    tuple => tuple.Aggregations.LastValue))
                 .Context(new() { MinTopNThreshold = 5 })
                 .ToJson();
 
@@ -68,9 +66,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                         pair => pair.Source.Timestamp)
                 })
                 .Metric(metric => metric.Numeric(
-                    dimension => dimension.ObjectId))
-                .Metric(metric => metric.Numeric(
-                    (dimension, aggregations) => aggregations.LastValue))
+                    tuple => tuple.Aggregations.LastValue))
                 .Context(new() { MinTopNThreshold = 5 })
                 .ToJson();
 
@@ -108,11 +104,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                             finalizing: true))
                 })
                 .Metric(metric => metric.Numeric(
-                    dimension => dimension.ObjectId))
-                .Metric(metric => metric.Numeric(
-                    (dimension, aggregations) => aggregations.LastValue))
-                .Metric(metric => metric.Numeric(
-                    (dimension, aggregations, postAggregations) => postAggregations.Sum))
+                    tuple => tuple.PostAggregations.Sum))
                 .Context(new() { MinTopNThreshold = 5 })
                 .ToJson();
 
@@ -156,11 +148,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                             finalizing: true))
                 })
                 .Metric(metric => metric.Numeric(
-                    dimension => dimension.ObjectId))
-                .Metric(metric => metric.Numeric(
-                    (dimension, aggregations) => aggregations.LastValue))
-                .Metric(metric => metric.Numeric(
-                    (dimension, aggregations, postAggregations) => postAggregations.Sum))
+                    tuple => tuple.PostAggregations.Sum))
                 .Context(new() { MinTopNThreshold = 5 })
                 .ToJson();
         }

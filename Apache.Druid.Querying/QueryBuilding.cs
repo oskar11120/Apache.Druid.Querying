@@ -62,8 +62,6 @@ namespace Apache.Druid.Querying
         Strlen
     }
 
-    public sealed record SourceWithVirtualColumns<TSource, TVirtualColumns>(TSource Source, TVirtualColumns VirtualColumns);
-
     public sealed record QuerySection(Type Type, object? Value);
 
     public interface IQuery

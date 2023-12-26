@@ -33,6 +33,11 @@ namespace Apache.Druid.Querying
         };
     }
 
+    public sealed record Source_VirtualColumns<TSource, TVirtualColumns>(TSource Source, TVirtualColumns VirtualColumns);
+    public sealed record Dimension_Aggregations<TDimension, TAggregations>(TDimension Dimension, TAggregations Aggregations);
+    public sealed record Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>(
+        TDimension Dimension, TAggregations Aggregations, TPostAggregations PostAggregations);
+
     public readonly record struct AggregationsAndPostAggregations<TAggregations, TPostAggregations>(TAggregations Aggregations, TPostAggregations PostAggregations)
     {
         internal static MapQueryResult<AggregationsAndPostAggregations<TAggregations, TPostAggregations>> Map { get; } = (json, options) => new(
@@ -76,17 +81,17 @@ namespace Apache.Druid.Querying
             IQueryWithResult<WithTimestamp<None>>
         {
             public class WithVirtualColumns<TVirtualColumns> :
-                QueryBase<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>.TimeSeries,
+                QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>.TimeSeries,
                 IQueryWith.VirtualColumns<TVirtualColumns, WithVirtualColumns<TVirtualColumns>>,
                 IQueryWithResult<WithTimestamp<None>>
             {
                 public class WithAggregations<TAggregations> :
-                    QueryBase<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>.TimeSeries<TAggregations>,
+                    QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>.TimeSeries<TAggregations>,
                     IQueryWith.VirtualColumns<TVirtualColumns, WithAggregations<TAggregations>>,
                     IQueryWithResult<WithTimestamp<TAggregations>>
                 {
                     public class WithPostAggregations<TPostAggregations> :
-                        QueryBase<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>.TimeSeries<TAggregations, TPostAggregations>,
+                        QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>.TimeSeries<TAggregations, TPostAggregations>,
                         IQueryWith.VirtualColumns<TVirtualColumns, WithPostAggregations<TPostAggregations>>,
                         IQueryWithMappedResult<WithTimestamp<AggregationsAndPostAggregations<TAggregations, TPostAggregations>>>
                     {
@@ -120,12 +125,12 @@ namespace Apache.Druid.Querying
             IQueryWithResult<WithTimestamp<TDimension>>
         {
             public class WithVirtualColumns<TVirtualColumns> :
-                QueryBase<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>.TopN<TDimension>,
+                QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>.TopN<TDimension>,
                 IQueryWith.VirtualColumns<TVirtualColumns, WithVirtualColumns<TVirtualColumns>>,
                 IQueryWithResult<WithTimestamp<TDimension>>
             {
                 public class WithAggregations<TAggregations> :
-                    QueryBase<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>.TopN<TDimension, TAggregations>,
+                    QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>.TopN<TDimension, TAggregations>,
                     IQueryWith.VirtualColumns<TVirtualColumns, WithAggregations<TAggregations>>,
                     IQueryWithMappedResult<WithTimestamp<DimensionsAndAggregations<TDimension, TAggregations>>>
                 {
@@ -133,7 +138,7 @@ namespace Apache.Druid.Querying
                         => MapResult.WithTimestamp(DimensionsAndAggregations<TDimension, TAggregations>.Map);
 
                     public class WithPostAggregations<TPostAggregations> :
-                        QueryBase<SourceWithVirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>.TopN<TDimension, TAggregations, TPostAggregations>,
+                        QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>.TopN<TDimension, TAggregations, TPostAggregations>,
                         IQueryWith.VirtualColumns<TVirtualColumns, WithPostAggregations<TPostAggregations>>,
                         IQueryWithMappedResult<WithTimestamp<AggregationsAndPostAggregations<TAggregations, TPostAggregations>>>
                     {

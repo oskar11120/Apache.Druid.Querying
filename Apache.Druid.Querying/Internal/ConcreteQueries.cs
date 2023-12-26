@@ -22,7 +22,6 @@ namespace Apache.Druid.Querying.Internal
         public abstract class TimeSeries<TAggregations> :
             TimeSeries,
             IQueryWith.Aggregations<TSource, TAggregations, TSelf>
-
         {
         }
 
@@ -32,14 +31,14 @@ namespace Apache.Druid.Querying.Internal
         {
         }
 
-        public abstract class TopN<TDimension> :
+        public abstract class TopN_<TDimension, TMetricArguments> :
             Query,
             IQueryWith.Intervals,
             IQueryWith.Granularity,
             IQueryWith.Filter<TSource, TSelf>,
             IQueryWith.Context<QueryContext.TopN, TSelf>
         {
-            public TopN() : base("topN")
+            public TopN_() : base("topN")
             {
             }
 
@@ -59,9 +58,9 @@ namespace Apache.Druid.Querying.Internal
                 return Self.Unwrapped;
             }
 
-            public TSelf Metric(Func<Factory.MetricSpec<TDimension>, Metric> factory)
+            public TSelf Metric(Func<Factory.MetricSpec<TMetricArguments>, Metric> factory)
             {
-                var factory_ = new Factory.MetricSpec<TDimension>();
+                var factory_ = new Factory.MetricSpec<TMetricArguments>();
                 var metric = factory(factory_);
                 return Metric(metric);
             }
@@ -73,28 +72,21 @@ namespace Apache.Druid.Querying.Internal
             }
         }
 
+        public abstract class TopN<TDimension> : TopN_<TDimension, TDimension>
+        {
+        }
+
         public abstract class TopN<TDimension, TAggregations> :
-            TopN<TDimension>,
+            TopN_<TDimension, Dimension_Aggregations<TDimension, TAggregations>>,
             IQueryWith.Aggregations<TSource, TAggregations, TSelf>
         {
-            public TSelf Metric(Func<Factory.MetricSpec<TDimension>.WithAggregations<TAggregations>, Metric> factory)
-            {
-                var factory_ = new Factory.MetricSpec<TDimension>.WithAggregations<TAggregations>();
-                var metric = factory(factory_);
-                return Metric(metric);
-            }
         }
 
         public abstract class TopN<TDimension, TAggregations, TPostAggregations> :
-            TopN<TDimension, TAggregations>,
+            TopN_<TDimension, Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>,
+            IQueryWith.Aggregations<TSource, TAggregations, TSelf>,
             IQueryWith.PostAggregations<TAggregations, TPostAggregations, TSelf>
         {
-            public TSelf Metric(Func<Factory.MetricSpec<TDimension>.WithAggregations<TAggregations>.AndPostAggregations<TPostAggregations>, Metric> factory)
-            {
-                var factory_ = new Factory.MetricSpec<TDimension>.WithAggregations<TAggregations>.AndPostAggregations<TPostAggregations>();
-                var metric = factory(factory_);
-                return Metric(metric);
-            }
         }
 
         public abstract class GroupBy<TDimensions> :
