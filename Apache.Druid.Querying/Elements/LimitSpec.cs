@@ -17,7 +17,7 @@ namespace Apache.Druid.Querying.Elements
 
         public class OrderBy
         {
-            public OrderBy(string dimension, OrderDirection direction, SortingOrder dimensionOrder)
+            public OrderBy(string dimension, SortingOrder dimensionOrder, OrderDirection? direction = null)
             {
                 Dimension = dimension;
                 Direction = direction;
@@ -25,7 +25,7 @@ namespace Apache.Druid.Querying.Elements
             }
 
             public string Dimension { get; }
-            public OrderDirection Direction { get; }
+            public OrderDirection? Direction { get; }
             public SortingOrder DimensionOrder { get; }
         }
     }

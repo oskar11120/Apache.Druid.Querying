@@ -158,14 +158,14 @@ namespace Apache.Druid.Querying.Internal
         {
         }
 
-        public abstract class GroupBy<TDimensions> :
+        public abstract class GroupBy_<TDimensions, TOrderByAndHavingArguments> :
             Query,
             IQueryWith.Intervals,
             IQueryWith.Granularity,
             IQueryWith.Filter<TSource, TSelf>,
-            IQueryWith.Context<Context.WithVectorization, TSelf> // TODO
+            IQueryWith.Context<QueryContext.GroupBy, TSelf>
         {
-            public GroupBy() : base("groupBy")
+            public GroupBy_() : base("groupBy")
             {
             }
 
@@ -182,13 +182,46 @@ namespace Apache.Druid.Querying.Internal
             public TSelf LimitSpec(
                 int? limit = null,
                 int? offset = null,
-                Func<Factory.OrderByColumnSpec<TDimensions>, IEnumerable<LimitSpec.OrderBy>>? columns = null)
+                Func<Factory.OrderByColumnSpec<TOrderByAndHavingArguments>, IEnumerable<LimitSpec.OrderBy>>? columns = null)
             {
-                var factory_ = new Factory.OrderByColumnSpec<TDimensions>();
+                var factory_ = new Factory.OrderByColumnSpec<TOrderByAndHavingArguments>();
                 var limitSpec = new LimitSpec(limit, offset, columns?.Invoke(factory_));
                 Self.AddOrUpdateSection(nameof(limitSpec), limitSpec);
                 return Self.Unwrapped;
             }
+
+            public TSelf Having(Func<Factory.Having<TOrderByAndHavingArguments>, Having> factory)
+            {
+                var factory_ = new Factory.Having<TOrderByAndHavingArguments>();
+                var having = factory(factory_);
+                Self.AddOrUpdateSection(nameof(having), having);
+                return Self.Unwrapped;
+            }
+
+            public TSelf HavingFilter(Func<Factory.Filter<TOrderByAndHavingArguments>, Filter> factory)
+            {
+                var factory_ = new Factory.Having<TOrderByAndHavingArguments>();
+                var having = factory_.Filter(factory);
+                Self.AddOrUpdateSection(nameof(having), having);
+                return Self.Unwrapped;
+            }
+        }
+
+        public abstract class GroupBy<TDimensions> : GroupBy_<TDimensions, TDimensions>
+        {
+        }
+
+        public abstract class GroupBy<TDimensions, TAggregations> :
+            GroupBy_<TDimensions, Dimensions_Aggregations<TDimensions, TAggregations>>,
+            IQueryWith.Aggregations<TSource, TAggregations, TSelf>
+        {
+        }
+
+        public abstract class GroupBy<TDimensions, TAggregations, TPostAggregations> :
+            GroupBy_<TDimensions, Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>,
+            IQueryWith.Aggregations<TSource, TAggregations, TSelf>,
+            IQueryWith.PostAggregations<TAggregations, TPostAggregations, TSelf>
+        {
         }
     }
 }

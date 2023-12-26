@@ -6,12 +6,95 @@ namespace Apache.Druid.Querying.Unit.Tests
     public class Tests
     {
         [Test]
+        public void GroupByQuery_Builds()
+        {
+            var zero = new Query<Message>
+                .GroupBy<GroupByDimensions>
+                .WithNoVirtualColumns
+                .WithAggregations<Aggregations>()
+                .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
+                .Granularity(Granularity.Minute)
+                .Dimensions(dimensions => new[]
+                {
+                    dimensions.Default(
+                        message => message.ObjectId,
+                        dimensions => dimensions.ObjectId),
+                    dimensions.Default(
+                        message => message.VariableName,
+                        dimensions => dimensions.VariableName)
+                })
+                .Aggregations(aggregators => new[]
+                {
+                    aggregators.Last(
+                        aggregations => aggregations.LastValue,
+                        message => message.Value),
+                    aggregators.Max(
+                        aggregations => aggregations.TMax,
+                        message => message.Timestamp)
+                })
+                .LimitSpec(
+                    5000,
+                    columns: columns => new[]
+                    {
+                        columns.OrderBy(tuple => tuple.Dimensions.ObjectId),
+                        columns.OrderBy(tuple => tuple.Aggregations.LastValue)
+                    })
+                .HavingFilter(filter => filter.Range(
+                    tuple => tuple.Aggregations.LastValue,
+                    lower: 0))
+                .ToJson();
+
+            var one = new Query<Message>
+                .GroupBy<GroupByDimensions>
+                .WithVirtualColumns<VirtualColumns>
+                .WithAggregations<Aggregations>()
+                .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
+                .Granularity(Granularity.Minute)
+                .VirtualColumns(columns => new[]
+                {
+                    columns.Expression(
+                        virtualColumns => virtualColumns.TReal,
+                        "__time")
+                })
+                .Dimensions(dimensions => new[]
+                {
+                    dimensions.Default(
+                        tuple => tuple.Source.ObjectId,
+                        dimensions => dimensions.ObjectId),
+                    dimensions.Default(
+                        tuple => tuple.Source.VariableName,
+                        dimensions => dimensions.VariableName)
+                })
+                .Aggregations(aggregators => new[]
+                {
+                    aggregators.Last(
+                        aggregations => aggregations.LastValue,
+                        tuple => tuple.Source.Value),
+                    aggregators.Max(
+                        aggregations => aggregations.TMax,
+                        tuple => tuple.Source.Timestamp)
+                })
+                .LimitSpec(
+                    5000,
+                    columns: columns => new[]
+                    {
+                        columns.OrderBy(tuple => tuple.Dimensions.ObjectId),
+                        columns.OrderBy(tuple => tuple.Aggregations.LastValue)
+                    })
+                .HavingFilter(filter => filter.Range(
+                    tuple => tuple.Aggregations.LastValue,
+                    lower: 0))
+                .ToJson();
+        }
+
+        [Test]
         public void TopNQuery_Builds()
         {
             var zero = new Query<Message>
                 .TopN<TopNDimension>
                 .WithNoVirtualColumns
                 .WithAggregations<Aggregations>()
+                .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .Dimension(dimension => dimension.Default(
                     message => message.ObjectId,
                     dimension => dimension.ObjectId))
@@ -40,6 +123,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .TopN<TopNDimension>
                 .WithVirtualColumns<VirtualColumns>
                 .WithAggregations<Aggregations>()
+                .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .VirtualColumns(columns => new[]
                 {
                     columns.Expression(
@@ -75,6 +159,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .WithNoVirtualColumns
                 .WithAggregations<Aggregations>
                 .WithPostAggregations<PostAggregations>()
+                .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .Dimension(dimension => dimension.Default(
                     message => message.ObjectId,
                     dimension => dimension.ObjectId))
@@ -113,6 +198,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .WithVirtualColumns<VirtualColumns>
                 .WithAggregations<Aggregations>
                 .WithPostAggregations<PostAggregations>()
+                .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .VirtualColumns(columns => new[]
                 {
                     columns.Expression(
@@ -290,6 +376,7 @@ namespace Apache.Druid.Querying.Unit.Tests
         record Aggregations(DateTimeOffset TMax, double LastValue);
         record PostAggregations(double Sum);
         record TopNDimension(Guid ObjectId);
+        record GroupByDimensions(Guid ObjectId, string VariableName);
     }
 
     internal static class TestExtensions

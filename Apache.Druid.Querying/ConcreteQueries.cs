@@ -28,6 +28,11 @@ namespace Apache.Druid.Querying
         {
             public int? MinTopNThreshold { get; set; }
         }
+
+        public class GroupBy : Context.WithVectorization
+        {
+            public long? MaxOnDiskStorage { get; set; }
+        }
     }
 
     public static class Query<TSource>
@@ -106,6 +111,46 @@ namespace Apache.Druid.Querying
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<TSource, WithPostAggregations<TPostAggregations>>.TopN<TDimension, TAggregations, TPostAggregations>,
                         IQueryWithMappedResult.Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations>
+                    {
+                    }
+                }
+            }
+        }
+
+        public class GroupBy<TDimensions> :
+            QueryBase<TSource, GroupBy<TDimensions>>.GroupBy<TDimensions>,
+            IQueryWithResult<WithTimestamp<TDimensions>>
+        {
+            public class WithVirtualColumns<TVirtualColumns> :
+                QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>.GroupBy<TDimensions>,
+                IQueryWith.VirtualColumns<TVirtualColumns, WithVirtualColumns<TVirtualColumns>>,
+                IQueryWithResult<WithTimestamp<TDimensions>>
+            {
+                public class WithAggregations<TAggregations> :
+                    QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>.GroupBy<TDimensions, TAggregations>,
+                    IQueryWith.VirtualColumns<TVirtualColumns, WithAggregations<TAggregations>>,
+                    IQueryWithMappedResult.Dimensions_Aggregations_<TDimensions, TAggregations>
+                {
+                    public class WithPostAggregations<TPostAggregations> :
+                        QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>.GroupBy<TDimensions, TAggregations, TPostAggregations>,
+                        IQueryWith.VirtualColumns<TVirtualColumns, WithPostAggregations<TPostAggregations>>,
+                        IQueryWithMappedResult.Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>
+                    {
+                    }
+                }
+            }
+
+            public class WithNoVirtualColumns :
+                QueryBase<TSource, WithNoVirtualColumns>.GroupBy<TDimensions>,
+                IQueryWithResult<WithTimestamp<TDimensions>>
+            {
+                public class WithAggregations<TAggregations> :
+                    QueryBase<TSource, WithAggregations<TAggregations>>.GroupBy<TDimensions, TAggregations>,
+                    IQueryWithMappedResult.Dimensions_Aggregations_<TDimensions, TAggregations>
+                {
+                    public class WithPostAggregations<TPostAggregations> :
+                        QueryBase<TSource, WithPostAggregations<TPostAggregations>>.GroupBy<TDimensions, TAggregations, TPostAggregations>,
+                        IQueryWithMappedResult.Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>
                     {
                     }
                 }

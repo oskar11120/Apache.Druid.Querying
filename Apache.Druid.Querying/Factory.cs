@@ -19,6 +19,9 @@ namespace Apache.Druid.Querying
             return expression.Member.Name;
         }
 
+        private static string GetColumnName<TSelector>(Expression<TSelector> selector)
+            => GetColumnName(selector.Body);
+
         public static class DependentOn
         {
             public abstract class Source<TSource>
@@ -255,21 +258,17 @@ namespace Apache.Druid.Querying
         public sealed class DimensionSpec<TSource, TDimensions> : DependentOn.Source<TSource>
         {
             public delegate TColumn DimensionsColumnSelector<TColumn>(TDimensions dimensions);
-            private static string GetColumnName<TColumn>(Expression<DimensionsColumnSelector<TColumn>> dimensions)
-                => Factory.GetColumnName(dimensions.Body);
 
             public Dimension Default<TSourceColumn, TDimensionColumn>(
                 Expression<SourceColumnSelector<TSourceColumn>> dimension,
                 Expression<DimensionsColumnSelector<TDimensionColumn>> outputName,
                 SimpleDataType? outputType = null)
-                => new Dimension.Default(GetColumnName(dimension), GetColumnName(outputName), outputType ?? DataType.GetSimple<TDimensionColumn>());
+                => new Dimension.Default(GetColumnName(dimension), Factory.GetColumnName(outputName), outputType ?? DataType.GetSimple<TDimensionColumn>());
         }
 
         public class MetricSpec<TArguments>
         {
             public delegate TColumn MetricColumnSelector<TColumn>(TArguments arguments);
-            private static string GetColumnName<TColumn>(Expression<MetricColumnSelector<TColumn>> selector)
-                => Factory.GetColumnName(selector.Body);
 
             public Metric Dimension<TColumn>(
                 TColumn previousStop,
@@ -287,42 +286,25 @@ namespace Apache.Druid.Querying
                 => new Metric.Numeric(GetColumnName(metric));
         }
 
-        public class OrderByColumnSpec<TDimensions>
+        public class OrderByColumnSpec<TArguments>
         {
-            public delegate TColumn OrderByColumnSelector<TColumn>(TDimensions dimensions);
-            private static string GetColumnName<TColumn>(Expression<OrderByColumnSelector<TColumn>> dimension)
-                => Factory.GetColumnName(dimension.Body);
+            public delegate TColumn OrderByColumnSelector<TColumn>(TArguments arguments);
 
             public LimitSpec.OrderBy OrderBy<TColumn>(
                 Expression<OrderByColumnSelector<TColumn>> dimension,
-                OrderDirection direction,
+                OrderDirection? direction = null,
                 SortingOrder dimensionOrder = SortingOrder.Lexicographic)
-                => new(GetColumnName(dimension), direction, dimensionOrder);
+                => new(GetColumnName(dimension), dimensionOrder, direction);
+        }
 
-            public class WithAggregations<TAggregations> : OrderByColumnSpec<TDimensions> 
+        public class Having<TArguments>
+        {
+            public delegate TColumn HavingColumnSelector<TColumn>(TArguments arguments);
+
+            public Having Filter(Func<Filter<TArguments>, Filter> factory)
             {
-                public new delegate TColumn OrderByColumnSelector<TColumn>(TDimensions dimensions, TAggregations aggregations);
-                private static string GetColumnName<TColumn>(Expression<OrderByColumnSelector<TColumn>> dimension)
-                    => Factory.GetColumnName(dimension.Body);
-
-                public LimitSpec.OrderBy OrderBy<TColumn>(
-                    Expression<OrderByColumnSelector<TColumn>> dimension,
-                    OrderDirection direction,
-                    SortingOrder dimensionOrder = SortingOrder.Lexicographic)
-                    => new(GetColumnName(dimension), direction, dimensionOrder);
-
-                public class AndPostAggregations<TPostAggregations> : WithAggregations<TAggregations>
-                {
-                    public new delegate TColumn OrderByColumnSelector<TColumn>(TDimensions dimensions, TAggregations aggregations, TPostAggregations postAggregations);
-                    private static string GetColumnName<TColumn>(Expression<OrderByColumnSelector<TColumn>> dimension)
-                        => Factory.GetColumnName(dimension.Body);
-
-                    public LimitSpec.OrderBy OrderBy<TColumn>(
-                        Expression<OrderByColumnSelector<TColumn>> dimension,
-                        OrderDirection direction,
-                        SortingOrder dimensionOrder = SortingOrder.Lexicographic)
-                        => new(GetColumnName(dimension), direction, dimensionOrder);
-                }
+                var filter = factory(new Filter<TArguments>());
+                return new Having.Filter_(filter);
             }
         }
     }
