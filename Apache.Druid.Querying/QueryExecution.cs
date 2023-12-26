@@ -9,11 +9,9 @@ using System.Threading;
 
 namespace Apache.Druid.Querying
 {
-    public delegate TResult MapQueryResult<TResult>(JsonElement from, JsonSerializerOptions serializerOptions);
-
     public interface IQueryWithMappedResult<TResult> : IQuery
     {
-        MapQueryResult<TResult> Map { get; }
+        TResult Map(JsonElement from, JsonSerializerOptions options);
     }
 
     public interface IQueryWithResult<TResult> : IQuery
