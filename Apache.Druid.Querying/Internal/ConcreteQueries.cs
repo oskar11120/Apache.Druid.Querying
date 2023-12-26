@@ -32,6 +32,26 @@ namespace Apache.Druid.Querying.Internal
                     json.Deserialize<TPostAggregations>(options)!);
         }
 
+        public interface Dimension_Aggregations_<TDimensions, TAggregations>
+            : WithTimestamp_<Dimension_Aggregations<TDimensions, TAggregations>>
+        {
+            Dimension_Aggregations<TDimensions, TAggregations> WithTimestamp_<Dimension_Aggregations<TDimensions, TAggregations>>.MapResult(
+                JsonElement json, JsonSerializerOptions options)
+                => new(
+                    json.Deserialize<TDimensions>(options)!,
+                    json.Deserialize<TAggregations>(options)!);
+        }
+
+        public interface Dimension_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>
+             : WithTimestamp_<Dimension_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>
+        {
+            Dimension_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations> WithTimestamp_<Dimension_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>.MapResult(
+                JsonElement json, JsonSerializerOptions options) => new(
+                json.Deserialize<TDimensions>(options)!,
+                json.Deserialize<TAggregations>(options)!,
+                json.Deserialize<TPostAggregations>(options)!);
+        }
+
         public interface Dimensions_Aggregations_<TDimensions, TAggregations>
             : WithTimestamp_<Dimensions_Aggregations<TDimensions, TAggregations>>
         {
