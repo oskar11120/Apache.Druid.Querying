@@ -11,7 +11,7 @@ namespace Apache.Druid.Querying
 {
     public interface IQueryWithMappedResult<TResult> : IQuery
     {
-        TResult Map(JsonElement from, JsonSerializerOptions options);
+        TResult Map(JsonElement json, JsonSerializerOptions options);
     }
 
     public interface IQueryWithResult<TResult> : IQuery
