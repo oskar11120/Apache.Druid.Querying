@@ -38,24 +38,24 @@ namespace Apache.Druid.Querying
     public sealed record Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>(
         TDimension Dimension, TAggregations Aggregations, TPostAggregations PostAggregations);
 
-    public readonly record struct AggregationsAndPostAggregations<TAggregations, TPostAggregations>(TAggregations Aggregations, TPostAggregations PostAggregations)
+    public readonly record struct Aggregations_PostAggregations<TAggregations, TPostAggregations>(TAggregations Aggregations, TPostAggregations PostAggregations)
     {
-        internal static MapQueryResult<AggregationsAndPostAggregations<TAggregations, TPostAggregations>> Map { get; } = (json, options) => new(
+        internal static MapQueryResult<Aggregations_PostAggregations<TAggregations, TPostAggregations>> Map { get; } = (json, options) => new(
             json.Deserialize<TAggregations>(options)!,
             json.Deserialize<TPostAggregations>(options)!);
     }
 
-    public readonly record struct DimensionsAndAggregations<TDimensions, TAggregations>(TDimensions Dimensions, TAggregations Aggregations)
+    public readonly record struct Dimensions_Aggregations<TDimensions, TAggregations>(TDimensions Dimensions, TAggregations Aggregations)
     {
-        internal static MapQueryResult<DimensionsAndAggregations<TDimensions, TAggregations>> Map { get; } = (json, options) => new(
+        internal static MapQueryResult<Dimensions_Aggregations<TDimensions, TAggregations>> Map { get; } = (json, options) => new(
             json.Deserialize<TDimensions>(options)!,
             json.Deserialize<TAggregations>(options)!);
     }
 
-    public readonly record struct DimensionsAggregationsAndPostAggregations<TDimension, TAggregations, TPostAggregations>(
+    public readonly record struct Dimensions_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>(
         TDimension Dimensions, TAggregations Aggregations, TPostAggregations PostAggregations)
     {
-        internal static MapQueryResult<DimensionsAggregationsAndPostAggregations<TDimension, TAggregations, TPostAggregations>> Map { get; } = (json, options) => new(
+        internal static MapQueryResult<Dimensions_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>> Map { get; } = (json, options) => new(
             json.Deserialize<TDimension>(options)!,
             json.Deserialize<TAggregations>(options)!,
             json.Deserialize<TPostAggregations>(options)!);
@@ -93,10 +93,10 @@ namespace Apache.Druid.Querying
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>.TimeSeries<TAggregations, TPostAggregations>,
                         IQueryWith.VirtualColumns<TVirtualColumns, WithPostAggregations<TPostAggregations>>,
-                        IQueryWithMappedResult<WithTimestamp<AggregationsAndPostAggregations<TAggregations, TPostAggregations>>>
+                        IQueryWithMappedResult<WithTimestamp<Aggregations_PostAggregations<TAggregations, TPostAggregations>>>
                     {
-                        MapQueryResult<WithTimestamp<AggregationsAndPostAggregations<TAggregations, TPostAggregations>>> IQueryWithMappedResult<WithTimestamp<AggregationsAndPostAggregations<TAggregations, TPostAggregations>>>.Map
-                        { get; } = MapResult.WithTimestamp(AggregationsAndPostAggregations<TAggregations, TPostAggregations>.Map);
+                        MapQueryResult<WithTimestamp<Aggregations_PostAggregations<TAggregations, TPostAggregations>>> IQueryWithMappedResult<WithTimestamp<Aggregations_PostAggregations<TAggregations, TPostAggregations>>>.Map
+                        { get; } = MapResult.WithTimestamp(Aggregations_PostAggregations<TAggregations, TPostAggregations>.Map);
                     }
                 }
             }
@@ -111,10 +111,10 @@ namespace Apache.Druid.Querying
                 {
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<TSource, WithPostAggregations<TPostAggregations>>.TimeSeries<TAggregations, TPostAggregations>,
-                        IQueryWithMappedResult<WithTimestamp<AggregationsAndPostAggregations<TAggregations, TPostAggregations>>>
+                        IQueryWithMappedResult<WithTimestamp<Aggregations_PostAggregations<TAggregations, TPostAggregations>>>
                     {
-                        MapQueryResult<WithTimestamp<AggregationsAndPostAggregations<TAggregations, TPostAggregations>>> IQueryWithMappedResult<WithTimestamp<AggregationsAndPostAggregations<TAggregations, TPostAggregations>>>.Map
-                        { get; } = MapResult.WithTimestamp(AggregationsAndPostAggregations<TAggregations, TPostAggregations>.Map);
+                        MapQueryResult<WithTimestamp<Aggregations_PostAggregations<TAggregations, TPostAggregations>>> IQueryWithMappedResult<WithTimestamp<Aggregations_PostAggregations<TAggregations, TPostAggregations>>>.Map
+                        { get; } = MapResult.WithTimestamp(Aggregations_PostAggregations<TAggregations, TPostAggregations>.Map);
                     }
                 }
             }
@@ -132,18 +132,18 @@ namespace Apache.Druid.Querying
                 public class WithAggregations<TAggregations> :
                     QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>.TopN<TDimension, TAggregations>,
                     IQueryWith.VirtualColumns<TVirtualColumns, WithAggregations<TAggregations>>,
-                    IQueryWithMappedResult<WithTimestamp<DimensionsAndAggregations<TDimension, TAggregations>>>
+                    IQueryWithMappedResult<WithTimestamp<Dimensions_Aggregations<TDimension, TAggregations>>>
                 {
-                    MapQueryResult<WithTimestamp<DimensionsAndAggregations<TDimension, TAggregations>>> IQueryWithMappedResult<WithTimestamp<DimensionsAndAggregations<TDimension, TAggregations>>>.Map
-                        => MapResult.WithTimestamp(DimensionsAndAggregations<TDimension, TAggregations>.Map);
+                    MapQueryResult<WithTimestamp<Dimensions_Aggregations<TDimension, TAggregations>>> IQueryWithMappedResult<WithTimestamp<Dimensions_Aggregations<TDimension, TAggregations>>>.Map
+                        => MapResult.WithTimestamp(Dimensions_Aggregations<TDimension, TAggregations>.Map);
 
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>.TopN<TDimension, TAggregations, TPostAggregations>,
                         IQueryWith.VirtualColumns<TVirtualColumns, WithPostAggregations<TPostAggregations>>,
-                        IQueryWithMappedResult<WithTimestamp<AggregationsAndPostAggregations<TAggregations, TPostAggregations>>>
+                        IQueryWithMappedResult<WithTimestamp<Aggregations_PostAggregations<TAggregations, TPostAggregations>>>
                     {
-                        MapQueryResult<WithTimestamp<AggregationsAndPostAggregations<TAggregations, TPostAggregations>>> IQueryWithMappedResult<WithTimestamp<AggregationsAndPostAggregations<TAggregations, TPostAggregations>>>.Map
-                        { get; } = MapResult.WithTimestamp(AggregationsAndPostAggregations<TAggregations, TPostAggregations>.Map);
+                        MapQueryResult<WithTimestamp<Aggregations_PostAggregations<TAggregations, TPostAggregations>>> IQueryWithMappedResult<WithTimestamp<Aggregations_PostAggregations<TAggregations, TPostAggregations>>>.Map
+                        { get; } = MapResult.WithTimestamp(Aggregations_PostAggregations<TAggregations, TPostAggregations>.Map);
                     }
                 }
             }
@@ -154,17 +154,17 @@ namespace Apache.Druid.Querying
             {
                 public class WithAggregations<TAggregations> :
                     QueryBase<TSource, WithAggregations<TAggregations>>.TopN<TDimension, TAggregations>,
-                    IQueryWithMappedResult<WithTimestamp<DimensionsAndAggregations<TDimension, TAggregations>>>
+                    IQueryWithMappedResult<WithTimestamp<Dimensions_Aggregations<TDimension, TAggregations>>>
                 {
-                    MapQueryResult<WithTimestamp<DimensionsAndAggregations<TDimension, TAggregations>>> IQueryWithMappedResult<WithTimestamp<DimensionsAndAggregations<TDimension, TAggregations>>>.Map
-                        => MapResult.WithTimestamp(DimensionsAndAggregations<TDimension, TAggregations>.Map);
+                    MapQueryResult<WithTimestamp<Dimensions_Aggregations<TDimension, TAggregations>>> IQueryWithMappedResult<WithTimestamp<Dimensions_Aggregations<TDimension, TAggregations>>>.Map
+                        => MapResult.WithTimestamp(Dimensions_Aggregations<TDimension, TAggregations>.Map);
 
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<TSource, WithPostAggregations<TPostAggregations>>.TopN<TDimension, TAggregations, TPostAggregations>,
-                        IQueryWithMappedResult<WithTimestamp<AggregationsAndPostAggregations<TAggregations, TPostAggregations>>>
+                        IQueryWithMappedResult<WithTimestamp<Aggregations_PostAggregations<TAggregations, TPostAggregations>>>
                     {
-                        MapQueryResult<WithTimestamp<AggregationsAndPostAggregations<TAggregations, TPostAggregations>>> IQueryWithMappedResult<WithTimestamp<AggregationsAndPostAggregations<TAggregations, TPostAggregations>>>.Map
-                        { get; } = MapResult.WithTimestamp(AggregationsAndPostAggregations<TAggregations, TPostAggregations>.Map);
+                        MapQueryResult<WithTimestamp<Aggregations_PostAggregations<TAggregations, TPostAggregations>>> IQueryWithMappedResult<WithTimestamp<Aggregations_PostAggregations<TAggregations, TPostAggregations>>>.Map
+                        { get; } = MapResult.WithTimestamp(Aggregations_PostAggregations<TAggregations, TPostAggregations>.Map);
                     }
                 }
             }
