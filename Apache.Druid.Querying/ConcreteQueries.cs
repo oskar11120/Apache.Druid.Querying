@@ -1,8 +1,5 @@
 ﻿using Apache.Druid.Querying.Internal;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
 
 namespace Apache.Druid.Querying
 {
@@ -30,54 +27,6 @@ namespace Apache.Druid.Querying
         public class TopN : Context
         {
             public int? MinTopNThreshold { get; set; }
-        }
-    }
-
-    internal static class IQueryWithMappedResult
-    {
-        public interface WithTimestamp_<TResult> : IQueryWithMappedResult<WithTimestamp<TResult>>
-        {
-            TResult MapResult(JsonElement from, JsonSerializerOptions options);
-
-            WithTimestamp<TResult> IQueryWithMappedResult<WithTimestamp<TResult>>.Map(JsonElement json, JsonSerializerOptions options)
-            {
-                var t = json
-                    .GetProperty(nameof(WithTimestamp<TResult>.Timestamp).ToCamelCase())
-                    .Deserialize<DateTimeOffset>(options);
-                var resultJson = json.GetProperty(nameof(WithTimestamp<TResult>.Timestamp).ToCamelCase());
-                var result = MapResult(resultJson, options);
-                return new(t, result);
-            }
-        }
-
-        public interface Dimensions_Aggregations_<TDimensions, TAggregations>
-            : WithTimestamp_<Dimensions_Aggregations<TDimensions, TAggregations>>
-        {
-            Dimensions_Aggregations<TDimensions, TAggregations> WithTimestamp_<Dimensions_Aggregations<TDimensions, TAggregations>>.MapResult(
-                JsonElement json, JsonSerializerOptions options)
-                => new(
-                    json.Deserialize<TDimensions>(options)!,
-                    json.Deserialize<TAggregations>(options)!);
-        }
-
-        public interface Aggregations_PostAggregations_<TAggregations, TPostAggregations>
-            : WithTimestamp_<Aggregations_PostAggregations<TAggregations, TPostAggregations>>
-        {
-            Aggregations_PostAggregations<TAggregations, TPostAggregations> WithTimestamp_<Aggregations_PostAggregations<TAggregations, TPostAggregations>>.MapResult(
-                JsonElement json, JsonSerializerOptions options) =>
-                new(
-                    json.Deserialize<TAggregations>(options)!,
-                    json.Deserialize<TPostAggregations>(options)!);
-        }
-
-        public interface Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>
-             : WithTimestamp_<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>
-        {
-            Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations> WithTimestamp_<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>.MapResult(
-                JsonElement json, JsonSerializerOptions options) => new(
-                json.Deserialize<TDimensions>(options)!,
-                json.Deserialize<TAggregations>(options)!,
-                json.Deserialize<TPostAggregations>(options)!);
         }
     }
 
