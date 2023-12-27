@@ -73,14 +73,14 @@ namespace Apache.Druid.Querying.Internal
         }
     }
 
-    public static class QueryBase<TSource, TSelf> where TSelf : IQuery<TSelf>
+    public static class QueryBase<TArguments, TSelf> where TSelf : IQuery<TSelf>
     {
         public abstract class TimeSeries :
             Query,
             IQueryWith.Order,
             IQueryWith.Intervals,
             IQueryWith.Granularity,
-            IQueryWith.Filter<TSource, TSelf>,
+            IQueryWith.Filter<TArguments, TSelf>,
             IQueryWith.Context<QueryContext.TimeSeries, TSelf>
         {
             public TimeSeries() : base("timeseries")
@@ -90,7 +90,7 @@ namespace Apache.Druid.Querying.Internal
 
         public abstract class TimeSeries<TAggregations> :
             TimeSeries,
-            IQueryWith.Aggregations<TSource, TAggregations, TSelf>
+            IQueryWith.Aggregations<TArguments, TAggregations, TSelf>
         {
         }
 
@@ -104,7 +104,7 @@ namespace Apache.Druid.Querying.Internal
             Query,
             IQueryWith.Intervals,
             IQueryWith.Granularity,
-            IQueryWith.Filter<TSource, TSelf>,
+            IQueryWith.Filter<TArguments, TSelf>,
             IQueryWith.Context<QueryContext.TopN, TSelf>
         {
             public TopN_() : base("topN")
@@ -113,9 +113,9 @@ namespace Apache.Druid.Querying.Internal
 
             private IQuery<TSelf> Self => this;
 
-            public TSelf Dimension(Func<QuerySectionFactory.DimensionSpec<TSource, TDimension>, Dimension> factory)
+            public TSelf Dimension(Func<QuerySectionFactory.DimensionSpec<TArguments, TDimension>, Dimension> factory)
             {
-                var factory_ = new QuerySectionFactory.DimensionSpec<TSource, TDimension>();
+                var factory_ = new QuerySectionFactory.DimensionSpec<TArguments, TDimension>();
                 var dimension = factory(factory_);
                 Self.AddOrUpdateSection(nameof(dimension), dimension);
                 return Self.Unwrapped;
@@ -147,13 +147,13 @@ namespace Apache.Druid.Querying.Internal
 
         public abstract class TopN<TDimension, TAggregations> :
             TopN_<TDimension, Dimension_Aggregations<TDimension, TAggregations>>,
-            IQueryWith.Aggregations<TSource, TAggregations, TSelf>
+            IQueryWith.Aggregations<TArguments, TAggregations, TSelf>
         {
         }
 
         public abstract class TopN<TDimension, TAggregations, TPostAggregations> :
             TopN_<TDimension, Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>,
-            IQueryWith.Aggregations<TSource, TAggregations, TSelf>,
+            IQueryWith.Aggregations<TArguments, TAggregations, TSelf>,
             IQueryWith.PostAggregations<TAggregations, TPostAggregations, TSelf>
         {
         }
@@ -162,7 +162,7 @@ namespace Apache.Druid.Querying.Internal
             Query,
             IQueryWith.Intervals,
             IQueryWith.Granularity,
-            IQueryWith.Filter<TSource, TSelf>,
+            IQueryWith.Filter<TArguments, TSelf>,
             IQueryWith.Context<QueryContext.GroupBy, TSelf>
         {
             public GroupBy_() : base("groupBy")
@@ -171,9 +171,9 @@ namespace Apache.Druid.Querying.Internal
 
             private IQuery<TSelf> Self => this;
 
-            public TSelf Dimensions(Func<QuerySectionFactory.DimensionSpec<TSource, TDimensions>, IEnumerable<Dimension>> factory)
+            public TSelf Dimensions(Func<QuerySectionFactory.DimensionSpec<TArguments, TDimensions>, IEnumerable<Dimension>> factory)
             {
-                var factory_ = new QuerySectionFactory.DimensionSpec<TSource, TDimensions>();
+                var factory_ = new QuerySectionFactory.DimensionSpec<TArguments, TDimensions>();
                 var dimensions = factory(factory_);
                 Self.AddOrUpdateSection(nameof(dimensions), dimensions);
                 return Self.Unwrapped;
@@ -213,13 +213,13 @@ namespace Apache.Druid.Querying.Internal
 
         public abstract class GroupBy<TDimensions, TAggregations> :
             GroupBy_<TDimensions, Dimensions_Aggregations<TDimensions, TAggregations>>,
-            IQueryWith.Aggregations<TSource, TAggregations, TSelf>
+            IQueryWith.Aggregations<TArguments, TAggregations, TSelf>
         {
         }
 
         public abstract class GroupBy<TDimensions, TAggregations, TPostAggregations> :
             GroupBy_<TDimensions, Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>,
-            IQueryWith.Aggregations<TSource, TAggregations, TSelf>,
+            IQueryWith.Aggregations<TArguments, TAggregations, TSelf>,
             IQueryWith.PostAggregations<TAggregations, TPostAggregations, TSelf>
         {
         }

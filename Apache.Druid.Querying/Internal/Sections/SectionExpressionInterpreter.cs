@@ -48,9 +48,9 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
         }
     }
 
-    internal sealed class SectionExpressionInterpreter
+    internal static class SectionExpressionInterpreter
     {
-        public IEnumerable<FactoryCall> Execute(
+        public static IEnumerable<FactoryCall> Execute(
             LambdaExpression factoryExpression,
             Type factoryType,
             Type argumentsType)

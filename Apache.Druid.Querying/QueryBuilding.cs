@@ -1,10 +1,13 @@
 ﻿using Apache.Druid.Querying.Internal;
 using Apache.Druid.Querying.Internal.QuerySectionFactory;
+using Apache.Druid.Querying.Internal.Sections;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
 namespace Apache.Druid.Querying
@@ -63,34 +66,50 @@ namespace Apache.Druid.Querying
         Strlen
     }
 
-    public sealed record QuerySection(Type Type, object? Value);
+    public delegate JsonNode QuerySectionValueFactory(JsonSerializerOptions serializerOptions);
 
     public interface IQuery
     {
-        private protected Dictionary<string, QuerySection> State { get; }
-        public IReadOnlyDictionary<string, QuerySection> GetState() => State;
-        internal void AddOrUpdateSection<TSection>(string key, TSection section)
+        private protected Dictionary<string, QuerySectionValueFactory> State { get; }
+        public IReadOnlyDictionary<string, QuerySectionValueFactory> GetState() => State;
+        public void AddOrUpdateSection(string key, QuerySectionValueFactory valueFactory, bool convertKeyToCamelCase = true)
         {
+            key = convertKeyToCamelCase ? key : key.ToCamelCase();
             State.Remove(key);
-            State.Add(key, new(typeof(TSection), section));
+            State.Add(key, valueFactory);
         }
+
+        public void AddOrUpdateSection<TValue>(string key, TValue value, bool convertKeyToCamelCase = true)
+            => AddOrUpdateSection(key, options => JsonSerializer.SerializeToNode(value, options)!);
     }
 
     public abstract class Query : IQuery
     {
         public Query(string? type = null)
         {
-            type ??= GetType().Name.ToCamelCase();
-            state = new() { ["queryType"] = new(typeof(string), type) };
+            state = new() { ["queryType"] = _ => (type ?? GetType().Name.ToCamelCase())! };
         }
 
-        private readonly Dictionary<string, QuerySection> state;
-        Dictionary<string, QuerySection> IQuery.State => state;
+        private readonly Dictionary<string, QuerySectionValueFactory> state;
+        Dictionary<string, QuerySectionValueFactory> IQuery.State => state;
     }
 
     public interface IQuery<TSelf> : IQuery where TSelf : IQuery<TSelf>
     {
-        public TSelf Unwrapped => (TSelf)this;
+        private TSelf Unwrapped => (TSelf)this;
+        private IQuery Base => this;
+
+        public new TSelf AddOrUpdateSection(string key, QuerySectionValueFactory valueFactory, bool convertKeyToCamelCase = true)
+        {
+            Base.AddOrUpdateSection(key, valueFactory, convertKeyToCamelCase);
+            return Unwrapped;
+        }
+
+        public new TSelf AddOrUpdateSection<TValue>(string key, TValue value, bool convertKeyToCamelCase = true)
+        {
+            Base.AddOrUpdateSection(key, value, convertKeyToCamelCase);
+            return Unwrapped;
+        }
     }
 
     public static class IQueryWith
@@ -99,22 +118,16 @@ namespace Apache.Druid.Querying
         {
         }
 
-        public interface Filter<TSource, TSelf> : IQuery<TSelf> where TSelf : IQuery<TSelf>
+        public interface Filter<TArguments, TSelf> : IQuery<TSelf> where TSelf : IQuery<TSelf>
         {
         }
 
-        private static HashSet<string> GetPropertyNames<T>() => typeof(T)
-            .GetProperties()
-            .Select(property => property.Name)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        public interface Aggregations<TSource, TAggregations, TSelf> : IQuery<TSelf> where TSelf : IQuery<TSelf>
+        public interface Aggregations<TArguments, TAggregations, TSelf> : IQuery<TSelf> where TSelf : IQuery<TSelf>
         {
-            internal static readonly HashSet<string> AggregationsPropertyNames = GetPropertyNames<TAggregations>();
         }
 
-        public interface PostAggregations<TAggregations, TPostAggregations, TSelf> : IQuery<TSelf> where TSelf : IQuery<TSelf>
+        public interface PostAggregations<TArguments, TPostAggregations, TSelf> : IQuery<TSelf> where TSelf : IQuery<TSelf>
         {
-            internal static readonly HashSet<string> PostAggregationsPropertyNames = GetPropertyNames<TPostAggregations>();
         }
 
         public interface Context<TContext, TSelf> : IQuery<TSelf>
@@ -155,55 +168,39 @@ namespace Apache.Druid.Querying
         }
     }
 
-    public delegate TSection QuerySectionFactory<TArguments, TSection>(TArguments arguments);
+    public delegate TSection QuerySectionFactory<TElementFactory, TSection>(TElementFactory factory);
 
     public static class QueryExtensions
     {
         public static TQuery VirtualColumns<TArguments, TVirtualColumns, TQuery>(
             this IQueryWith.VirtualColumns<TArguments, TVirtualColumns, TQuery> query,
-            Expression<Func<QuerySectionFactory<TArguments, TVirtualColumns>>> factory)
+            Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IVirtualColumns, TVirtualColumns>> factory)
             where TQuery : IQuery<TQuery>
-        {
-            var factory_ = new QueryElementFactory.VirtualColumns<TVirtualColumns>();
-            var virtualColumns = factory(factory_);
-            query.AddOrUpdateSection(nameof(virtualColumns), virtualColumns);
-            return query.Unwrapped;
-        }
+            => query.AddOrUpdateSection(
+                nameof(VirtualColumns),
+                options => FromExpressionQuerySectionFactory.Create(factory, options));
 
-        public static TQuery Aggregations<TArguments, TQuery, TAggregations>(
+        public static TQuery Aggregations<TArguments, TAggregations, TQuery>(
             this IQueryWith.Aggregations<TArguments, TAggregations, TQuery> query,
-            Expression<Func<QuerySectionFactory<TArguments, TAggregations>>> factory)
+            Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IAggregations, TAggregations>> factory)
             where TQuery : IQuery<TQuery>
-        {
-            var factory_ = new QueryElementFactory.Aggregators<TArguments, TAggregations>();
-            var aggregators = factory(factory_).ToArray();
-            var aggregatorNames = aggregators.Select(aggregator => aggregator.Name);
-            var propertyNames = IQueryWith.Aggregations<TArguments, TAggregations, TQuery>.AggregationsPropertyNames;
-            query.AddOrUpdateSection(nameof(Aggregations).ToCamelCase(), aggregators);
-            return query.Unwrapped;
-        }
+            => query.AddOrUpdateSection(
+                nameof(Aggregations),
+                options => FromExpressionQuerySectionFactory.Create(factory, options));
 
-        public static TQuery PostAggregations<TQuery, TArguments, TPostAggregations>(
+        public static TQuery PostAggregations<TArguments, TPostAggregations, TQuery>(
             this IQueryWith.PostAggregations<TArguments, TPostAggregations, TQuery> query,
-            Expression<Func<QuerySectionFactory<TArguments, TArguments>>> factory)
+            Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IPostAggregators, TPostAggregations>> factory)
             where TQuery : IQuery<TQuery>
-        {
-            var factory_ = new QueryElementFactory.PostAggregators<TArguments, TPostAggregations>();
-            var postAggregators = factory(factory_).ToArray();
-            var postAggregatorNames = postAggregators.Select(aggregator => aggregator.Name);
-            var propertyNames = IQueryWith.PostAggregations<TArguments, TPostAggregations, TQuery>.PostAggregationsPropertyNames;
-            query.AddOrUpdateSection(nameof(PostAggregations).ToCamelCase(), postAggregators);
-            return query.Unwrapped;
-        }
+            => query.AddOrUpdateSection(
+                nameof(PostAggregations),
+                options => FromExpressionQuerySectionFactory.Create(factory, options));
 
         public static TQuery Filter<TArguments, TQuery>(this IQueryWith.Filter<TArguments, TQuery> query, Func<QueryElementFactory<TArguments>.Filter, IFilter> factory)
             where TQuery : IQuery<TQuery>
-        {
-            var factory_ = new QueryElementFactory<TArguments>.Filter();
-            var filter = factory(factory_);
-            query.AddOrUpdateSection(nameof(filter), filter);
-            return query.Unwrapped;
-        }
+            => query.AddOrUpdateSection(
+                nameof(Filter),
+                factory(new QueryElementFactory<TArguments>.Filter()));
 
         public static TQuery Intervals<TQuery>(this TQuery query, IEnumerable<Interval> intervals)
             where TQuery : IQueryWith.Intervals
@@ -221,7 +218,7 @@ namespace Apache.Druid.Querying
         public static TQuery Order<TQuery>(this TQuery query, OrderDirection order)
             where TQuery : IQueryWith.Order
         {
-            var descending = order is Querying.OrderDirection.Descending;
+            var descending = order is OrderDirection.Descending;
             query.AddOrUpdateSection(nameof(descending), descending);
             return query;
         }
@@ -229,10 +226,7 @@ namespace Apache.Druid.Querying
         public static TQuery Context<TQuery, TContext>(this IQueryWith.Context<TContext, TQuery> query, TContext context)
             where TQuery : IQuery<TQuery>
             where TContext : Context
-        {
-            query.AddOrUpdateSection(nameof(context), context);
-            return query.Unwrapped;
-        }
+            => query.AddOrUpdateSection(nameof(context), context);
 
         private static string ToSnake(this string @string)
             => Regex.Replace(Regex.Replace(@string, "(.)([A-Z][a-z]+)", "$1_$2"), "([a-z0-9])([A-Z])", "$1_$2").ToLower();

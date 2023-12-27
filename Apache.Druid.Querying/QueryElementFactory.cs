@@ -23,7 +23,7 @@ namespace Apache.Druid.Querying
 
         private static string GetColumnName<TSelector>(Expression<TSelector> selector)
             => GetColumnName(selector.Body);
-      
+
         public sealed class Filter
         {
             public IFilter And(params IFilter[] filters) => new Filter_.And(filters);
@@ -83,56 +83,76 @@ namespace Apache.Druid.Querying
         }
         public interface IVirtualColumns
         {
-            TColumn Expression<TColumn>(ColumnSelector<TColumn> name, string expression);
+            TColumn Expression<TColumn>(string expression);
         }
 
         public interface IAggregations
         {
             int Count();
 
-            TColumn Mean<TColumn>(
-                ColumnSelector<TColumn> fieldName);
+            TColumn Mean<TColumn>(ColumnSelector<TColumn> fieldName);
 
-            TColumn Any<TColumn>(
-                ColumnSelector<TColumn> fieldName,
-                SimpleDataType? dataType = null);
+            TColumn Any<TColumn>(ColumnSelector<TColumn> fieldName, SimpleDataType dataType);
+            TColumn Any<TColumn>(ColumnSelector<TColumn> fieldName);
 
             TColumn Sum<TColumn>(
                 ColumnSelector<TColumn> fieldName,
-                SimpleDataType? dataType = null);
+                SimpleDataType dataType);
             TColumn Min<TColumn>(
                 ColumnSelector<TColumn> fieldName,
-                SimpleDataType? dataType = null);
+                SimpleDataType dataType);
             TColumn Max<TColumn>(
                 ColumnSelector<TColumn> fieldName,
-                SimpleDataType? dataType = null);
+                SimpleDataType dataType);
             TColumn Sum<TColumn>(
                 ColumnSelector<TColumn> fieldName,
                 string expression,
-                SimpleDataType? dataType = null);
+                SimpleDataType dataType);
             TColumn Min<TColumn>(
                 ColumnSelector<TColumn> fieldName,
                 string expression,
-                SimpleDataType? dataType = null);
+                SimpleDataType dataType);
             TColumn Max<TColumn>(
                 ColumnSelector<TColumn> fieldName,
                 string expression,
-                SimpleDataType? dataType = null);
+                SimpleDataType dataType);
+
+            TColumn Sum<TColumn>(ColumnSelector<TColumn> fieldName);
+            TColumn Min<TColumn>(ColumnSelector<TColumn> fieldName);
+            TColumn Max<TColumn>(ColumnSelector<TColumn> fieldName);
+            TColumn Sum<TColumn>(
+                ColumnSelector<TColumn> fieldName,
+                string expression);
+            TColumn Min<TColumn>(
+                ColumnSelector<TColumn> fieldName,
+                string expression);
+            TColumn Max<TColumn>(
+                ColumnSelector<TColumn> fieldName,
+                string expression);
 
             TColumn First<TColumn, TTimeColumn>(
                 ColumnSelector<TColumn> fieldName,
                 ColumnSelector<TTimeColumn> timeColumn,
-                SimpleDataType? dataType = null);
+                SimpleDataType dataType);
             TColumn Last<TColumn, TTimeColumn>(
                 ColumnSelector<TColumn> fieldName,
                 ColumnSelector<TTimeColumn> timeColumn,
-                SimpleDataType? dataType = null);
+                SimpleDataType dataType);
             TColumn First<TColumn>(
                ColumnSelector<TColumn> fieldName,
-                SimpleDataType? dataType = null);
+                SimpleDataType dataType);
             TColumn Last<TColumn>(
                 ColumnSelector<TColumn> fieldName,
-                SimpleDataType? dataType = null);
+                SimpleDataType dataType);
+
+            TColumn First<TColumn, TTimeColumn>(
+               ColumnSelector<TColumn> fieldName,
+               ColumnSelector<TTimeColumn> timeColumn);
+            TColumn Last<TColumn, TTimeColumn>(
+                ColumnSelector<TColumn> fieldName,
+                ColumnSelector<TTimeColumn> timeColumn);
+            TColumn First<TColumn>(ColumnSelector<TColumn> fieldName);
+            TColumn Last<TColumn>(ColumnSelector<TColumn> fieldName);
         }
 
 
