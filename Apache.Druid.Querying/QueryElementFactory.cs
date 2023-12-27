@@ -8,7 +8,7 @@ using Having_ = Apache.Druid.Querying.Internal.QuerySectionFactory.Having;
 
 namespace Apache.Druid.Querying
 {
-    public static class QuerySectionFactory<TArguments>
+    public static class QueryElementFactory<TArguments>
     {
         public delegate TColumn ColumnSelector<TColumn>(TArguments arguments);
 

@@ -54,8 +54,7 @@ namespace Apache.Druid.Querying.Unit.Tests
         public IEnumerable<FactoryCall> Execute(
             LambdaExpression factoryExpression,
             Type factoryType,
-            Type argumentsType,
-            Type columnSelectorGenericTypeDefinition)
+            Type argumentsType)
         {
             FactoryCall.Parameter.ArgumentsMemberSelector Execute_(Expression argumentsMemberSelector)
             {
@@ -78,7 +77,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                         var paramType = @param.ParameterType;
                         var expectedArgumentsMemberSelector =
                             paramType.IsGenericType &&
-                            paramType.GetGenericTypeDefinition() == columnSelectorGenericTypeDefinition;
+                            paramType.GetGenericTypeDefinition() == typeof(QueryElementFactory<>.ColumnSelector<>);
                         FactoryCall.Parameter.Any result = expectedArgumentsMemberSelector ?
                             new(Execute_(arg), null) :
                             new(null, new FactoryCall.Parameter.Scalar(paramType, @param.Name!, arg.GetValue()));

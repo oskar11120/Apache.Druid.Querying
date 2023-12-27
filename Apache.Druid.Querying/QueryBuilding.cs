@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 
 namespace Apache.Druid.Querying
@@ -94,7 +95,7 @@ namespace Apache.Druid.Querying
 
     public static class IQueryWith
     {
-        public interface VirtualColumns<TVirtualColumns, TSelf> : IQuery<TSelf> where TSelf : IQuery<TSelf>
+        public interface VirtualColumns<TArguments, TVirtualColumns, TSelf> : IQuery<TSelf> where TSelf : IQuery<TSelf>
         {
         }
 
@@ -154,67 +155,55 @@ namespace Apache.Druid.Querying
         }
     }
 
+    public delegate TSection QuerySectionFactory<TArguments, TSection>(TArguments arguments);
+
     public static class QueryExtensions
     {
-        public static TQuery VirtualColumns<TVirtualColumns, TQuery>(
-            this IQueryWith.VirtualColumns<TVirtualColumns, TQuery> query,
-            Func<QuerySectionFactory.VirtualColumns<TVirtualColumns>, IEnumerable<VirtualColumn>> factory)
+        public static TQuery VirtualColumns<TArguments, TVirtualColumns, TQuery>(
+            this IQueryWith.VirtualColumns<TArguments, TVirtualColumns, TQuery> query,
+            Expression<Func<QuerySectionFactory<TArguments, TVirtualColumns>>> factory)
             where TQuery : IQuery<TQuery>
         {
-            var factory_ = new QuerySectionFactory.VirtualColumns<TVirtualColumns>();
+            var factory_ = new QueryElementFactory.VirtualColumns<TVirtualColumns>();
             var virtualColumns = factory(factory_);
             query.AddOrUpdateSection(nameof(virtualColumns), virtualColumns);
             return query.Unwrapped;
         }
 
-        public static TQuery Filter<TSource, TQuery>(this IQueryWith.Filter<TSource, TQuery> query, Func<QuerySectionFactory<TSource>.Filter, IFilter> factory)
-           where TQuery : IQuery<TQuery>
-        {
-            var factory_ = new QuerySectionFactory<TSource>.Filter();
-            var filter = factory(factory_);
-            query.AddOrUpdateSection(nameof(filter), filter);
-            return query.Unwrapped;
-        }
 
-        private static void EnsureMatch<TAggregations>(HashSet<string> aggregationPropertyNames, IEnumerable<string> aggregatorNames, string aggregatorsLogName)
-        {
-            var match = aggregationPropertyNames.SetEquals(aggregatorNames);
-            if (!match)
-            {
-                throw new InvalidOperationException($"Added {aggregatorsLogName} names did not match property names of {typeof(TAggregations)}.")
-                {
-                    Data =
-                    {
-                        [aggregatorsLogName + "Names"] = aggregatorNames,
-                        ["propertyNames"] = aggregationPropertyNames
-                    }
-                };
-            }
-        }
-        public static TQuery Aggregations<TSource, TQuery, TAggregations>(
-            this IQueryWith.Aggregations<TSource, TAggregations, TQuery> query, Func<QuerySectionFactory.Aggregators<TSource, TAggregations>, IEnumerable<Aggregator>> factory)
+
+        public static TQuery Aggregations<TArguments, TQuery, TAggregations>(
+            this IQueryWith.Aggregations<TArguments, TAggregations, TQuery> query,
+            Expression<Func<QuerySectionFactory<TArguments, TAggregations>>> factory)
             where TQuery : IQuery<TQuery>
         {
-            var factory_ = new QuerySectionFactory.Aggregators<TSource, TAggregations>();
+            var factory_ = new QueryElementFactory.Aggregators<TArguments, TAggregations>();
             var aggregators = factory(factory_).ToArray();
             var aggregatorNames = aggregators.Select(aggregator => aggregator.Name);
-            var propertyNames = IQueryWith.Aggregations<TSource, TAggregations, TQuery>.AggregationsPropertyNames;
-            EnsureMatch<TAggregations>(propertyNames, aggregatorNames, nameof(aggregators));
+            var propertyNames = IQueryWith.Aggregations<TArguments, TAggregations, TQuery>.AggregationsPropertyNames;
             query.AddOrUpdateSection(nameof(Aggregations).ToCamelCase(), aggregators);
             return query.Unwrapped;
         }
 
-        public static TQuery PostAggregations<TQuery, TAggregations, TPostAggregations>(
-            this IQueryWith.PostAggregations<TAggregations, TPostAggregations, TQuery> query,
-            Func<QuerySectionFactory.PostAggregators<TAggregations, TPostAggregations>, IEnumerable<PostAggregator>> factory)
+        public static TQuery PostAggregations<TQuery, TArguments, TPostAggregations>(
+            this IQueryWith.PostAggregations<TArguments, TPostAggregations, TQuery> query,
+            Expression<Func<QuerySectionFactory<TArguments, TArguments>>> factory)
             where TQuery : IQuery<TQuery>
         {
-            var factory_ = new QuerySectionFactory.PostAggregators<TAggregations, TPostAggregations>();
+            var factory_ = new QueryElementFactory.PostAggregators<TArguments, TPostAggregations>();
             var postAggregators = factory(factory_).ToArray();
             var postAggregatorNames = postAggregators.Select(aggregator => aggregator.Name);
-            var propertyNames = IQueryWith.PostAggregations<TAggregations, TPostAggregations, TQuery>.PostAggregationsPropertyNames;
-            EnsureMatch<TPostAggregations>(propertyNames, postAggregatorNames, nameof(postAggregators));
+            var propertyNames = IQueryWith.PostAggregations<TArguments, TPostAggregations, TQuery>.PostAggregationsPropertyNames;
             query.AddOrUpdateSection(nameof(PostAggregations).ToCamelCase(), postAggregators);
+            return query.Unwrapped;
+        }
+
+        public static TQuery Filter<TArguments, TQuery>(this IQueryWith.Filter<TArguments, TQuery> query, Func<QueryElementFactory<TArguments>.Filter, IFilter> factory)
+            where TQuery : IQuery<TQuery>
+        {
+            var factory_ = new QueryElementFactory<TArguments>.Filter();
+            var filter = factory(factory_);
+            query.AddOrUpdateSection(nameof(filter), filter);
             return query.Unwrapped;
         }
 
