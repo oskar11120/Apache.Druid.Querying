@@ -1,5 +1,5 @@
-﻿using Apache.Druid.Querying.Elements;
-using Apache.Druid.Querying.Internal;
+﻿using Apache.Druid.Querying.Internal;
+using Apache.Druid.Querying.Internal.QuerySectionFactory;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -135,23 +135,42 @@ namespace Apache.Druid.Querying
         }
     }
 
+    public interface IFilter
+    {
+    }
+
+    public interface IMetric
+    {
+    }
+
+    public interface IHaving
+    {
+    }
+
+    public interface ILimitSpec
+    {
+        public interface OrderBy
+        {
+        }
+    }
+
     public static class QueryExtensions
     {
         public static TQuery VirtualColumns<TVirtualColumns, TQuery>(
             this IQueryWith.VirtualColumns<TVirtualColumns, TQuery> query,
-            Func<Factory.VirtualColumns<TVirtualColumns>, IEnumerable<VirtualColumn>> factory)
+            Func<QuerySectionFactory.VirtualColumns<TVirtualColumns>, IEnumerable<VirtualColumn>> factory)
             where TQuery : IQuery<TQuery>
         {
-            var factory_ = new Factory.VirtualColumns<TVirtualColumns>();
+            var factory_ = new QuerySectionFactory.VirtualColumns<TVirtualColumns>();
             var virtualColumns = factory(factory_);
             query.AddOrUpdateSection(nameof(virtualColumns), virtualColumns);
             return query.Unwrapped;
         }
 
-        public static TQuery Filter<TSource, TQuery>(this IQueryWith.Filter<TSource, TQuery> query, Func<Factory.Filter<TSource>, Filter> factory)
+        public static TQuery Filter<TSource, TQuery>(this IQueryWith.Filter<TSource, TQuery> query, Func<QuerySectionFactory<TSource>.Filter, IFilter> factory)
            where TQuery : IQuery<TQuery>
         {
-            var factory_ = new Factory.Filter<TSource>();
+            var factory_ = new QuerySectionFactory<TSource>.Filter();
             var filter = factory(factory_);
             query.AddOrUpdateSection(nameof(filter), filter);
             return query.Unwrapped;
@@ -173,10 +192,10 @@ namespace Apache.Druid.Querying
             }
         }
         public static TQuery Aggregations<TSource, TQuery, TAggregations>(
-            this IQueryWith.Aggregations<TSource, TAggregations, TQuery> query, Func<Factory.Aggregators<TSource, TAggregations>, IEnumerable<Aggregator>> factory)
+            this IQueryWith.Aggregations<TSource, TAggregations, TQuery> query, Func<QuerySectionFactory.Aggregators<TSource, TAggregations>, IEnumerable<Aggregator>> factory)
             where TQuery : IQuery<TQuery>
         {
-            var factory_ = new Factory.Aggregators<TSource, TAggregations>();
+            var factory_ = new QuerySectionFactory.Aggregators<TSource, TAggregations>();
             var aggregators = factory(factory_).ToArray();
             var aggregatorNames = aggregators.Select(aggregator => aggregator.Name);
             var propertyNames = IQueryWith.Aggregations<TSource, TAggregations, TQuery>.AggregationsPropertyNames;
@@ -187,10 +206,10 @@ namespace Apache.Druid.Querying
 
         public static TQuery PostAggregations<TQuery, TAggregations, TPostAggregations>(
             this IQueryWith.PostAggregations<TAggregations, TPostAggregations, TQuery> query,
-            Func<Factory.PostAggregators<TAggregations, TPostAggregations>, IEnumerable<PostAggregator>> factory)
+            Func<QuerySectionFactory.PostAggregators<TAggregations, TPostAggregations>, IEnumerable<PostAggregator>> factory)
             where TQuery : IQuery<TQuery>
         {
-            var factory_ = new Factory.PostAggregators<TAggregations, TPostAggregations>();
+            var factory_ = new QuerySectionFactory.PostAggregators<TAggregations, TPostAggregations>();
             var postAggregators = factory(factory_).ToArray();
             var postAggregatorNames = postAggregators.Select(aggregator => aggregator.Name);
             var propertyNames = IQueryWith.PostAggregations<TAggregations, TPostAggregations, TQuery>.PostAggregationsPropertyNames;

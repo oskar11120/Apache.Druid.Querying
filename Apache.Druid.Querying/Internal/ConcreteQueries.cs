@@ -1,4 +1,4 @@
-﻿using Apache.Druid.Querying.Elements;
+﻿using Apache.Druid.Querying.Internal.QuerySectionFactory;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
@@ -113,9 +113,9 @@ namespace Apache.Druid.Querying.Internal
 
             private IQuery<TSelf> Self => this;
 
-            public TSelf Dimension(Func<Factory.DimensionSpec<TSource, TDimension>, Dimension> factory)
+            public TSelf Dimension(Func<QuerySectionFactory.DimensionSpec<TSource, TDimension>, Dimension> factory)
             {
-                var factory_ = new Factory.DimensionSpec<TSource, TDimension>();
+                var factory_ = new QuerySectionFactory.DimensionSpec<TSource, TDimension>();
                 var dimension = factory(factory_);
                 Self.AddOrUpdateSection(nameof(dimension), dimension);
                 return Self.Unwrapped;
@@ -127,9 +127,9 @@ namespace Apache.Druid.Querying.Internal
                 return Self.Unwrapped;
             }
 
-            public TSelf Metric(Func<Factory.MetricSpec<TMetricArguments>, Metric> factory)
+            public TSelf Metric(Func<QuerySectionFactory.MetricSpec<TMetricArguments>, Metric> factory)
             {
-                var factory_ = new Factory.MetricSpec<TMetricArguments>();
+                var factory_ = new QuerySectionFactory.MetricSpec<TMetricArguments>();
                 var metric = factory(factory_);
                 return Metric(metric);
             }
@@ -171,9 +171,9 @@ namespace Apache.Druid.Querying.Internal
 
             private IQuery<TSelf> Self => this;
 
-            public TSelf Dimensions(Func<Factory.DimensionSpec<TSource, TDimensions>, IEnumerable<Dimension>> factory)
+            public TSelf Dimensions(Func<QuerySectionFactory.DimensionSpec<TSource, TDimensions>, IEnumerable<Dimension>> factory)
             {
-                var factory_ = new Factory.DimensionSpec<TSource, TDimensions>();
+                var factory_ = new QuerySectionFactory.DimensionSpec<TSource, TDimensions>();
                 var dimensions = factory(factory_);
                 Self.AddOrUpdateSection(nameof(dimensions), dimensions);
                 return Self.Unwrapped;
@@ -182,25 +182,25 @@ namespace Apache.Druid.Querying.Internal
             public TSelf LimitSpec(
                 int? limit = null,
                 int? offset = null,
-                Func<Factory.OrderByColumnSpec<TOrderByAndHavingArguments>, IEnumerable<LimitSpec.OrderBy>>? columns = null)
+                Func<QuerySectionFactory.OrderByColumnSpec<TOrderByAndHavingArguments>, IEnumerable<LimitSpec.OrderBy>>? columns = null)
             {
-                var factory_ = new Factory.OrderByColumnSpec<TOrderByAndHavingArguments>();
+                var factory_ = new QuerySectionFactory.OrderByColumnSpec<TOrderByAndHavingArguments>();
                 var limitSpec = new LimitSpec(limit, offset, columns?.Invoke(factory_));
                 Self.AddOrUpdateSection(nameof(limitSpec), limitSpec);
                 return Self.Unwrapped;
             }
 
-            public TSelf Having(Func<Factory.Having<TOrderByAndHavingArguments>, Having> factory)
+            public TSelf Having(Func<QuerySectionFactory.Having<TOrderByAndHavingArguments>, Having> factory)
             {
-                var factory_ = new Factory.Having<TOrderByAndHavingArguments>();
+                var factory_ = new QuerySectionFactory.Having<TOrderByAndHavingArguments>();
                 var having = factory(factory_);
                 Self.AddOrUpdateSection(nameof(having), having);
                 return Self.Unwrapped;
             }
 
-            public TSelf HavingFilter(Func<Factory.Filter<TOrderByAndHavingArguments>, Filter> factory)
+            public TSelf HavingFilter(Func<QuerySectionFactory.Filter<TOrderByAndHavingArguments>, Filter> factory)
             {
-                var factory_ = new Factory.Having<TOrderByAndHavingArguments>();
+                var factory_ = new QuerySectionFactory.Having<TOrderByAndHavingArguments>();
                 var having = factory_.Filter(factory);
                 Self.AddOrUpdateSection(nameof(having), having);
                 return Self.Unwrapped;

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using Apache.Druid.Querying.DependencyInjection;
 
@@ -5,6 +6,23 @@ namespace Apache.Druid.Querying.Unit.Tests
 {
     public class Tests
     {
+        private readonly SimpleDataType DataType = SimpleDataType.String;
+        private SimpleDataType? GetDataType(double i) => i == 0 ? DataType : null;
+
+        [Test]
+        public void Test1()
+        {
+            var i = 0;
+            new Test<Message, Aggregations>()
+                .Test0(
+                    aggregators => new(
+                        aggregators.Max(message => message.Timestamp, null),
+                        aggregators.Last(message => message.Value, null))
+                    {
+                        LastValue = aggregators.Last(message => message.Value, GetDataType(i))
+                    });
+        }
+
         [Test]
         public void GroupByQuery_Builds()
         {
@@ -370,10 +388,10 @@ namespace Apache.Druid.Querying.Unit.Tests
         record Message(
             [property: DataSourceColumn("variable")] string VariableName,
             Guid ObjectId,
-            double Value,
+            double? Value,
             DateTimeOffset Timestamp);
         record VirtualColumns(DateTimeOffset TReal);
-        record Aggregations(DateTimeOffset TMax, double LastValue);
+        record Aggregations(DateTimeOffset TMax, double? LastValue);
         record PostAggregations(double Sum);
         record TopNDimension(Guid ObjectId);
         record GroupByDimensions(Guid ObjectId, string VariableName);

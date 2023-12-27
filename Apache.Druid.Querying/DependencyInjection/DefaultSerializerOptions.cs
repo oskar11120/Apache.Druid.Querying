@@ -3,7 +3,7 @@ using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Buffers;
-using Apache.Druid.Querying.Elements;
+using Apache.Druid.Querying.Internal.QuerySectionFactory;
 
 namespace Apache.Druid.Querying.DependencyInjection
 {

@@ -1,6 +1,6 @@
-﻿namespace Apache.Druid.Querying.Elements
+﻿namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 {
-    public abstract class Metric : WithType
+    internal abstract class Metric : WithType, IMetric
     {
         public sealed class Numeric : Metric
         {
@@ -27,9 +27,9 @@
 
         public sealed class Inverted : Metric
         {
-            public Metric Metric { get; }
+            public IMetric Metric { get; }
 
-            public Inverted(Metric metric)
+            public Inverted(IMetric metric)
             {
                 Metric = metric;
             }

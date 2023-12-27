@@ -1,6 +1,6 @@
-﻿namespace Apache.Druid.Querying.Elements
+﻿namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 {
-    public abstract class WithType
+    internal abstract class WithType
     {
         public string Type { get; }
 

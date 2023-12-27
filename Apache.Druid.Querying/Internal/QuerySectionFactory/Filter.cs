@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Apache.Druid.Querying.Elements
+namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 {
-    public abstract class Filter : WithType
+    internal abstract class Filter : WithType, IFilter
     {
         public sealed class And : Filter
         {
-            public IEnumerable<Filter> Fields { get; }
+            public IEnumerable<IFilter> Fields { get; }
 
-            public And(IEnumerable<Filter> fields)
+            public And(IEnumerable<IFilter> fields)
             {
                 Fields = fields;
             }
@@ -17,9 +17,9 @@ namespace Apache.Druid.Querying.Elements
 
         public sealed class Or : Filter
         {
-            public IEnumerable<Filter> Fields { get; }
+            public IEnumerable<IFilter> Fields { get; }
 
-            public Or(IEnumerable<Filter> fields)
+            public Or(IEnumerable<IFilter> fields)
             {
                 Fields = fields;
             }
@@ -27,9 +27,9 @@ namespace Apache.Druid.Querying.Elements
 
         public sealed class Not : Filter
         {
-            public Filter Field { get; }
+            public IFilter Field { get; }
 
-            public Not(Filter field)
+            public Not(IFilter field)
             {
                 Field = field;
             }
@@ -53,7 +53,7 @@ namespace Apache.Druid.Querying.Elements
         }
     }
 
-    public abstract class Filter<TColumn> : Filter.WithColumn
+    internal abstract class Filter<TColumn> : Filter.WithColumn
     {
         protected Filter(string column) : base(column)
         {

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace Apache.Druid.Querying.Elements
+namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 {
-    public class LimitSpec : WithType
+    internal sealed class LimitSpec : WithType, ILimitSpec
     {
         public LimitSpec(int? limit, int? offset, IEnumerable<OrderBy>? columns) : base("default")
         {
@@ -15,7 +15,7 @@ namespace Apache.Druid.Querying.Elements
         public int? Offset { get; }
         public IEnumerable<OrderBy>? Columns { get; }
 
-        public class OrderBy
+        public sealed class OrderBy : ILimitSpec.OrderBy
         {
             public OrderBy(string dimension, SortingOrder dimensionOrder, OrderDirection? direction = null)
             {

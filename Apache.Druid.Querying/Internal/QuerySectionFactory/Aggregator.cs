@@ -1,4 +1,4 @@
-﻿namespace Apache.Druid.Querying.Elements
+﻿namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 {
     public class Aggregator : WithType
     {
