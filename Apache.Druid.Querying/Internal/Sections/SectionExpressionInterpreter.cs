@@ -1,11 +1,10 @@
-﻿using Apache.Druid.Querying.Internal.QuerySectionFactory;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Apache.Druid.Querying.Unit.Tests
+namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 {
     internal sealed record FactoryCall(
         string ResultMemberName,

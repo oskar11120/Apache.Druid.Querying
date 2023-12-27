@@ -170,8 +170,6 @@ namespace Apache.Druid.Querying
             return query.Unwrapped;
         }
 
-
-
         public static TQuery Aggregations<TArguments, TQuery, TAggregations>(
             this IQueryWith.Aggregations<TArguments, TAggregations, TQuery> query,
             Expression<Func<QuerySectionFactory<TArguments, TAggregations>>> factory)

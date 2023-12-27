@@ -1,5 +1,7 @@
 ﻿using System.Reflection;
 using System.Linq.Expressions;
+using System;
+using System.Linq;
 
 namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 {
