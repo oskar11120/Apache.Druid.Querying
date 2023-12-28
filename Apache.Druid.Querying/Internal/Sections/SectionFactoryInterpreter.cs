@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -22,24 +23,27 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 
         public static class Parameter
         {
-            public sealed record Any(ArgumentsMemberSelector? Selector, Scalar? Scalar)
+            public sealed record Any(ArgumentsMemberSelector? Selector = null, Scalar? Scalar = null, Nested? Nested = null)
             {
                 public TResult Switch<TResult, TArg>(
                     TArg argument,
                     Func<ArgumentsMemberSelector, TArg, TResult> ifMemberSelector,
-                    Func<Scalar, TArg, TResult> ifScalar)
-                    => (Selector, Scalar) switch
+                    Func<Scalar, TArg, TResult> ifScalar,
+                    Func<Nested, TArg, TResult> ifNested)
+                    => (Selector, Scalar, Nested) switch
                     {
-                        (ArgumentsMemberSelector selector, null) => ifMemberSelector(selector, argument),
-                        (null, Scalar scalar) => ifScalar(scalar, argument),
+                        (ArgumentsMemberSelector selector, null, null) => ifMemberSelector(selector, argument),
+                        (null, Scalar scalar, null) => ifScalar(scalar, argument),
+                        (null, null, Nested nested) => ifNested(nested, argument),
                         _ => throw new InvalidOperationException()
                     };
 
                 public void Switch<TArg>(
                     TArg argument,
                     Action<ArgumentsMemberSelector, TArg> ifMemberSelector,
-                    Action<Scalar, TArg> ifScalar) => Switch(
-                        (argument, ifMemberSelector, ifScalar),
+                    Action<Scalar, TArg> ifScalar,
+                    Action<Nested, TArg> ifNested) => Switch(
+                        (argument, ifMemberSelector, ifScalar, ifNested),
                         (selector, arg) =>
                         {
                             arg.ifMemberSelector(selector, arg.argument);
@@ -49,11 +53,17 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
                         {
                             arg.ifScalar(scalar, arg.argument);
                             return 0;
+                        },
+                        (nested, arg) =>
+                        {
+                            arg.ifNested(nested, arg.argument);
+                            return 0;
                         });
             }
 
             public sealed record ArgumentsMemberSelector(Type MemberType, string MemberName, string Name);
             public sealed record Scalar(Type Type, string Name, object? Value);
+            public sealed record Nested(IReadOnlyList<ElementFactoryCall> Calls, string Name);
         }
     }
 
@@ -84,12 +94,16 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
                     {
                         var paramType = @param.ParameterType;
                         var paramName = @param.Name!;
-                        var expectedArgumentsMemberSelector =
+                        var expectedMemberSelector =
                             paramType.IsGenericType &&
                             paramType.GetGenericTypeDefinition() == typeof(QueryElementFactory<>.ColumnSelector<>);
-                        ElementFactoryCall.Parameter.Any result = expectedArgumentsMemberSelector ?
-                            new(GetMember(arg).Map(paramName), null) :
-                            new(null, new ElementFactoryCall.Parameter.Scalar(paramType, paramName, arg.GetValue()));
+                        var isNested = paramType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(paramType);
+                        ElementFactoryCall.Parameter.Any result = (expectedMemberSelector, isNested) switch
+                        {
+                            (true, _) => new(Selector: GetMember(arg).Map(paramName)),
+                            (_, true) => new(Nested: new(Execute__(arg).ToList(), paramName)),
+                            _ => new(Scalar: new ElementFactoryCall.Parameter.Scalar(paramType, paramName, arg.GetValue()))
+                        };
                         return result;
                     })
                     .ToList();
@@ -97,18 +111,24 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
             }
 
 
-            IEnumerable<ElementFactoryCall> Execute__()
+            IEnumerable<ElementFactoryCall> Execute__(Expression sectionFactoryBody)
             {
-                var body = querySectionFactory.Body;
-                if (body.NodeType is ExpressionType.Call)
+                if (sectionFactoryBody.NodeType is ExpressionType.Call)
                 {
-                    yield return Execute(body, null);
+                    yield return Execute(sectionFactoryBody, null);
                     yield break;
                 }
 
-                var init = body as MemberInitExpression;
+                if (sectionFactoryBody is NewArrayExpression newArray)
+                {
+                    foreach (var item in newArray.Expressions)
+                        yield return Execute(item, null);
+                    yield break;
+                }
+
+                var init = sectionFactoryBody as MemberInitExpression;
                 var @new = init is null ?
-                    body as NewExpression ?? throw new InvalidOperationException() :
+                    sectionFactoryBody as NewExpression ?? throw new InvalidOperationException() :
                     init.NewExpression;
 
                 if (init is not null)
@@ -134,7 +154,7 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
                 }
             }
 
-            return Execute__().DistinctBy(call => call.ResultMemberName);
+            return Execute__(querySectionFactory.Body).DistinctBy(call => call.ResultMemberName);
         }
 
         private static Member GetMember(Expression selectorBody)

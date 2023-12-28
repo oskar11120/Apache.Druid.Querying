@@ -1,5 +1,6 @@
 ﻿using Apache.Druid.Querying.Internal.QuerySectionFactory;
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -16,38 +17,46 @@ namespace Apache.Druid.Querying.Internal.Sections
             IArgumentColumnNameProvider columnNames,
             CustomMappings? customMappings)
         {
+            JsonArray Map(IEnumerable<ElementFactoryCall> calls)
+            {
+                var array = new JsonArray();
+                foreach (var call in calls)
+                {
+                    var (member, method, @params) = call;
+                    var element = new JsonObject
+                    {
+                        { "name", member ?? sectionKey },
+                        { "type", customMappings?.MapType?.Invoke(call) ?? method }
+                    };
+
+                    foreach (var param in @params)
+                    {
+                        param.Switch(
+                            element,
+                            (selector, element) => element.Add(selector.Name, columnNames.Get(selector.MemberName)),
+                            (scalar, element) =>
+                            {
+                                if (customMappings?.SkipScalarParameter?.Invoke(scalar) is true)
+                                    return;
+
+                                element.Add(
+                                    scalar.Name,
+                                    JsonSerializer.SerializeToNode(scalar.Value, scalar.Type, serializerOptions));
+                            },
+                            (nested, element) => element.Add(nested.Name, Map(nested.Calls)));
+                    }
+
+                    array.Add(element);
+                }
+
+                return array;
+            }
+
             var calls = SectionFactoryInterpreter.Execute(
                 factory,
                 typeof(QuerySectionFactory<TElementFactory, TSection>),
                 argumentsType);
-            var array = new JsonArray();
-            foreach (var call in calls)
-            {
-                var (member, method, @params) = call;
-                var element = new JsonObject
-                {
-                    { "name", member ?? sectionKey },
-                    { "type", customMappings?.MapType?.Invoke(call) ?? method }
-                };
-
-                foreach (var param in @params)
-                {
-                    param.Switch(
-                        element,
-                        (selector, element) => element.Add(selector.Name, columnNames.Get(selector.MemberName)),
-                        (scalar, element) =>
-                        {
-                            if (customMappings?.SkipScalarParameter?.Invoke(scalar) is false)
-                                element.Add(
-                                    scalar.Name,
-                                    JsonSerializer.SerializeToNode(scalar.Value, scalar.Type, serializerOptions));
-                        });
-                }
-
-                array.Add(element);
-            }
-
-            return array;
+            return Map(calls);
         }
 
         public sealed record CustomMappings(
