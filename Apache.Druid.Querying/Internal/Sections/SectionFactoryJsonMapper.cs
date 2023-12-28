@@ -25,7 +25,7 @@ namespace Apache.Druid.Querying.Internal.Sections
                     var (member, method, @params) = call;
                     var element = new JsonObject
                     {
-                        { "name", member ?? sectionKey },
+                        { customMappings?.SectionColumnNameKey ?? "name", member ?? sectionKey },
                         { "type", customMappings?.MapType?.Invoke(call) ?? method }
                     };
 
@@ -63,6 +63,7 @@ namespace Apache.Druid.Querying.Internal.Sections
         public sealed record CustomMappings(
             Func<ElementFactoryCall, string>? MapType = null,
             Func<ElementFactoryCall.Parameter.Scalar, bool>? SkipScalarParameter = null,
-            Func<ElementFactoryCall.Parameter.Scalar, ElementFactoryCall.Parameter.Scalar>? ReplaceScalarParameter = null);
+            Func<ElementFactoryCall.Parameter.Scalar, ElementFactoryCall.Parameter.Scalar>? ReplaceScalarParameter = null,
+            string? SectionColumnNameKey = null);
     }
 }

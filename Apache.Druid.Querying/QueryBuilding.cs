@@ -233,7 +233,7 @@ namespace Apache.Druid.Querying
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IPostAggregators, TPostAggregations>> factory)
             where TQuery : IQuery<TQuery>
             => query.AddOrUpdateSectionWithSectionFactory(nameof(PostAggregations), factory, new(
-                ReplaceScalarParameter: scalar => scalar.Type == typeof(ArithmeticFunction) ?
+                ReplaceScalarParameter: static scalar => scalar.Type == typeof(ArithmeticFunction) ?
                     scalar with
                     {
                         Type = typeof(string),

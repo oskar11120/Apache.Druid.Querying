@@ -75,7 +75,7 @@ namespace Apache.Druid.Querying.Internal
         }
     }
 
-    public static class Marker 
+    public static class Marker
     {
         public sealed record Dimension;
         public sealed record Dimensions;
@@ -108,6 +108,7 @@ namespace Apache.Druid.Querying.Internal
         {
         }
 
+        private static readonly SectionFactoryJsonMapper.CustomMappings dimensionMappings = new(SectionColumnNameKey: "outputName");
         public abstract class TopN_<TDimension, TMetricArguments> :
             Query,
             IQueryWith.Intervals,
@@ -123,7 +124,7 @@ namespace Apache.Druid.Querying.Internal
             private IQuery<TSelf> Self => this;
 
             public TSelf Dimension(Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IDimensions, TDimension>> factory)
-                => this.AddOrUpdateSectionWithSectionFactory(nameof(Dimension), factory);
+                => this.AddOrUpdateSectionWithSectionFactory(nameof(Dimension), factory, dimensionMappings);
 
             public TSelf Threshold(int threshold)
                 => Self.AddOrUpdateSection(nameof(threshold), threshold);
@@ -164,7 +165,7 @@ namespace Apache.Druid.Querying.Internal
             private IQuery<TSelf> Self => this;
 
             public TSelf Dimensions(Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IDimensions, TDimensions>> factory)
-                => this.AddOrUpdateSectionWithSectionFactory(nameof(Dimensions), factory);
+                => this.AddOrUpdateSectionWithSectionFactory(nameof(Dimensions), factory, dimensionMappings);
 
             public TSelf LimitSpec(
                 int? limit = null,
