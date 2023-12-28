@@ -34,22 +34,22 @@ namespace Apache.Druid.Querying.Internal
                     json.Deserialize<TPostAggregations>(options)!);
         }
 
-        public interface Dimension_Aggregations_<TDimensions, TAggregations>
-            : WithTimestamp_<Dimension_Aggregations<TDimensions, TAggregations>>
+        public interface Dimension_Aggregations_<TDimension, TAggregations>
+            : WithTimestamp_<Dimension_Aggregations<TDimension, TAggregations>>
         {
-            Dimension_Aggregations<TDimensions, TAggregations> WithTimestamp_<Dimension_Aggregations<TDimensions, TAggregations>>.MapResult(
+            Dimension_Aggregations<TDimension, TAggregations> WithTimestamp_<Dimension_Aggregations<TDimension, TAggregations>>.MapResult(
                 JsonElement json, JsonSerializerOptions options)
                 => new(
-                    json.Deserialize<TDimensions>(options)!,
+                    json.Deserialize<TDimension>(options)!,
                     json.Deserialize<TAggregations>(options)!);
         }
 
-        public interface Dimension_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>
-             : WithTimestamp_<Dimension_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>
+        public interface Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations>
+             : WithTimestamp_<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>
         {
-            Dimension_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations> WithTimestamp_<Dimension_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>.MapResult(
+            Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations> WithTimestamp_<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>.MapResult(
                 JsonElement json, JsonSerializerOptions options) => new(
-                json.Deserialize<TDimensions>(options)!,
+                json.Deserialize<TDimension>(options)!,
                 json.Deserialize<TAggregations>(options)!,
                 json.Deserialize<TPostAggregations>(options)!);
         }
@@ -108,7 +108,7 @@ namespace Apache.Druid.Querying.Internal
         {
         }
 
-        private static readonly SectionFactoryJsonMapper.CustomMappings dimensionMappings = new(SectionColumnNameKey: "outputName");
+        private static readonly SectionFactoryJsonMapper.Options dimensionsMapperOptions = new(SectionColumnNameKey: "outputName");
         public abstract class TopN_<TDimension, TMetricArguments> :
             Query,
             IQueryWith.Intervals,
@@ -117,6 +117,8 @@ namespace Apache.Druid.Querying.Internal
             IQueryWith.Context<QueryContext.TopN, TSelf>,
             IQuery<TArguments, TSelf, Marker.Dimension>
         {
+            private static readonly SectionFactoryJsonMapper.Options mapperOptions = dimensionsMapperOptions with { ForceSingle = true };
+
             public TopN_() : base("topN")
             {
             }
@@ -124,7 +126,7 @@ namespace Apache.Druid.Querying.Internal
             private IQuery<TSelf> Self => this;
 
             public TSelf Dimension(Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IDimensions, TDimension>> factory)
-                => this.AddOrUpdateSectionWithSectionFactory(nameof(Dimension), factory, dimensionMappings);
+                => this.AddOrUpdateSectionWithSectionFactory(nameof(Dimension), factory, mapperOptions);
 
             public TSelf Threshold(int threshold)
                 => Self.AddOrUpdateSection(nameof(threshold), threshold);
@@ -165,7 +167,7 @@ namespace Apache.Druid.Querying.Internal
             private IQuery<TSelf> Self => this;
 
             public TSelf Dimensions(Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IDimensions, TDimensions>> factory)
-                => this.AddOrUpdateSectionWithSectionFactory(nameof(Dimensions), factory, dimensionMappings);
+                => this.AddOrUpdateSectionWithSectionFactory(nameof(Dimensions), factory, dimensionsMapperOptions);
 
             public TSelf LimitSpec(
                 int? limit = null,

@@ -98,7 +98,7 @@ namespace Apache.Druid.Querying
 
     public interface IQuery<TSelf> : IQuery where TSelf : IQuery<TSelf>
     {
-        private TSelf Unwrapped => (TSelf)this;
+        public TSelf Unwrapped => (TSelf)this;
         private IQuery Base => this;
 
         public new TSelf AddOrUpdateSection(string key, QuerySectionValueFactory valueFactory, bool convertKeyToCamelCase = true)

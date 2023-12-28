@@ -89,157 +89,110 @@ namespace Apache.Druid.Querying.Unit.Tests
         //        .ToJson();
         //}
 
-        //[Test]
-        //public void TopNQuery_Builds()
-        //{
-        //    var zero = new Query<Message>
-        //        .TopN<TopNDimension>
-        //        .WithNoVirtualColumns
-        //        .WithAggregations<Aggregations>()
-        //        .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
-        //        .Dimension(dimension => dimension.Default(
-        //            message => message.ObjectId,
-        //            dimension => dimension.ObjectId))
-        //        .Threshold(5)
-        //        .Granularity(Granularity.Minute)
-        //        .Filter(filter => filter.Or(
-        //            filter.Null(message => message.Value),
-        //            filter.Equals(
-        //                message => message.ObjectId,
-        //                Guid.NewGuid())))
-        //        .Aggregations(aggregators => new[]
-        //        {
-        //            aggregators.Last(
-        //                aggregations => aggregations.LastValue,
-        //                message => message.Value),
-        //            aggregators.Max(
-        //                aggregations => aggregations.TMax,
-        //                message => message.Timestamp)
-        //        })
-        //        .Metric(metric => metric.Numeric(
-        //            tuple => tuple.Aggregations.LastValue))
-        //        .Context(new() { MinTopNThreshold = 5 })
-        //        .ToJson();
+        [Test]
+        public void TopNQuery_Builds()
+        {
+            var zero = new Query<Message>
+                .TopN<Guid>
+                .WithNoVirtualColumns
+                .WithAggregations<Aggregations>()
+                .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
+                .Dimension(dimension => dimension.Default(message => message.ObjectId))
+                .Threshold(5)
+                .Granularity(Granularity.Minute)
+                .Filter(filter => filter.Or(
+                    filter.Null(message => message.Value),
+                    filter.Equals(
+                        message => message.ObjectId,
+                        Guid.NewGuid())))
+                .Aggregations(aggregations => new(
+                    aggregations.Max(message => message.Timestamp),
+                    aggregations.Last(message => message.Value)
+                ))
+                .Metric(metric => metric.Numeric(
+                    tuple => tuple.Aggregations.LastValue))
+                .Context(new() { MinTopNThreshold = 5 })
+                .ToJson();
 
-        //    var one = new Query<Message>
-        //        .TopN<TopNDimension>
-        //        .WithVirtualColumns<VirtualColumns>
-        //        .WithAggregations<Aggregations>()
-        //        .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
-        //        .VirtualColumns(columns => new[]
-        //        {
-        //            columns.Expression(
-        //                virtualColumns => virtualColumns.TReal,
-        //                "__time")
-        //        })
-        //        .Filter(filter => filter.Or(
-        //            filter.Null(pair => pair.VirtualColumns.TReal),
-        //            filter.Equals(
-        //                pair => pair.Source.ObjectId,
-        //                Guid.NewGuid())))
-        //        .Dimension(dimension => dimension.Default(
-        //            message => message.Source.ObjectId,
-        //            dimension => dimension.ObjectId))
-        //        .Threshold(5)
-        //        .Granularity(Granularity.Minute)
-        //        .Aggregations(aggregators => new[]
-        //        {
-        //            aggregators.Last(
-        //                aggregations => aggregations.LastValue,
-        //                pair => pair.Source.Value),
-        //            aggregators.Max(
-        //                aggregations => aggregations.TMax,
-        //                pair => pair.Source.Timestamp)
-        //        })
-        //        .Metric(metric => metric.Numeric(
-        //            tuple => tuple.Aggregations.LastValue))
-        //        .Context(new() { MinTopNThreshold = 5 })
-        //        .ToJson();
+            var one = new Query<Message>
+                .TopN<Guid>
+                .WithVirtualColumns<DateTimeOffset>
+                .WithAggregations<Aggregations>()
+                .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
+                .VirtualColumns(columns => columns.Expression<DateTimeOffset>("__time"))
+                .Filter(filter => filter.Or(
+                    filter.Null(pair => pair.VirtualColumns),
+                    filter.Equals(
+                        pair => pair.Source.ObjectId,
+                        Guid.NewGuid())))
+                .Dimension(dimension => dimension.Default(
+                    message => message.Source.ObjectId))
+                .Threshold(5)
+                .Granularity(Granularity.Minute)
+                .Aggregations(aggregations => new(
+                    aggregations.Max(tuple => tuple.Source.Timestamp),
+                    aggregations.Last(tuple => tuple.Source.Value)
+                ))
+                .Metric(metric => metric.Numeric(
+                    tuple => tuple.Aggregations.LastValue))
+                .Context(new() { MinTopNThreshold = 5 })
+                .ToJson();
 
-        //    var two = new Query<Message>
-        //        .TopN<TopNDimension>
-        //        .WithNoVirtualColumns
-        //        .WithAggregations<Aggregations>
-        //        .WithPostAggregations<PostAggregations>()
-        //        .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
-        //        .Dimension(dimension => dimension.Default(
-        //            message => message.ObjectId,
-        //            dimension => dimension.ObjectId))
-        //        .Threshold(5)
-        //        .Granularity(Granularity.Minute)
-        //        .Filter(filter => filter.Or(
-        //            filter.Null(message => message.Value),
-        //            filter.Equals(
-        //                message => message.ObjectId,
-        //                Guid.NewGuid())))
-        //        .Aggregations(aggregators => new[]
-        //        {
-        //            aggregators.Last(
-        //                aggregations => aggregations.LastValue,
-        //                message => message.Value),
-        //            aggregators.Max(
-        //                aggregations => aggregations.TMax,
-        //                message => message.Timestamp)
-        //        })
-        //        .PostAggregations(postAggregators => new[]
-        //        {
-        //            postAggregators.Arithmetic(
-        //                postAggregations => postAggregations.Sum,
-        //                ArithmeticFunction.Add,
-        //                postAggregators.FieldAccess(
-        //                    aggregations => aggregations.LastValue,
-        //                    finalizing: true))
-        //        })
-        //        .Metric(metric => metric.Numeric(
-        //            tuple => tuple.PostAggregations.Sum))
-        //        .Context(new() { MinTopNThreshold = 5 })
-        //        .ToJson();
+            var two = new Query<Message>
+                .TopN<TopNDimension>
+                .WithNoVirtualColumns
+                .WithAggregations<Aggregations>
+                .WithPostAggregations<double>()
+                .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
+                .Dimension(dimension => new(dimension.Default(
+                    message => message.ObjectId)))
+                .Threshold(5)
+                .Granularity(Granularity.Minute)
+                .Filter(filter => filter.Or(
+                    filter.Null(message => message.Value),
+                    filter.Equals(
+                        message => message.ObjectId,
+                        Guid.NewGuid())))
+                .Aggregations(aggregations => new(
+                    aggregations.Max(message => message.Timestamp),
+                    aggregations.Last(message => message.Value)
+                ))
+                .PostAggregations(postAggregators => postAggregators.Arithmetic(
+                    ArithmeticFunction.Add,
+                    postAggregators.FieldAccess(aggregations => aggregations.LastValue, true)))
+                .Metric(metric => metric.Numeric(tuple => tuple.PostAggregations))
+                .Context(new() { MinTopNThreshold = 5 })
+                .ToJson();
 
-        //    var three = new Query<Message>
-        //        .TopN<TopNDimension>
-        //        .WithVirtualColumns<VirtualColumns>
-        //        .WithAggregations<Aggregations>
-        //        .WithPostAggregations<PostAggregations>()
-        //        .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
-        //        .VirtualColumns(columns => new[]
-        //        {
-        //            columns.Expression(
-        //                virtualColumns => virtualColumns.TReal,
-        //                "__time")
-        //        })
-        //        .Filter(filter => filter.Or(
-        //            filter.Null(pair => pair.VirtualColumns.TReal),
-        //            filter.Equals(
-        //                pair => pair.Source.ObjectId,
-        //                Guid.NewGuid())))
-        //        .Dimension(dimension => dimension.Default(
-        //            message => message.Source.ObjectId,
-        //            dimension => dimension.ObjectId))
-        //        .Threshold(5)
-        //        .Granularity(Granularity.Minute)
-        //        .Aggregations(aggregators => new[]
-        //        {
-        //            aggregators.Last(
-        //                aggregations => aggregations.LastValue,
-        //                pair => pair.Source.Value),
-        //            aggregators.Max(
-        //                aggregations => aggregations.TMax,
-        //                pair => pair.Source.Timestamp)
-        //        })
-        //        .PostAggregations(postAggregators => new[]
-        //        {
-        //            postAggregators.Arithmetic(
-        //                postAggregations => postAggregations.Sum,
-        //                ArithmeticFunction.Add,
-        //                postAggregators.FieldAccess(
-        //                    aggregations => aggregations.LastValue,
-        //                    finalizing: true))
-        //        })
-        //        .Metric(metric => metric.Numeric(
-        //            tuple => tuple.PostAggregations.Sum))
-        //        .Context(new() { MinTopNThreshold = 5 })
-        //        .ToJson();
-        //}
+            var three = new Query<Message>
+                .TopN<TopNDimension>
+                .WithVirtualColumns<VirtualColumns>
+                .WithAggregations<Aggregations>
+                .WithPostAggregations<PostAggregations>()
+                .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
+                .VirtualColumns(columns => new(columns.Expression<DateTimeOffset>("__time")))
+                .Filter(filter => filter.Or(
+                    filter.Null(pair => pair.VirtualColumns.TReal),
+                    filter.Equals(
+                        pair => pair.Source.ObjectId,
+                        Guid.NewGuid())))
+                .Dimension(dimension => new(
+                    dimension.Default(message => message.Source.ObjectId)))
+                .Threshold(5)
+                .Granularity(Granularity.Minute)
+                .Aggregations(aggregations => new(
+                    aggregations.Max(tuple => tuple.Source.Timestamp),
+                    aggregations.Last(tuple => tuple.Source.Value)
+                ))
+                .PostAggregations(postAggregators => new(
+                    postAggregators.Arithmetic(
+                        ArithmeticFunction.Add,
+                        postAggregators.FieldAccess( aggregations => aggregations.LastValue, true))))
+                .Metric(metric => metric.Numeric(
+                    tuple => tuple.PostAggregations.Sum))
+                .Context(new() { MinTopNThreshold = 5 })
+                .ToJson();
+        }
 
         [Test]
         public void TimeSeriesQuery_Builds()
