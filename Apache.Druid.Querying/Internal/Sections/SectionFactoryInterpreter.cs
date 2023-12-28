@@ -9,8 +9,17 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
     internal sealed record ElementFactoryCall(
         string ResultMemberName,
         string MethodName,
-        IEnumerable<ElementFactoryCall.Parameter.Any> Parameters)
+        IReadOnlyList<ElementFactoryCall.Parameter.Any> Parameters)
     {
+        public Parameter.Scalar? TryGetScalarParameter<TParameter>() => Parameters
+            .SingleOrDefault(param => param.Scalar?.Type == typeof(TParameter))
+            ?.Scalar;
+
+        public Parameter.ArgumentsMemberSelector GetMemberSelectorParameter(string name) => Parameters
+            .SingleOrDefault(param => param.Selector?.Name == name)
+            ?.Selector
+            ?? throw new InvalidOperationException(); // TODO
+
         public static class Parameter
         {
             public sealed record Any(ArgumentsMemberSelector? Selector, Scalar? Scalar)
@@ -58,7 +67,7 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
             Member GetMember(Expression argumentsMemberSelector)
             {
                 var lambda = argumentsMemberSelector as LambdaExpression ?? throw new InvalidOperationException();
-                if (lambda.Parameters.Count is not 1 /*|| lambda.Parameters[0].Type != argumentsType*/) // TODO
+                if (lambda.Parameters.Count is not 1 || lambda.Parameters[0].Type != argumentsType)
                     throw new InvalidOperationException();
                 return SectionFactoryInterpreter.GetMember(lambda.Body);
             }
@@ -82,7 +91,8 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
                             new(GetMember(arg).Map(paramName), null) :
                             new(null, new ElementFactoryCall.Parameter.Scalar(paramType, paramName, arg.GetValue()));
                         return result;
-                    });
+                    })
+                    .ToList();
                 return new(resultMemberName, methodName, callParameters);
             }
 
@@ -132,7 +142,7 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
             return new(property.PropertyType, name);
         }
 
-        private readonly record struct Member(Type Type, string Name) 
+        private readonly record struct Member(Type Type, string Name)
         {
             public ElementFactoryCall.Parameter.ArgumentsMemberSelector Map(string name) => new(Type, Name, name);
         }

@@ -1,5 +1,4 @@
 ﻿using Apache.Druid.Querying.Internal;
-using Apache.Druid.Querying.Internal.QuerySectionFactory;
 using Apache.Druid.Querying.Internal.Sections;
 using System;
 using System.Collections.Generic;
@@ -182,7 +181,27 @@ namespace Apache.Druid.Querying
             this IQueryWith.Aggregations<TArguments, TAggregations, TQuery> query,
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IAggregations, TAggregations>> factory)
             where TQuery : IQuery<TQuery>
-            => query.AddOrUpdateSection(nameof(Aggregations), typeof(TArguments), factory);
+            => query.AddOrUpdateSection(nameof(Aggregations), typeof(TArguments), factory, new(
+                static call =>
+                {
+                    return call.MethodName switch
+                    {
+                        nameof(QueryElementFactory<TArguments>.IAggregations.Mean) => "doubleMean",
+
+                        nameof(QueryElementFactory<TArguments>.IAggregations.Sum) or
+                        nameof(QueryElementFactory<TArguments>.IAggregations.Min) or
+                        nameof(QueryElementFactory<TArguments>.IAggregations.Max) or
+                        nameof(QueryElementFactory<TArguments>.IAggregations.First) or
+                        nameof(QueryElementFactory<TArguments>.IAggregations.Last) or
+                        nameof(QueryElementFactory<TArguments>.IAggregations.Any) =>
+                            (call.TryGetScalarParameter<SimpleDataType>()?.Value?.ToString()
+                            ?? DataType.GetSimple(call.GetMemberSelectorParameter("fieldName").MemberType).ToString())
+                            .ToCamelCase()
+                            + call.MethodName,
+
+                        _ => call.MethodName.ToCamelCase()
+                    };
+                }));
 
         public static TQuery PostAggregations<TArguments, TPostAggregations, TQuery>(
             this IQueryWith.PostAggregations<TArguments, TPostAggregations, TQuery> query,

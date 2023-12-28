@@ -10,11 +10,12 @@ namespace Apache.Druid.Querying.Internal.Sections
             string key,
             Type argumentsType,
             Expression<QuerySectionFactory<TElementFactory, TSection>> factory,
+            SectionFactoryJsonMapper.CustomMappings? customMappings = null,
             bool convertKeyToCamelCase = true)
             where TSelf : IQuery<TSelf>
             => query.AddOrUpdateSection(
                 key,
-                options => SectionFactoryJsonMapper.Map(factory, argumentsType, options),
+                options => SectionFactoryJsonMapper.Map(factory, argumentsType, options, customMappings),
                 convertKeyToCamelCase);
     }
 }

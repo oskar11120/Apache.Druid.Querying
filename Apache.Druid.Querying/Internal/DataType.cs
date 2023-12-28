@@ -28,13 +28,10 @@ namespace Apache.Druid.Querying.Internal
             return result.ToString();
         }
 
-        public static SimpleDataType GetSimple<TValue>()
-        {
-            var type = typeof(TValue);
-            return TryGetSimple(type, out var simple) ?
+        public static SimpleDataType GetSimple(Type type) 
+            => TryGetSimple(type, out var simple) ?
                 simple :
                 throw new InvalidOperationException($"No matching {nameof(SimpleDataType)} {nameof(DataType)} exists for {nameof(type)}.");
-        }
 
         private static void Set(Type type, StringBuilder result)
         {

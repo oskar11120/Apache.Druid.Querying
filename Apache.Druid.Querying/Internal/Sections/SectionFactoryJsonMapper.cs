@@ -11,19 +11,21 @@ namespace Apache.Druid.Querying.Internal.Sections
         public static JsonArray Map<TElementFactory, TSection>(
             Expression<QuerySectionFactory<TElementFactory, TSection>> factory,
             Type argumentsType,
-            JsonSerializerOptions serializerOptions)
+            JsonSerializerOptions serializerOptions,
+            CustomMappings? customMappings)
         {
             var calls = SectionFactoryInterpreter.Execute(
                 factory,
                 typeof(QuerySectionFactory<TElementFactory, TSection>),
                 argumentsType);
             var array = new JsonArray();
-            foreach (var (member, method, @params) in calls)
+            foreach (var call in calls)
             {
+                var (member, method, @params) = call;
                 var element = new JsonObject
                 {
                     { "name", member },
-                    { "type", method }
+                    { "type", customMappings?.MapType?.Invoke(call) ?? method }
                 };
 
                 foreach (var param in @params)
@@ -31,7 +33,13 @@ namespace Apache.Druid.Querying.Internal.Sections
                     param.Switch(
                         element,
                         (selector, element) => element.Add(selector.Name, selector.MemberName),
-                        (scalar, element) => element.Add(scalar.Name, JsonSerializer.SerializeToNode(scalar.Value, scalar.Type, serializerOptions)));
+                        (scalar, element) =>
+                        {
+                            if (customMappings?.SkipScalarParameter?.Invoke(scalar) is false)
+                                element.Add(
+                                    scalar.Name,
+                                    JsonSerializer.SerializeToNode(scalar.Value, scalar.Type, serializerOptions));
+                        });
                 }
 
                 array.Add(element);
@@ -39,5 +47,9 @@ namespace Apache.Druid.Querying.Internal.Sections
 
             return array;
         }
+
+        public sealed record CustomMappings(
+            Func<ElementFactoryCall, string>? MapType = null,
+            Func<ElementFactoryCall.Parameter.Scalar, bool>? SkipScalarParameter = null);
     }
 }
