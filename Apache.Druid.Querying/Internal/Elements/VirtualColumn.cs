@@ -1,6 +1,6 @@
 ﻿namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 {
-    public abstract class VirtualColumn : WithType
+    internal abstract class VirtualColumn : WithType
     {
         public VirtualColumn(string? type = null) : base(type)
         {

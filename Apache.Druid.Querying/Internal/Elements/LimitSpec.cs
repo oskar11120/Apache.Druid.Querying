@@ -4,7 +4,7 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 {
     internal sealed class LimitSpec : WithType, ILimitSpec
     {
-        public LimitSpec(int? limit, int? offset, IEnumerable<OrderBy>? columns) : base("default")
+        public LimitSpec(int? limit, int? offset, IEnumerable<ILimitSpec.OrderBy>? columns) : base("default")
         {
             Limit = limit;
             Offset = offset;
@@ -13,7 +13,7 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 
         public int? Limit { get; }
         public int? Offset { get; }
-        public IEnumerable<OrderBy>? Columns { get; }
+        public IEnumerable<ILimitSpec.OrderBy>? Columns { get; }
 
         public sealed class OrderBy : ILimitSpec.OrderBy
         {

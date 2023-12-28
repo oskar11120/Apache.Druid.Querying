@@ -15,10 +15,11 @@ namespace Apache.Druid.Querying.DependencyInjection
             Converters =
             {
                 new JsonStringEnumConverter(),
-                new PolymorphicSerializer<Filter>(),
-                new PolymorphicSerializer<Aggregator>(),
-                new PolymorphicSerializer<PostAggregator>(),
-                new PolymorphicSerializer<VirtualColumn>(),
+                new PolymorphicSerializer<IFilter>(),
+                new PolymorphicSerializer<IMetric>(),
+                new PolymorphicSerializer<IHaving>(),
+                new PolymorphicSerializer<ILimitSpec>(),
+                new PolymorphicSerializer<ILimitSpec.OrderBy>()
                 //    new UnixMilisecondsConverter<DateTimeOffset>(
                 //        DateTimeOffset.FromUnixTimeMilliseconds,
                 //        Utf8Formatter.TryFormat),

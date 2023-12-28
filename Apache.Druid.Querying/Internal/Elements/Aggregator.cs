@@ -1,6 +1,6 @@
 ﻿namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 {
-    public class Aggregator : WithType
+    internal class Aggregator : WithType
     {
         public Aggregator(string name, string? type = null) : base(type)
         {

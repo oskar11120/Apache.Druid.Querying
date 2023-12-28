@@ -29,20 +29,12 @@ internal class MessageSourceTests
                 filter.Selector(
                     message => message.ObjectId,
                     Guid.Parse("4460391b-b713-44eb-b422-2dbe7de91856"))))
-            .Aggregations(aggregators => new[]
-            {
-                aggregators.Sum(
-                    aggregations => aggregations.Sum,
-                    message => message.Value),
-                aggregators.Count(aggregations => aggregations.Count),
-                aggregators.First(
-                    aggregations => aggregations.Variable,
-                    message => message.VariableName),
-                aggregators.First(
-                    aggregations => aggregations.FirstValue,
-                    message => message.Value,
-                    SimpleDataType.String)
-            })
+            .Aggregations(aggregators => new(
+                aggregators.Sum(message => message.Value),
+                aggregators.Count(),
+                aggregators.First(message => message.VariableName),
+                aggregators.First(message => message.Value, SimpleDataType.String)
+            ))
             //.PostAggregations(postAggregators => new[]
             //{
             //    postAggregators.Arithmetic(

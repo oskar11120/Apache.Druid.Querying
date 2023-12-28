@@ -2,7 +2,7 @@
 
 namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 {
-    public abstract class PostAggregator : WithType
+    internal abstract class PostAggregator : WithType
     {
         public PostAggregator(string Name, string? type = null) : base(type)
         {

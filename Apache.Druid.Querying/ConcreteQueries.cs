@@ -83,17 +83,17 @@ namespace Apache.Druid.Querying
         {
             public class WithVirtualColumns<TVirtualColumns> :
                 QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>.TopN<TDimension>,
-                IQueryWith.VirtualColumns<TVirtualColumns, WithVirtualColumns<TVirtualColumns>>,
+                IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithVirtualColumns<TVirtualColumns>>,
                 IQueryWithResult<WithTimestamp<TDimension>>
             {
                 public class WithAggregations<TAggregations> :
                     QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>.TopN<TDimension, TAggregations>,
-                    IQueryWith.VirtualColumns<TVirtualColumns, WithAggregations<TAggregations>>,
+                    IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithAggregations<TAggregations>>,
                     IQueryWithMappedResult.Dimension_Aggregations_<TDimension, TAggregations>
                 {
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>.TopN<TDimension, TAggregations, TPostAggregations>,
-                        IQueryWith.VirtualColumns<TVirtualColumns, WithPostAggregations<TPostAggregations>>,
+                        IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithPostAggregations<TPostAggregations>>,
                         IQueryWithMappedResult.Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations>
                     {
                     }
@@ -123,17 +123,17 @@ namespace Apache.Druid.Querying
         {
             public class WithVirtualColumns<TVirtualColumns> :
                 QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>.GroupBy<TDimensions>,
-                IQueryWith.VirtualColumns<TVirtualColumns, WithVirtualColumns<TVirtualColumns>>,
+                IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithVirtualColumns<TVirtualColumns>>,
                 IQueryWithResult<WithTimestamp<TDimensions>>
             {
                 public class WithAggregations<TAggregations> :
                     QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>.GroupBy<TDimensions, TAggregations>,
-                    IQueryWith.VirtualColumns<TVirtualColumns, WithAggregations<TAggregations>>,
+                    IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithAggregations<TAggregations>>,
                     IQueryWithMappedResult.Dimensions_Aggregations_<TDimensions, TAggregations>
                 {
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>.GroupBy<TDimensions, TAggregations, TPostAggregations>,
-                        IQueryWith.VirtualColumns<TVirtualColumns, WithPostAggregations<TPostAggregations>>,
+                        IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithPostAggregations<TPostAggregations>>,
                         IQueryWithMappedResult.Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>
                     {
                     }

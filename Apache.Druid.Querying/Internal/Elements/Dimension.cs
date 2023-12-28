@@ -1,6 +1,6 @@
 ﻿namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 {
-    public abstract class Dimension : WithType
+    internal abstract class Dimension : WithType
     {
         public Dimension(string? type = null) : base(type)
         {

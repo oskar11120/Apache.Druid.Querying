@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Apache.Druid.Querying.DependencyInjection;
 
 namespace Apache.Druid.Querying.Unit.Tests
@@ -330,7 +331,6 @@ namespace Apache.Druid.Querying.Unit.Tests
                         postAggregators.FieldAccess(aggregations => aggregations.LastValue, true))
                 ))
                 .ToJson();
-
         }
 
         record Message(
@@ -349,12 +349,12 @@ namespace Apache.Druid.Querying.Unit.Tests
     {
         public static string ToJson(this IQuery query)
         {
-            var asDictionary = query
-                .GetState()
-                .ToDictionary(pair => pair.Key, pair => pair.Value.Value);
             var options = DefaultSerializerOptions.Create();
             options.WriteIndented = true;
-            return JsonSerializer.Serialize<object>(asDictionary, options);
+            var asDictionary = query
+                .GetState()
+                .ToDictionary(pair => pair.Key, pair => pair.Value(options));
+            return JsonSerializer.Serialize(asDictionary, options);
         }
     }
 }

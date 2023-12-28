@@ -6,10 +6,10 @@ using System.Reflection;
 
 namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 {
-    internal sealed record FactoryCall(
+    internal sealed record ElementFactoryCall(
         string ResultMemberName,
         string MethodName,
-        IEnumerable<FactoryCall.Parameter.Any> Parameters)
+        IEnumerable<ElementFactoryCall.Parameter.Any> Parameters)
     {
         public static class Parameter
         {
@@ -43,27 +43,27 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
                         });
             }
 
-            public sealed record ArgumentsMemberSelector(Type Type, string Name);
+            public sealed record ArgumentsMemberSelector(Type MemberType, string MemberName, string Name);
             public sealed record Scalar(Type Type, string Name, object? Value);
         }
     }
 
-    internal static class SectionExpressionInterpreter
+    internal static class SectionFactoryInterpreter
     {
-        public static IEnumerable<FactoryCall> Execute(
-            LambdaExpression factoryExpression,
+        public static IEnumerable<ElementFactoryCall> Execute(
+            LambdaExpression querySectionFactory,
             Type factoryType,
             Type argumentsType)
         {
-            FactoryCall.Parameter.ArgumentsMemberSelector Execute_(Expression argumentsMemberSelector)
+            Member GetMember(Expression argumentsMemberSelector)
             {
                 var lambda = argumentsMemberSelector as LambdaExpression ?? throw new InvalidOperationException();
-                if (lambda.Parameters.Count is not 1 || lambda.Parameters[0].Type != argumentsType)
+                if (lambda.Parameters.Count is not 1 /*|| lambda.Parameters[0].Type != argumentsType*/) // TODO
                     throw new InvalidOperationException();
-                return ExecuteOnBody(lambda.Body);
+                return SectionFactoryInterpreter.GetMember(lambda.Body);
             }
 
-            FactoryCall Execute(Expression factoryCall, string resultMemberName)
+            ElementFactoryCall Execute(Expression factoryCall, string resultMemberName)
             {
                 var call = factoryCall as MethodCallExpression ?? throw new InvalidOperationException();
                 var method = call.Method;
@@ -74,21 +74,22 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
                     .Zip(methodParameters, (arg, @param) =>
                     {
                         var paramType = @param.ParameterType;
+                        var paramName = @param.Name!;
                         var expectedArgumentsMemberSelector =
                             paramType.IsGenericType &&
                             paramType.GetGenericTypeDefinition() == typeof(QueryElementFactory<>.ColumnSelector<>);
-                        FactoryCall.Parameter.Any result = expectedArgumentsMemberSelector ?
-                            new(Execute_(arg), null) :
-                            new(null, new FactoryCall.Parameter.Scalar(paramType, @param.Name!, arg.GetValue()));
+                        ElementFactoryCall.Parameter.Any result = expectedArgumentsMemberSelector ?
+                            new(GetMember(arg).Map(paramName), null) :
+                            new(null, new ElementFactoryCall.Parameter.Scalar(paramType, paramName, arg.GetValue()));
                         return result;
                     });
                 return new(resultMemberName, methodName, callParameters);
             }
 
 
-            IEnumerable<FactoryCall> Execute__()
+            IEnumerable<ElementFactoryCall> Execute__()
             {
-                var body = factoryExpression.Body;
+                var body = querySectionFactory.Body;
                 var init = body as MemberInitExpression;
                 var @new = init is null ?
                     body as NewExpression ?? throw new InvalidOperationException() :
@@ -120,15 +121,20 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
             return Execute__().DistinctBy(call => call.ResultMemberName);
         }
 
-        private static FactoryCall.Parameter.ArgumentsMemberSelector ExecuteOnBody(Expression selectorBody)
+        private static Member GetMember(Expression selectorBody)
         {
             if (selectorBody is UnaryExpression unary)
-                return ExecuteOnBody(unary.Operand);
+                return GetMember(unary.Operand);
 
             var expression = (MemberExpression)selectorBody;
             var name = expression.Member.Name;
             var property = expression.Member as PropertyInfo ?? throw new InvalidOperationException();
             return new(property.PropertyType, name);
+        }
+
+        private readonly record struct Member(Type Type, string Name) 
+        {
+            public ElementFactoryCall.Parameter.ArgumentsMemberSelector Map(string name) => new(Type, Name, name);
         }
     }
 }

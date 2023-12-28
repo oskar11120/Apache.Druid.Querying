@@ -74,7 +74,7 @@ namespace Apache.Druid.Querying
         public IReadOnlyDictionary<string, QuerySectionValueFactory> GetState() => State;
         public void AddOrUpdateSection(string key, QuerySectionValueFactory valueFactory, bool convertKeyToCamelCase = true)
         {
-            key = convertKeyToCamelCase ? key : key.ToCamelCase();
+            key = convertKeyToCamelCase ? key.ToCamelCase() : key;
             State.Remove(key);
             State.Add(key, valueFactory);
         }
@@ -176,25 +176,19 @@ namespace Apache.Druid.Querying
             this IQueryWith.VirtualColumns<TArguments, TVirtualColumns, TQuery> query,
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IVirtualColumns, TVirtualColumns>> factory)
             where TQuery : IQuery<TQuery>
-            => query.AddOrUpdateSection(
-                nameof(VirtualColumns),
-                options => FromExpressionQuerySectionFactory.Create(factory, options));
+            => query.AddOrUpdateSection(nameof(VirtualColumns), typeof(TArguments), factory);
 
         public static TQuery Aggregations<TArguments, TAggregations, TQuery>(
             this IQueryWith.Aggregations<TArguments, TAggregations, TQuery> query,
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IAggregations, TAggregations>> factory)
             where TQuery : IQuery<TQuery>
-            => query.AddOrUpdateSection(
-                nameof(Aggregations),
-                options => FromExpressionQuerySectionFactory.Create(factory, options));
+            => query.AddOrUpdateSection(nameof(Aggregations), typeof(TArguments), factory);
 
         public static TQuery PostAggregations<TArguments, TPostAggregations, TQuery>(
             this IQueryWith.PostAggregations<TArguments, TPostAggregations, TQuery> query,
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IPostAggregators, TPostAggregations>> factory)
             where TQuery : IQuery<TQuery>
-            => query.AddOrUpdateSection(
-                nameof(PostAggregations),
-                options => FromExpressionQuerySectionFactory.Create(factory, options));
+            => query.AddOrUpdateSection(nameof(PostAggregations), typeof(TArguments), factory);
 
         public static TQuery Filter<TArguments, TQuery>(this IQueryWith.Filter<TArguments, TQuery> query, Func<QueryElementFactory<TArguments>.Filter, IFilter> factory)
             where TQuery : IQuery<TQuery>

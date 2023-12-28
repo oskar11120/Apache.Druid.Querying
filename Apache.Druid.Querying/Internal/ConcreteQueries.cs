@@ -1,6 +1,8 @@
 ﻿using Apache.Druid.Querying.Internal.QuerySectionFactory;
+using Apache.Druid.Querying.Internal.Sections;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text.Json;
 
 namespace Apache.Druid.Querying.Internal
@@ -113,32 +115,14 @@ namespace Apache.Druid.Querying.Internal
 
             private IQuery<TSelf> Self => this;
 
-            public TSelf Dimension(Func<QuerySectionFactory.DimensionSpec<TArguments, TDimension>, Dimension> factory)
-            {
-                var factory_ = new QuerySectionFactory.DimensionSpec<TArguments, TDimension>();
-                var dimension = factory(factory_);
-                Self.AddOrUpdateSection(nameof(dimension), dimension);
-                return Self.Unwrapped;
-            }
+            public TSelf Dimension(Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IDimensions, TDimension>> factory)
+                => Self.AddOrUpdateSection(nameof(Dimension), typeof(TArguments), factory);
 
             public TSelf Threshold(int threshold)
-            {
-                Self.AddOrUpdateSection(nameof(threshold), threshold);
-                return Self.Unwrapped;
-            }
+                => Self.AddOrUpdateSection(nameof(threshold), threshold);
 
-            public TSelf Metric(Func<QuerySectionFactory.MetricSpec<TMetricArguments>, Metric> factory)
-            {
-                var factory_ = new QuerySectionFactory.MetricSpec<TMetricArguments>();
-                var metric = factory(factory_);
-                return Metric(metric);
-            }
-
-            protected TSelf Metric(Metric metric)
-            {
-                Self.AddOrUpdateSection(nameof(metric), metric);
-                return Self.Unwrapped;
-            }
+            public TSelf Metric(Func<QueryElementFactory<TMetricArguments>.MetricSpec, IMetric> factory)
+                => Self.AddOrUpdateSection(nameof(Metric), factory(new()));
         }
 
         public abstract class TopN<TDimension> : TopN_<TDimension, TDimension>
@@ -171,40 +155,20 @@ namespace Apache.Druid.Querying.Internal
 
             private IQuery<TSelf> Self => this;
 
-            public TSelf Dimensions(Func<QuerySectionFactory.DimensionSpec<TArguments, TDimensions>, IEnumerable<Dimension>> factory)
-            {
-                var factory_ = new QuerySectionFactory.DimensionSpec<TArguments, TDimensions>();
-                var dimensions = factory(factory_);
-                Self.AddOrUpdateSection(nameof(dimensions), dimensions);
-                return Self.Unwrapped;
-            }
+            public TSelf Dimensions(Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IDimensions, TDimensions>> factory)
+                => Self.AddOrUpdateSection(nameof(Dimensions), typeof(TArguments), factory);
 
             public TSelf LimitSpec(
                 int? limit = null,
                 int? offset = null,
-                Func<QuerySectionFactory.OrderByColumnSpec<TOrderByAndHavingArguments>, IEnumerable<LimitSpec.OrderBy>>? columns = null)
-            {
-                var factory_ = new QuerySectionFactory.OrderByColumnSpec<TOrderByAndHavingArguments>();
-                var limitSpec = new LimitSpec(limit, offset, columns?.Invoke(factory_));
-                Self.AddOrUpdateSection(nameof(limitSpec), limitSpec);
-                return Self.Unwrapped;
-            }
+                Func<QueryElementFactory<TOrderByAndHavingArguments>.OrderByColumnSpec, IEnumerable<ILimitSpec.OrderBy>>? columns = null)
+                => Self.AddOrUpdateSection(nameof(LimitSpec), new LimitSpec(limit, offset, columns?.Invoke(new())));
 
-            public TSelf Having(Func<QuerySectionFactory.Having<TOrderByAndHavingArguments>, Having> factory)
-            {
-                var factory_ = new QuerySectionFactory.Having<TOrderByAndHavingArguments>();
-                var having = factory(factory_);
-                Self.AddOrUpdateSection(nameof(having), having);
-                return Self.Unwrapped;
-            }
+            public TSelf Having(Func<QueryElementFactory<TOrderByAndHavingArguments>.Having, IHaving> factory)
+                => Self.AddOrUpdateSection(nameof(Having), factory(new()));
 
-            public TSelf HavingFilter(Func<QuerySectionFactory.Filter<TOrderByAndHavingArguments>, Filter> factory)
-            {
-                var factory_ = new QuerySectionFactory.Having<TOrderByAndHavingArguments>();
-                var having = factory_.Filter(factory);
-                Self.AddOrUpdateSection(nameof(having), having);
-                return Self.Unwrapped;
-            }
+            public TSelf HavingFilter(Func<QueryElementFactory<TOrderByAndHavingArguments>.Filter, IFilter> factory)
+                => Self.AddOrUpdateSection(nameof(Having), new QueryElementFactory<TOrderByAndHavingArguments>.Having().Filter(factory));
         }
 
         public abstract class GroupBy<TDimensions> : GroupBy_<TDimensions, TDimensions>
