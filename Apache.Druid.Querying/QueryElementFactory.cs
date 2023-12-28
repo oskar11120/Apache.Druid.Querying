@@ -153,6 +153,40 @@ namespace Apache.Druid.Querying
                 ColumnSelector<TTimeColumn> timeColumn);
             TColumn First<TColumn>(ColumnSelector<TColumn> fieldName);
             TColumn Last<TColumn>(ColumnSelector<TColumn> fieldName);
+
+            string First<TTimeColumn>(
+                ColumnSelector<string> fieldName,
+                ColumnSelector<TTimeColumn> timeColumn,
+                long maxStringBytes,
+                SimpleDataType dataType);
+            string Last<TTimeColumn>(
+                ColumnSelector<string> fieldName,
+                ColumnSelector<TTimeColumn> timeColumn,
+                long maxStringBytes,
+                SimpleDataType dataType);
+            string First(
+               ColumnSelector<string> fieldName,
+                long maxStringBytes,
+                SimpleDataType dataType);
+            string Last(
+                ColumnSelector<string> fieldName,
+                long maxStringBytes,
+                SimpleDataType dataType);
+
+            string First< TTimeColumn>(
+                ColumnSelector<string> fieldName,
+                ColumnSelector<TTimeColumn> timeColumn,
+                long maxStringBytes);
+            string Last< TTimeColumn>(
+                ColumnSelector<string> fieldName,
+                ColumnSelector<TTimeColumn> timeColumn,
+                long maxStringBytes);
+            string First(
+                ColumnSelector<string> fieldName,
+                long maxStringBytes);
+            string Last(
+                ColumnSelector<string> fieldName,
+                long maxStringBytes);
         }
 
 

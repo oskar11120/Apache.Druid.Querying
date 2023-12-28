@@ -11,6 +11,7 @@ namespace Apache.Druid.Querying.Internal.Sections
         public static JsonArray Map<TElementFactory, TSection>(
             Expression<QuerySectionFactory<TElementFactory, TSection>> factory,
             Type argumentsType,
+            string sectionKey,
             JsonSerializerOptions serializerOptions,
             CustomMappings? customMappings)
         {
@@ -24,7 +25,7 @@ namespace Apache.Druid.Querying.Internal.Sections
                 var (member, method, @params) = call;
                 var element = new JsonObject
                 {
-                    { "name", member },
+                    { "name", member ?? sectionKey },
                     { "type", customMappings?.MapType?.Invoke(call) ?? method }
                 };
 

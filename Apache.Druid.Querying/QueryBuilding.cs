@@ -113,19 +113,34 @@ namespace Apache.Druid.Querying
 
     public static class IQueryWith
     {
-        public interface VirtualColumns<TArguments, TVirtualColumns, TSelf> : IQuery<TSelf> where TSelf : IQuery<TSelf>
+        public static class Marker
+        {
+            public sealed record VirtualColumns;
+            public sealed record Aggregations;
+            public sealed record PostAggregations;
+        }
+
+        public interface VirtualColumns<TArguments, TVirtualColumns, TSelf> :
+            IQuery<TArguments, TSelf, Marker.VirtualColumns>
+            where TSelf : IQuery<TSelf>
         {
         }
 
-        public interface Filter<TArguments, TSelf> : IQuery<TSelf> where TSelf : IQuery<TSelf>
+        public interface Aggregations<TArguments, TAggregations, TSelf> :
+            IQuery<TArguments, TSelf, Marker.Aggregations>
+            where TSelf : IQuery<TSelf>
         {
         }
 
-        public interface Aggregations<TArguments, TAggregations, TSelf> : IQuery<TSelf> where TSelf : IQuery<TSelf>
+        public interface PostAggregations<TArguments, TPostAggregations, TSelf>
+            : IQuery<TArguments, TSelf, Marker.PostAggregations>
+            where TSelf : IQuery<TSelf>
         {
         }
 
-        public interface PostAggregations<TArguments, TPostAggregations, TSelf> : IQuery<TSelf> where TSelf : IQuery<TSelf>
+        public interface Filter<TArguments, TSelf> :
+            IQuery<TSelf>
+            where TSelf : IQuery<TSelf>
         {
         }
 
@@ -175,39 +190,43 @@ namespace Apache.Druid.Querying
             this IQueryWith.VirtualColumns<TArguments, TVirtualColumns, TQuery> query,
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IVirtualColumns, TVirtualColumns>> factory)
             where TQuery : IQuery<TQuery>
-            => query.AddOrUpdateSection(nameof(VirtualColumns), typeof(TArguments), factory);
+            => query.AddOrUpdateSectionWithSectionFactory(nameof(VirtualColumns), factory);
 
         public static TQuery Aggregations<TArguments, TAggregations, TQuery>(
             this IQueryWith.Aggregations<TArguments, TAggregations, TQuery> query,
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IAggregations, TAggregations>> factory)
             where TQuery : IQuery<TQuery>
-            => query.AddOrUpdateSection(nameof(Aggregations), typeof(TArguments), factory, new(
-                static call =>
-                {
-                    return call.MethodName switch
+            => query.AddOrUpdateSectionWithSectionFactory(
+                nameof(Aggregations), 
+                factory, 
+                new(
+                    static call =>
                     {
-                        nameof(QueryElementFactory<TArguments>.IAggregations.Mean) => "doubleMean",
+                        return call.MethodName switch
+                        {
+                            nameof(QueryElementFactory<TArguments>.IAggregations.Mean) => "doubleMean",
 
-                        nameof(QueryElementFactory<TArguments>.IAggregations.Sum) or
-                        nameof(QueryElementFactory<TArguments>.IAggregations.Min) or
-                        nameof(QueryElementFactory<TArguments>.IAggregations.Max) or
-                        nameof(QueryElementFactory<TArguments>.IAggregations.First) or
-                        nameof(QueryElementFactory<TArguments>.IAggregations.Last) or
-                        nameof(QueryElementFactory<TArguments>.IAggregations.Any) =>
-                            (call.TryGetScalarParameter<SimpleDataType>()?.Value?.ToString()
-                            ?? DataType.GetSimple(call.GetMemberSelectorParameter("fieldName").MemberType).ToString())
-                            .ToCamelCase()
-                            + call.MethodName,
+                            nameof(QueryElementFactory<TArguments>.IAggregations.Sum) or
+                            nameof(QueryElementFactory<TArguments>.IAggregations.Min) or
+                            nameof(QueryElementFactory<TArguments>.IAggregations.Max) or
+                            nameof(QueryElementFactory<TArguments>.IAggregations.First) or
+                            nameof(QueryElementFactory<TArguments>.IAggregations.Last) or
+                            nameof(QueryElementFactory<TArguments>.IAggregations.Any) =>
+                                (call.TryGetScalarParameter<SimpleDataType>()?.Value?.ToString()
+                                ?? DataType.GetSimple(call.GetMemberSelectorParameter("fieldName").MemberType).ToString())
+                                .ToCamelCase()
+                                + call.MethodName,
 
-                        _ => call.MethodName.ToCamelCase()
-                    };
-                }));
+                            _ => call.MethodName.ToCamelCase()
+                        };
+                    },
+                    static scalar => scalar.Type == typeof(SimpleDataType)));
 
         public static TQuery PostAggregations<TArguments, TPostAggregations, TQuery>(
             this IQueryWith.PostAggregations<TArguments, TPostAggregations, TQuery> query,
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IPostAggregators, TPostAggregations>> factory)
             where TQuery : IQuery<TQuery>
-            => query.AddOrUpdateSection(nameof(PostAggregations), typeof(TArguments), factory);
+            => query.AddOrUpdateSectionWithSectionFactory(nameof(PostAggregations), factory);
 
         public static TQuery Filter<TArguments, TQuery>(this IQueryWith.Filter<TArguments, TQuery> query, Func<QueryElementFactory<TArguments>.Filter, IFilter> factory)
             where TQuery : IQuery<TQuery>

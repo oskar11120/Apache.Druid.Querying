@@ -7,7 +7,7 @@ using System.Reflection;
 namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 {
     internal sealed record ElementFactoryCall(
-        string ResultMemberName,
+        string? ResultMemberName,
         string MethodName,
         IReadOnlyList<ElementFactoryCall.Parameter.Any> Parameters)
     {
@@ -72,7 +72,7 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
                 return SectionFactoryInterpreter.GetMember(lambda.Body);
             }
 
-            ElementFactoryCall Execute(Expression factoryCall, string resultMemberName)
+            ElementFactoryCall Execute(Expression factoryCall, string? resultMemberName)
             {
                 var call = factoryCall as MethodCallExpression ?? throw new InvalidOperationException();
                 var method = call.Method;
@@ -100,6 +100,12 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
             IEnumerable<ElementFactoryCall> Execute__()
             {
                 var body = querySectionFactory.Body;
+                if (body.NodeType is ExpressionType.Call)
+                {
+                    yield return Execute(body, null);
+                    yield break;
+                }
+
                 var init = body as MemberInitExpression;
                 var @new = init is null ?
                     body as NewExpression ?? throw new InvalidOperationException() :

@@ -247,7 +247,7 @@ namespace Apache.Druid.Querying.Unit.Tests
             var test0 = new Query<Message>
                 .TimeSeries
                 .WithNoVirtualColumns
-                .WithAggregations<Aggregations>()
+                .WithAggregations<double>()
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .Order(OrderDirection.Ascending)
                 .Granularity(Granularity.Minute)
@@ -256,10 +256,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                     filter.Equals(
                         message => message.ObjectId,
                         Guid.NewGuid())))
-                .Aggregations(aggregations => new(
-                    aggregations.Max(message => message.Timestamp),
-                    aggregations.Last(message => message.Value)
-                ))
+                .Aggregations(aggregations => aggregations.Last(message => message.Value, SimpleDataType.Float))
                 .ToJson();
 
             var test1 = new Query<Message>

@@ -75,6 +75,12 @@ namespace Apache.Druid.Querying.Internal
         }
     }
 
+    public static class Marker 
+    {
+        public sealed record Dimension;
+        public sealed record Dimensions;
+    }
+
     public static class QueryBase<TArguments, TSelf> where TSelf : IQuery<TSelf>
     {
         public abstract class TimeSeries :
@@ -107,7 +113,8 @@ namespace Apache.Druid.Querying.Internal
             IQueryWith.Intervals,
             IQueryWith.Granularity,
             IQueryWith.Filter<TArguments, TSelf>,
-            IQueryWith.Context<QueryContext.TopN, TSelf>
+            IQueryWith.Context<QueryContext.TopN, TSelf>,
+            IQuery<TArguments, TSelf, Marker.Dimension>
         {
             public TopN_() : base("topN")
             {
@@ -116,7 +123,7 @@ namespace Apache.Druid.Querying.Internal
             private IQuery<TSelf> Self => this;
 
             public TSelf Dimension(Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IDimensions, TDimension>> factory)
-                => Self.AddOrUpdateSection(nameof(Dimension), typeof(TArguments), factory);
+                => this.AddOrUpdateSectionWithSectionFactory(nameof(Dimension), factory);
 
             public TSelf Threshold(int threshold)
                 => Self.AddOrUpdateSection(nameof(threshold), threshold);
@@ -147,7 +154,8 @@ namespace Apache.Druid.Querying.Internal
             IQueryWith.Intervals,
             IQueryWith.Granularity,
             IQueryWith.Filter<TArguments, TSelf>,
-            IQueryWith.Context<QueryContext.GroupBy, TSelf>
+            IQueryWith.Context<QueryContext.GroupBy, TSelf>,
+            IQuery<TArguments, TSelf, Marker.Dimensions>
         {
             public GroupBy_() : base("groupBy")
             {
@@ -156,7 +164,7 @@ namespace Apache.Druid.Querying.Internal
             private IQuery<TSelf> Self => this;
 
             public TSelf Dimensions(Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IDimensions, TDimensions>> factory)
-                => Self.AddOrUpdateSection(nameof(Dimensions), typeof(TArguments), factory);
+                => this.AddOrUpdateSectionWithSectionFactory(nameof(Dimensions), factory);
 
             public TSelf LimitSpec(
                 int? limit = null,

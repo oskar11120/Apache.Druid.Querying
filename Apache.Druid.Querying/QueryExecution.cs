@@ -44,7 +44,7 @@ namespace Apache.Druid.Querying
             var asDictionary = query
                 .GetState()
                 .ToDictionary(pair => pair.Key, pair => pair.Value(serializerOptions));
-            asDictionary.Add("dataSource", id);
+            asDictionary.Add("dataSource", id!);
             using var content = JsonContent.Create(asDictionary, options: serializerOptions);
             using var request = new HttpRequestMessage(HttpMethod.Post, "druid/v2") { Content = content };
             using var client = clientFactory();
