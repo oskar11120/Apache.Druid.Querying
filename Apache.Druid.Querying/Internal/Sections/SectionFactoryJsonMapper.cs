@@ -17,7 +17,7 @@ namespace Apache.Druid.Querying.Internal.Sections
             IArgumentColumnNameProvider columnNames,
             CustomMappings? customMappings)
         {
-            JsonArray Map(IEnumerable<ElementFactoryCall> calls)
+            JsonArray Map(IEnumerable<ElementFactoryCall> calls, bool nested)
             {
                 var array = new JsonArray();
                 foreach (var call in calls)
@@ -25,9 +25,11 @@ namespace Apache.Druid.Querying.Internal.Sections
                     var (member, method, @params) = call;
                     var element = new JsonObject
                     {
-                        { customMappings?.SectionColumnNameKey ?? "name", member ?? sectionKey },
-                        { "type", customMappings?.MapType?.Invoke(call) ?? method }
+                        { "type", customMappings?.MapType?.Invoke(call) ?? method.ToCamelCase() }
                     };
+
+                    if (!nested)
+                        element.Add(customMappings?.SectionColumnNameKey ?? "name", member ?? sectionKey);
 
                     foreach (var param in @params)
                     {
@@ -44,7 +46,7 @@ namespace Apache.Druid.Querying.Internal.Sections
                                     scalar.Name,
                                     JsonSerializer.SerializeToNode(scalar.Value, scalar.Type, serializerOptions));
                             },
-                            (nested, element) => element.Add(nested.Name, Map(nested.Calls)));
+                            (nested, element) => element.Add(nested.Name, Map(nested.Calls, true)));
                     }
 
                     array.Add(element);
@@ -57,7 +59,7 @@ namespace Apache.Druid.Querying.Internal.Sections
                 factory,
                 typeof(QuerySectionFactory<TElementFactory, TSection>),
                 argumentsType);
-            return Map(calls);
+            return Map(calls, false);
         }
 
         public sealed record CustomMappings(

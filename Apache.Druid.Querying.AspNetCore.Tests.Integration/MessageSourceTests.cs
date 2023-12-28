@@ -11,14 +11,14 @@ internal class MessageSourceTests
     [Test]
     public async Task Works()
     {
-        var t = DateTime.Parse("2023-10-10T16:57:00.000Z", null, DateTimeStyles.AssumeUniversal).ToUniversalTime();
+        var t = DateTime.Parse("2023-10-19T16:57:00.000Z", null, DateTimeStyles.AssumeUniversal).ToUniversalTime();
         var query = new Query<Message>
             .TimeSeries
             .WithNoVirtualColumns
             .WithAggregations<Aggregations>
             .WithPostAggregations<PostAggregations>()
-            .Interval(new(t, t.AddDays(10)))
-            .Granularity(Granularity.Day)
+            .Interval(new(t, t.AddDays(1)))
+            .Granularity(Granularity.FifteenMinutes)
             .Filter(filter => filter.And(
                 filter.Selector(
                     message => message.VariableName,
@@ -29,20 +29,17 @@ internal class MessageSourceTests
                 filter.Selector(
                     message => message.ObjectId,
                     Guid.Parse("4460391b-b713-44eb-b422-2dbe7de91856"))))
-            .Aggregations(aggregators => new(
-                aggregators.Sum(message => message.Value),
-                aggregators.Count(),
-                aggregators.First(message => message.VariableName),
-                aggregators.First(message => message.Value, SimpleDataType.String)
+            .Aggregations(factory => new(
+                factory.Sum(message => message.Value),
+                factory.Count(),
+                factory.First(message => message.VariableName),
+                factory.First(message => message.Value, SimpleDataType.String)
             ))
-            //.PostAggregations(postAggregators => new[]
-            //{
-            //    postAggregators.Arithmetic(
-            //        postAggregations => postAggregations.Average,
-            //        ArithmeticFunction.Divide,
-            //        postAggregators.FieldAccess(aggrgations => aggrgations.Sum),
-            //        postAggregators.FieldAccess(aggregations => aggregations.Count))
-            //})
+            .PostAggregations(factory => new(
+                factory.Arithmetic(
+                    ArithmeticFunction.Divide,
+                    factory.FieldAccess(aggrgations => aggrgations.Sum),
+                    factory.FieldAccess(aggregations => aggregations.Count))))
             .Context(new() { SkipEmptyBuckets = true });
 
 
