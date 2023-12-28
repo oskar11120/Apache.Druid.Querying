@@ -84,6 +84,7 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 
             ElementFactoryCall Execute(Expression factoryCall, string? resultMemberName)
             {
+                factoryCall = UnwrapUnary(factoryCall);
                 var call = factoryCall as MethodCallExpression ?? throw new InvalidOperationException();
                 var method = call.Method;
                 var methodName = method.Name;
@@ -159,14 +160,15 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 
         private static Member GetMember(Expression selectorBody)
         {
-            if (selectorBody is UnaryExpression unary)
-                return GetMember(unary.Operand);
-
+            selectorBody = UnwrapUnary(selectorBody);
             var expression = (MemberExpression)selectorBody;
             var name = expression.Member.Name;
             var property = expression.Member as PropertyInfo ?? throw new InvalidOperationException();
             return new(property.PropertyType, name);
         }
+
+        private static Expression UnwrapUnary(Expression expression)
+            => expression is UnaryExpression unary ? UnwrapUnary(unary.Operand) : expression;
 
         private readonly record struct Member(Type Type, string Name)
         {

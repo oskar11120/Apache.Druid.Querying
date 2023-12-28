@@ -11,14 +11,14 @@ internal class MessageSourceTests
     [Test]
     public async Task Works()
     {
-        var t = DateTime.Parse("2023-10-19T16:57:00.000Z", null, DateTimeStyles.AssumeUniversal).ToUniversalTime();
+        var t = DateTime.Parse("2023-10-10T16:57:00.000Z", null, DateTimeStyles.AssumeUniversal).ToUniversalTime();
         var query = new Query<Message>
             .TimeSeries
             .WithNoVirtualColumns
             .WithAggregations<Aggregations>
             .WithPostAggregations<PostAggregations>()
-            .Interval(new(t, t.AddDays(1)))
-            .Granularity(Granularity.FifteenMinutes)
+            .Interval(new(t, t.AddDays(10)))
+            .Granularity(Granularity.Day)
             .Filter(filter => filter.And(
                 filter.Selector(
                     message => message.VariableName,
@@ -44,11 +44,13 @@ internal class MessageSourceTests
             //        postAggregators.FieldAccess(aggregations => aggregations.Count))
             //})
             .Context(new() { SkipEmptyBuckets = true });
+
+
         try
         {
             var result = await Messages
-            .ExecuteQuery(query)
-            .ToListAsync();
+                .ExecuteQuery(query)
+                .ToListAsync();
         }
         catch (Exception ex)
         {
