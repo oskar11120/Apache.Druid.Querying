@@ -330,8 +330,9 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .ToJson();
         }
 
-        record Message(
-            [property: DataSourceColumn("variable")] string VariableName,
+        [DataSourceColumnNamingConvention(DataSourceColumnNamingConventionType.CamelCase)]
+        internal record Message(
+            [property: DataSourceColumn("Variable")] string VariableName,
             Guid ObjectId,
             double Value,
             DateTimeOffset Timestamp);
@@ -350,7 +351,7 @@ namespace Apache.Druid.Querying.Unit.Tests
             options.WriteIndented = true;
             var asDictionary = query
                 .GetState()
-                .ToDictionary(pair => pair.Key, pair => pair.Value(options));
+                .ToDictionary(pair => pair.Key, pair => pair.Value(options, IArgumentColumnNameProvider.Implementation<Tests.Message>.Singleton));
             return JsonSerializer.Serialize(asDictionary, options);
         }
     }

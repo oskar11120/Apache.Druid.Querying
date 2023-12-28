@@ -129,7 +129,7 @@ namespace Apache.Druid.Querying.Internal
                 => Self.AddOrUpdateSection(nameof(threshold), threshold);
 
             public TSelf Metric(Func<QueryElementFactory<TMetricArguments>.MetricSpec, IMetric> factory)
-                => Self.AddOrUpdateSection(nameof(Metric), factory(new()));
+                => Self.AddOrUpdateSection(nameof(Metric), columnNames => factory(new(columnNames)));
         }
 
         public abstract class TopN<TDimension> : TopN_<TDimension, TDimension>
@@ -170,13 +170,13 @@ namespace Apache.Druid.Querying.Internal
                 int? limit = null,
                 int? offset = null,
                 Func<QueryElementFactory<TOrderByAndHavingArguments>.OrderByColumnSpec, IEnumerable<ILimitSpec.OrderBy>>? columns = null)
-                => Self.AddOrUpdateSection(nameof(LimitSpec), new LimitSpec(limit, offset, columns?.Invoke(new())));
+                => Self.AddOrUpdateSection(nameof(LimitSpec), columnNames => new LimitSpec(limit, offset, columns?.Invoke(new(columnNames))));
 
             public TSelf Having(Func<QueryElementFactory<TOrderByAndHavingArguments>.Having, IHaving> factory)
-                => Self.AddOrUpdateSection(nameof(Having), factory(new()));
+                => Self.AddOrUpdateSection(nameof(Having), columnNames => factory(new(columnNames)));
 
             public TSelf HavingFilter(Func<QueryElementFactory<TOrderByAndHavingArguments>.Filter, IFilter> factory)
-                => Self.AddOrUpdateSection(nameof(Having), new QueryElementFactory<TOrderByAndHavingArguments>.Having().Filter(factory));
+                => Self.AddOrUpdateSection(nameof(Having), columnNames => new QueryElementFactory<TOrderByAndHavingArguments>.Having(columnNames).Filter(factory));
         }
 
         public abstract class GroupBy<TDimensions> : GroupBy_<TDimensions, TDimensions>

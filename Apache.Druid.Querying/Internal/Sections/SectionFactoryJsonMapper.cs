@@ -13,6 +13,7 @@ namespace Apache.Druid.Querying.Internal.Sections
             Type argumentsType,
             string sectionKey,
             JsonSerializerOptions serializerOptions,
+            IArgumentColumnNameProvider columnNames,
             CustomMappings? customMappings)
         {
             var calls = SectionFactoryInterpreter.Execute(
@@ -33,7 +34,7 @@ namespace Apache.Druid.Querying.Internal.Sections
                 {
                     param.Switch(
                         element,
-                        (selector, element) => element.Add(selector.Name, selector.MemberName),
+                        (selector, element) => element.Add(selector.Name, columnNames.Get(selector.MemberName)),
                         (scalar, element) =>
                         {
                             if (customMappings?.SkipScalarParameter?.Invoke(scalar) is false)

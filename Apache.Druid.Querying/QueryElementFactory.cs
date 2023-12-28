@@ -12,20 +12,35 @@ namespace Apache.Druid.Querying
     {
         public delegate TColumn ColumnSelector<TColumn>(TArguments arguments);
 
-        private static string GetColumnName(Expression selectorBody)
+        public abstract class UsingArgumentColumnNames
         {
-            if (selectorBody is UnaryExpression unary)
-                return GetColumnName(unary.Operand);
+            protected readonly IArgumentColumnNameProvider columnNames;
 
-            var expression = (MemberExpression)selectorBody;
-            return expression.Member.Name;
+            protected UsingArgumentColumnNames(IArgumentColumnNameProvider columnNames)
+            {
+                this.columnNames = columnNames;
+            }
+
+            private string GetColumnName(Expression selectorBody)
+            {
+                if (selectorBody is UnaryExpression unary)
+                    return GetColumnName(unary.Operand);
+
+                var expression = (MemberExpression)selectorBody;
+                var memberName = expression.Member.Name;
+                return columnNames.Get(memberName);
+            }
+
+            protected string GetColumnName<TSelector>(Expression<TSelector> selector)
+                => GetColumnName(selector.Body);
         }
 
-        private static string GetColumnName<TSelector>(Expression<TSelector> selector)
-            => GetColumnName(selector.Body);
-
-        public sealed class Filter
+        public sealed class Filter : UsingArgumentColumnNames
         {
+            public Filter(IArgumentColumnNameProvider columnNames) : base(columnNames)
+            {
+            }
+
             public IFilter And(params IFilter[] filters) => new Filter_.And(filters);
             public IFilter Or(params IFilter[] filters) => new Filter_.Or(filters);
             public IFilter Not(IFilter filter) => new Filter_.Not(filter);
@@ -46,8 +61,12 @@ namespace Apache.Druid.Querying
                 => new Filter<TColumn>.Selector(GetColumnName(dimension), value);
         }
 
-        public class MetricSpec
+        public class MetricSpec : UsingArgumentColumnNames
         {
+            public MetricSpec(IArgumentColumnNameProvider columnNames) : base(columnNames)
+            {
+            }
+
             public IMetric Dimension<TColumn>(
                 TColumn previousStop,
                 SortingOrder ordering = SortingOrder.Lexicographic)
@@ -64,8 +83,12 @@ namespace Apache.Druid.Querying
                 => new Metric.Numeric(GetColumnName(metric));
         }
 
-        public class OrderByColumnSpec
+        public class OrderByColumnSpec : UsingArgumentColumnNames
         {
+            public OrderByColumnSpec(IArgumentColumnNameProvider columnNames) : base(columnNames)
+            {
+            }
+
             public ILimitSpec.OrderBy OrderBy<TColumn>(
                 Expression<ColumnSelector<TColumn>> dimension,
                 OrderDirection? direction = null,
@@ -73,11 +96,15 @@ namespace Apache.Druid.Querying
                 => new LimitSpec.OrderBy(GetColumnName(dimension), dimensionOrder, direction);
         }
 
-        public class Having
+        public class Having : UsingArgumentColumnNames
         {
+            public Having(IArgumentColumnNameProvider columnNames) : base(columnNames)
+            {
+            }
+
             public IHaving Filter(Func<Filter, IFilter> factory)
             {
-                var filter = factory(new Filter());
+                var filter = factory(new Filter(columnNames));
                 return new Having_.Filter_(filter);
             }
         }

@@ -43,7 +43,9 @@ namespace Apache.Druid.Querying
             serializerOptionsWithFormatting ??= new(serializerOptions) { WriteIndented = true };
             var asDictionary = query
                 .GetState()
-                .ToDictionary(pair => pair.Key, pair => pair.Value(serializerOptions));
+                .ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value(serializerOptions, IArgumentColumnNameProvider.Implementation<TSource>.Singleton));
             asDictionary.Add("dataSource", id!);
             using var content = JsonContent.Create(asDictionary, options: serializerOptions);
             using var request = new HttpRequestMessage(HttpMethod.Post, "druid/v2") { Content = content };

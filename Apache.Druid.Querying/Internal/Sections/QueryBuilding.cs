@@ -18,7 +18,7 @@ namespace Apache.Druid.Querying.Internal.Sections
             where TSelf : IQuery<TSelf>
             => query.AddOrUpdateSection(
                 key,
-                options => SectionFactoryJsonMapper.Map(factory, typeof(TArguments), key, options, customMappings),
+                (options, columnNames) => SectionFactoryJsonMapper.Map(factory, typeof(TArguments), key, options, columnNames, customMappings),
                 convertKeyToCamelCase);
     }
 }

@@ -65,7 +65,7 @@ namespace Apache.Druid.Querying
         Strlen
     }
 
-    public delegate JsonNode QuerySectionValueFactory(JsonSerializerOptions serializerOptions);
+    public delegate JsonNode QuerySectionValueFactory(JsonSerializerOptions serializerOptions, IArgumentColumnNameProvider columnNames);
 
     public interface IQuery
     {
@@ -78,15 +78,18 @@ namespace Apache.Druid.Querying
             State.Add(key, valueFactory);
         }
 
+        public void AddOrUpdateSection<TValue>(string key, Func<IArgumentColumnNameProvider, TValue> getValue, bool convertKeyToCamelCase = true)
+            => AddOrUpdateSection(key, (options, columnNames) => JsonSerializer.SerializeToNode(getValue(columnNames), options)!, convertKeyToCamelCase);
+
         public void AddOrUpdateSection<TValue>(string key, TValue value, bool convertKeyToCamelCase = true)
-            => AddOrUpdateSection(key, options => JsonSerializer.SerializeToNode(value, options)!);
+            => AddOrUpdateSection(key, _ => value, convertKeyToCamelCase);
     }
 
     public abstract class Query : IQuery
     {
         public Query(string? type = null)
         {
-            state = new() { ["queryType"] = _ => (type ?? GetType().Name.ToCamelCase())! };
+            state = new() { ["queryType"] = (_, _) => (type ?? GetType().Name.ToCamelCase())! };
         }
 
         private readonly Dictionary<string, QuerySectionValueFactory> state;
@@ -101,6 +104,12 @@ namespace Apache.Druid.Querying
         public new TSelf AddOrUpdateSection(string key, QuerySectionValueFactory valueFactory, bool convertKeyToCamelCase = true)
         {
             Base.AddOrUpdateSection(key, valueFactory, convertKeyToCamelCase);
+            return Unwrapped;
+        }
+
+        public new TSelf AddOrUpdateSection<TValue>(string key, Func<IArgumentColumnNameProvider, TValue> getValue, bool convertKeyToCamelCase = true)
+        {
+            Base.AddOrUpdateSection(key, getValue, convertKeyToCamelCase);
             return Unwrapped;
         }
 
@@ -197,8 +206,8 @@ namespace Apache.Druid.Querying
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IAggregations, TAggregations>> factory)
             where TQuery : IQuery<TQuery>
             => query.AddOrUpdateSectionWithSectionFactory(
-                nameof(Aggregations), 
-                factory, 
+                nameof(Aggregations),
+                factory,
                 new(
                     static call =>
                     {
@@ -232,7 +241,7 @@ namespace Apache.Druid.Querying
             where TQuery : IQuery<TQuery>
             => query.AddOrUpdateSection(
                 nameof(Filter),
-                factory(new QueryElementFactory<TArguments>.Filter()));
+                columnNames => factory(new(columnNames)));
 
         public static TQuery Intervals<TQuery>(this TQuery query, IEnumerable<Interval> intervals)
             where TQuery : IQueryWith.Intervals

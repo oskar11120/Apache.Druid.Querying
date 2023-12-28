@@ -2,8 +2,8 @@
 
 internal record Message(
     Guid TenantId,
-    [property: DataSourceColumn("variable")] string VariableName,
+    [property: DataSourceColumnAttribute("variable")] string VariableName,
     Guid ObjectId,
     double Value,
-    [property: DataSourceTimeColumn] DateTimeOffset Timestamp,
+    [property: DataSourceTimeColumnAttribute] DateTimeOffset Timestamp,
     DateTimeOffset ProcessedTimestamp);
