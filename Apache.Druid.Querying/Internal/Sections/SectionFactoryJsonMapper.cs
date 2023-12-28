@@ -39,6 +39,7 @@ namespace Apache.Druid.Querying.Internal.Sections
                                 if (customMappings?.SkipScalarParameter?.Invoke(scalar) is true)
                                     return;
 
+                                scalar = customMappings?.ReplaceScalarParameter?.Invoke(scalar) ?? scalar;
                                 element.Add(
                                     scalar.Name,
                                     JsonSerializer.SerializeToNode(scalar.Value, scalar.Type, serializerOptions));
@@ -61,6 +62,7 @@ namespace Apache.Druid.Querying.Internal.Sections
 
         public sealed record CustomMappings(
             Func<ElementFactoryCall, string>? MapType = null,
-            Func<ElementFactoryCall.Parameter.Scalar, bool>? SkipScalarParameter = null);
+            Func<ElementFactoryCall.Parameter.Scalar, bool>? SkipScalarParameter = null,
+            Func<ElementFactoryCall.Parameter.Scalar, ElementFactoryCall.Parameter.Scalar>? ReplaceScalarParameter = null);
     }
 }
