@@ -18,7 +18,7 @@ internal static class TestExtensions
         return query
             .Unwrapped
             .Interval(new(t, t.AddDays(1)))
-            .Granularity(Granularity.FifteenMinutes)
+            .Granularity(Granularity.SixHours)
             .Filter(filter => filter.And(
                 filter.Selector(
                     message => message.VariableName,
@@ -56,17 +56,10 @@ internal class MessageSourceTests
             .Dimension(factory => new(factory.Default(message => message.ObjectId)))
             .Metric(factory => factory.Numeric(tuple => tuple.Aggregations.Count))
             .Threshold(1000);
-        try
-        {
-            var result = await Messages
-                .ExecuteQuery(query)
-                .ToListAsync();
-            result.Should().NotBeEmpty();
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
+        var result = await Messages
+            .ExecuteQuery(query)
+            .ToListAsync();
+        result.Should().NotBeEmpty();
     }
 
     [Test]

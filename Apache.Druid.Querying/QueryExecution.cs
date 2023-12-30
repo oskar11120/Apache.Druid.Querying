@@ -1,7 +1,9 @@
 ﻿using Apache.Druid.Querying.DependencyInjection;
 using System.Collections.Generic;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -24,6 +26,8 @@ namespace Apache.Druid.Querying
 
     public class DataSource<TSource> : IDataSourceInitializer<TSource>
     {
+        private static readonly StringWithQualityHeaderValue gzip = new("gzip");
+
         private JsonSerializerOptions? serializerOptionsWithFormatting;
         DataSourceInitlializationState? IDataSourceInitializer<TSource>.state { get; set; }
         private DataSourceInitlializationState State => (this as IDataSourceInitializer<TSource>).State;
@@ -55,7 +59,11 @@ namespace Apache.Druid.Querying
                     pair => pair.Value(serializerOptions, IArgumentColumnNameProvider.Implementation<TSource>.Singleton));
             asDictionary.Add("dataSource", id!);
             using var content = JsonContent.Create(asDictionary, options: serializerOptions);
-            using var request = new HttpRequestMessage(HttpMethod.Post, "druid/v2") { Content = content };
+            using var request = new HttpRequestMessage(HttpMethod.Post, "druid/v2")
+            {
+                Content = content,
+                Headers = { AcceptEncoding = { gzip } }
+            };
             using var client = clientFactory();
             using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token);
 
@@ -71,8 +79,10 @@ namespace Apache.Druid.Querying
                 throw;
             }
 
-            using var stream = await response.Content.ReadAsStreamAsync(token);
-            var results = JsonSerializer.DeserializeAsyncEnumerable<TResult>(stream, serializerOptions, token);
+            using var raw = await response.Content.ReadAsStreamAsync(token);
+            var isGzip = response.Content.Headers.ContentEncoding.Contains(gzip.Value);
+            using var decompressed = isGzip ? new GZipStream(raw, CompressionMode.Decompress) : raw; 
+            var results = JsonSerializer.DeserializeAsyncEnumerable<TResult>(decompressed, serializerOptions, token);
             await foreach (var result in results)
                 yield return result!;
         }
