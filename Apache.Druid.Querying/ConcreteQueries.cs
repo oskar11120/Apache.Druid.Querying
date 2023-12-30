@@ -14,8 +14,8 @@ namespace Apache.Druid.Querying
         TDimension Dimension, TAggregations Aggregations, TPostAggregations PostAggregations);
     public readonly record struct Aggregations_PostAggregations<TAggregations, TPostAggregations>(TAggregations Aggregations, TPostAggregations PostAggregations);
     public readonly record struct Dimensions_Aggregations<TDimensions, TAggregations>(TDimensions Dimensions, TAggregations Aggregations);
-    public readonly record struct Dimensions_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>(
-        TDimension Dimensions, TAggregations Aggregations, TPostAggregations PostAggregations);
+    public readonly record struct Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>(
+        TDimensions Dimensions, TAggregations Aggregations, TPostAggregations PostAggregations);
 
     public static class QueryContext
     {
@@ -54,7 +54,7 @@ namespace Apache.Druid.Querying
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>.TimeSeries<TAggregations, TPostAggregations>,
                         IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithPostAggregations<TPostAggregations>>,
-                        IQueryWithMappedResult.Aggregations_PostAggregations_<TAggregations, TPostAggregations>
+                        IQueryWithMappedResult.WithTimestamp.Aggregations_PostAggregations_<TAggregations, TPostAggregations>
                     {
                     }
                 }
@@ -70,7 +70,7 @@ namespace Apache.Druid.Querying
                 {
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<TSource, WithPostAggregations<TPostAggregations>>.TimeSeries<TAggregations, TPostAggregations>,
-                        IQueryWithMappedResult.Aggregations_PostAggregations_<TAggregations, TPostAggregations>
+                        IQueryWithMappedResult.WithTimestamp.Aggregations_PostAggregations_<TAggregations, TPostAggregations>
                     {
                     }
                 }
@@ -89,12 +89,12 @@ namespace Apache.Druid.Querying
                 public class WithAggregations<TAggregations> :
                     QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>.TopN<TDimension, TAggregations>,
                     IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithAggregations<TAggregations>>,
-                    IQueryWithMappedResult.Dimension_Aggregations_<TDimension, TAggregations>
+                    IQueryWithMappedResult.WithTimestamp.Dimension_Aggregations_<TDimension, TAggregations>
                 {
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>.TopN<TDimension, TAggregations, TPostAggregations>,
                         IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithPostAggregations<TPostAggregations>>,
-                        IQueryWithMappedResult.Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations>
+                        IQueryWithMappedResult.WithTimestamp.Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations>
                     {
                     }
                 }
@@ -106,11 +106,11 @@ namespace Apache.Druid.Querying
             {
                 public class WithAggregations<TAggregations> :
                     QueryBase<TSource, WithAggregations<TAggregations>>.TopN<TDimension, TAggregations>,
-                    IQueryWithMappedResult.Dimension_Aggregations_<TDimension, TAggregations>
+                    IQueryWithMappedResult.WithTimestamp.Dimension_Aggregations_<TDimension, TAggregations>
                 {
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<TSource, WithPostAggregations<TPostAggregations>>.TopN<TDimension, TAggregations, TPostAggregations>,
-                        IQueryWithMappedResult.Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations>
+                        IQueryWithMappedResult.WithTimestamp.Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations>
                     {
                     }
                 }
@@ -128,13 +128,13 @@ namespace Apache.Druid.Querying
             {
                 public class WithAggregations<TAggregations> :
                     QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>.GroupBy<TDimensions, TAggregations>,
-                    IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithAggregations<TAggregations>>,
-                    IQueryWithMappedResult.Dimensions_Aggregations_<TDimensions, TAggregations>
+                    IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithAggregations<TAggregations>>
+                    //IQueryWithMappedResult.Dimensions_Aggregations_<TDimensions, TAggregations>
                 {
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>.GroupBy<TDimensions, TAggregations, TPostAggregations>,
-                        IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithPostAggregations<TPostAggregations>>,
-                        IQueryWithMappedResult.Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>
+                        IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithPostAggregations<TPostAggregations>>
+                        //IQueryWithMappedResult.Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>
                     {
                     }
                 }
@@ -145,12 +145,12 @@ namespace Apache.Druid.Querying
                 IQueryWithResult<WithTimestamp<TDimensions>>
             {
                 public class WithAggregations<TAggregations> :
-                    QueryBase<TSource, WithAggregations<TAggregations>>.GroupBy<TDimensions, TAggregations>,
-                    IQueryWithMappedResult.Dimensions_Aggregations_<TDimensions, TAggregations>
+                    QueryBase<TSource, WithAggregations<TAggregations>>.GroupBy<TDimensions, TAggregations>
+                    //IQueryWithMappedResult.Dimensions_Aggregations_<TDimensions, TAggregations>
                 {
                     public class WithPostAggregations<TPostAggregations> :
-                        QueryBase<TSource, WithPostAggregations<TPostAggregations>>.GroupBy<TDimensions, TAggregations, TPostAggregations>,
-                        IQueryWithMappedResult.Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>
+                        QueryBase<TSource, WithPostAggregations<TPostAggregations>>.GroupBy<TDimensions, TAggregations, TPostAggregations>
+                        //IQueryWithMappedResult.Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>
                     {
                     }
                 }

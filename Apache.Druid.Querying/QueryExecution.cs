@@ -9,9 +9,13 @@ using System.Threading;
 
 namespace Apache.Druid.Querying
 {
-    public interface IQueryWithMappedResult<TResult> : IQuery
+    public interface IQueryResultMapper<TResult>
     {
         TResult Map(JsonElement json, JsonSerializerOptions options);
+    }
+
+    public interface IQueryWithMappedResult<TResult, TMapper> : IQuery where TMapper : IQueryResultMapper<TResult>, new()
+    {
     }
 
     public interface IQueryWithResult<TResult> : IQuery
@@ -30,11 +34,14 @@ namespace Apache.Druid.Querying
         public virtual IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQueryWithResult<TResult> query, CancellationToken token = default)
             => Execute<TResult>(query, token);
 
-        public virtual async IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQueryWithMappedResult<TResult> query, [EnumeratorCancellation] CancellationToken token = default)
+        public virtual async IAsyncEnumerable<TResult> ExecuteQuery<TResult, TMapper>(
+            IQueryWithMappedResult<TResult, TMapper> query, [EnumeratorCancellation] CancellationToken token = default)
+            where TMapper : IQueryResultMapper<TResult>, new()
         {
+            var mapper = new TMapper();
             var json = Execute<JsonElement>(query, token);
             await foreach (var result in json)
-                yield return query.Map(result, State.SerializerOptions);
+                yield return mapper.Map(result, State.SerializerOptions);
         }
 
         private async IAsyncEnumerable<TResult> Execute<TResult>(IQuery query, [EnumeratorCancellation] CancellationToken token = default)

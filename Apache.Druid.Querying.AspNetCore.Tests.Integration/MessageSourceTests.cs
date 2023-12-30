@@ -43,17 +43,17 @@ internal class MessageSourceTests
     public async Task TopNQuery_ReturnsAnything()
     {
         var query = new Query<Message>
-            .TopN<Guid>
+            .TopN<Dimension>
             .WithNoVirtualColumns
             .WithAggregations<Aggregations>
-            .WithPostAggregations<double>()
+            .WithPostAggregations<PostAggregations>()
             .Defaults()
             .PostAggregations(factory =>
-                factory.Arithmetic(
+                new(factory.Arithmetic(
                     ArithmeticFunction.Divide,
                     factory.FieldAccess(aggrgations => aggrgations.Sum),
-                    factory.FieldAccess(aggregations => aggregations.Count)))
-            .Dimension(factory => factory.Default(message => message.ObjectId))
+                    factory.FieldAccess(aggregations => aggregations.Count))))
+            .Dimension(factory => new(factory.Default(message => message.ObjectId)))
             .Metric(factory => factory.Numeric(tuple => tuple.Aggregations.Count))
             .Threshold(1000);
         try
@@ -92,4 +92,5 @@ internal class MessageSourceTests
 
     public sealed record Aggregations(double Sum, int Count, string Variable, double? FirstValue);
     public sealed record PostAggregations(double Average);
+    public sealed record Dimension(Guid ObjectId);
 }
