@@ -48,13 +48,16 @@ namespace Apache.Druid.Querying.Internal
             where TResultMapper : IQueryResultMapper<TResult>, new()
         {
             private static readonly IQueryResultMapper<TResult> mapper = new TResultMapper();
+            private static readonly (string Timestamp, string Result) names = (
+                nameof(WithTimestamp<TResult>.Timestamp).ToCamelCase(),
+                nameof(WithTimestamp<TResult>.Result).ToCamelCase());
 
             public WithTimestamp<TResult> Map(JsonElement json, JsonSerializerOptions options)
             {
                 var t = json
-                    .GetProperty(nameof(WithTimestamp<TResult>.Timestamp).ToCamelCase())
+                    .GetProperty(names.Timestamp)
                     .Deserialize<DateTimeOffset>(options);
-                var resultJson = json.GetProperty(nameof(WithTimestamp<TResult>.Result).ToCamelCase());
+                var resultJson = json.GetProperty(names.Result);
                 var result = mapper.Map(resultJson, options);
                 return new(t, result);
             }
