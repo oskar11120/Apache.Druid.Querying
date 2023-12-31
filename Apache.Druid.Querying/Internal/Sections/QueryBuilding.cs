@@ -1,4 +1,6 @@
-﻿using System.Linq.Expressions;
+﻿using Apache.Druid.Querying.Internal.QuerySectionFactory;
+using System.Linq;
+using System.Linq.Expressions;
 
 namespace Apache.Druid.Querying.Internal.Sections
 {
@@ -18,8 +20,17 @@ namespace Apache.Druid.Querying.Internal.Sections
             where TSelf : IQuery<TSelf>
             => query.AddOrUpdateSection(
                 key,
-                (options, columnNames) => SectionFactoryJsonMapper.Map(
-                    factory, typeof(TArguments), key, options, columnNames, mapperOptions ?? SectionFactoryJsonMapper.Options.Default),
+                (options, columnNames) => 
+                {
+                    var calls = SectionFactoryInterpreter
+                        .Execute(
+                            factory,
+                            typeof(TElementFactory),
+                            typeof(TArguments))
+                        .ToList();
+                    return SectionFactoryJsonMapper.Map(
+                        calls, key, options, columnNames, mapperOptions ?? SectionFactoryJsonMapper.Options.Default);
+                },
                 convertKeyToCamelCase);
     }
 }

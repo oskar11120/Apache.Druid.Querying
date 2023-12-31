@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -10,9 +9,8 @@ namespace Apache.Druid.Querying.Internal.Sections
 {
     internal class SectionFactoryJsonMapper
     {
-        public static JsonNode Map<TElementFactory, TSection>(
-            Expression<QuerySectionFactory<TElementFactory, TSection>> factory,
-            Type argumentsType,
+        public static JsonNode Map(
+            IReadOnlyList<ElementFactoryCall> calls,
             string sectionKey,
             JsonSerializerOptions serializerOptions,
             IArgumentColumnNameProvider columnNames,
@@ -64,12 +62,6 @@ namespace Apache.Druid.Querying.Internal.Sections
                 return array;
             }
 
-            var calls = SectionFactoryInterpreter
-                .Execute(
-                    factory,
-                    typeof(QuerySectionFactory<TElementFactory, TSection>),
-                    argumentsType)
-                .ToList();
             return Map(calls, false);
         }
 
