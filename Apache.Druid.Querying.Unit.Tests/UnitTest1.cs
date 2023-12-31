@@ -7,87 +7,64 @@ namespace Apache.Druid.Querying.Unit.Tests
 {
     public class Tests
     {
-        //[Test]
-        //public void GroupByQuery_Builds()
-        //{
-        //    var zero = new Query<Message>
-        //        .GroupBy<GroupByDimensions>
-        //        .WithNoVirtualColumns
-        //        .WithAggregations<Aggregations>()
-        //        .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
-        //        .Granularity(Granularity.Minute)
-        //        .Dimensions(dimensions => new[]
-        //        {
-        //            dimensions.Default(
-        //                message => message.ObjectId,
-        //                dimensions => dimensions.ObjectId),
-        //            dimensions.Default(
-        //                message => message.VariableName,
-        //                dimensions => dimensions.VariableName)
-        //        })
-        //        .Aggregations(aggregators => new[]
-        //        {
-        //            aggregators.Last(
-        //                aggregations => aggregations.LastValue,
-        //                message => message.Value),
-        //            aggregators.Max(
-        //                aggregations => aggregations.TMax,
-        //                message => message.Timestamp)
-        //        })
-        //        .LimitSpec(
-        //            5000,
-        //            columns: columns => new[]
-        //            {
-        //                columns.OrderBy(tuple => tuple.Dimensions.ObjectId),
-        //                columns.OrderBy(tuple => tuple.Aggregations.LastValue)
-        //            })
-        //        .HavingFilter(filter => filter.Range(
-        //            tuple => tuple.Aggregations.LastValue,
-        //            lower: 0))
-        //        .ToJson();
+        [Test]
+        public void GroupByQuery_Builds()
+        {
+            var zero = new Query<Message>
+                .GroupBy<GroupByDimensions>
+                .WithNoVirtualColumns
+                .WithAggregations<Aggregations>()
+                .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
+                .Granularity(Granularity.Minute)
+                .Dimensions(dimensions => new
+                (
+                    dimensions.Default(message => message.ObjectId),
+                    dimensions.Default(message => message.VariableName)
+                ))
+                .Aggregations(aggregators => new(
+                    aggregators.Max(message => message.Timestamp),
+                    aggregators.Last(message => message.Value)
+                ))
+                .LimitSpec(
+                    5000,
+                    columns: columns => new[]
+                    {
+                        columns.OrderBy(tuple => tuple.Dimensions.ObjectId),
+                        columns.OrderBy(tuple => tuple.Aggregations.LastValue)
+                    })
+                .HavingFilter(filter => filter.Range(
+                    tuple => tuple.Aggregations.LastValue,
+                    lower: 0))
+                .ToJson();
 
-        //    var one = new Query<Message>
-        //        .GroupBy<GroupByDimensions>
-        //        .WithVirtualColumns<VirtualColumns>
-        //        .WithAggregations<Aggregations>()
-        //        .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
-        //        .Granularity(Granularity.Minute)
-        //        .VirtualColumns(columns => new[]
-        //        {
-        //            columns.Expression(
-        //                virtualColumns => virtualColumns.TReal,
-        //                "__time")
-        //        })
-        //        .Dimensions(dimensions => new[]
-        //        {
-        //            dimensions.Default(
-        //                tuple => tuple.Source.ObjectId,
-        //                dimensions => dimensions.ObjectId),
-        //            dimensions.Default(
-        //                tuple => tuple.Source.VariableName,
-        //                dimensions => dimensions.VariableName)
-        //        })
-        //        .Aggregations(aggregators => new[]
-        //        {
-        //            aggregators.Last(
-        //                aggregations => aggregations.LastValue,
-        //                tuple => tuple.Source.Value),
-        //            aggregators.Max(
-        //                aggregations => aggregations.TMax,
-        //                tuple => tuple.Source.Timestamp)
-        //        })
-        //        .LimitSpec(
-        //            5000,
-        //            columns: columns => new[]
-        //            {
-        //                columns.OrderBy(tuple => tuple.Dimensions.ObjectId),
-        //                columns.OrderBy(tuple => tuple.Aggregations.LastValue)
-        //            })
-        //        .HavingFilter(filter => filter.Range(
-        //            tuple => tuple.Aggregations.LastValue,
-        //            lower: 0))
-        //        .ToJson();
-        //}
+            var one = new Query<Message>
+                .GroupBy<GroupByDimensions>
+                .WithVirtualColumns<DateTimeOffset>
+                .WithAggregations<Aggregations>()
+                .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
+                .Granularity(Granularity.Minute)
+                .VirtualColumns(columns => columns.Expression<DateTimeOffset>("__time"))
+                .Dimensions(dimensions => new
+                (
+                    dimensions.Default(message => message.Source.ObjectId),
+                    dimensions.Default(message => message.Source.VariableName)
+                ))
+                .Aggregations(aggregators => new(
+                    aggregators.Max(message => message.Source.Timestamp),
+                    aggregators.Last(message => message.Source.Value)
+                ))
+                .LimitSpec(
+                    5000,
+                    columns: columns => new[]
+                    {
+                        columns.OrderBy(tuple => tuple.Dimensions.ObjectId),
+                        columns.OrderBy(tuple => tuple.Aggregations.LastValue)
+                    })
+                .HavingFilter(filter => filter.Range(
+                    tuple => tuple.Aggregations.LastValue,
+                    lower: 0))
+                .ToJson();
+        }
 
         [Test]
         public void TopNQuery_Builds()
@@ -187,7 +164,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .PostAggregations(postAggregators => new(
                     postAggregators.Arithmetic(
                         ArithmeticFunction.Add,
-                        postAggregators.FieldAccess( aggregations => aggregations.LastValue, true))))
+                        postAggregators.FieldAccess(aggregations => aggregations.LastValue, true))))
                 .Metric(metric => metric.Numeric(
                     tuple => tuple.PostAggregations.Sum))
                 .Context(new() { MinTopNThreshold = 5 })
