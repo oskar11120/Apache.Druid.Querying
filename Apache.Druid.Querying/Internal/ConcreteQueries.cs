@@ -61,15 +61,16 @@ namespace Apache.Druid.Querying.Internal
                 ToJson(nameof(WithTimestamp<TResult>.Result)));
 
             async IAsyncEnumerable<WithTimestamp<TResult>> IQueryResultMapper<WithTimestamp<TResult>>.Map(
-                JsonStreamReader json, JsonSerializerOptions options, [EnumeratorCancellation] CancellationToken token)
+                QueryResultMapperContext context, [EnumeratorCancellation] CancellationToken token)
             {
+                var (json, _, _) = context;
                 DateTimeOffset t;
                 while (!json.ReadToPropertyValue(names.Timestamp, out t))
                     await json.AdvanceAsync(token);
                 while (!json.ReadToProperty(names.Result))
                     await json.AdvanceAsync(token);
 
-                var results = mapper.Map(json, options, token);
+                var results = mapper.Map(context, token);
                 await foreach (var result in results)
                     yield return new(t, result);
 
@@ -85,8 +86,9 @@ namespace Apache.Druid.Querying.Internal
             private static readonly IQueryResultMapper<TElement> mapper = new TElementMapper();
 
             async IAsyncEnumerable<TElement> IQueryResultMapper<TElement>.Map(
-                JsonStreamReader json, JsonSerializerOptions options, [EnumeratorCancellation] CancellationToken token)
+                QueryResultMapperContext context, [EnumeratorCancellation] CancellationToken token)
             {
+                var (json, _, _) = context;
                 bool SkipEndArray(out bool skippedEndArray)
                 {
                     var reader = json.GetReader();
@@ -113,7 +115,7 @@ namespace Apache.Druid.Querying.Internal
                     if (skippedEndArray)
                         yield break;
 
-                    var results = mapper.Map(json, options, token);
+                    var results = mapper.Map(context, token);
                     await foreach (var result in results)
                         yield return result;
 
@@ -129,14 +131,15 @@ namespace Apache.Druid.Querying.Internal
         public abstract class Atom<TSelf> : IQueryResultMapper<TSelf>
         {
             async IAsyncEnumerable<TSelf> IQueryResultMapper<TSelf>.Map(
-                JsonStreamReader json, JsonSerializerOptions options, [EnumeratorCancellation] CancellationToken token)
+                QueryResultMapperContext context, [EnumeratorCancellation] CancellationToken token)
             {
+                var (json, _, _) = context;
                 var bytes = await EnsureWholeInBufferAndGetSpanningBytesAsync(json, token);
                 TSelf Map_()
                 {
-                    var context = new Context(json, options, bytes);
-                    var result = Map(ref context);
-                    context.UpdateState();
+                    var context_ = new Context(context, bytes);
+                    var result = Map(ref context_);
+                    context_.UpdateState();
                     return result;
                 }
 
@@ -158,14 +161,14 @@ namespace Apache.Druid.Querying.Internal
                 private static readonly byte[] comaBytes = Encoding.UTF8.GetBytes(",");
                 private readonly JsonStreamReader json;
                 private readonly JsonSerializerOptions options;
+                private readonly SectionAtomicity.IProvider atomicity;
                 private readonly int spanningBytes;
                 private readonly int trimBytes;
                 private long deserializeConsumedBytes = 0;
 
-                public Context(JsonStreamReader json, JsonSerializerOptions options, int spanningBytes)
+                public Context(QueryResultMapperContext mapperContext, int spanningBytes)
                 {
-                    this.json = json;
-                    this.options = options;
+                    (json, options, atomicity) = mapperContext;
                     this.spanningBytes = spanningBytes;
 
                     var startWithComa = json.UnreadPartOfBufferStartsWith(comaBytes);

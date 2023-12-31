@@ -1,6 +1,7 @@
 ﻿using Apache.Druid.Querying.Internal.QuerySectionFactory;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 
 namespace Apache.Druid.Querying.Internal.Sections
 {
@@ -11,16 +12,23 @@ namespace Apache.Druid.Querying.Internal.Sections
 
     internal static class QueryExtensions
     {
+        private static readonly ConditionalWeakTable<IQuery, SectionAtomicity.IProvider.Builder> builders = new();
+
+        private static SectionAtomicity.IProvider.Builder GetBuilder(this IQuery query)
+            => builders.GetOrCreateValue(query);
+
+        public static SectionAtomicity.IProvider GetSectionAtomicity(this IQuery query) => query.GetBuilder();
+
         public static TSelf AddOrUpdateSectionWithSectionFactory<TArguments, TSelf, TMarker, TSection, TElementFactory>(
             this IQuery<TArguments, TSelf, TMarker> query,
-            string key,
+            string atomicSectionColumnName,
             Expression<QuerySectionFactory<TElementFactory, TSection>> factory,
             SectionFactoryJsonMapper.Options? mapperOptions = null,
             bool convertKeyToCamelCase = true)
             where TSelf : IQuery<TSelf>
             => query.AddOrUpdateSection(
-                key,
-                (options, columnNames) => 
+                atomicSectionColumnName,
+                (options, columnNames) =>
                 {
                     var calls = SectionFactoryInterpreter
                         .Execute(
@@ -28,8 +36,9 @@ namespace Apache.Druid.Querying.Internal.Sections
                             typeof(TElementFactory),
                             typeof(TArguments))
                         .ToList();
+                    var atomicity = query.GetBuilder().Add<TSection>(calls, atomicSectionColumnName);
                     return SectionFactoryJsonMapper.Map(
-                        calls, key, options, columnNames, mapperOptions ?? SectionFactoryJsonMapper.Options.Default);
+                        calls, atomicity, options, columnNames, mapperOptions ?? SectionFactoryJsonMapper.Options.Default);
                 },
                 convertKeyToCamelCase);
     }

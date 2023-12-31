@@ -1,5 +1,6 @@
 ﻿using Apache.Druid.Querying.DependencyInjection;
 using Apache.Druid.Querying.Internal;
+using Apache.Druid.Querying.Internal.Sections;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -15,9 +16,11 @@ using System.Threading;
 
 namespace Apache.Druid.Querying
 {
+    internal readonly record struct QueryResultMapperContext(JsonStreamReader Json, JsonSerializerOptions Options, SectionAtomicity.IProvider Atomicity);
+
     public interface IQueryResultMapper<TResult>
     {
-        internal IAsyncEnumerable<TResult> Map(JsonStreamReader json, JsonSerializerOptions options, CancellationToken token);
+        internal IAsyncEnumerable<TResult> Map(QueryResultMapperContext context, CancellationToken token);
     }
 
     public interface IQueryWithMappedResult<TResult, TMapper> : IQuery where TMapper : IQueryResultMapper<TResult>, new()
@@ -46,7 +49,8 @@ namespace Apache.Druid.Querying
             IQueryWithMappedResult<TResult, TMapper> query, CancellationToken token = default)
             where TMapper : IQueryResultMapper<TResult>, new()
         {
-            static async IAsyncEnumerable<TResult> Deserialize(Stream stream, JsonSerializerOptions options, [EnumeratorCancellation] CancellationToken token)
+            var atomicity = query.GetSectionAtomicity();
+            async IAsyncEnumerable<TResult> Deserialize(Stream stream, JsonSerializerOptions options, [EnumeratorCancellation] CancellationToken token)
             {
                 var mapper = new TMapper();
                 var buffer = ArrayPool<byte>.Shared.Rent(JsonStreamReader.Size);
@@ -54,7 +58,7 @@ namespace Apache.Druid.Querying
                 try
                 {
                     var read = await stream.ReadAsync(buffer, token);
-                    var results = mapper.Map(new(stream, buffer, read), options, token);
+                    var results = mapper.Map(new(new(stream, buffer, read), options, atomicity), token);
                     await foreach (var result in results)
                         yield return result!;
                 }

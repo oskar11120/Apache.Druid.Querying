@@ -11,7 +11,7 @@ namespace Apache.Druid.Querying.Internal.Sections
     {
         public static JsonNode Map(
             IReadOnlyList<ElementFactoryCall> calls,
-            string sectionKey,
+            SectionAtomicity atomicity,
             JsonSerializerOptions serializerOptions,
             IArgumentColumnNameProvider columnNames,
             Options options)
@@ -41,7 +41,7 @@ namespace Apache.Druid.Querying.Internal.Sections
                 };
 
                 if (!nested)
-                    result.Add(options.SectionColumnNameKey, member ?? sectionKey);
+                    result.Add(options.SectionColumnNameKey, atomicity.Atomic ? atomicity.ColumnNameIfAtomic : member);
                 foreach (var param in @params)
                     MapCallParam(param, result);
                 return result;
@@ -49,9 +49,9 @@ namespace Apache.Druid.Querying.Internal.Sections
 
             JsonNode Map(IReadOnlyCollection<ElementFactoryCall> calls, bool nested)
             {
-                if(options.ForceSingle)
+                if (options.ForceSingle || atomicity.Atomic)
                 {
-                    return calls.Count == 1 ? 
+                    return calls.Count == 1 ?
                         MapCall(calls.Single(), nested) :
                         throw new InvalidOperationException();
                 }
