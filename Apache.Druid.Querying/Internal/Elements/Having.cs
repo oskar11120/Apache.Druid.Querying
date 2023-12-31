@@ -2,14 +2,18 @@
 {
     internal abstract class Having : WithType, IHaving
     {
+        public Having(string? type = null) : base(type)
+        {
+        }
+
         public sealed class Filter_ : Having
         {
-            public IFilter Filter { get; }
-
-            public Filter_(IFilter filter)
+            public Filter_(IFilter filter) : base(nameof(Filter).ToCamelCase())
             {
                 Filter = filter;
             }
+
+            public IFilter Filter { get; }
         }
     }
 }

@@ -54,9 +54,20 @@ namespace Apache.Druid.Querying
                 TColumn? lower = default,
                 TColumn? upper = default,
                 string? matchValueType = null,
-                bool lowerStrict = false,
-                bool upperStrict = false)
-                => new Filter<TColumn>.Range(GetColumnName(column), matchValueType ?? DataType.Get<TColumn>(), lower, upper, lowerStrict, upperStrict);
+                bool lowerOpen = false,
+                bool upperOpen = false)
+                where TColumn : struct
+                => new Filter<TColumn?>.Range(GetColumnName(column), matchValueType ?? DataType.Get<TColumn>(), lower, upper, lowerOpen, upperOpen);
+            public IFilter Range<TColumn>(
+                Expression<ColumnSelector<TColumn>> column,
+                TColumn? lower = default,
+                TColumn? upper = default,
+                string? matchValueType = null,
+                bool lowerOpen = false,
+                bool upperOpen = false)
+                where TColumn : class
+                => new Filter<TColumn>.Range(GetColumnName(column), matchValueType ?? DataType.Get<TColumn>(), lower, upper, lowerOpen, upperOpen);
+
             public IFilter Selector<TColumn>(Expression<ColumnSelector<TColumn>> dimension, TColumn value)
                 => new Filter<TColumn>.Selector(GetColumnName(dimension), value);
         }
@@ -200,11 +211,11 @@ namespace Apache.Druid.Querying
                 long maxStringBytes,
                 SimpleDataType dataType);
 
-            string First< TTimeColumn>(
+            string First<TTimeColumn>(
                 ColumnSelector<string> fieldName,
                 ColumnSelector<TTimeColumn> timeColumn,
                 long maxStringBytes);
-            string Last< TTimeColumn>(
+            string Last<TTimeColumn>(
                 ColumnSelector<string> fieldName,
                 ColumnSelector<TTimeColumn> timeColumn,
                 long maxStringBytes);
