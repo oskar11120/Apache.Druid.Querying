@@ -13,22 +13,29 @@ namespace Apache.Druid.Querying.Internal
 {
     public static class IQueryWithMappedResult
     {
-        public interface ArrayOfObjectsWithTimestamp<TResult, TResultMapper>
-            : IQueryWithMappedResult<WithTimestamp<TResult>,
-            QueryResultMapper.Array<WithTimestamp<TResult>, QueryResultMapper.WithTimestamp<TResult, TResultMapper>>>
-            where TResultMapper : IQueryResultMapper<TResult>, new()
+        public interface WithTimestampArray<TValue, TValueMapper>
+            : IQueryWithMappedResult<WithTimestamp<TValue>,
+            QueryResultMapper.Array<WithTimestamp<TValue>, QueryResultMapper.WithTimestamp<TValue, TValueMapper>>>
+            where TValueMapper : IQueryResultMapper<TValue>, new()
+        {
+        }
+
+        public interface GroupByResultArray<TValue, TValueMapper>
+            : IQueryWithMappedResult<WithTimestamp<TValue>,
+            QueryResultMapper.Array<WithTimestamp<TValue>, QueryResultMapper.GroupByResult<TValue, TValueMapper>>>
+            where TValueMapper : IQueryResultMapper<TValue>, new()
         {
         }
 
         public static class WithTimestamp
         {
-            public interface Aggregations_PostAggregations_<TAggregations, TPostAggregations> : ArrayOfObjectsWithTimestamp<
+            public interface Aggregations_PostAggregations_<TAggregations, TPostAggregations> : WithTimestampArray<
                 Aggregations_PostAggregations<TAggregations, TPostAggregations>,
                 QueryResultMapper.Aggregations_PostAggregations_<TAggregations, TPostAggregations>>
             {
             }
 
-            public interface Dimension_Aggregations_<TDimension, TAggregations> : ArrayOfObjectsWithTimestamp<
+            public interface Dimension_Aggregations_<TDimension, TAggregations> : WithTimestampArray<
                 Dimension_Aggregations<TDimension, TAggregations>,
                 QueryResultMapper.Array<
                     Dimension_Aggregations<TDimension, TAggregations>,
@@ -36,11 +43,27 @@ namespace Apache.Druid.Querying.Internal
             {
             }
 
-            public interface Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations> : ArrayOfObjectsWithTimestamp<
+            public interface Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations> : WithTimestampArray<
                 Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>,
                 QueryResultMapper.Array<
                     Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>,
                     QueryResultMapper.Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations>>>
+            {
+            }
+
+            public interface Dimensions_Aggregations_<TDimensions, TAggregations> : GroupByResultArray<
+                Dimensions_Aggregations<TDimensions, TAggregations>,
+                QueryResultMapper.Array<
+                    Dimensions_Aggregations<TDimensions, TAggregations>,
+                    QueryResultMapper.Dimensions_Aggregations_<TDimensions, TAggregations>>>
+            {
+            }
+
+            public interface Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations> : GroupByResultArray<
+                Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>,
+                QueryResultMapper.Array<
+                    Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>,
+                    QueryResultMapper.Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>>>
             {
             }
         }
@@ -48,38 +71,66 @@ namespace Apache.Druid.Querying.Internal
 
     public static class QueryResultMapper
     {
-        public class WithTimestamp<TResult, TResultMapper> :
-            IQueryResultMapper<WithTimestamp<TResult>>
-            where TResultMapper : IQueryResultMapper<TResult>, new()
+        public class WithTwoProperties<TFirstNonMappable, TSecondMappable, TScondMapper, TResult> :
+            IQueryResultMapper<TResult>
+            where TScondMapper : IQueryResultMapper<TSecondMappable>, new()
         {
-            private static byte[] ToJson(string propertyName) =>
-                Encoding.UTF8.GetBytes(propertyName.ToCamelCase());
+            private static readonly IQueryResultMapper<TSecondMappable> mapper = new TScondMapper();
+            private readonly (byte[] First, byte[] Second) names;
+            private readonly Func<TFirstNonMappable, TSecondMappable, TResult> create;
 
-            private static readonly IQueryResultMapper<TResult> mapper = new TResultMapper();
-            private static readonly (byte[] Timestamp, byte[] Result) names = (
-                ToJson(nameof(WithTimestamp<TResult>.Timestamp)),
-                ToJson(nameof(WithTimestamp<TResult>.Result)));
+            public WithTwoProperties(string firstName, string secondName, Func<TFirstNonMappable, TSecondMappable, TResult> create)
+            {
+                names = (ToJson(firstName), ToJson(secondName));
+                this.create = create;
+            }
 
-            async IAsyncEnumerable<WithTimestamp<TResult>> IQueryResultMapper<WithTimestamp<TResult>>.Map(
+            async IAsyncEnumerable<TResult> IQueryResultMapper<TResult>.Map(
                 QueryResultMapperContext context, [EnumeratorCancellation] CancellationToken token)
             {
                 var (json, _, _) = context;
-                DateTimeOffset t;
-                while (!json.ReadToPropertyValue(names.Timestamp, out t))
+                TFirstNonMappable first;
+                while (!json.ReadToPropertyValue(names.First, out first))
                     await json.AdvanceAsync(token);
-                while (!json.ReadToProperty(names.Result))
+                while (!json.ReadToProperty(names.Second))
                     await json.AdvanceAsync(token);
 
                 var results = mapper.Map(context, token);
                 await foreach (var result in results)
-                    yield return new(t, result);
+                    yield return create(first, result);
 
                 while (!json.ReadToTokenType(JsonTokenType.EndObject))
                     await json.AdvanceAsync(token);
             }
+
+            private static byte[] ToJson(string propertyName) =>
+                Encoding.UTF8.GetBytes(propertyName.ToCamelCase());
         }
 
-        public class Array<TElement, TElementMapper> :
+        public class WithTimestamp<TResult, TResultMapper>
+            : WithTwoProperties<DateTimeOffset, TResult, TResultMapper, WithTimestamp<TResult>>
+            where TResultMapper : IQueryResultMapper<TResult>, new()
+        {
+            public WithTimestamp() : this("result")
+            {            
+            }
+
+            public WithTimestamp(string valuePropertyNameBase)
+                : base(nameof(WithTimestamp<TResult>.Timestamp), valuePropertyNameBase, static (t, result) => new(t, result))
+            {
+            }
+        }
+
+        public sealed class GroupByResult<TEvent, TEventMapper>
+            : WithTimestamp<TEvent, TEventMapper>
+            where TEventMapper : IQueryResultMapper<TEvent>, new()
+        {
+            public GroupByResult() : base("event")
+            {
+            }
+        }
+
+        public sealed class Array<TElement, TElementMapper> :
             IQueryResultMapper<TElement>
             where TElementMapper : IQueryResultMapper<TElement>, new()
         {
