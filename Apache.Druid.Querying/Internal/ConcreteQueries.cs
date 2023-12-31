@@ -207,7 +207,7 @@ namespace Apache.Druid.Querying.Internal
             }
         }
 
-        public class Aggregations_PostAggregations_<TAggregations, TPostAggregations>
+        public sealed class Aggregations_PostAggregations_<TAggregations, TPostAggregations>
             : Atom<Aggregations_PostAggregations<TAggregations, TPostAggregations>>
         {
             private protected override Aggregations_PostAggregations<TAggregations, TPostAggregations> Map(ref Context context)
@@ -216,7 +216,7 @@ namespace Apache.Druid.Querying.Internal
                     context.Deserialize<TPostAggregations>());
         }
 
-        public class Dimension_Aggregations_<TDimension, TAggregations> :
+        public sealed class Dimension_Aggregations_<TDimension, TAggregations> :
             Atom<Dimension_Aggregations<TDimension, TAggregations>>
         {
             private protected override Dimension_Aggregations<TDimension, TAggregations> Map(ref Context context)
@@ -225,7 +225,7 @@ namespace Apache.Druid.Querying.Internal
                     context.Deserialize<TAggregations>());
         }
 
-        public class Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations>
+        public sealed class Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations>
              : Atom<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>
         {
             private protected override Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations> Map(ref Context context)
@@ -235,7 +235,7 @@ namespace Apache.Druid.Querying.Internal
                     context.Deserialize<TPostAggregations>());
         }
 
-        public class Dimensions_Aggregations_<TDimensions, TAggregations>
+        public sealed class Dimensions_Aggregations_<TDimensions, TAggregations>
             : Atom<Dimensions_Aggregations<TDimensions, TAggregations>>
         {
             private protected override Dimensions_Aggregations<TDimensions, TAggregations> Map(ref Context context)
@@ -244,7 +244,7 @@ namespace Apache.Druid.Querying.Internal
                     context.Deserialize<TAggregations>());
         }
 
-        public class Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>
+        public sealed class Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>
              : Atom<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>
         {
             private protected override Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations> Map(ref Context context)

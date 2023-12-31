@@ -85,5 +85,4 @@ internal class MessageSourceTests
 
     public sealed record Aggregations(double Sum, int Count, string Variable, double? FirstValue);
     public sealed record PostAggregations(double Average);
-    public sealed record Dimension(Guid ObjectId);
 }
