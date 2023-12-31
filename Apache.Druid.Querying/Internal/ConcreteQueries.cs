@@ -2,6 +2,7 @@
 using Apache.Druid.Querying.Internal.Sections;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -48,18 +49,28 @@ namespace Apache.Druid.Querying.Internal
 
     public static class QueryResultMapper
     {
+        private static readonly byte[] comaBytes = Encoding.UTF8.GetBytes(",");
+
         private static TObject Deserialize<TObject>(JsonStreamReader json, JsonSerializerOptions options)
         {
-            var reader = json.GetReader();
+            json.ReadToTokenTypeAtNextTokenDepth(JsonTokenType.EndObject, out var bytesConsumed, false);
+            var startWithComa = json.UnreadPartOfBufferStartsWith(comaBytes);   
+            var reader = json.GetReaderForSlice((int)bytesConsumed, startWithComa ? comaBytes.Length : 0);
             var result = JsonSerializer.Deserialize<TObject>(ref reader, options)!;
             return result;
         }
 
         private static TObject DeserializeAndUpdateState<TObject>(JsonStreamReader json, JsonSerializerOptions options)
         {
-            var reader = json.GetReader();
-            var result = JsonSerializer.Deserialize<TObject>(ref reader, options)!;
-            json.UpdateState(reader);
+            json.ReadToTokenTypeAtNextTokenDepth(JsonTokenType.EndObject, out var bytesConsumed, false);
+            var startWithComa = json.UnreadPartOfBufferStartsWith(comaBytes);
+            var trimBytes = startWithComa ? comaBytes.Length : 0;
+            var sliceReader = json.GetReaderForSlice((int)bytesConsumed, trimBytes);
+            var result = JsonSerializer.Deserialize<TObject>(ref sliceReader, options)!;
+            var updateReader = json.GetReader();
+            while (updateReader.BytesConsumed < sliceReader.BytesConsumed + trimBytes)
+                updateReader.Read();
+            json.UpdateState(updateReader);
             return result;
         }
 
@@ -110,18 +121,19 @@ namespace Apache.Druid.Querying.Internal
             async IAsyncEnumerable<TElement> IQueryResultMapper<TElement>.Map(
                 JsonStreamReader json, JsonSerializerOptions options, [EnumeratorCancellation] CancellationToken token)
             {
-                bool SkipNext(out JsonTokenType type)
+                bool SkipEndArray(out bool skippedEndArray)
                 {
                     var reader = json.GetReader();
                     var read = reader.Read();
                     if (!read)
                     {
-                        type = default;
+                        skippedEndArray = default;
                         return false;
                     }
 
-                    json.UpdateState(reader);
-                    type = reader.TokenType;
+                    skippedEndArray = reader.TokenType is JsonTokenType.EndArray;
+                    if (skippedEndArray)
+                        json.UpdateState(reader);
                     return true;
                 }
 
@@ -129,20 +141,19 @@ namespace Apache.Druid.Querying.Internal
                     await json.AdvanceAsync(token);
                 while (true)
                 {
-                    JsonTokenType type;
-                    while (!json.ReadNext(out type))
+                    bool skippedEndArray;
+                    while (!SkipEndArray(out skippedEndArray))
                         await json.AdvanceAsync(token);
-
-                    if (type is JsonTokenType.EndArray)
+                    if (skippedEndArray)
                         yield break;
 
                     var results = mapper.Map(json, options, token);
                     await foreach (var result in results)
                         yield return result;
 
-                    while(!SkipNext(out type))
+                    while (!SkipEndArray(out skippedEndArray))
                         await json.AdvanceAsync(token);
-                    if (type is JsonTokenType.EndArray)
+                    if (skippedEndArray)
                         yield break;
                 }
             }

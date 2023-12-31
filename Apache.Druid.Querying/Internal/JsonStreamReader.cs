@@ -33,11 +33,32 @@ internal sealed class JsonStreamReader
         _depth = reader.CurrentDepth;
     }
 
+    public bool UnreadPartOfBufferStartsWith(ReadOnlySpan<byte> bytes)
+    {
+        var consumed = (int)_bytesConsumed;
+        return bytes.SequenceEqual(_buffer.AsSpan()[consumed..(consumed + bytes.Length)]);
+    }
+
+    public Utf8JsonReader GetReaderForSlice(int sliceLengthInBytes, int trimStart)
+    {
+        var consumed = (int)_bytesConsumed;
+        ReadOnlySpan<byte> slice = _buffer.AsSpan()[(consumed + trimStart)..(consumed + sliceLengthInBytes)];
+        return new Utf8JsonReader(slice, false, default);
+    }
+
     public Utf8JsonReader GetReader()
     {
         ReadOnlySpan<byte> slice = _bytesConsumed > 0 || _readCount < Size ? _buffer.AsSpan()[(int)_bytesConsumed.._readCount] : _buffer;
         var reader = new Utf8JsonReader(slice, false, _readerState);
         return reader;
+    }
+
+    public string DebugString => Debug();
+
+    private string Debug()
+    {
+        ReadOnlySpan<byte> slice = _bytesConsumed > 0 || _readCount < Size ? _buffer.AsSpan()[(int)_bytesConsumed.._readCount] : _buffer;
+        return Encoding.UTF8.GetString(slice);
     }
 
 
@@ -114,8 +135,7 @@ internal sealed class JsonStreamReader
             if (!read)
                 return false;
 
-            var readDepth = reader.CurrentDepth;
-            if (readDepth != depth)
+            if (reader.CurrentDepth != depth)
                 continue;
 
             if (updateState)

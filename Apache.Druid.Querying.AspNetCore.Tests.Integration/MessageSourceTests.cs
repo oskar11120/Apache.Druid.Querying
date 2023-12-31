@@ -17,7 +17,7 @@ internal static class TestExtensions
         var t = DateTime.Parse("2023-10-19T16:57:00.000Z", null, DateTimeStyles.AssumeUniversal).ToUniversalTime();
         return query
             .Unwrapped
-            .Interval(new(t, t.AddDays(1)))
+            .Interval(new(t, t.AddDays(5)))
             .Granularity(Granularity.SixHours)
             .Filter(filter => filter.And(
                 filter.Selector(
