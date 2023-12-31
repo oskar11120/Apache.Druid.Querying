@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Apache.Druid.Querying.Internal;
 
-// https://github.com/richlander/convenience/blob/main/releasejson/releasejson/JsonStreamReader.cs
+// Based on https://github.com/richlander/convenience/blob/main/releasejson/releasejson/JsonStreamReader.cs.
 internal sealed class JsonStreamReader
 {
     public JsonStreamReader(Stream stream, byte[] buffer, int readCount)

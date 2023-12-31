@@ -177,7 +177,21 @@ namespace Apache.Druid.Querying.Internal
 
                 public TObject Deserialize<TObject>()
                 {
+                    var (atomic, _, columnName) = atomicity.Get<TObject>();
                     var reader = json.GetReaderForSlice(spanningBytes, trimBytes);
+                    if (atomic)
+                    {
+                        JsonStreamReader.ReadToProperty(ref reader, columnName);
+                        var start = (int)reader.BytesConsumed;
+                        var propertyDepth = reader.CurrentDepth;
+                        do
+                            reader.Read();
+                        while (reader.CurrentDepth < propertyDepth);
+                        deserializeConsumedBytes = reader.BytesConsumed;
+                        reader = json.GetReaderForSlice((int)deserializeConsumedBytes + trimBytes, start + trimBytes);
+                        return JsonSerializer.Deserialize<TObject>(ref reader, options)!;
+                    }
+
                     var result = JsonSerializer.Deserialize<TObject>(ref reader, options)!;
                     deserializeConsumedBytes = reader.BytesConsumed;
                     return result;

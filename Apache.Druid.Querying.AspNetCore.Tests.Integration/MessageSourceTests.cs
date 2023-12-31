@@ -43,7 +43,7 @@ internal class MessageSourceTests
     public async Task TopNQuery_ReturnsAnything()
     {
         var query = new Query<Message>
-            .TopN<Dimension>
+            .TopN<Guid>
             .WithNoVirtualColumns
             .WithAggregations<Aggregations>
             .WithPostAggregations<PostAggregations>()
@@ -53,7 +53,7 @@ internal class MessageSourceTests
                     ArithmeticFunction.Divide,
                     factory.FieldAccess(aggrgations => aggrgations.Sum),
                     factory.FieldAccess(aggregations => aggregations.Count))))
-            .Dimension(factory => new(factory.Default(message => message.ObjectId)))
+            .Dimension(factory => factory.Default(message => message.ObjectId))
             .Metric(factory => factory.Numeric(tuple => tuple.Aggregations.Count))
             .Threshold(1000);
         var result = await Messages
