@@ -71,7 +71,7 @@ namespace Apache.Druid.Querying.Internal
 
     public static class QueryResultMapper
     {
-        public class WithTwoProperties<TFirstNonMappable, TSecondMappable, TScondMapper, TResult> :
+        public abstract class WithTwoProperties<TFirstNonMappable, TSecondMappable, TScondMapper, TResult> :
             IQueryResultMapper<TResult>
             where TScondMapper : IQueryResultMapper<TSecondMappable>, new()
         {
