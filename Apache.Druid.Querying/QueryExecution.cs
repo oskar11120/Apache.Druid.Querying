@@ -1,5 +1,9 @@
 ﻿using Apache.Druid.Querying.DependencyInjection;
+using Apache.Druid.Querying.Internal;
+using System;
+using System.Buffers;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
@@ -13,7 +17,7 @@ namespace Apache.Druid.Querying
 {
     public interface IQueryResultMapper<TResult>
     {
-        TResult Map(JsonElement json, JsonSerializerOptions options);
+        internal IAsyncEnumerable<TResult> Map(JsonStreamReader json, JsonSerializerOptions options, CancellationToken token);
     }
 
     public interface IQueryWithMappedResult<TResult, TMapper> : IQuery where TMapper : IQueryResultMapper<TResult>, new()
@@ -38,17 +42,41 @@ namespace Apache.Druid.Querying
         public virtual IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQueryWithResult<TResult> query, CancellationToken token = default)
             => Execute<TResult>(query, token);
 
-        public virtual async IAsyncEnumerable<TResult> ExecuteQuery<TResult, TMapper>(
-            IQueryWithMappedResult<TResult, TMapper> query, [EnumeratorCancellation] CancellationToken token = default)
+        public virtual IAsyncEnumerable<TResult> ExecuteQuery<TResult, TMapper>(
+            IQueryWithMappedResult<TResult, TMapper> query, CancellationToken token = default)
             where TMapper : IQueryResultMapper<TResult>, new()
         {
-            var mapper = new TMapper();
-            var json = Execute<JsonElement>(query, token);
-            await foreach (var result in json)
-                yield return mapper.Map(result, State.SerializerOptions);
+            static async IAsyncEnumerable<TResult> Deserialize(Stream stream, JsonSerializerOptions options, [EnumeratorCancellation] CancellationToken token)
+            {
+                var mapper = new TMapper();
+                var buffer = ArrayPool<byte>.Shared.Rent(JsonStreamReader.Size);
+
+                try
+                {
+                    var read = await stream.ReadAsync(buffer, token);
+                    var results = mapper.Map(new(stream, buffer, read), options, token);
+                    await foreach (var result in results)
+                        yield return result!;
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(buffer);
+                }
+            }
+
+            return Execute(query, Deserialize, token);
         }
 
-        private async IAsyncEnumerable<TResult> Execute<TResult>(IQuery query, [EnumeratorCancellation] CancellationToken token = default)
+
+#pragma warning disable CS8621 // Nullability of reference types in return type doesn't match the target delegate (possibly because of nullability attributes).
+        private IAsyncEnumerable<TResult> Execute<TResult>(IQuery query, CancellationToken token = default)
+            => Execute<TResult>(query, JsonSerializer.DeserializeAsyncEnumerable<TResult>, token);
+#pragma warning restore CS8621 // Nullability of reference types in return type doesn't match the target delegate (possibly because of nullability attributes).
+
+        private async IAsyncEnumerable<TResult> Execute<TResult>(
+            IQuery query,
+            Func<Stream, JsonSerializerOptions, CancellationToken, IAsyncEnumerable<TResult>> deserialize,
+            [EnumeratorCancellation] CancellationToken token = default)
         {
             var (id, serializerOptions, clientFactory) = State;
             serializerOptionsWithFormatting ??= new(serializerOptions) { WriteIndented = true };
@@ -81,8 +109,8 @@ namespace Apache.Druid.Querying
 
             using var raw = await response.Content.ReadAsStreamAsync(token);
             var isGzip = response.Content.Headers.ContentEncoding.Contains(gzip.Value);
-            using var decompressed = isGzip ? new GZipStream(raw, CompressionMode.Decompress) : raw; 
-            var results = JsonSerializer.DeserializeAsyncEnumerable<TResult>(decompressed, serializerOptions, token);
+            using var decompressed = isGzip ? new GZipStream(raw, CompressionMode.Decompress) : raw;
+            var results = deserialize(decompressed, serializerOptions, token);
             await foreach (var result in results)
                 yield return result!;
         }

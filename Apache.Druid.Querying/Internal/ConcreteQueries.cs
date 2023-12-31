@@ -3,37 +3,42 @@ using Apache.Druid.Querying.Internal.Sections;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Apache.Druid.Querying.Internal
 {
     public static class IQueryWithMappedResult
     {
-        public interface WithTimestamp<TResult, TResultMapper>
-            : IQueryWithMappedResult<WithTimestamp<TResult>, QueryResultMapper.WithTimestamp<TResult, TResultMapper>>
+        public interface ArrayOfObjectsWithTimestamp<TResult, TResultMapper>
+            : IQueryWithMappedResult<WithTimestamp<TResult>,
+            QueryResultMapper.Array<WithTimestamp<TResult>, QueryResultMapper.WithTimestamp<TResult, TResultMapper>>>
             where TResultMapper : IQueryResultMapper<TResult>, new()
         {
         }
 
         public static class WithTimestamp
         {
-            public interface Aggregations_PostAggregations_<TAggregations, TPostAggregations> : WithTimestamp<
+            public interface Aggregations_PostAggregations_<TAggregations, TPostAggregations> : ArrayOfObjectsWithTimestamp<
                 Aggregations_PostAggregations<TAggregations, TPostAggregations>,
                 QueryResultMapper.Aggregations_PostAggregations_<TAggregations, TPostAggregations>>
             {
             }
 
-            public interface Dimension_Aggregations_<TDimension, TAggregations> : WithTimestamp<
-                List<Dimension_Aggregations<TDimension, TAggregations>>,
-                QueryResultMapper.List<
+            public interface Dimension_Aggregations_<TDimension, TAggregations> : ArrayOfObjectsWithTimestamp<
+                Dimension_Aggregations<TDimension, TAggregations>,
+                QueryResultMapper.Array<
                     Dimension_Aggregations<TDimension, TAggregations>,
                     QueryResultMapper.Dimension_Aggregations_<TDimension, TAggregations>>>
             {
             }
 
-            public interface Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations> : WithTimestamp<
-                List<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>,
-                QueryResultMapper.List<
+            public interface Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations> : ArrayOfObjectsWithTimestamp<
+                Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>,
+                QueryResultMapper.Array<
                     Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>,
                     QueryResultMapper.Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations>>>
             {
@@ -43,87 +48,171 @@ namespace Apache.Druid.Querying.Internal
 
     public static class QueryResultMapper
     {
+        private static TObject Deserialize<TObject>(JsonStreamReader json, JsonSerializerOptions options)
+        {
+            var reader = json.GetReader();
+            var result = JsonSerializer.Deserialize<TObject>(ref reader, options)!;
+            return result;
+        }
+
+        private static TObject DeserializeAndUpdateState<TObject>(JsonStreamReader json, JsonSerializerOptions options)
+        {
+            var reader = json.GetReader();
+            var result = JsonSerializer.Deserialize<TObject>(ref reader, options)!;
+            json.UpdateState(reader);
+            return result;
+        }
+
+        private static async ValueTask<int> EnsureWholeObjectInBufferAndGetBytesConsumedAsync(JsonStreamReader json, CancellationToken token)
+        {
+            long bytesConsumed;
+            while (!json.ReadToTokenTypeAtNextTokenDepth(JsonTokenType.EndObject, out bytesConsumed, false))
+                await json.AdvanceAsync(token);
+            return (int)bytesConsumed;
+        }
+
         public class WithTimestamp<TResult, TResultMapper> :
             IQueryResultMapper<WithTimestamp<TResult>>
             where TResultMapper : IQueryResultMapper<TResult>, new()
         {
-            private static readonly IQueryResultMapper<TResult> mapper = new TResultMapper();
-            private static readonly (string Timestamp, string Result) names = (
-                nameof(WithTimestamp<TResult>.Timestamp).ToCamelCase(),
-                nameof(WithTimestamp<TResult>.Result).ToCamelCase());
+            private static byte[] ToJson(string propertyName) =>
+                Encoding.UTF8.GetBytes(propertyName.ToCamelCase());
 
-            public WithTimestamp<TResult> Map(JsonElement json, JsonSerializerOptions options)
+            private static readonly IQueryResultMapper<TResult> mapper = new TResultMapper();
+            private static readonly (byte[] Timestamp, byte[] Result) names = (
+                ToJson(nameof(WithTimestamp<TResult>.Timestamp)),
+                ToJson(nameof(WithTimestamp<TResult>.Result)));
+
+            async IAsyncEnumerable<WithTimestamp<TResult>> IQueryResultMapper<WithTimestamp<TResult>>.Map(
+                JsonStreamReader json, JsonSerializerOptions options, [EnumeratorCancellation] CancellationToken token)
             {
-                var t = json
-                    .GetProperty(names.Timestamp)
-                    .Deserialize<DateTimeOffset>(options);
-                var resultJson = json.GetProperty(names.Result);
-                var result = mapper.Map(resultJson, options);
-                return new(t, result);
+                DateTimeOffset t;
+                while (!json.ReadToPropertyValue(names.Timestamp, out t))
+                    await json.AdvanceAsync(token);
+                while (!json.ReadToProperty(names.Result))
+                    await json.AdvanceAsync(token);
+
+                var results = mapper.Map(json, options, token);
+                await foreach (var result in results)
+                    yield return new(t, result);
+
+                while (!json.ReadToTokenType(JsonTokenType.EndObject))
+                    await json.AdvanceAsync(token);
             }
         }
 
-        public class List<TValue, TValueMapper> :
-            IQueryResultMapper<List<TValue>>
-            where TValueMapper : IQueryResultMapper<TValue>, new()
+        public class Array<TElement, TElementMapper> :
+            IQueryResultMapper<TElement>
+            where TElementMapper : IQueryResultMapper<TElement>, new()
         {
-            private static readonly IQueryResultMapper<TValue> mapper = new TValueMapper();
+            private static readonly IQueryResultMapper<TElement> mapper = new TElementMapper();
 
-            public List<TValue> Map(JsonElement json, JsonSerializerOptions options)
+            async IAsyncEnumerable<TElement> IQueryResultMapper<TElement>.Map(
+                JsonStreamReader json, JsonSerializerOptions options, [EnumeratorCancellation] CancellationToken token)
             {
-                var result = new List<TValue>(json.GetArrayLength());
-                foreach (var value in json.EnumerateArray())
-                    result.Add(mapper.Map(value, options));
-                return result;
+                bool SkipNext(out JsonTokenType type)
+                {
+                    var reader = json.GetReader();
+                    var read = reader.Read();
+                    if (!read)
+                    {
+                        type = default;
+                        return false;
+                    }
+
+                    json.UpdateState(reader);
+                    type = reader.TokenType;
+                    return true;
+                }
+
+                while (!json.ReadToTokenType(JsonTokenType.StartArray))
+                    await json.AdvanceAsync(token);
+                while (true)
+                {
+                    JsonTokenType type;
+                    while (!json.ReadNext(out type))
+                        await json.AdvanceAsync(token);
+
+                    if (type is JsonTokenType.EndArray)
+                        yield break;
+
+                    var results = mapper.Map(json, options, token);
+                    await foreach (var result in results)
+                        yield return result;
+
+                    while(!SkipNext(out type))
+                        await json.AdvanceAsync(token);
+                    if (type is JsonTokenType.EndArray)
+                        yield break;
+                }
             }
         }
 
         public class Aggregations_PostAggregations_<TAggregations, TPostAggregations> :
             IQueryResultMapper<Aggregations_PostAggregations<TAggregations, TPostAggregations>>
         {
-            public Aggregations_PostAggregations<TAggregations, TPostAggregations> Map(JsonElement json, JsonSerializerOptions options)
-            => new(
-                json.Deserialize<TAggregations>(options)!,
-                json.Deserialize<TPostAggregations>(options)!);
+            async IAsyncEnumerable<Aggregations_PostAggregations<TAggregations, TPostAggregations>> IQueryResultMapper<Aggregations_PostAggregations<TAggregations, TPostAggregations>>.Map(
+                JsonStreamReader json, JsonSerializerOptions options, [EnumeratorCancellation] CancellationToken token)
+            {
+                await EnsureWholeObjectInBufferAndGetBytesConsumedAsync(json, token);
+                yield return new(
+                    Deserialize<TAggregations>(json, options),
+                    DeserializeAndUpdateState<TPostAggregations>(json, options));
+            }
         }
 
         public class Dimension_Aggregations_<TDimension, TAggregations> :
             IQueryResultMapper<Dimension_Aggregations<TDimension, TAggregations>>
         {
-            public Dimension_Aggregations<TDimension, TAggregations> Map(JsonElement json, JsonSerializerOptions options)
-            => new(
-                json.Deserialize<TDimension>(options)!,
-                json.Deserialize<TAggregations>(options)!);
+            async IAsyncEnumerable<Dimension_Aggregations<TDimension, TAggregations>> IQueryResultMapper<Dimension_Aggregations<TDimension, TAggregations>>.Map(
+                JsonStreamReader json, JsonSerializerOptions options, [EnumeratorCancellation] CancellationToken token)
+            {
+                await EnsureWholeObjectInBufferAndGetBytesConsumedAsync(json, token);
+                yield return new(
+                    Deserialize<TDimension>(json, options),
+                    DeserializeAndUpdateState<TAggregations>(json, options));
+            }
         }
-
 
         public class Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations>
              : IQueryResultMapper<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>
         {
-            public Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations> Map(JsonElement json, JsonSerializerOptions options)
-            => new(
-                json.Deserialize<TDimension>(options)!,
-                json.Deserialize<TAggregations>(options)!,
-                json.Deserialize<TPostAggregations>(options)!);
+            async IAsyncEnumerable<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>> IQueryResultMapper<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>.Map(
+                JsonStreamReader json, JsonSerializerOptions options, [EnumeratorCancellation] CancellationToken token)
+            {
+                await EnsureWholeObjectInBufferAndGetBytesConsumedAsync(json, token);
+                yield return new(
+                    Deserialize<TDimension>(json, options),
+                    Deserialize<TAggregations>(json, options),
+                    DeserializeAndUpdateState<TPostAggregations>(json, options));
+            }
         }
 
         public class Dimensions_Aggregations_<TDimensions, TAggregations>
             : IQueryResultMapper<Dimensions_Aggregations<TDimensions, TAggregations>>
         {
-            public Dimensions_Aggregations<TDimensions, TAggregations> Map(JsonElement json, JsonSerializerOptions options)
-            => new(
-                json.Deserialize<TDimensions>(options)!,
-                json.Deserialize<TAggregations>(options)!);
+            async IAsyncEnumerable<Dimensions_Aggregations<TDimensions, TAggregations>> IQueryResultMapper<Dimensions_Aggregations<TDimensions, TAggregations>>.Map(
+                JsonStreamReader json, JsonSerializerOptions options, [EnumeratorCancellation] CancellationToken token)
+            {
+                await EnsureWholeObjectInBufferAndGetBytesConsumedAsync(json, token);
+                yield return new(
+                    Deserialize<TDimensions>(json, options),
+                    DeserializeAndUpdateState<TAggregations>(json, options));
+            }
         }
 
         public class Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>
              : IQueryResultMapper<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>
         {
-            public Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations> Map(JsonElement json, JsonSerializerOptions options)
-            => new(
-                json.Deserialize<TDimensions>(options)!,
-                json.Deserialize<TAggregations>(options)!,
-                json.Deserialize<TPostAggregations>(options)!);
+            async IAsyncEnumerable<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>> IQueryResultMapper<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>.Map(
+                JsonStreamReader json, JsonSerializerOptions options, [EnumeratorCancellation] CancellationToken token)
+            {
+                await EnsureWholeObjectInBufferAndGetBytesConsumedAsync(json, token);
+                yield return new(
+                    Deserialize<TDimensions>(json, options),
+                    Deserialize<TAggregations>(json, options),
+                    DeserializeAndUpdateState<TPostAggregations>(json, options));
+            }
         }
     }
 
