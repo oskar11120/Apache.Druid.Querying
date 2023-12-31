@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
-using System.Text.Unicode;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -185,9 +185,6 @@ internal sealed class JsonStreamReader
         return found;
     }
 
-    // This app only relies on T == bool
-    // A different app may rely on multiple types of T
-    // This more complicated version was written to demonstrate the pattern
     public bool ReadToPropertyValue<T>(ReadOnlySpan<byte> name, [NotNullWhen(true)] out T value, bool updateState = true)
     {
         var reader = GetReader();
@@ -200,17 +197,18 @@ internal sealed class JsonStreamReader
 
             if (type == typeof(bool))
             {
-                // Unsafe.As<>() can be used for the same purpose
-                value = (T)(object)reader.GetBoolean();
+                var @bool = reader.GetBoolean();
+                value = Unsafe.As<bool, T>(ref @bool);
             }
             else if (type == typeof(string))
             {
-                var val = reader.GetString() ?? throw new Exception("BAD JSON");
-                value = (T)(object)val;
+                var @string = reader.GetString() ?? throw new Exception("BAD JSON");
+                value = Unsafe.As<string, T>(ref @string);
             }
             else if (type == typeof(DateTimeOffset))
             {
-                value = (T)(object)reader.GetDateTimeOffset();
+                var t = reader.GetDateTimeOffset();
+                value = Unsafe.As<DateTimeOffset, T>(ref t);
             }
             else
             {

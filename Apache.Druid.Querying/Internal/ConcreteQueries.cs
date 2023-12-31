@@ -48,40 +48,6 @@ namespace Apache.Druid.Querying.Internal
 
     public static class QueryResultMapper
     {
-        private static readonly byte[] comaBytes = Encoding.UTF8.GetBytes(",");
-
-        private static TObject Deserialize<TObject>(JsonStreamReader json, JsonSerializerOptions options)
-        {
-            // TODO
-            json.ReadToTokenTypeAtNextTokenDepth(JsonTokenType.EndObject, out var bytesConsumed, false);
-            var startWithComa = json.UnreadPartOfBufferStartsWith(comaBytes);   
-            var reader = json.GetReaderForSlice((int)bytesConsumed, startWithComa ? comaBytes.Length : 0);
-            var result = JsonSerializer.Deserialize<TObject>(ref reader, options)!;
-            return result;
-        }
-
-        private static TObject DeserializeAndUpdateState<TObject>(JsonStreamReader json, JsonSerializerOptions options)
-        {
-            json.ReadToTokenTypeAtNextTokenDepth(JsonTokenType.EndObject, out var bytesConsumed, false);
-            var startWithComa = json.UnreadPartOfBufferStartsWith(comaBytes);
-            var trimBytes = startWithComa ? comaBytes.Length : 0;
-            var sliceReader = json.GetReaderForSlice((int)bytesConsumed, trimBytes);
-            var result = JsonSerializer.Deserialize<TObject>(ref sliceReader, options)!;
-            var updateReader = json.GetReader();
-            while (updateReader.BytesConsumed < sliceReader.BytesConsumed + trimBytes)
-                updateReader.Read();
-            json.UpdateState(updateReader);
-            return result;
-        }
-
-        private static async ValueTask<int> EnsureWholeObjectInBufferAndGetBytesConsumedAsync(JsonStreamReader json, CancellationToken token)
-        {
-            long bytesConsumed;
-            while (!json.ReadToTokenTypeAtNextTokenDepth(JsonTokenType.EndObject, out bytesConsumed, false))
-                await json.AdvanceAsync(token);
-            return (int)bytesConsumed;
-        }
-
         public class WithTimestamp<TResult, TResultMapper> :
             IQueryResultMapper<WithTimestamp<TResult>>
             where TResultMapper : IQueryResultMapper<TResult>, new()
@@ -159,71 +125,116 @@ namespace Apache.Druid.Querying.Internal
             }
         }
 
-        public class Aggregations_PostAggregations_<TAggregations, TPostAggregations> :
-            IQueryResultMapper<Aggregations_PostAggregations<TAggregations, TPostAggregations>>
+        // "Atoms" are objects small enough that whole their data can be fit into buffer. 
+        public abstract class Atom<TSelf> : IQueryResultMapper<TSelf>
         {
-            async IAsyncEnumerable<Aggregations_PostAggregations<TAggregations, TPostAggregations>> IQueryResultMapper<Aggregations_PostAggregations<TAggregations, TPostAggregations>>.Map(
+            async IAsyncEnumerable<TSelf> IQueryResultMapper<TSelf>.Map(
                 JsonStreamReader json, JsonSerializerOptions options, [EnumeratorCancellation] CancellationToken token)
             {
-                await EnsureWholeObjectInBufferAndGetBytesConsumedAsync(json, token);
-                yield return new(
-                    Deserialize<TAggregations>(json, options),
-                    DeserializeAndUpdateState<TPostAggregations>(json, options));
+                var bytes = await EnsureWholeInBufferAndGetSpanningBytesAsync(json, token);
+                TSelf Map_()
+                {
+                    var context = new Context(json, options, bytes);
+                    var result = Map(ref context);
+                    context.UpdateState();
+                    return result;
+                }
+
+                yield return Map_();
             }
+
+            private protected abstract TSelf Map(ref Context context);
+
+            private static async ValueTask<int> EnsureWholeInBufferAndGetSpanningBytesAsync(JsonStreamReader json, CancellationToken token)
+            {
+                long bytesConsumed;
+                while (!json.ReadToTokenTypeAtNextTokenDepth(JsonTokenType.EndObject, out bytesConsumed, false))
+                    await json.AdvanceAsync(token);
+                return (int)bytesConsumed;
+            }
+
+            protected private ref struct Context
+            {
+                private static readonly byte[] comaBytes = Encoding.UTF8.GetBytes(",");
+                private readonly JsonStreamReader json;
+                private readonly JsonSerializerOptions options;
+                private readonly int spanningBytes;
+                private readonly int trimBytes;
+                private long deserializeConsumedBytes = 0;
+
+                public Context(JsonStreamReader json, JsonSerializerOptions options, int spanningBytes)
+                {
+                    this.json = json;
+                    this.options = options;
+                    this.spanningBytes = spanningBytes;
+
+                    var startWithComa = json.UnreadPartOfBufferStartsWith(comaBytes);
+                    trimBytes = startWithComa ? comaBytes.Length : 0;
+                }
+
+                public TObject Deserialize<TObject>()
+                {
+                    var reader = json.GetReaderForSlice(spanningBytes, trimBytes);
+                    var result = JsonSerializer.Deserialize<TObject>(ref reader, options)!;
+                    deserializeConsumedBytes = reader.BytesConsumed;
+                    return result;
+                }
+
+                public readonly void UpdateState()
+                {
+                    var reader = json.GetReader();
+                    while (reader.BytesConsumed < deserializeConsumedBytes + trimBytes)
+                        reader.Read();
+                    json.UpdateState(reader);
+                }
+            }
+        }
+
+        public class Aggregations_PostAggregations_<TAggregations, TPostAggregations>
+            : Atom<Aggregations_PostAggregations<TAggregations, TPostAggregations>>
+        {
+            private protected override Aggregations_PostAggregations<TAggregations, TPostAggregations> Map(ref Context context)
+                => new(
+                    context.Deserialize<TAggregations>(),
+                    context.Deserialize<TPostAggregations>());
         }
 
         public class Dimension_Aggregations_<TDimension, TAggregations> :
-            IQueryResultMapper<Dimension_Aggregations<TDimension, TAggregations>>
+            Atom<Dimension_Aggregations<TDimension, TAggregations>>
         {
-            async IAsyncEnumerable<Dimension_Aggregations<TDimension, TAggregations>> IQueryResultMapper<Dimension_Aggregations<TDimension, TAggregations>>.Map(
-                JsonStreamReader json, JsonSerializerOptions options, [EnumeratorCancellation] CancellationToken token)
-            {
-                await EnsureWholeObjectInBufferAndGetBytesConsumedAsync(json, token);
-                yield return new(
-                    Deserialize<TDimension>(json, options),
-                    DeserializeAndUpdateState<TAggregations>(json, options));
-            }
+            private protected override Dimension_Aggregations<TDimension, TAggregations> Map(ref Context context)
+                => new(
+                    context.Deserialize<TDimension>(),
+                    context.Deserialize<TAggregations>());
         }
 
         public class Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations>
-             : IQueryResultMapper<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>
+             : Atom<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>
         {
-            async IAsyncEnumerable<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>> IQueryResultMapper<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>.Map(
-                JsonStreamReader json, JsonSerializerOptions options, [EnumeratorCancellation] CancellationToken token)
-            {
-                await EnsureWholeObjectInBufferAndGetBytesConsumedAsync(json, token);
-                yield return new(
-                    Deserialize<TDimension>(json, options),
-                    Deserialize<TAggregations>(json, options),
-                    DeserializeAndUpdateState<TPostAggregations>(json, options));
-            }
+            private protected override Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations> Map(ref Context context)
+                => new(
+                    context.Deserialize<TDimension>(),
+                    context.Deserialize<TAggregations>(),
+                    context.Deserialize<TPostAggregations>());
         }
 
         public class Dimensions_Aggregations_<TDimensions, TAggregations>
-            : IQueryResultMapper<Dimensions_Aggregations<TDimensions, TAggregations>>
+            : Atom<Dimensions_Aggregations<TDimensions, TAggregations>>
         {
-            async IAsyncEnumerable<Dimensions_Aggregations<TDimensions, TAggregations>> IQueryResultMapper<Dimensions_Aggregations<TDimensions, TAggregations>>.Map(
-                JsonStreamReader json, JsonSerializerOptions options, [EnumeratorCancellation] CancellationToken token)
-            {
-                await EnsureWholeObjectInBufferAndGetBytesConsumedAsync(json, token);
-                yield return new(
-                    Deserialize<TDimensions>(json, options),
-                    DeserializeAndUpdateState<TAggregations>(json, options));
-            }
+            private protected override Dimensions_Aggregations<TDimensions, TAggregations> Map(ref Context context)
+                => new(
+                    context.Deserialize<TDimensions>(),
+                    context.Deserialize<TAggregations>());
         }
 
         public class Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>
-             : IQueryResultMapper<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>
+             : Atom<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>
         {
-            async IAsyncEnumerable<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>> IQueryResultMapper<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>.Map(
-                JsonStreamReader json, JsonSerializerOptions options, [EnumeratorCancellation] CancellationToken token)
-            {
-                await EnsureWholeObjectInBufferAndGetBytesConsumedAsync(json, token);
-                yield return new(
-                    Deserialize<TDimensions>(json, options),
-                    Deserialize<TAggregations>(json, options),
-                    DeserializeAndUpdateState<TPostAggregations>(json, options));
-            }
+            private protected override Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations> Map(ref Context context)
+                => new(
+                    context.Deserialize<TDimensions>(),
+                    context.Deserialize<TAggregations>(),
+                    context.Deserialize<TPostAggregations>());
         }
     }
 
