@@ -51,7 +51,8 @@ internal class MessageSourceTests
             .Scan()
             .IntervalFilterDefaults()
             .Limit(10000)
-            .Offset(5);
+            .Offset(5)
+            .Order(OrderDirection.Ascending);
         var result = await Messages
             .ExecuteQuery(query)
             .ToListAsync();
