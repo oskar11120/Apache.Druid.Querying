@@ -82,7 +82,6 @@ namespace Apache.Druid.Querying
             return Execute(query, Deserialize, token);
         }
 
-
 #pragma warning disable CS8621 // Nullability of reference types in return type doesn't match the target delegate (possibly because of nullability attributes).
         private IAsyncEnumerable<TResult> Execute<TResult>(IQuery query, CancellationToken token = default)
             => Execute<TResult>(query, JsonSerializer.DeserializeAsyncEnumerable<TResult>, token);
