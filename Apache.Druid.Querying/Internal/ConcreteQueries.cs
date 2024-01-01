@@ -53,17 +53,13 @@ namespace Apache.Druid.Querying.Internal
 
             public interface Dimensions_Aggregations_<TDimensions, TAggregations> : GroupByResultArray<
                 Dimensions_Aggregations<TDimensions, TAggregations>,
-                QueryResultMapper.Array<
-                    Dimensions_Aggregations<TDimensions, TAggregations>,
-                    QueryResultMapper.Dimensions_Aggregations_<TDimensions, TAggregations>>>
+                QueryResultMapper.Dimensions_Aggregations_<TDimensions, TAggregations>>
             {
             }
 
             public interface Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations> : GroupByResultArray<
                 Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>,
-                QueryResultMapper.Array<
-                    Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>,
-                    QueryResultMapper.Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>>>
+                 QueryResultMapper.Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>>
             {
             }
         }

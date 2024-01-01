@@ -43,7 +43,7 @@ internal class MessageSourceTests
     public async Task GroupBy_ReturnsAnything()
     {
         var query = new Query<Message>
-            .GroupBy<(Guid ObjectId, string VariableName)>
+            .GroupBy<GroupByDimensions>
             .WithNoVirtualColumns
             .WithAggregations<Aggregations>
             .WithPostAggregations<PostAggregations>()
@@ -109,4 +109,5 @@ internal class MessageSourceTests
 
     public sealed record Aggregations(double Sum, int Count, string Variable, double? FirstValue);
     public sealed record PostAggregations(double Average);
+    public sealed record GroupByDimensions(Guid ObjectId, string VariableName);
 }
