@@ -48,11 +48,10 @@ internal class MessageSourceTests
             .WithAggregations<Aggregations>
             .WithPostAggregations<PostAggregations>()
             .Defaults()
-            .PostAggregations(factory =>
-                new(factory.Arithmetic(
-                    ArithmeticFunction.Divide,
-                    factory.FieldAccess(aggrgations => aggrgations.Sum),
-                    factory.FieldAccess(aggregations => aggregations.Count))))
+            .PostAggregations(factory => new(factory.Arithmetic(
+                ArithmeticFunction.Divide,
+                factory.FieldAccess(aggrgations => aggrgations.Sum),
+                factory.FieldAccess(aggregations => aggregations.Count))))
             .Dimensions(factory => new(
                 factory.Default(message => message.ObjectId),
                 factory.Default(message => message.VariableName)))
