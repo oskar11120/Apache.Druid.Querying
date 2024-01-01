@@ -11,17 +11,17 @@ using System.Threading.Tasks;
 
 namespace Apache.Druid.Querying.Internal
 {
-    public static class IQueryWithMappedResult
+    public static class IQueryWithMappedResult<TSource>
     {
         public interface WithTimestampArray<TValue, TValueMapper>
-            : IQueryWithMappedResult<WithTimestamp<TValue>,
+            : IQueryWithSource<TSource>.AndMappedResult<WithTimestamp<TValue>,
             QueryResultMapper.Array<WithTimestamp<TValue>, QueryResultMapper.WithTimestamp<TValue, TValueMapper>>>
             where TValueMapper : IQueryResultMapper<TValue>, new()
         {
         }
 
         public interface GroupByResultArray<TValue, TValueMapper>
-            : IQueryWithMappedResult<WithTimestamp<TValue>,
+            : IQueryWithSource<TSource>.AndMappedResult<WithTimestamp<TValue>,
             QueryResultMapper.Array<WithTimestamp<TValue>, QueryResultMapper.GroupByResult<TValue, TValueMapper>>>
             where TValueMapper : IQueryResultMapper<TValue>, new()
         {

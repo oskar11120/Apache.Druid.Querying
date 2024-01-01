@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 using Apache.Druid.Querying.DependencyInjection;
+using Apache.Druid.Querying.Json;
 
 namespace Apache.Druid.Querying.AspNetCore
 {

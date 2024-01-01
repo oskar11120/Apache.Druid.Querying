@@ -1,6 +1,7 @@
 ﻿using Apache.Druid.Querying.DependencyInjection;
 using Apache.Druid.Querying.Internal;
 using Apache.Druid.Querying.Internal.Sections;
+using Apache.Druid.Querying.Json;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -23,12 +24,18 @@ namespace Apache.Druid.Querying
         internal IAsyncEnumerable<TResult> Map(QueryResultMapperContext context, CancellationToken token);
     }
 
-    public interface IQueryWithMappedResult<TResult, TMapper> : IQuery where TMapper : IQueryResultMapper<TResult>, new()
-    {
-    }
 
-    public interface IQueryWithResult<TResult> : IQuery
+    public interface IQueryWithSource<TSource> : IQuery
     {
+        public interface AndResult<TResult> : IQueryWithSource<TSource>
+        {
+        }
+
+        public interface AndMappedResult<TResult, TMapper> :
+            IQueryWithSource<TSource>
+            where TMapper : IQueryResultMapper<TResult>, new()
+        {
+        }
     }
 
     public class DataSource<TSource> : IDataSourceInitializer<TSource>
@@ -39,25 +46,22 @@ namespace Apache.Druid.Querying
         DataSourceInitlializationState? IDataSourceInitializer<TSource>.state { get; set; }
         private DataSourceInitlializationState State => (this as IDataSourceInitializer<TSource>).State;
 
-        public JsonObject MapQueryToJson(IQuery query)
+        public JsonObject MapQueryToJson(IQueryWithSource<TSource> query)
         {
             var (id, serializerOptions, _) = State;
-            var result = new JsonObject();
-            var state = query.GetState();
-            foreach (var (key, factory) in state)
-                result.Add(key, factory(serializerOptions, IArgumentColumnNameProvider.Implementation<TSource>.Singleton));
+            var result = query.MapToJson(serializerOptions);
             result.Add("dataSource", id);
             return result;
         }
 
-        public virtual IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQuery query, CancellationToken token = default)
+        public virtual IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQueryWithSource<TSource> query, CancellationToken token = default)
             => Execute<TResult>(query, token);
 
-        public virtual IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQueryWithResult<TResult> query, CancellationToken token = default)
+        public virtual IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQueryWithSource<TSource>.AndResult<TResult> query, CancellationToken token = default)
             => Execute<TResult>(query, token);
 
         public virtual IAsyncEnumerable<TResult> ExecuteQuery<TResult, TMapper>(
-            IQueryWithMappedResult<TResult, TMapper> query, CancellationToken token = default)
+            IQueryWithSource<TSource>.AndMappedResult<TResult, TMapper> query, CancellationToken token = default)
             where TMapper : IQueryResultMapper<TResult>, new()
         {
             var atomicity = query.GetSectionAtomicity();
@@ -83,19 +87,19 @@ namespace Apache.Druid.Querying
         }
 
 #pragma warning disable CS8621 // Nullability of reference types in return type doesn't match the target delegate (possibly because of nullability attributes).
-        private IAsyncEnumerable<TResult> Execute<TResult>(IQuery query, CancellationToken token = default)
+        private IAsyncEnumerable<TResult> Execute<TResult>(IQueryWithSource<TSource> query, CancellationToken token = default)
             => Execute<TResult>(query, JsonSerializer.DeserializeAsyncEnumerable<TResult>, token);
 #pragma warning restore CS8621 // Nullability of reference types in return type doesn't match the target delegate (possibly because of nullability attributes).
 
         private async IAsyncEnumerable<TResult> Execute<TResult>(
-            IQuery query,
+            IQueryWithSource<TSource> query,
             Func<Stream, JsonSerializerOptions, CancellationToken, IAsyncEnumerable<TResult>> deserialize,
             [EnumeratorCancellation] CancellationToken token = default)
         {
             var (_, serializerOptions, clientFactory) = State;
             serializerOptionsWithFormatting ??= new(serializerOptions) { WriteIndented = true };
-            var materialized = MapQueryToJson(query);
-            using var content = JsonContent.Create(materialized, options: serializerOptions);
+            var json = MapQueryToJson(query);
+            using var content = JsonContent.Create(json, options: serializerOptions);
             using var request = new HttpRequestMessage(HttpMethod.Post, "druid/v2")
             {
                 Content = content,
@@ -111,7 +115,7 @@ namespace Apache.Druid.Querying
             catch (HttpRequestException exception)
             {
                 var responseContent = await response.Content.ReadAsStringAsync(token);
-                exception.Data.Add("requestContent", JsonSerializer.Serialize(materialized, serializerOptionsWithFormatting));
+                exception.Data.Add("requestContent", JsonSerializer.Serialize(json, serializerOptionsWithFormatting));
                 exception.Data.Add(nameof(responseContent), responseContent);
                 throw;
             }

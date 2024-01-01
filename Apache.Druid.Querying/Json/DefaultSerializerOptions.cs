@@ -4,7 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Buffers;
 
-namespace Apache.Druid.Querying.DependencyInjection
+namespace Apache.Druid.Querying.Json
 {
     public static class DefaultSerializerOptions
     {

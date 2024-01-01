@@ -1,7 +1,4 @@
-using System.ComponentModel.DataAnnotations;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using Apache.Druid.Querying.DependencyInjection;
+using Apache.Druid.Querying.Json;
 
 namespace Apache.Druid.Querying.Unit.Tests
 {
@@ -35,7 +32,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .HavingFilter(filter => filter.Range(
                     tuple => tuple.Aggregations.LastValue,
                     lower: 0))
-                .ToJson();
+                .MapToJson();
 
             var one = new Query<Message>
                 .GroupBy<GroupByDimensions>
@@ -63,7 +60,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .HavingFilter(filter => filter.Range(
                     tuple => tuple.Aggregations.LastValue,
                     lower: 0))
-                .ToJson();
+                .MapToJson();
         }
 
         [Test]
@@ -89,7 +86,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .Metric(metric => metric.Numeric(
                     tuple => tuple.Aggregations.LastValue))
                 .Context(new() { MinTopNThreshold = 5 })
-                .ToJson();
+                .MapToJson();
 
             var one = new Query<Message>
                 .TopN<Guid>
@@ -113,7 +110,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .Metric(metric => metric.Numeric(
                     tuple => tuple.Aggregations.LastValue))
                 .Context(new() { MinTopNThreshold = 5 })
-                .ToJson();
+                .MapToJson();
 
             var two = new Query<Message>
                 .TopN<TopNDimension>
@@ -139,7 +136,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                     postAggregators.FieldAccess(aggregations => aggregations.LastValue, true)))
                 .Metric(metric => metric.Numeric(tuple => tuple.PostAggregations))
                 .Context(new() { MinTopNThreshold = 5 })
-                .ToJson();
+                .MapToJson();
 
             var three = new Query<Message>
                 .TopN<TopNDimension>
@@ -168,7 +165,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .Metric(metric => metric.Numeric(
                     tuple => tuple.PostAggregations.Sum))
                 .Context(new() { MinTopNThreshold = 5 })
-                .ToJson();
+                .MapToJson();
         }
 
         [Test]
@@ -187,7 +184,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                         message => message.ObjectId,
                         Guid.NewGuid())))
                 .Aggregations(aggregations => aggregations.Last(message => message.Value, SimpleDataType.Float))
-                .ToJson();
+                .MapToJson();
 
             var test1 = new Query<Message>
                 .TimeSeries
@@ -206,7 +203,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                     aggregations.Max(tuple => tuple.Source.Timestamp),
                     aggregations.Last(tuple => tuple.Source.Value)
                 ))
-                .ToJson();
+                .MapToJson();
 
             var test2 = new Query<Message>
                 .TimeSeries
@@ -231,7 +228,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                         ArithmeticFunction.Add,
                         postAggregators.FieldAccess(aggregations => aggregations.LastValue, true))
                 ))
-                .ToJson();
+                .MapToJson();
 
             var test3 = new Query<Message>
                 .TimeSeries
@@ -257,7 +254,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                         ArithmeticFunction.Add,
                         postAggregators.FieldAccess(aggregations => aggregations.LastValue, true))
                 ))
-                .ToJson();
+                .MapToJson();
         }
 
         [DataSourceColumnNamingConvention(DataSourceColumnNamingConventionType.CamelCase)]
@@ -271,18 +268,5 @@ namespace Apache.Druid.Querying.Unit.Tests
         record PostAggregations(double Sum);
         record TopNDimension(Guid ObjectId);
         record GroupByDimensions(Guid ObjectId, string VariableName);
-    }
-
-    internal static class TestExtensions
-    {
-        public static string ToJson(this IQuery query)
-        {
-            var options = DefaultSerializerOptions.Create();
-            options.WriteIndented = true;
-            var asDictionary = query
-                .GetState()
-                .ToDictionary(pair => pair.Key, pair => pair.Value(options, IArgumentColumnNameProvider.Implementation<Tests.Message>.Singleton));
-            return JsonSerializer.Serialize(asDictionary, options);
-        }
     }
 }
