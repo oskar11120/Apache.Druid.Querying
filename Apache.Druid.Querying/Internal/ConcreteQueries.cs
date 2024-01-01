@@ -14,55 +14,66 @@ namespace Apache.Druid.Querying.Internal
 {
     public static class IQueryWithMappedResult<TSource>
     {
-        public interface WithTimestampArray<TValue, TValueMapper>
-            : IQueryWithSource<TSource>.AndMappedResult<WithTimestamp<TValue>,
+        public interface WithTimestampArray<TValue, TValueMapper> :
+            IQueryWithSource<TSource>.AndMappedResult<WithTimestamp<TValue>,
             QueryResultMapper.Array<WithTimestamp<TValue>, QueryResultMapper.WithTimestamp<TValue, TValueMapper>>>
             where TValueMapper : IQueryResultMapper<TValue>, new()
         {
         }
 
-        public interface GroupByResultArray<TValue, TValueMapper>
-            : IQueryWithSource<TSource>.AndMappedResult<WithTimestamp<TValue>,
+        public interface GroupByResultArray<TValue, TValueMapper> :
+            IQueryWithSource<TSource>.AndMappedResult<WithTimestamp<TValue>,
             QueryResultMapper.Array<WithTimestamp<TValue>, QueryResultMapper.GroupByResult<TValue, TValueMapper>>>
             where TValueMapper : IQueryResultMapper<TValue>, new()
         {
         }
 
-        public static class WithTimestamp
+        public interface Aggregations_PostAggregations_<TAggregations, TPostAggregations> : WithTimestampArray<
+            Aggregations_PostAggregations<TAggregations, TPostAggregations>,
+            QueryResultMapper.Aggregations_PostAggregations_<TAggregations, TPostAggregations>>
         {
-            public interface Aggregations_PostAggregations_<TAggregations, TPostAggregations> : WithTimestampArray<
-                Aggregations_PostAggregations<TAggregations, TPostAggregations>,
-                QueryResultMapper.Aggregations_PostAggregations_<TAggregations, TPostAggregations>>
-            {
-            }
+        }
 
-            public interface Dimension_Aggregations_<TDimension, TAggregations> : WithTimestampArray<
+        public interface Dimension_Aggregations_<TDimension, TAggregations> : WithTimestampArray<
+            Dimension_Aggregations<TDimension, TAggregations>,
+            QueryResultMapper.Array<
                 Dimension_Aggregations<TDimension, TAggregations>,
-                QueryResultMapper.Array<
-                    Dimension_Aggregations<TDimension, TAggregations>,
-                    QueryResultMapper.Dimension_Aggregations_<TDimension, TAggregations>>>
-            {
-            }
+                QueryResultMapper.Dimension_Aggregations_<TDimension, TAggregations>>>
+        {
+        }
 
-            public interface Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations> : WithTimestampArray<
+        public interface Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations> : WithTimestampArray<
+            Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>,
+            QueryResultMapper.Array<
                 Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>,
+                QueryResultMapper.Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations>>>
+        {
+        }
+
+        public interface Dimensions_Aggregations_<TDimensions, TAggregations> : GroupByResultArray<
+            Dimensions_Aggregations<TDimensions, TAggregations>,
+            QueryResultMapper.Dimensions_Aggregations_<TDimensions, TAggregations>>
+        {
+        }
+
+        public interface Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations> : GroupByResultArray<
+            Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>,
+             QueryResultMapper.Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>>
+        {
+        }
+
+        public interface ScanResult_<TColumns> :
+            IQueryWithSource<TSource>
+            .AndMappedResult<
+                ScanResult<TColumns>,
                 QueryResultMapper.Array<
-                    Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>,
-                    QueryResultMapper.Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations>>>
-            {
-            }
-
-            public interface Dimensions_Aggregations_<TDimensions, TAggregations> : GroupByResultArray<
-                Dimensions_Aggregations<TDimensions, TAggregations>,
-                QueryResultMapper.Dimensions_Aggregations_<TDimensions, TAggregations>>
-            {
-            }
-
-            public interface Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations> : GroupByResultArray<
-                Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>,
-                 QueryResultMapper.Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>>
-            {
-            }
+                    ScanResult<TColumns>,
+                    QueryResultMapper.ScanResult<
+                        TColumns,
+                        QueryResultMapper.Array<
+                            TColumns,
+                            QueryResultMapper.SourceColumns<TColumns>>>>>
+        {
         }
     }
 
@@ -85,7 +96,7 @@ namespace Apache.Druid.Querying.Internal
             async IAsyncEnumerable<TResult> IQueryResultMapper<TResult>.Map(
                 QueryResultMapperContext context, [EnumeratorCancellation] CancellationToken token)
             {
-                var (json, _, _) = context;
+                var json = context.Json;
                 TFirstNonMappable first;
                 while (!json.ReadToPropertyValue(names.First, out first))
                     await json.AdvanceAsync(token);
@@ -113,7 +124,7 @@ namespace Apache.Druid.Querying.Internal
             async IAsyncEnumerable<TElement> IQueryResultMapper<TElement>.Map(
                 QueryResultMapperContext context, [EnumeratorCancellation] CancellationToken token)
             {
-                var (json, _, _) = context;
+                var json = context.Json;
                 bool SkipEndArray(out bool skippedEndArray)
                 {
                     var reader = json.GetReader();
@@ -158,7 +169,7 @@ namespace Apache.Druid.Querying.Internal
             async IAsyncEnumerable<TSelf> IQueryResultMapper<TSelf>.Map(
                 QueryResultMapperContext context, [EnumeratorCancellation] CancellationToken token)
             {
-                var (json, _, _) = context;
+                var json = context.Json;
                 var bytes = await EnsureWholeInBufferAndGetSpanningBytesAsync(json, token);
                 TSelf Map_()
                 {
@@ -184,19 +195,17 @@ namespace Apache.Druid.Querying.Internal
             protected private ref struct Context
             {
                 private static readonly byte[] comaBytes = Encoding.UTF8.GetBytes(",");
-                private readonly JsonStreamReader json;
-                private readonly JsonSerializerOptions options;
-                private readonly SectionAtomicity.IProvider atomicity;
                 private readonly int spanningBytes;
                 private readonly int trimBytes;
                 private long deserializeConsumedBytes = 0;
+                public readonly QueryResultMapperContext MapperContext;
 
                 public Context(QueryResultMapperContext mapperContext, int spanningBytes)
                 {
-                    (json, options, atomicity) = mapperContext;
+                    MapperContext = mapperContext;
                     this.spanningBytes = spanningBytes;
 
-                    var startWithComa = json.UnreadPartOfBufferStartsWith(comaBytes);
+                    var startWithComa = mapperContext.Json.UnreadPartOfBufferStartsWith(comaBytes);
                     trimBytes = startWithComa ? comaBytes.Length : 0;
                 }
 
@@ -205,6 +214,7 @@ namespace Apache.Druid.Querying.Internal
 
                 public TObject Deserialize<TObject>()
                 {
+                    var (json, options, atomicity, _) = MapperContext;
                     var (atomic, _, columnName) = atomicity.Get<TObject>();
                     var slice = json.GetSliceOfBuffer(spanningBytes, trimBytes);
                     deserializeConsumedBytes = slice.Length;
@@ -226,6 +236,7 @@ namespace Apache.Druid.Querying.Internal
 
                 public readonly void UpdateState()
                 {
+                    var json = MapperContext.Json;
                     var reader = json.GetReader();
                     while (reader.BytesConsumed < deserializeConsumedBytes + trimBytes)
                         reader.Read();
@@ -234,25 +245,34 @@ namespace Apache.Druid.Querying.Internal
             }
         }
 
-        public class WithTimestamp<TResult, TResultMapper>
-            : WithTwoProperties<DateTimeOffset, TResult, TResultMapper, WithTimestamp<TResult>>
-            where TResultMapper : IQueryResultMapper<TResult>, new()
+        public class WithTimestamp<TValue, TValueMapper>
+            : WithTwoProperties<DateTimeOffset, TValue, TValueMapper, WithTimestamp<TValue>>
+            where TValueMapper : IQueryResultMapper<TValue>, new()
         {
             public WithTimestamp() : this("result")
             {
             }
 
             public WithTimestamp(string valuePropertyNameBase)
-                : base(nameof(WithTimestamp<TResult>.Timestamp), valuePropertyNameBase, static (t, result) => new(t, result))
+                : base(nameof(WithTimestamp<TValue>.Timestamp), valuePropertyNameBase, static (t, value) => new(t, value))
             {
             }
         }
 
-        public sealed class GroupByResult<TEvent, TEventMapper>
-            : WithTimestamp<TEvent, TEventMapper>
-            where TEventMapper : IQueryResultMapper<TEvent>, new()
+        public sealed class GroupByResult<TValue, TValueMapper>
+            : WithTimestamp<TValue, TValueMapper>
+            where TValueMapper : IQueryResultMapper<TValue>, new()
         {
             public GroupByResult() : base("event")
+            {
+            }
+        }
+
+        public sealed class ScanResult<TValue, TValueMapper>
+            : WithTwoProperties<string?, TValue, TValueMapper, ScanResult<TValue>>
+            where TValueMapper : IQueryResultMapper<TValue>, new()
+        {
+            public ScanResult() : base(nameof(ScanResult<TValue>.SegmentId), "events", static (id, value) => new(id, value))
             {
             }
         }
@@ -302,6 +322,28 @@ namespace Apache.Druid.Querying.Internal
                     context.Deserialize<TDimensions>(),
                     context.Deserialize<TAggregations>(),
                     context.Deserialize<TPostAggregations>());
+        }
+
+        public sealed class SourceColumns<TSelf> : Atom<TSelf>
+        {
+            private static readonly string[] propertyNames = typeof(TSelf)
+                .GetProperties()
+                .Select(property => property.Name)
+                .ToArray();
+
+            // TODO Optimize.
+            private protected override TSelf Map(ref Context context)
+            {
+                var json = context.Deserialize<System.Text.Json.Nodes.JsonObject>();
+                foreach (var name in propertyNames)
+                {
+                    var columnName = context.MapperContext.ColumnNames.Get(name);
+                    if (columnName != name)
+                        json[name] = json[columnName];
+                }
+
+                return json.Deserialize<TSelf>(context.MapperContext.Options)!;
+            }
         }
     }
 
@@ -442,7 +484,7 @@ namespace Apache.Druid.Querying.Internal
             {
             }
 
-            public TSelf Offset(int offset) 
+            public TSelf Offset(int offset)
                 => Self.AddOrUpdateSection(nameof(offset), offset);
 
             public TSelf Limit(int limit)
@@ -460,7 +502,7 @@ namespace Apache.Druid.Querying.Internal
 
                 public WithColumns()
                 {
-                    Self.AddOrUpdateSection("columns", (options, columnNames) 
+                    Self.AddOrUpdateSection("columns", (options, columnNames)
                         => JsonSerializer.SerializeToNode(propertyNames.Select(columnNames.Get), options)!);
                 }
             }

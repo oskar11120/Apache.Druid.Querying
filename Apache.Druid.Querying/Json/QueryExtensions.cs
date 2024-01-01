@@ -7,13 +7,17 @@ namespace Apache.Druid.Querying.Json
     {
         private static readonly JsonSerializerOptions @default = DefaultSerializerOptions.Create();
 
-        public static JsonObject MapToJson<TSource>(this IQueryWithSource<TSource> query, JsonSerializerOptions? serializerOptions = null)
+        public static JsonObject MapToJson<TSource>(
+            this IQueryWithSource<TSource> query,
+            JsonSerializerOptions? serializerOptions = null,
+            IArgumentColumnNameProvider? columNames = null)
         {
             serializerOptions ??= @default;
+            columNames ??= IArgumentColumnNameProvider.Implementation<TSource>.Singleton;
             var result = new JsonObject();
             var state = query.GetState();
             foreach (var (key, factory) in state)
-                result.Add(key, factory(serializerOptions, IArgumentColumnNameProvider.Implementation<TSource>.Singleton));
+                result.Add(key, factory(serializerOptions, columNames));
             return result;
         }
     }

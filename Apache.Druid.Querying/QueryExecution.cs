@@ -17,7 +17,11 @@ using System.Threading;
 
 namespace Apache.Druid.Querying
 {
-    internal readonly record struct QueryResultMapperContext(JsonStreamReader Json, JsonSerializerOptions Options, SectionAtomicity.IProvider Atomicity);
+    internal readonly record struct QueryResultMapperContext(
+        JsonStreamReader Json,
+        JsonSerializerOptions Options,
+        SectionAtomicity.IProvider Atomicity,
+        IArgumentColumnNameProvider ColumnNames);
 
     public interface IQueryResultMapper<TResult>
     {
@@ -40,6 +44,7 @@ namespace Apache.Druid.Querying
     public class DataSource<TSource> : IDataSourceInitializer<TSource>
     {
         private static readonly StringWithQualityHeaderValue gzip = new("gzip");
+        private static readonly IArgumentColumnNameProvider columnNames = IArgumentColumnNameProvider.Implementation<TSource>.Singleton;
 
         private JsonSerializerOptions? serializerOptionsWithFormatting;
         DataSourceInitlializationState? IDataSourceInitializer<TSource>.state { get; set; }
@@ -48,7 +53,7 @@ namespace Apache.Druid.Querying
         public JsonObject MapQueryToJson(IQueryWithSource<TSource> query)
         {
             var (id, serializerOptions, _) = State;
-            var result = query.MapToJson(serializerOptions);
+            var result = query.MapToJson(serializerOptions, columnNames);
             result.Add("dataSource", id);
             return result;
         }
@@ -72,7 +77,7 @@ namespace Apache.Druid.Querying
                 try
                 {
                     var read = await stream.ReadAsync(buffer, token);
-                    var results = mapper.Map(new(new(stream, buffer, read), options, atomicity), token);
+                    var results = mapper.Map(new(new(stream, buffer, read), options, atomicity, columnNames), token);
                     await foreach (var result in results)
                         yield return result!;
                 }
