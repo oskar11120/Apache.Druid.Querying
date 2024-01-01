@@ -39,11 +39,11 @@ internal sealed class JsonStreamReader
         return bytes.SequenceEqual(_buffer.AsSpan()[consumed..(consumed + bytes.Length)]);
     }
 
-    public Utf8JsonReader GetReaderForSlice(int sliceLengthInBytes, int trimStart)
+    public ReadOnlySpan<byte> GetSliceOfBuffer(int sliceLengthInBytes, int trimStart)
     {
         var consumed = (int)_bytesConsumed;
-        ReadOnlySpan<byte> slice = _buffer.AsSpan()[(consumed + trimStart)..(consumed + sliceLengthInBytes)];
-        return new Utf8JsonReader(slice, false, default);
+        var slice = _buffer.AsSpan()[(consumed + trimStart)..(consumed + sliceLengthInBytes)];
+        return  slice;
     }
 
     public Utf8JsonReader GetReader()

@@ -222,12 +222,16 @@ namespace Apache.Druid.Querying.Internal
                     trimBytes = startWithComa ? comaBytes.Length : 0;
                 }
 
+                private static Utf8JsonReader WrapInReader(ReadOnlySpan<byte> slice)
+                    => new(slice, false, default);
+
                 public TObject Deserialize<TObject>()
                 {
                     var (atomic, _, columnName) = atomicity.Get<TObject>();
-                    var reader = json.GetReaderForSlice(spanningBytes, trimBytes);
+                    var slice = json.GetSliceOfBuffer(spanningBytes, trimBytes);
                     if (atomic)
                     {
+                        var reader = WrapInReader(slice);
                         JsonStreamReader.ReadToProperty(ref reader, columnName);
                         var start = (int)reader.BytesConsumed;
                         var propertyDepth = reader.CurrentDepth;
@@ -235,12 +239,12 @@ namespace Apache.Druid.Querying.Internal
                             reader.Read();
                         while (reader.CurrentDepth < propertyDepth);
                         deserializeConsumedBytes = reader.BytesConsumed;
-                        reader = json.GetReaderForSlice((int)deserializeConsumedBytes + trimBytes, start + trimBytes);
-                        return JsonSerializer.Deserialize<TObject>(ref reader, options)!;
+                        var valueSlice = slice[start..(int)deserializeConsumedBytes];
+                        return JsonSerializer.Deserialize<TObject>(valueSlice, options)!;
                     }
 
-                    var result = JsonSerializer.Deserialize<TObject>(ref reader, options)!;
-                    deserializeConsumedBytes = reader.BytesConsumed;
+                    var result = JsonSerializer.Deserialize<TObject>(slice, options)!;
+                    deserializeConsumedBytes = slice.Length;
                     return result;
                 }
 

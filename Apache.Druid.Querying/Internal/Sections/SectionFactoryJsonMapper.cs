@@ -49,7 +49,7 @@ namespace Apache.Druid.Querying.Internal.Sections
 
             JsonNode Map(IReadOnlyCollection<ElementFactoryCall> calls, bool nested)
             {
-                if (!nested && (options.ForceSingle || atomicity.Atomic))
+                if (!nested && options.ForceSingle)
                 {
                     return calls.Count == 1 ?
                         MapCall(calls.Single(), nested) :
