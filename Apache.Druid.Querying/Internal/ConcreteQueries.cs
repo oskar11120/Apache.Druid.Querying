@@ -103,29 +103,6 @@ namespace Apache.Druid.Querying.Internal
                 Encoding.UTF8.GetBytes(propertyName.ToCamelCase());
         }
 
-        public class WithTimestamp<TResult, TResultMapper>
-            : WithTwoProperties<DateTimeOffset, TResult, TResultMapper, WithTimestamp<TResult>>
-            where TResultMapper : IQueryResultMapper<TResult>, new()
-        {
-            public WithTimestamp() : this("result")
-            {            
-            }
-
-            public WithTimestamp(string valuePropertyNameBase)
-                : base(nameof(WithTimestamp<TResult>.Timestamp), valuePropertyNameBase, static (t, result) => new(t, result))
-            {
-            }
-        }
-
-        public sealed class GroupByResult<TEvent, TEventMapper>
-            : WithTimestamp<TEvent, TEventMapper>
-            where TEventMapper : IQueryResultMapper<TEvent>, new()
-        {
-            public GroupByResult() : base("event")
-            {
-            }
-        }
-
         public sealed class Array<TElement, TElementMapper> :
             IQueryResultMapper<TElement>
             where TElementMapper : IQueryResultMapper<TElement>, new()
@@ -229,6 +206,7 @@ namespace Apache.Druid.Querying.Internal
                 {
                     var (atomic, _, columnName) = atomicity.Get<TObject>();
                     var slice = json.GetSliceOfBuffer(spanningBytes, trimBytes);
+                    deserializeConsumedBytes = slice.Length;
                     if (atomic)
                     {
                         var reader = WrapInReader(slice);
@@ -238,13 +216,10 @@ namespace Apache.Druid.Querying.Internal
                         do
                             reader.Read();
                         while (reader.CurrentDepth < propertyDepth);
-                        deserializeConsumedBytes = reader.BytesConsumed;
-                        var valueSlice = slice[start..(int)deserializeConsumedBytes];
-                        return JsonSerializer.Deserialize<TObject>(valueSlice, options)!;
+                        slice = slice[start..(int)reader.BytesConsumed];
                     }
 
                     var result = JsonSerializer.Deserialize<TObject>(slice, options)!;
-                    deserializeConsumedBytes = slice.Length;
                     return result;
                 }
 
@@ -255,6 +230,29 @@ namespace Apache.Druid.Querying.Internal
                         reader.Read();
                     json.UpdateState(reader);
                 }
+            }
+        }
+
+        public class WithTimestamp<TResult, TResultMapper>
+            : WithTwoProperties<DateTimeOffset, TResult, TResultMapper, WithTimestamp<TResult>>
+            where TResultMapper : IQueryResultMapper<TResult>, new()
+        {
+            public WithTimestamp() : this("result")
+            {
+            }
+
+            public WithTimestamp(string valuePropertyNameBase)
+                : base(nameof(WithTimestamp<TResult>.Timestamp), valuePropertyNameBase, static (t, result) => new(t, result))
+            {
+            }
+        }
+
+        public sealed class GroupByResult<TEvent, TEventMapper>
+            : WithTimestamp<TEvent, TEventMapper>
+            where TEventMapper : IQueryResultMapper<TEvent>, new()
+        {
+            public GroupByResult() : base("event")
+            {
             }
         }
 
