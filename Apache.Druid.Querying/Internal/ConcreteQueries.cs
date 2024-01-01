@@ -212,16 +212,16 @@ namespace Apache.Druid.Querying.Internal
                 private static Utf8JsonReader WrapInReader(ReadOnlySpan<byte> slice)
                     => new(slice, false, default);
 
-                public TObject Deserialize<TObject>()
+                public TObject Deserialize<TObject>(bool checkForAtomicity = true)
                 {
                     var (json, options, atomicity, _) = MapperContext;
-                    var (atomic, _, columnName) = atomicity.Get<TObject>();
                     var slice = json.GetSliceOfBuffer(spanningBytes, trimBytes);
                     deserializeConsumedBytes = slice.Length;
-                    if (atomic)
+                    SectionAtomicity atomicity_;
+                    if (checkForAtomicity && (atomicity_ = atomicity.Get<TObject>()).Atomic)
                     {
                         var reader = WrapInReader(slice);
-                        JsonStreamReader.ReadToProperty(ref reader, columnName);
+                        JsonStreamReader.ReadToProperty(ref reader, atomicity_.ColumnNameIfAtomicUtf8);
                         var start = (int)reader.BytesConsumed;
                         var propertyDepth = reader.CurrentDepth;
                         do
@@ -334,12 +334,21 @@ namespace Apache.Druid.Querying.Internal
             // TODO Optimize.
             private protected override TSelf Map(ref Context context)
             {
-                var json = context.Deserialize<System.Text.Json.Nodes.JsonObject>();
+                var json = context.Deserialize<System.Text.Json.Nodes.JsonObject>(false);
                 foreach (var name in propertyNames)
                 {
                     var columnName = context.MapperContext.ColumnNames.Get(name);
-                    if (columnName != name)
-                        json[name] = json[columnName];
+                    if (columnName != name && json.Remove(columnName, out var value))
+                    {
+                        if (columnName == "__time")
+                        {
+                            var unixMs = (long)value!;
+                            var t = DateTimeOffset.FromUnixTimeMilliseconds(unixMs);
+                            json[name] = t;
+                        }
+                        else
+                            json[name] = value;
+                    }
                 }
 
                 return json.Deserialize<TSelf>(context.MapperContext.Options)!;

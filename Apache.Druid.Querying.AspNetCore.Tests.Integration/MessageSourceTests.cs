@@ -7,37 +7,56 @@ namespace Apache.Druid.Querying.AspNetCore.Tests.Integration;
 
 internal static class TestExtensions
 {
-    public static TSelf Defaults<TSelf>(this IQuery<TSelf> query) where TSelf :
-        IQueryWith.Granularity,
+    public static TSelf IntervalFilterDefaults<TSelf>(this IQuery<TSelf> query) where TSelf :
         IQueryWith.Intervals,
         IQueryWith.Filter<Message, TSelf>,
-        IQueryWith.Aggregations<Message, MessageSourceTests.Aggregations, TSelf>,
         IQuery<TSelf>
     {
         var t = DateTime.Parse("2023-10-19T16:57:00.000Z", null, DateTimeStyles.AssumeUniversal).ToUniversalTime();
         return query
             .Unwrapped
             .Interval(new(t, t.AddDays(5)))
-            .Granularity(Granularity.SixHours)
             .Filter(filter => filter.And(
                 filter.Selector(
                     message => message.VariableName,
                     "pmPAct"),
                 filter.Selector(
                     message => message.TenantId,
-                    Guid.Parse("55022f5d-d9c4-4773-86e5-fbce823cd287"))))
+                    Guid.Parse("55022f5d-d9c4-4773-86e5-fbce823cd287"))));
+    }
+
+    public static TSelf AggregationsDefaults<TSelf>(this IQuery<TSelf> query) where TSelf :
+        IQueryWith.Granularity,
+        IQueryWith.Aggregations<Message, MessageSourceTests.Aggregations, TSelf>,
+        IQuery<TSelf>
+        => query
+            .Unwrapped
+            .Granularity(Granularity.SixHours)
             .Aggregations(factory => new(
                 factory.Sum(message => message.Value),
                 factory.Count(),
                 factory.First(message => message.VariableName),
                 factory.First(message => message.Value, SimpleDataType.String)
             ));
-    }
 }
 
 internal class MessageSourceTests
 {
     private static DataSource<Message> Messages => Services.GetRequiredService<DataSource<Message>>();
+
+    [Test]
+    public async Task Scan_ReturnsAnything()
+    {
+        var query = new Query<Message>
+            .Scan()
+            .IntervalFilterDefaults()
+            .Limit(10000)
+            .Offset(5);
+        var result = await Messages
+            .ExecuteQuery(query)
+            .ToListAsync();
+        result.Should().NotBeEmpty();
+    }
 
     [Test]
     public async Task GroupBy_ReturnsAnything()
@@ -47,7 +66,8 @@ internal class MessageSourceTests
             .WithNoVirtualColumns
             .WithAggregations<Aggregations>
             .WithPostAggregations<double>()
-            .Defaults()
+            .IntervalFilterDefaults()
+            .AggregationsDefaults()
             .PostAggregations(factory => factory.Arithmetic(
                 ArithmeticFunction.Divide,
                 factory.FieldAccess(aggrgations => aggrgations.Sum),
@@ -70,7 +90,8 @@ internal class MessageSourceTests
             .WithNoVirtualColumns
             .WithAggregations<Aggregations>
             .WithPostAggregations<PostAggregations>()
-            .Defaults()
+            .IntervalFilterDefaults()
+            .AggregationsDefaults()
             .PostAggregations(factory =>
                 new(factory.Arithmetic(
                     ArithmeticFunction.Divide,
@@ -93,7 +114,8 @@ internal class MessageSourceTests
             .WithNoVirtualColumns
             .WithAggregations<Aggregations>
             .WithPostAggregations<PostAggregations>()
-            .Defaults()
+            .IntervalFilterDefaults()
+            .AggregationsDefaults()
             .PostAggregations(factory => new(
                 factory.Arithmetic(
                     ArithmeticFunction.Divide,
