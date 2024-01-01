@@ -39,7 +39,7 @@ namespace Apache.Druid.Querying
         DataSourceInitlializationState? IDataSourceInitializer<TSource>.state { get; set; }
         private DataSourceInitlializationState State => (this as IDataSourceInitializer<TSource>).State;
 
-        public JsonObject MaterializeQuery(IQuery query)
+        public JsonObject MapQueryToJson(IQuery query)
         {
             var (id, serializerOptions, _) = State;
             var result = new JsonObject();
@@ -94,7 +94,7 @@ namespace Apache.Druid.Querying
         {
             var (_, serializerOptions, clientFactory) = State;
             serializerOptionsWithFormatting ??= new(serializerOptions) { WriteIndented = true };
-            var materialized = MaterializeQuery(query);
+            var materialized = MapQueryToJson(query);
             using var content = JsonContent.Create(materialized, options: serializerOptions);
             using var request = new HttpRequestMessage(HttpMethod.Post, "druid/v2")
             {
