@@ -6,12 +6,12 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading;
 
 namespace Apache.Druid.Querying
@@ -38,6 +38,17 @@ namespace Apache.Druid.Querying
         private JsonSerializerOptions? serializerOptionsWithFormatting;
         DataSourceInitlializationState? IDataSourceInitializer<TSource>.state { get; set; }
         private DataSourceInitlializationState State => (this as IDataSourceInitializer<TSource>).State;
+
+        public JsonObject MaterializeQuery(IQuery query)
+        {
+            var (id, serializerOptions, _) = State;
+            var result = new JsonObject();
+            var state = query.GetState();
+            foreach (var (key, factory) in state)
+                result.Add(key, factory(serializerOptions, IArgumentColumnNameProvider.Implementation<TSource>.Singleton));
+            result.Add("dataSource", id);
+            return result;
+        }
 
         public virtual IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQuery query, CancellationToken token = default)
             => Execute<TResult>(query, token);
@@ -82,15 +93,10 @@ namespace Apache.Druid.Querying
             Func<Stream, JsonSerializerOptions, CancellationToken, IAsyncEnumerable<TResult>> deserialize,
             [EnumeratorCancellation] CancellationToken token = default)
         {
-            var (id, serializerOptions, clientFactory) = State;
+            var (_, serializerOptions, clientFactory) = State;
             serializerOptionsWithFormatting ??= new(serializerOptions) { WriteIndented = true };
-            var asDictionary = query
-                .GetState()
-                .ToDictionary(
-                    pair => pair.Key,
-                    pair => pair.Value(serializerOptions, IArgumentColumnNameProvider.Implementation<TSource>.Singleton));
-            asDictionary.Add("dataSource", id!);
-            using var content = JsonContent.Create(asDictionary, options: serializerOptions);
+            var materialized = MaterializeQuery(query);
+            using var content = JsonContent.Create(materialized, options: serializerOptions);
             using var request = new HttpRequestMessage(HttpMethod.Post, "druid/v2")
             {
                 Content = content,
@@ -106,7 +112,7 @@ namespace Apache.Druid.Querying
             catch (HttpRequestException exception)
             {
                 var responseContent = await response.Content.ReadAsStringAsync(token);
-                exception.Data.Add("requestContent", JsonSerializer.Serialize(asDictionary, serializerOptionsWithFormatting));
+                exception.Data.Add("requestContent", JsonSerializer.Serialize(materialized, serializerOptionsWithFormatting));
                 exception.Data.Add(nameof(responseContent), responseContent);
                 throw;
             }
