@@ -2,7 +2,6 @@
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Buffers;
 
 namespace Apache.Druid.Querying.Json
 {
@@ -19,12 +18,6 @@ namespace Apache.Druid.Querying.Json
                 new PolymorphicSerializer<IHaving>(),
                 new PolymorphicSerializer<ILimitSpec>(),
                 new PolymorphicSerializer<ILimitSpec.OrderBy>()
-                //    new UnixMilisecondsConverter<DateTimeOffset>(
-                //        DateTimeOffset.FromUnixTimeMilliseconds,
-                //        Utf8Formatter.TryFormat),
-                //    new UnixMilisecondsConverter<DateTime>(
-                //        static miliseconds => DateTimeOffset.FromUnixTimeMilliseconds(miliseconds).UtcDateTime,
-                //        Utf8Formatter.TryFormat)
             }
         };
 
@@ -57,39 +50,6 @@ namespace Apache.Druid.Querying.Json
                 }
 
                 JsonSerializer.Serialize(writer, value, type, options);
-            }
-        }
-
-        private sealed class UnixMilisecondsConverter<T> : JsonConverter<T>
-        {
-            public delegate bool TryFormatUTf8(T value, Span<byte> destination, out int bytesWritten, StandardFormat format);
-
-            private readonly Func<long, T> convert;
-            private readonly TryFormatUTf8 tryFormat;
-
-            public UnixMilisecondsConverter(Func<long, T> convert, TryFormatUTf8 tryFormat)
-            {
-                this.convert = convert;
-                this.tryFormat = tryFormat;
-            }
-
-            public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-            {
-                var number = reader.TokenType switch
-                {
-                    JsonTokenType.Number => reader.GetInt64(),
-                    JsonTokenType.String => long.Parse(reader.GetString()!),
-                    _ => throw new NotSupportedException()
-                };
-                return convert(number);
-            }
-
-            public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
-            {
-                // The "R" standard format will always be 29 bytes.
-                Span<byte> utf8Date = stackalloc byte[29];
-                tryFormat(value, utf8Date, out _, new StandardFormat('R'));
-                writer.WriteStringValue(utf8Date);
             }
         }
     }
