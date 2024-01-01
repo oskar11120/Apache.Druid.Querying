@@ -2,6 +2,7 @@
 using Apache.Druid.Querying.Internal.Sections;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -426,6 +427,43 @@ namespace Apache.Druid.Querying.Internal
             IQueryWith.Aggregations<TArguments, TAggregations, TSelf>,
             IQueryWith.PostAggregations<TAggregations, TPostAggregations, TSelf>
         {
+        }
+
+        public abstract class Scan :
+            Query,
+            IQueryWith.Order,
+            IQueryWith.Intervals,
+            IQueryWith.Filter<TArguments, TSelf>,
+            IQueryWith.Context<QueryContext.Scan, TSelf>
+        {
+            protected IQuery<TSelf> Self => this;
+
+            public Scan() : base("scan")
+            {
+            }
+
+            public TSelf Offset(int offset) 
+                => Self.AddOrUpdateSection(nameof(offset), offset);
+
+            public TSelf Limit(int limit)
+                => Self.AddOrUpdateSection(nameof(limit), limit);
+
+            public TSelf BatchSize(int batchSize)
+                => Self.AddOrUpdateSection(nameof(batchSize), batchSize);
+
+            public abstract class WithColumns : Scan
+            {
+                private static readonly string[] propertyNames = typeof(TArguments)
+                    .GetProperties()
+                    .Select(property => property.Name)
+                    .ToArray();
+
+                public WithColumns()
+                {
+                    Self.AddOrUpdateSection("columns", (options, columnNames) 
+                        => JsonSerializer.SerializeToNode(propertyNames.Select(columnNames.Get), options)!);
+                }
+            }
         }
     }
 }

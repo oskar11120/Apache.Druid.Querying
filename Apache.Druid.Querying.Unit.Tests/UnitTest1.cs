@@ -5,6 +5,23 @@ namespace Apache.Druid.Querying.Unit.Tests
     public class Tests
     {
         [Test]
+        public void Scan_Builds()
+        {
+            var zero = new Query<Message>
+                .Scan
+                .WithColumns<ScanColumns>()
+                .Limit(10000)
+                .BatchSize(2000)
+                .Offset(4000)
+                .Filter(type => type.Range(
+                    columns => columns.Value,
+                    lower: 100))
+                .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
+                .Order(OrderDirection.Ascending)
+                .MapToJson();
+        }
+
+        [Test]
         public void GroupByQuery_Builds()
         {
             var zero = new Query<Message>
@@ -268,5 +285,6 @@ namespace Apache.Druid.Querying.Unit.Tests
         record PostAggregations(double Sum);
         record TopNDimension(Guid ObjectId);
         record GroupByDimensions(Guid ObjectId, string VariableName);
+        record ScanColumns(string VariableName, DateTimeOffset Timestamp, double Value);
     }
 }

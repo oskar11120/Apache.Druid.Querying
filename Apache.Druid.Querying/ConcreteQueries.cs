@@ -45,6 +45,12 @@ namespace Apache.Druid.Querying
             public bool? ApplyLimitPushDownToSegment { get; set; }
             public bool? GroupByEnableMultiValueUnnesting { get; set; }
         }
+
+        public class Scan : Context
+        {
+            public int? MaxRowsQueuedForOrdering { get; set; }
+            public int? MaxSegmentPartitionsOrderedInMemory { get; set; }
+        }
     }
 
     public static class Query<TSource>
@@ -166,6 +172,17 @@ namespace Apache.Druid.Querying
                     {
                     }
                 }
+            }
+        }
+
+        public class Scan :
+           QueryBase<TSource, Scan>.Scan,
+           IQueryWithSource<TSource>.AndResult<TSource>
+        {
+            public class WithColumns<TColumns> :
+                QueryBase<TColumns, WithColumns<TColumns>>.Scan.WithColumns,
+                IQueryWithSource<TSource>.AndResult<TSource>
+            { 
             }
         }
     }
