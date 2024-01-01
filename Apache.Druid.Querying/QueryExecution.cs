@@ -24,7 +24,6 @@ namespace Apache.Druid.Querying
         internal IAsyncEnumerable<TResult> Map(QueryResultMapperContext context, CancellationToken token);
     }
 
-
     public interface IQueryWithSource<TSource> : IQuery
     {
         public interface AndResult<TResult> : IQueryWithSource<TSource>
