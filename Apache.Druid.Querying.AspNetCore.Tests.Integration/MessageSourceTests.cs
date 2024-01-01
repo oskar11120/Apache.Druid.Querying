@@ -40,7 +40,31 @@ internal class MessageSourceTests
     private static DataSource<Message> Messages => Services.GetRequiredService<DataSource<Message>>();
 
     [Test]
-    public async Task TopNQuery_ReturnsAnything()
+    public async Task GroupBy_ReturnsAnything()
+    {
+        var query = new Query<Message>
+            .GroupBy<(Guid ObjectId, string VariableName)>
+            .WithNoVirtualColumns
+            .WithAggregations<Aggregations>
+            .WithPostAggregations<PostAggregations>()
+            .Defaults()
+            .PostAggregations(factory =>
+                new(factory.Arithmetic(
+                    ArithmeticFunction.Divide,
+                    factory.FieldAccess(aggrgations => aggrgations.Sum),
+                    factory.FieldAccess(aggregations => aggregations.Count))))
+            .Dimensions(factory => new(
+                factory.Default(message => message.ObjectId),
+                factory.Default(message => message.VariableName)))
+            .LimitSpec(1000);
+        var result = await Messages
+            .ExecuteQuery(query)
+            .ToListAsync();
+        result.Should().NotBeEmpty();
+    }
+
+    [Test]
+    public async Task TopN_ReturnsAnything()
     {
         var query = new Query<Message>
             .TopN<Guid>
@@ -63,7 +87,7 @@ internal class MessageSourceTests
     }
 
     [Test]
-    public async Task TimeSeriesQuery_ReturnsAnything()
+    public async Task TimeSeries_ReturnsAnything()
     {
         var query = new Query<Message>
             .TimeSeries

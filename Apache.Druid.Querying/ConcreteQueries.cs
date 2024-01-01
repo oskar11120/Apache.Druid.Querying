@@ -33,6 +33,17 @@ namespace Apache.Druid.Querying
         public class GroupBy : Context.WithVectorization
         {
             public long? MaxOnDiskStorage { get; set; }
+            public bool? GroupByIsSingleThreaded { get; set; }
+            public bool? BufferGrouperInitialBuckets { get; set; }
+            public double? BufferGrouperMaxLoadFactor { get; set; }
+            public bool? ForceHashAggregation { get; set; }
+            public int? IntermediateCombineDegree { get; set; }
+            public int? NumParallelCombineThreads { get; set; }
+            public bool? MergeThreadLocal { get; set; }
+            public bool? SortByDimsFirst { get; set; }
+            public bool? ForceLimitPushDown { get; set; }
+            public bool? ApplyLimitPushDownToSegment { get; set; }
+            public bool? GroupByEnableMultiValueUnnesting { get; set; }
         }
     }
 
