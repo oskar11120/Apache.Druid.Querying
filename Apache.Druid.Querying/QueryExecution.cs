@@ -43,7 +43,8 @@ namespace Apache.Druid.Querying
 
     public delegate JsonNode? DataSourceJsonProvider();
 
-    public sealed class DataSource<TSource>
+    // TODO Seal
+    public class DataSource<TSource>
     {
         private static readonly StringWithQualityHeaderValue gzip = new("gzip");
         private static readonly IArgumentColumnNameProvider columnNames = IArgumentColumnNameProvider.Implementation<TSource>.Singleton;
@@ -154,5 +155,7 @@ namespace Apache.Druid.Querying
                 ["type"] = "query",
                 ["query"] = MapQueryToJson(query)
             });
+
+        internal string? JsonRepresentationDebugView => GetJsonRepresentation()?.ToJsonString(options.Serializer);
     }
 }
