@@ -41,30 +41,39 @@ namespace Apache.Druid.Querying
         }
     }
 
-    public class DataSource<TSource> : IDataSourceInitializer<TSource>
+    public delegate JsonNode? DataSourceJsonProvider();
+
+    public sealed class DataSource<TSource>
     {
         private static readonly StringWithQualityHeaderValue gzip = new("gzip");
         private static readonly IArgumentColumnNameProvider columnNames = IArgumentColumnNameProvider.Implementation<TSource>.Singleton;
 
+        private readonly Func<DataSourceOptions> getOptions;
         private JsonSerializerOptions? serializerOptionsWithFormatting;
-        DataSourceInitlializationState? IDataSourceInitializer<TSource>.state { get; set; }
-        private DataSourceInitlializationState State => (this as IDataSourceInitializer<TSource>).State;
+        private DataSourceOptions options => getOptions();
+
+        public DataSource(Func<DataSourceOptions> getOptions, DataSourceJsonProvider getJsonRepresentation)
+        {
+            this.getOptions = getOptions;
+            this.GetJsonRepresentation = getJsonRepresentation;
+        }
+
+        public readonly DataSourceJsonProvider GetJsonRepresentation;
 
         public JsonObject MapQueryToJson(IQueryWithSource<TSource> query)
         {
-            var (id, serializerOptions, _) = State;
-            var result = query.MapToJson(serializerOptions, columnNames);
-            result.Add("dataSource", id);
+            var result = query.MapToJson(options.Serializer, columnNames);
+            result.Add("dataSource", GetJsonRepresentation());
             return result;
         }
 
-        public virtual IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQueryWithSource<TSource> query, CancellationToken token = default)
+        public IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQueryWithSource<TSource> query, CancellationToken token = default)
             => Execute<TResult>(query, token);
 
-        public virtual IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQueryWithSource<TSource>.AndResult<TResult> query, CancellationToken token = default)
+        public IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQueryWithSource<TSource>.AndResult<TResult> query, CancellationToken token = default)
             => Execute<TResult>(query, token);
 
-        public virtual IAsyncEnumerable<TResult> ExecuteQuery<TResult, TMapper>(
+        public IAsyncEnumerable<TResult> ExecuteQuery<TResult, TMapper>(
             IQueryWithSource<TSource>.AndMappedResult<TResult, TMapper> query, CancellationToken token = default)
             where TMapper : IQueryResultMapper<TResult>, new()
         {
@@ -100,16 +109,14 @@ namespace Apache.Druid.Querying
             Func<Stream, JsonSerializerOptions, CancellationToken, IAsyncEnumerable<TResult>> deserialize,
             [EnumeratorCancellation] CancellationToken token = default)
         {
-            var (_, serializerOptions, clientFactory) = State;
-            serializerOptionsWithFormatting ??= new(serializerOptions) { WriteIndented = true };
             var json = MapQueryToJson(query);
-            using var content = JsonContent.Create(json, options: serializerOptions);
+            using var content = JsonContent.Create(json, options: options.Serializer);
             using var request = new HttpRequestMessage(HttpMethod.Post, "druid/v2")
             {
                 Content = content,
                 Headers = { AcceptEncoding = { gzip } }
             };
-            using var client = clientFactory();
+            using var client = options.HttpClientFactory();
             using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token);
 
             try
@@ -118,6 +125,7 @@ namespace Apache.Druid.Querying
             }
             catch (HttpRequestException exception)
             {
+                serializerOptionsWithFormatting ??= new(options.Serializer) { WriteIndented = true };
                 var responseContent = await response.Content.ReadAsStringAsync(token);
                 exception.Data.Add("requestContent", JsonSerializer.Serialize(json, serializerOptionsWithFormatting));
                 exception.Data.Add(nameof(responseContent), responseContent);
@@ -127,9 +135,24 @@ namespace Apache.Druid.Querying
             using var raw = await response.Content.ReadAsStreamAsync(token);
             var isGzip = response.Content.Headers.ContentEncoding.Contains(gzip.Value);
             using var decompressed = isGzip ? new GZipStream(raw, CompressionMode.Decompress) : raw;
-            var results = deserialize(decompressed, serializerOptions, token);
+            var results = deserialize(decompressed, options.Serializer, token);
             await foreach (var result in results)
                 yield return result!;
         }
+
+        public DataSource<TResult> WrapQuery<TResult>(IQueryWithSource<TSource>.AndResult<TResult> query)
+            => Wrap<TResult>(query);
+
+        public DataSource<TResult> WrapQuery<TResult, TMapper>(IQueryWithSource<TSource>.AndMappedResult<TResult, TMapper> query)
+            where TMapper : IQueryResultMapper<TResult>, new()
+            => Wrap<TResult>(query);
+
+        private DataSource<TResult> Wrap<TResult>(IQueryWithSource<TSource> query) => new(
+            getOptions,
+            () => new JsonObject
+            {
+                ["type"] = "query",
+                ["query"] = MapQueryToJson(query)
+            });
     }
 }

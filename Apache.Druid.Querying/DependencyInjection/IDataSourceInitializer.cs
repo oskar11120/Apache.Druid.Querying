@@ -5,24 +5,23 @@ using System.Text.Json;
 
 namespace Apache.Druid.Querying.DependencyInjection
 {
-    public sealed record DataSourceInitlializationState(
-        string Id,
-        JsonSerializerOptions SerializerOptions,
+    public sealed record DataSourceOptions(
+        JsonSerializerOptions Serializer,
         Func<HttpClient> HttpClientFactory);
 
-    public interface IDataSourceInitializer<TSource>
+    public interface IDataSourceInitializer
     {
         [SuppressMessage("Style", "IDE1006:Naming Styles")]
-        private protected DataSourceInitlializationState? state { get; set; }
+        private protected DataSourceOptions? options { get; set; }
 
-        internal DataSourceInitlializationState State => state ??
-            throw new InvalidOperationException($"Attempted to use an uninitialized instance of {typeof(DataSource<TSource>)}.");
+        internal DataSourceOptions Options => options ??
+            throw new InvalidOperationException($"Attempted to use an uninitialized instance of {GetType()}.");
 
-        public void Initialize(DataSourceInitlializationState state)
+        public void Initialize(DataSourceOptions state)
         {
-            if (this.state is not null)
+            if (this.options is not null)
                 throw new InvalidOperationException("Already initialized.");
-            this.state = state;
+            this.options = state;
         }
     }
 }
