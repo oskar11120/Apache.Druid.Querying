@@ -7,7 +7,6 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq.Expressions;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -145,6 +144,21 @@ namespace Apache.Druid.Querying
                 yield return result!;
         }
 
+        public DataSource<TResult> WrapQuery<TResult>(IQueryWithSource<TSource>.AndResult<TResult> query)
+            => Wrap<TResult>(query);
+
+        public DataSource<TResult> WrapQuery<TResult, TMapper>(IQueryWithSource<TSource>.AndMappedResult<TResult, TMapper> query)
+            where TMapper : IQueryResultMapper<TResult>, new()
+            => Wrap<TResult>(query);
+
+        private DataSource<TResult> Wrap<TResult>(IQueryWithSource<TSource> query) => new(
+            getOptions,
+            () => new JsonObject
+            {
+                ["type"] = "query",
+                ["query"] = MapQueryToJson(query)
+            });
+
         public DataSource<InnerJoinResult<TSource, TRight>> InnerJoin<TRight>(DataSource<TRight> right, string rightPrefix, string condition)
             => Join<TRight, InnerJoinResult<TSource, TRight>>(right, rightPrefix, condition, "INNER");
 
@@ -162,21 +176,6 @@ namespace Apache.Druid.Querying
                 [nameof(rightPrefix)] = rightPrefix,
                 [nameof(condition)] = condition,
                 [nameof(joinType)] = joinType
-            });
-
-        public DataSource<TResult> WrapQuery<TResult>(IQueryWithSource<TSource>.AndResult<TResult> query)
-            => Wrap<TResult>(query);
-
-        public DataSource<TResult> WrapQuery<TResult, TMapper>(IQueryWithSource<TSource>.AndMappedResult<TResult, TMapper> query)
-            where TMapper : IQueryResultMapper<TResult>, new()
-            => Wrap<TResult>(query);
-
-        private DataSource<TResult> Wrap<TResult>(IQueryWithSource<TSource> query) => new(
-            getOptions,
-            () => new JsonObject
-            {
-                ["type"] = "query",
-                ["query"] = MapQueryToJson(query)
             });
 
         internal string? JsonRepresentationDebugView => GetJsonRepresentation()?.ToJsonString(options.Serializer);
