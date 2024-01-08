@@ -47,11 +47,12 @@ namespace Apache.Druid.Querying
             });
 
         public DataSource<TResult> Query<TSource, TResult>(DataSource<TSource> dataSource, IQueryWithSource<TSource>.AndResult<TResult> query)
-            => Create<TResult>(() => new JsonObject
-            {
-                [Constants.type] = "inline",
-                [Constants.dataSources] = JsonSerializer.SerializeToNode(rows, Options.Serializer)
-            });
+            => dataSource.WrapQuery(query);
+
+        public DataSource<TResult> Query<TSource, TResult, TMapper>(
+            DataSource<TSource> dataSource, IQueryWithSource<TSource>.AndMappedResult<TResult, TMapper> query)
+            where TMapper : IQueryResultMapper<TResult>, new()
+            => dataSource.WrapQuery(query);
 
         protected DataSource<TSource> Table<TSource>(string id)
             => Create<TSource>(() => id);
