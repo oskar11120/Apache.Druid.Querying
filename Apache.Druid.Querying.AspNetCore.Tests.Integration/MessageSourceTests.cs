@@ -7,14 +7,12 @@ namespace Apache.Druid.Querying.AspNetCore.Tests.Integration;
 
 internal static class TestExtensions
 {
-    public static TSelf IntervalFilterDefaults<TSelf>(this IQuery<TSelf> query) where TSelf :
+    public static TQuery IntervalFilterDefaults<TQuery>(this TQuery query) where TQuery :
         IQueryWith.Intervals,
-        IQueryWith.Filter<Message, TSelf>,
-        IQuery<TSelf>
+        IQueryWith.Filter<Message, TQuery>
     {
         var t = DateTime.Parse("2023-10-19T16:57:00.000Z", null, DateTimeStyles.AssumeUniversal).ToUniversalTime();
         return query
-            .Unwrapped
             .Interval(new(t, t.AddDays(5)))
             .Filter(filter => filter.And(
                 filter.Selector(
@@ -25,12 +23,10 @@ internal static class TestExtensions
                     Guid.Parse("55022f5d-d9c4-4773-86e5-fbce823cd287"))));
     }
 
-    public static TSelf AggregationsDefaults<TSelf>(this IQuery<TSelf> query) where TSelf :
+    public static TQuery AggregationsDefaults<TQuery>(this TQuery query) where TQuery :
         IQueryWith.Granularity,
-        IQueryWith.Aggregations<Message, MessageSourceTests.Aggregations, TSelf>,
-        IQuery<TSelf>
+        IQueryWith.Aggregations<Message, MessageSourceTests.Aggregations, TQuery>
         => query
-            .Unwrapped
             .Granularity(Granularity.SixHours)
             .Aggregations(factory => new(
                 factory.Sum(message => message.Value),
