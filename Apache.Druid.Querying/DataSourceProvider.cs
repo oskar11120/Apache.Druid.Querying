@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Apache.Druid.Querying
 {
     public readonly record struct Lookup<TKey, TValue>(TKey K, TValue V);
-    public readonly record struct Union<TFirst, TSecond>(TFirst First, TSecond Second);
-    public readonly record struct Union<TFirst, TSecond, TThird>(TFirst First, TSecond Second, TThird Third);
+    public readonly record struct Union<TFirst, TSecond>(TFirst? First, TSecond? Second);
+    public readonly record struct Union<TFirst, TSecond, TThird>(TFirst? First, TSecond? Second, TThird? Third);
 
     public abstract class DataSourceProvider : IDataSourceInitializer
     {
@@ -52,6 +53,12 @@ namespace Apache.Druid.Querying
             DataSource<TSource> dataSource, IQueryWithSource<TSource>.AndMappedResult<TResult, TMapper> query)
             where TMapper : IQueryResultMapper<TResult>, new()
             => dataSource.WrapQuery(query);
+
+        public DataSource<InnerJoinResult<TLeft, TRight>> InnerJoin<TLeft, TRight>(DataSource<TLeft> left, DataSource<TRight> right, string rightPrefix, string condition)
+            => left.InnerJoin(right, rightPrefix, condition);
+
+        public DataSource<LeftJoinResult<TLeft, TRight>> LeftJoin<TLeft, TRight>(DataSource<TLeft> left, DataSource<TRight> right, string rightPrefix, string condition)
+            => left.LeftJoin(right, rightPrefix, condition);
 
         protected DataSource<TSource> Table<TSource>(string id)
             => Create<TSource>(() => id);

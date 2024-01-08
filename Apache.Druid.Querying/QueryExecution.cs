@@ -7,6 +7,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq.Expressions;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -42,6 +43,9 @@ namespace Apache.Druid.Querying
     }
 
     public delegate JsonNode? DataSourceJsonProvider();
+
+    public readonly record struct InnerJoinResult<TLeft, TRight>(TLeft Left, TRight Right);
+    public readonly record struct LeftJoinResult<TLeft, TRight>(TLeft Left, TRight? Right);
 
     // TODO Seal
     public class DataSource<TSource>
@@ -140,6 +144,25 @@ namespace Apache.Druid.Querying
             await foreach (var result in results)
                 yield return result!;
         }
+
+        public DataSource<InnerJoinResult<TSource, TRight>> InnerJoin<TRight>(DataSource<TRight> right, string rightPrefix, string condition)
+            => Join<TRight, InnerJoinResult<TSource, TRight>>(right, rightPrefix, condition, "INNER");
+
+        public DataSource<LeftJoinResult<TSource, TRight>> LeftJoin<TRight>(DataSource<TRight> right, string rightPrefix, string condition)
+            => Join<TRight, LeftJoinResult<TSource, TRight>>(right, rightPrefix, condition, "LEFT");
+
+        private DataSource<TResult> Join<TRight, TResult>(
+            DataSource<TRight> right, string rightPrefix, string condition, string joinType) => new(
+            getOptions,
+            () => new JsonObject
+            {
+                ["type"] = "join",
+                ["left"] = GetJsonRepresentation(),
+                ["right"] = right.GetJsonRepresentation(),
+                [nameof(rightPrefix)] = rightPrefix,
+                [nameof(condition)] = condition,
+                [nameof(joinType)] = joinType
+            });
 
         public DataSource<TResult> WrapQuery<TResult>(IQueryWithSource<TSource>.AndResult<TResult> query)
             => Wrap<TResult>(query);
