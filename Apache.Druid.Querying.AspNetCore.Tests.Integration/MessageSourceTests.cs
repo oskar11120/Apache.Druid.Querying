@@ -38,7 +38,7 @@ internal static class TestExtensions
 
 internal class MessageSourceTests
 {
-    private static DataSource<Message> Messages => Services.GetRequiredService<DataSource<Message>>();
+    private static EcDruid Druid => Services.GetRequiredService<EcDruid>();
 
     [Test]
     public async Task Scan_ReturnsAnything()
@@ -49,7 +49,8 @@ internal class MessageSourceTests
             .Limit(10000)
             .Offset(5)
             .Order(OrderDirection.Ascending);
-        var result = await Messages
+        var result = await Druid
+            .Variables
             .ExecuteQuery(query)
             .ToListAsync();
         result.Should().NotBeEmpty();
@@ -73,7 +74,8 @@ internal class MessageSourceTests
                 factory.Default(message => message.ObjectId),
                 factory.Default(message => message.VariableName)))
             .LimitSpec(1000);
-        var result = await Messages
+        var result = await Druid
+            .Variables
             .ExecuteQuery(query)
             .ToListAsync();
         result.Should().NotBeEmpty();
@@ -97,7 +99,8 @@ internal class MessageSourceTests
             .Dimension(factory => factory.Default(message => message.ObjectId))
             .Metric(factory => factory.Numeric(tuple => tuple.Aggregations.Count))
             .Threshold(1000);
-        var result = await Messages
+        var result = await Druid
+            .Variables
             .ExecuteQuery(query)
             .ToListAsync();
         result.Should().NotBeEmpty();
@@ -119,7 +122,8 @@ internal class MessageSourceTests
                     factory.FieldAccess(aggrgations => aggrgations.Sum),
                     factory.FieldAccess(aggregations => aggregations.Count))))
             .Context(new() { SkipEmptyBuckets = true });
-        var result = await Messages
+        var result = await Druid
+            .Variables
             .ExecuteQuery(query)
             .ToListAsync();
         result.Should().NotBeEmpty();

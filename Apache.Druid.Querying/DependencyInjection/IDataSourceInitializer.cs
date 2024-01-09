@@ -5,9 +5,7 @@ using System.Text.Json;
 
 namespace Apache.Druid.Querying.DependencyInjection
 {
-    public sealed record DataSourceOptions(
-        JsonSerializerOptions Serializer,
-        Func<HttpClient> HttpClientFactory);
+    public sealed record DataSourceOptions(JsonSerializerOptions Serializer, Func<HttpClient> HttpClientFactory);
 
     public interface IDataSourceInitializer
     {
@@ -17,7 +15,9 @@ namespace Apache.Druid.Querying.DependencyInjection
         internal DataSourceOptions Options => options ??
             throw new InvalidOperationException($"Attempted to use an uninitialized instance of {GetType()}.");
 
-        public void Initialize(DataSourceOptions state)
+        bool Initialized => options is not null;
+
+        void Initialize(DataSourceOptions state)
         {
             if (this.options is not null)
                 throw new InvalidOperationException("Already initialized.");
