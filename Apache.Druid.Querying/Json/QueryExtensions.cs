@@ -13,7 +13,7 @@ namespace Apache.Druid.Querying.Json
             IColumnNameMappingProvider? columNames = null)
         {
             serializerOptions ??= @default;
-            columNames ??= IColumnNameMappingProvider.Implementation<TSource>.Singleton;
+            columNames ??= IColumnNameMappingProvider.ImmutableBuilder<TSource>.Singleton;
             var result = new JsonObject();
             var state = query.GetState();
             foreach (var (key, factory) in state)

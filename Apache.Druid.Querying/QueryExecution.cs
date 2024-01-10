@@ -43,29 +43,52 @@ namespace Apache.Druid.Querying
 
     public delegate JsonNode? DataSourceJsonProvider();
 
-    public readonly record struct InnerJoinResult<TLeft, TRight>(TLeft Left, TRight Right);
-    public readonly record struct LeftJoinResult<TLeft, TRight>(TLeft Left, TRight? Right);
+    public readonly record struct InnerJoinResult<TLeft, TRight>(TLeft Left, TRight Right)
+    {
+        private sealed class Deserializer : QueryResultElement.IDeserializer<InnerJoinResult<TLeft, TRight>>
+        {
+            public InnerJoinResult<TLeft, TRight> Deserialize(ref QueryResultElement.DeserializerContext context)
+                => new(
+                    context.Deserialize<TLeft>(),
+                    context.Deserialize<TRight>());
+        }
+    }
+
+    public readonly record struct LeftJoinResult<TLeft, TRight>(TLeft Left, TRight? Right)
+    {
+        private sealed class Deserializer : QueryResultElement.IDeserializer<LeftJoinResult<TLeft, TRight>>
+        {
+            public LeftJoinResult<TLeft, TRight> Deserialize(ref QueryResultElement.DeserializerContext context)
+                => new(
+                    context.Deserialize<TLeft>(),
+                    context.Deserialize<TRight>());
+        }
+    }
 
     public sealed class DataSource<TSource>
     {
         private static readonly StringWithQualityHeaderValue gzip = new("gzip");
-        private static readonly IColumnNameMappingProvider columnNames = IColumnNameMappingProvider.Implementation<TSource>.Singleton;
 
         private readonly Func<DataSourceOptions> getOptions;
         private JsonSerializerOptions? serializerOptionsWithFormatting;
         private DataSourceOptions options => getOptions();
 
-        public DataSource(Func<DataSourceOptions> getOptions, DataSourceJsonProvider getJsonRepresentation)
+        internal DataSource(
+            Func<DataSourceOptions> getOptions,
+            DataSourceJsonProvider getJsonRepresentation,
+            IColumnNameMappingProvider.ImmutableBuilder columnNameMappings)
         {
             this.getOptions = getOptions;
-            this.GetJsonRepresentation = getJsonRepresentation;
+            GetJsonRepresentation = getJsonRepresentation;
+            ColumnNameMappings = columnNameMappings;
         }
 
         public readonly DataSourceJsonProvider GetJsonRepresentation;
+        internal readonly IColumnNameMappingProvider.ImmutableBuilder ColumnNameMappings;
 
         public JsonObject MapQueryToJson(IQueryWithSource<TSource> query)
         {
-            var result = query.MapToJson(options.Serializer, columnNames);
+            var result = query.MapToJson(options.Serializer, ColumnNameMappings);
             result.Add("dataSource", GetJsonRepresentation());
             return result;
         }
@@ -89,7 +112,7 @@ namespace Apache.Druid.Querying
                 try
                 {
                     var read = await stream.ReadAsync(buffer, token);
-                    var results = mapper.Map(new(new(stream, buffer, read), options, atomicity, columnNames), token);
+                    var results = mapper.Map(new(new(stream, buffer, read), options, atomicity, ColumnNameMappings), token);
                     await foreach (var result in results)
                         yield return result!;
                 }
@@ -156,7 +179,8 @@ namespace Apache.Druid.Querying
             {
                 ["type"] = "query",
                 ["query"] = MapQueryToJson(query)
-            });
+            },
+            ColumnNameMappings);
 
         public DataSource<InnerJoinResult<TSource, TRight>> InnerJoin<TRight>(DataSource<TRight> right, string rightPrefix, string condition)
             => Join<TRight, InnerJoinResult<TSource, TRight>>(right, rightPrefix, condition, "INNER");
@@ -175,7 +199,8 @@ namespace Apache.Druid.Querying
                 [nameof(rightPrefix)] = rightPrefix,
                 [nameof(condition)] = condition,
                 [nameof(joinType)] = joinType
-            });
+            },
+            ColumnNameMappings.Combine(right.ColumnNameMappings));
 
         internal string? JsonRepresentationDebugView => GetJsonRepresentation()?.ToJsonString(options.Serializer);
     }

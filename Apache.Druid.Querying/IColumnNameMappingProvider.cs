@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 
@@ -11,46 +12,47 @@ namespace Apache.Druid.Querying
     {
         IReadOnlyList<PropertyColumnNameMapping> Get<TModel>();
 
-        internal sealed class Implementation<TSource> : IColumnNameMappingProvider
+        internal sealed class ImmutableBuilder : IColumnNameMappingProvider
         {
-            public static readonly Implementation<TSource> Singleton = new();
+            public static ImmutableBuilder Create<TFirstModel>() 
+                => new ImmutableBuilder().Add<TFirstModel>();
 
-            private static readonly IReadOnlyDictionary<string, string> mappings = GetMappings();
+            public ImmutableDictionary<Type, ImmutableArray<PropertyColumnNameMapping>> All { get; private set; }
 
-            public IReadOnlyList<PropertyColumnNameMapping> Get<TModel>() => throw new NotImplementedException();
+            public ImmutableBuilder(ImmutableDictionary<Type, ImmutableArray<PropertyColumnNameMapping>>? all = null)
+                => All = all ?? ImmutableDictionary<Type, ImmutableArray<PropertyColumnNameMapping>>.Empty;
 
-            public static Dictionary<string, string> GetMappings()
+            public IReadOnlyList<PropertyColumnNameMapping> Get<TModel>() => All.GetValueOrDefault(typeof(TModel));
+
+            public ImmutableBuilder Add<TModel>()
             {
-                var type = typeof(TSource);
-                var convention = type.GetCustomAttribute<DataSourceColumnNamingConventionAttribute>()?.Convention
+                var type = typeof(TModel);
+                var convention = type.GetCustomAttribute<DataSourceColumnNamingConventionAttribute>()
+                    ?.Convention
                     ?? IDataSourceColumnNamingConvention.None.Singleton;
                 var properties = type.GetProperties();
-                var result = properties.ToDictionary(
-                    property => property.Name,
-                    property => property.GetCustomAttribute<DataSourceColumnAttribute>(true)?.Name ?? convention.Apply(property.Name));
-                var hasTimeColumn = result.Values.Any(name => name == DataSourceTimeColumnAttribute.Name);
-                if (!hasTimeColumn)
-                {
-                    var timeProperties = properties
-                        .Where(property =>
-                            property.PropertyType == typeof(DateTime) ||
-                            property.PropertyType == typeof(DateTimeOffset))
-                        .ToArray();
-                    var timeColumnName = timeProperties.Length is 1 ?
-                        timeProperties[0].Name :
-                        throw new InvalidOperationException(
-                            $"Could not match any property of {type} with column {DataSourceTimeColumnAttribute.Name}. " +
-                            $"A property is matched with column {DataSourceTimeColumnAttribute.Name} when either:" +
-                            $"{Environment.NewLine}- it's decorated with {nameof(Attribute)} {typeof(DataSourceTimeColumnAttribute)}" +
-                            $"{Environment.NewLine}- it's the only property of type {typeof(DateTime)} or {typeof(DateTimeOffset)}.");
-                    result.Remove(timeColumnName);
-                    result.Add(timeColumnName, DataSourceTimeColumnAttribute.Name);
-                }
-
-                return result;
+                var result = properties
+                    .Select(property => new PropertyColumnNameMapping(
+                        property.Name,
+                        property.GetCustomAttribute<DataSourceColumnAttribute>(true)?.Name ?? convention.Apply(property.Name)))
+                    .ToImmutableArray();
+                return new(All = All.Add(type, result));
             }
 
-            public string Get(string memberName) => mappings.TryGetValue(memberName, out var result) ? result : memberName;
+            public ImmutableBuilder Update<TModel>(Func<ImmutableArray<PropertyColumnNameMapping>, ImmutableArray<PropertyColumnNameMapping>> update)
+            {
+                var type = typeof(TModel);
+                if (All.TryGetValue(type, out var existing))
+                {
+                    var result = All.Remove(type);
+                    return new(All = result.Add(type, update(existing)));
+                }
+
+                throw new InvalidOperationException($"No mapping for type {type} exist.");
+            }
+
+            public ImmutableBuilder Combine(ImmutableBuilder other)
+                => new(All.AddRange(other.All));
         }
     }
 }
