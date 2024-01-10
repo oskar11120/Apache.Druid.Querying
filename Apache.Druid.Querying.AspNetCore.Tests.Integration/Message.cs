@@ -1,10 +1,19 @@
 ﻿namespace Apache.Druid.Querying.AspNetCore.Tests.Integration;
 
 [DataSourceColumnNamingConvention(DataSourceColumnNamingConventionType.CamelCase)]
-internal record Message(
+internal record VariableMessage(
     Guid TenantId,
-    [property: DataSourceColumnAttribute("variable")] string VariableName,
+    [property: DataSourceColumn("variable")] string VariableName,
     Guid ObjectId,
     double Value,
-    [property: DataSourceTimeColumnAttribute] DateTimeOffset Timestamp,
+    [property: DataSourceTimeColumn] DateTimeOffset Timestamp,
+    DateTimeOffset ProcessedTimestamp);
+
+[DataSourceColumnNamingConvention(DataSourceColumnNamingConventionType.CamelCase)]
+internal record EventMessage(
+    Guid TenantId,
+    [property: DataSourceColumn("event")] string EventName,
+    Guid ObjectId,
+    double Value,
+    [property: DataSourceTimeColumn] DateTimeOffset Timestamp,
     DateTimeOffset ProcessedTimestamp);

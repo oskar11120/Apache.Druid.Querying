@@ -46,8 +46,7 @@ namespace Apache.Druid.Querying
     public readonly record struct InnerJoinResult<TLeft, TRight>(TLeft Left, TRight Right);
     public readonly record struct LeftJoinResult<TLeft, TRight>(TLeft Left, TRight? Right);
 
-    // TODO Seal
-    public class DataSource<TSource>
+    public sealed class DataSource<TSource>
     {
         private static readonly StringWithQualityHeaderValue gzip = new("gzip");
         private static readonly IArgumentColumnNameProvider columnNames = IArgumentColumnNameProvider.Implementation<TSource>.Singleton;

@@ -1,6 +1,5 @@
 ﻿using Apache.Druid.Querying.Internal;
 using System;
-using System.Threading;
 
 namespace Apache.Druid.Querying
 {

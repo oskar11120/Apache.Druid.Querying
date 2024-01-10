@@ -2,6 +2,7 @@
 {
     internal sealed class EcDruid : DataSourceProvider
     {
-        public DataSource<Message> Variables => Table<Message>("data-variables");
+        public DataSource<VariableMessage> Variables => Table<VariableMessage>("data-variables");
+        public DataSource<EventMessage> Events => Table<EventMessage>("data-variables");
     }
 }
