@@ -10,51 +10,86 @@ namespace Apache.Druid.Querying.Internal
 {
     public static class IQueryWithMappedResult<TSource>
     {
-        public interface WithTimestampArray<TValue, TValueMapper> :
+        public class WithTimestamp<TValue, TValueMapper>
+            : QueryResultMapper.TwoPropertyObject<DateTimeOffset, TValue, TValueMapper, WithTimestamp<TValue>>
+            where TValueMapper : IQueryResultMapper<TValue>, new()
+        {
+            public WithTimestamp() : this("result")
+            {
+            }
+
+            public WithTimestamp(string valuePropertyNameBase)
+                : base(nameof(WithTimestamp<TValue>.Timestamp), valuePropertyNameBase, static (t, value) => new(t, value))
+            {
+            }
+        }
+
+        public class WithTimestamp_<TValue> : WithTimestamp<TValue, QueryResultMapper.Element<TValue>>
+        {
+            public WithTimestamp_(string valuePropertyNameBase) : base(valuePropertyNameBase)
+            {
+            }
+        }
+
+        public sealed class GroupByResult<TValue> : WithTimestamp_<TValue>
+        {
+            public GroupByResult() : base("event")
+            {
+            }
+        }
+
+        public sealed class ScanResult<TValue, TValueMapper>
+            : QueryResultMapper.TwoPropertyObject<string?, TValue, TValueMapper, ScanResult<TValue>>
+            where TValueMapper : IQueryResultMapper<TValue>, new()
+        {
+            public ScanResult() : base(nameof(ScanResult<TValue>.SegmentId), "events", static (id, value) => new(id, value))
+            {
+            }
+        }
+
+        public interface ArrayOfObjectsWithTimestamp<TValue, TValueMapper> :
             IQueryWithSource<TSource>.AndMappedResult<WithTimestamp<TValue>,
-            QueryResultMapper.Array<WithTimestamp<TValue>, QueryResultMapper.WithTimestamp<TValue, TValueMapper>>>
+            QueryResultMapper.Array<WithTimestamp<TValue>, WithTimestamp<TValue, TValueMapper>>>
             where TValueMapper : IQueryResultMapper<TValue>, new()
         {
         }
 
-        public interface GroupByResultArray<TValue, TValueMapper> :
+        public interface ArrayOfObjectsWithTimestamp<TValue> :
             IQueryWithSource<TSource>.AndMappedResult<WithTimestamp<TValue>,
-            QueryResultMapper.Array<WithTimestamp<TValue>, QueryResultMapper.GroupByResult<TValue, TValueMapper>>>
-            where TValueMapper : IQueryResultMapper<TValue>, new()
+            QueryResultMapper.Array<WithTimestamp<TValue>>>
         {
         }
 
-        public interface Aggregations_PostAggregations_<TAggregations, TPostAggregations> : WithTimestampArray<
-            Aggregations_PostAggregations<TAggregations, TPostAggregations>,
-            QueryResultMapper.Aggregations_PostAggregations_<TAggregations, TPostAggregations>>
+        public interface ArrayOfGroupByResults<TValue> :
+            IQueryWithSource<TSource>.AndMappedResult<WithTimestamp<TValue>,
+            QueryResultMapper.Array<WithTimestamp<TValue>, GroupByResult<TValue>>>
         {
         }
 
-        public interface Dimension_Aggregations_<TDimension, TAggregations> : WithTimestampArray<
+        public interface Aggregations_PostAggregations_<TAggregations, TPostAggregations> : ArrayOfObjectsWithTimestamp<
+            Aggregations_PostAggregations<TAggregations, TPostAggregations>>
+        {
+        }
+
+        public interface Dimension_Aggregations_<TDimension, TAggregations> : ArrayOfObjectsWithTimestamp<
             Dimension_Aggregations<TDimension, TAggregations>,
-            QueryResultMapper.Array<
-                Dimension_Aggregations<TDimension, TAggregations>,
-                QueryResultMapper.Dimension_Aggregations_<TDimension, TAggregations>>>
+            QueryResultMapper.Array<Dimension_Aggregations<TDimension, TAggregations>>>
         {
         }
 
-        public interface Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations> : WithTimestampArray<
+        public interface Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations> : ArrayOfObjectsWithTimestamp<
             Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>,
-            QueryResultMapper.Array<
-                Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>,
-                QueryResultMapper.Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations>>>
+            QueryResultMapper.Array<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>>
         {
         }
 
-        public interface Dimensions_Aggregations_<TDimensions, TAggregations> : GroupByResultArray<
-            Dimensions_Aggregations<TDimensions, TAggregations>,
-            QueryResultMapper.Dimensions_Aggregations_<TDimensions, TAggregations>>
+        public interface Dimensions_Aggregations_<TDimensions, TAggregations> : ArrayOfGroupByResults<
+            Dimensions_Aggregations<TDimensions, TAggregations>>
         {
         }
 
-        public interface Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations> : GroupByResultArray<
-            Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>,
-             QueryResultMapper.Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>>
+        public interface Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations> : ArrayOfGroupByResults<
+            Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>
         {
         }
 
@@ -64,11 +99,9 @@ namespace Apache.Druid.Querying.Internal
                 ScanResult<TColumns>,
                 QueryResultMapper.Array<
                     ScanResult<TColumns>,
-                    QueryResultMapper.ScanResult<
+                    ScanResult<
                         TColumns,
-                        QueryResultMapper.Array<
-                            TColumns,
-                            QueryResultMapper.SourceColumns<TColumns>>>>>
+                        QueryResultMapper.Array<TColumns>>>>
         {
         }
     }
@@ -228,8 +261,16 @@ namespace Apache.Druid.Querying.Internal
 
                 public WithColumns()
                 {
-                    Self.AddOrUpdateSection("columns", (options, columnNames)
-                        => JsonSerializer.SerializeToNode(propertyNames.Select(columnNames.Get), options)!);
+                    Self.AddOrUpdateSection("columns", (options, columnNameMappings) => 
+                    {
+                        var mappings = columnNameMappings.Get<TArguments>();
+                        var columnNames = propertyNames;
+                        string GetColumnName(string propertyName) => mappings
+                            .FirstOrDefault(mapping => mapping.Property == propertyName)
+                            ?.ColumnName
+                            ?? propertyName;
+                        return JsonSerializer.SerializeToNode( propertyNames.Select(GetColumnName), options)!;
+                    });
                 }
             }
         }

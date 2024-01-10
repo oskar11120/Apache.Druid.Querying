@@ -14,9 +14,9 @@ namespace Apache.Druid.Querying
 
         public abstract class UsingArgumentColumnNames
         {
-            protected readonly IArgumentColumnNameProvider columnNames;
+            protected readonly IColumnNameMappingProvider columnNames;
 
-            protected UsingArgumentColumnNames(IArgumentColumnNameProvider columnNames)
+            protected UsingArgumentColumnNames(IColumnNameMappingProvider columnNames)
             {
                 this.columnNames = columnNames;
             }
@@ -37,7 +37,7 @@ namespace Apache.Druid.Querying
 
         public sealed class Filter : UsingArgumentColumnNames
         {
-            public Filter(IArgumentColumnNameProvider columnNames) : base(columnNames)
+            public Filter(IColumnNameMappingProvider columnNames) : base(columnNames)
             {
             }
 
@@ -74,7 +74,7 @@ namespace Apache.Druid.Querying
 
         public class MetricSpec : UsingArgumentColumnNames
         {
-            public MetricSpec(IArgumentColumnNameProvider columnNames) : base(columnNames)
+            public MetricSpec(IColumnNameMappingProvider columnNames) : base(columnNames)
             {
             }
 
@@ -96,7 +96,7 @@ namespace Apache.Druid.Querying
 
         public class OrderByColumnSpec : UsingArgumentColumnNames
         {
-            public OrderByColumnSpec(IArgumentColumnNameProvider columnNames) : base(columnNames)
+            public OrderByColumnSpec(IColumnNameMappingProvider columnNames) : base(columnNames)
             {
             }
 
@@ -109,7 +109,7 @@ namespace Apache.Druid.Querying
 
         public class Having : UsingArgumentColumnNames
         {
-            public Having(IArgumentColumnNameProvider columnNames) : base(columnNames)
+            public Having(IColumnNameMappingProvider columnNames) : base(columnNames)
             {
             }
 

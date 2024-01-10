@@ -13,7 +13,7 @@ namespace Apache.Druid.Querying.Internal.Sections
             IReadOnlyList<ElementFactoryCall> calls,
             SectionAtomicity atomicity,
             JsonSerializerOptions serializerOptions,
-            IArgumentColumnNameProvider columnNames,
+            IColumnNameMappingProvider columnNames,
             Options options)
         {
             void MapCallParam(ElementFactoryCall.Parameter.Any param, JsonObject result)

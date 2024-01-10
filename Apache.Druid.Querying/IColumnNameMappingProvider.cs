@@ -5,15 +5,19 @@ using System.Reflection;
 
 namespace Apache.Druid.Querying
 {
-    public interface IArgumentColumnNameProvider
-    {
-        public string Get(string memberName);
+    public sealed record PropertyColumnNameMapping(string Property, string ColumnName);
 
-        internal sealed class Implementation<TSource> : IArgumentColumnNameProvider
+    public interface IColumnNameMappingProvider
+    {
+        IReadOnlyList<PropertyColumnNameMapping> Get<TModel>();
+
+        internal sealed class Implementation<TSource> : IColumnNameMappingProvider
         {
             public static readonly Implementation<TSource> Singleton = new();
 
             private static readonly IReadOnlyDictionary<string, string> mappings = GetMappings();
+
+            public IReadOnlyList<PropertyColumnNameMapping> Get<TModel>() => throw new NotImplementedException();
 
             public static Dictionary<string, string> GetMappings()
             {

@@ -21,7 +21,7 @@ namespace Apache.Druid.Querying
         JsonStreamReader Json,
         JsonSerializerOptions Options,
         SectionAtomicity.IProvider Atomicity,
-        IArgumentColumnNameProvider ColumnNames);
+        IColumnNameMappingProvider ColumnNameMappings);
 
     public interface IQueryResultMapper<TResult>
     {
@@ -49,7 +49,7 @@ namespace Apache.Druid.Querying
     public sealed class DataSource<TSource>
     {
         private static readonly StringWithQualityHeaderValue gzip = new("gzip");
-        private static readonly IArgumentColumnNameProvider columnNames = IArgumentColumnNameProvider.Implementation<TSource>.Singleton;
+        private static readonly IColumnNameMappingProvider columnNames = IColumnNameMappingProvider.Implementation<TSource>.Singleton;
 
         private readonly Func<DataSourceOptions> getOptions;
         private JsonSerializerOptions? serializerOptionsWithFormatting;

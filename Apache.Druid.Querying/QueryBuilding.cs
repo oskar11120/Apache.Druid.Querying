@@ -65,7 +65,7 @@ namespace Apache.Druid.Querying
         Strlen
     }
 
-    public delegate JsonNode QuerySectionValueFactory(JsonSerializerOptions serializerOptions, IArgumentColumnNameProvider columnNames);
+    public delegate JsonNode QuerySectionValueFactory(JsonSerializerOptions serializerOptions, IColumnNameMappingProvider columnNames);
 
     public interface IQuery
     {
@@ -78,7 +78,7 @@ namespace Apache.Druid.Querying
             State.Add(key, valueFactory);
         }
 
-        public void AddOrUpdateSection<TValue>(string key, Func<IArgumentColumnNameProvider, TValue> getValue, bool convertKeyToCamelCase = true)
+        public void AddOrUpdateSection<TValue>(string key, Func<IColumnNameMappingProvider, TValue> getValue, bool convertKeyToCamelCase = true)
             => AddOrUpdateSection(key, (options, columnNames) => JsonSerializer.SerializeToNode(getValue(columnNames), options)!, convertKeyToCamelCase);
 
         public void AddOrUpdateSection<TValue>(string key, TValue value, bool convertKeyToCamelCase = true)
@@ -107,7 +107,7 @@ namespace Apache.Druid.Querying
             return Unwrapped;
         }
 
-        public new TSelf AddOrUpdateSection<TValue>(string key, Func<IArgumentColumnNameProvider, TValue> getValue, bool convertKeyToCamelCase = true)
+        public new TSelf AddOrUpdateSection<TValue>(string key, Func<IColumnNameMappingProvider, TValue> getValue, bool convertKeyToCamelCase = true)
         {
             Base.AddOrUpdateSection(key, getValue, convertKeyToCamelCase);
             return Unwrapped;

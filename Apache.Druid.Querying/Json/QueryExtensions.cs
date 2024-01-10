@@ -10,10 +10,10 @@ namespace Apache.Druid.Querying.Json
         public static JsonObject MapToJson<TSource>(
             this IQueryWithSource<TSource> query,
             JsonSerializerOptions? serializerOptions = null,
-            IArgumentColumnNameProvider? columNames = null)
+            IColumnNameMappingProvider? columNames = null)
         {
             serializerOptions ??= @default;
-            columNames ??= IArgumentColumnNameProvider.Implementation<TSource>.Singleton;
+            columNames ??= IColumnNameMappingProvider.Implementation<TSource>.Singleton;
             var result = new JsonObject();
             var state = query.GetState();
             foreach (var (key, factory) in state)

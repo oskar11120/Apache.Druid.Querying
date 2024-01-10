@@ -7,20 +7,129 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Apache.Druid.Querying.Internal
 {
+    internal static class QueryResultElement
+    {
+        public interface IDeserializer<TElement>
+        {
+            public TElement Deserialize(ref DeserializerContext context);
+        }
+
+        public ref struct DeserializerContext
+        {
+            [ThreadStatic]
+            private static readonly Dictionary<Type, object?> deserializers = new();
+
+            private static readonly byte[] comaBytes = Encoding.UTF8.GetBytes(",");
+            private readonly int spanningBytes;
+            private readonly int trimBytes;
+            private long deserializeConsumedBytes = 0;
+            private readonly QueryResultMapperContext mapperContext;
+
+            public DeserializerContext(QueryResultMapperContext mapperContext, int spanningBytes)
+            {
+                this.mapperContext = mapperContext;
+                this.spanningBytes = spanningBytes;
+
+                var startWithComa = mapperContext.Json.UnreadPartOfBufferStartsWith(comaBytes);
+                trimBytes = startWithComa ? comaBytes.Length : 0;
+            }
+
+            private static Utf8JsonReader WrapInReader(ReadOnlySpan<byte> slice)
+                => new(slice, false, default);
+
+            public TElementOrElementPart Deserialize<TElementOrElementPart>(bool checkForAtomicity = true)
+            {
+                if (GetDeserializer<TElementOrElementPart>() is IDeserializer<TElementOrElementPart> existing)
+                    return existing.Deserialize(ref this);
+
+                if (mapperContext.ColumnNameMappings.Get<TElementOrElementPart>() is var mappings and { Count: > 0 })
+                    return DeserializeApplyMappings<TElementOrElementPart>(mappings);
+
+                var (json, options, atomicity, _) = mapperContext;
+                var slice = json.GetSliceOfBuffer(spanningBytes, trimBytes);
+                deserializeConsumedBytes = slice.Length;
+                SectionAtomicity atomicity_;
+                if (checkForAtomicity && (atomicity_ = atomicity.Get<TElementOrElementPart>()).Atomic)
+                {
+                    var reader = WrapInReader(slice);
+                    JsonStreamReader.ReadToProperty(ref reader, atomicity_.ColumnNameIfAtomicUtf8);
+                    var start = (int)reader.BytesConsumed;
+                    var propertyDepth = reader.CurrentDepth;
+                    do
+                        reader.Read();
+                    while (reader.CurrentDepth < propertyDepth);
+                    slice = slice[start..(int)reader.BytesConsumed];
+                }
+
+                var result = JsonSerializer.Deserialize<TElementOrElementPart>(slice, options)!;
+                return result;
+            }
+
+            public readonly void UpdateState()
+            {
+                var json = mapperContext.Json;
+                var reader = json.GetReader();
+                while (reader.BytesConsumed < deserializeConsumedBytes + trimBytes)
+                    reader.Read();
+                json.UpdateState(reader);
+            }
+
+            private T DeserializeApplyMappings<T>(IReadOnlyList<PropertyColumnNameMapping> mappings)
+            {
+                var json = Deserialize<System.Text.Json.Nodes.JsonObject>(false);
+                foreach (var (property, column) in mappings)
+                {
+                    if (json.Remove(column, out var value))
+                    {
+                        if (column == "__time")
+                        {
+                            var unixMs = (long)value!;
+                            var t = DateTimeOffset.FromUnixTimeMilliseconds(unixMs);
+                            json[property] = t;
+                        }
+                        else
+                            json[property] = value;
+                    }
+                }
+
+                return json.Deserialize<T>(mapperContext.Options)!;
+            }
+
+            private static IDeserializer<TElement>? GetDeserializer<TElement>()
+            {
+                var elementType = typeof(TElement);
+                if (deserializers.TryGetValue(elementType, out var deserializer))
+                {
+                    return deserializer as IDeserializer<TElement>;
+                }
+
+                var @new = elementType
+                    .GetNestedTypes()
+                    .SingleOrDefault(type => type == elementType)
+                    is Type existing ?
+                    Activator.CreateInstance(existing) as IDeserializer<TElement>
+                    : null;
+                deserializers.Add(elementType, @new);
+                return @new;
+            }
+        }
+    }
+
     public static class QueryResultMapper
     {
-        public abstract class WithTwoProperties<TFirstNonMappable, TSecondMappable, TScondMapper, TResult> :
+        public abstract class TwoPropertyObject<TFirst, TSecond, TSecondMapper, TResult> :
             IQueryResultMapper<TResult>
-            where TScondMapper : IQueryResultMapper<TSecondMappable>, new()
+            where TSecondMapper : IQueryResultMapper<TSecond>, new()
         {
-            private static readonly IQueryResultMapper<TSecondMappable> mapper = new TScondMapper();
+            private static readonly IQueryResultMapper<TSecond> mapper = new TSecondMapper();
             private readonly (byte[] First, byte[] Second) names;
-            private readonly Func<TFirstNonMappable, TSecondMappable, TResult> create;
+            private readonly Func<TFirst, TSecond, TResult> create;
 
-            public WithTwoProperties(string firstName, string secondName, Func<TFirstNonMappable, TSecondMappable, TResult> create)
+            public TwoPropertyObject(string firstName, string secondName, Func<TFirst, TSecond, TResult> create)
             {
                 names = (ToJson(firstName), ToJson(secondName));
                 this.create = create;
@@ -30,7 +139,7 @@ namespace Apache.Druid.Querying.Internal
                 QueryResultMapperContext context, [EnumeratorCancellation] CancellationToken token)
             {
                 var json = context.Json;
-                TFirstNonMappable first;
+                TFirst first;
                 while (!json.ReadToPropertyValue(names.First, out first))
                     await json.AdvanceAsync(token);
                 while (!json.ReadToProperty(names.Second))
@@ -48,7 +157,7 @@ namespace Apache.Druid.Querying.Internal
                 Encoding.UTF8.GetBytes(propertyName.ToCamelCase());
         }
 
-        public sealed class Array<TElement, TElementMapper> :
+        public class Array<TElement, TElementMapper> :
             IQueryResultMapper<TElement>
             where TElementMapper : IQueryResultMapper<TElement>, new()
         {
@@ -96,8 +205,20 @@ namespace Apache.Druid.Querying.Internal
             }
         }
 
-        // "Atoms" are objects small enough that whole their data can be fit into buffer. 
-        public abstract class Atom<TSelf> : IQueryResultMapper<TSelf>
+        public abstract class TwoPropertyObject<TFirst, TSecond, TResult>
+            : TwoPropertyObject<TFirst, TSecond, Element<TSecond>, TResult>
+        {
+            protected TwoPropertyObject(string firstName, string secondName, Func<TFirst, TSecond, TResult> create) : base(firstName, secondName, create)
+            {
+            }
+        }
+
+        public sealed class Array<TElement> : Array<TElement, Element<TElement>>
+        {
+        }
+
+        // "Element" are objects small enough that whole their data can be fit into buffer. 
+        public sealed class Element<TSelf> : IQueryResultMapper<TSelf>
         {
             async IAsyncEnumerable<TSelf> IQueryResultMapper<TSelf>.Map(
                 QueryResultMapperContext context, [EnumeratorCancellation] CancellationToken token)
@@ -106,16 +227,14 @@ namespace Apache.Druid.Querying.Internal
                 var bytes = await EnsureWholeInBufferAndGetSpanningBytesAsync(json, token);
                 TSelf Map_()
                 {
-                    var context_ = new Context(context, bytes);
-                    var result = Map(ref context_);
+                    var context_ = new QueryResultElement.DeserializerContext(context, bytes);
+                    var result = context_.Deserialize<TSelf>(checkForAtomicity: false);
                     context_.UpdateState();
                     return result;
                 }
 
                 yield return Map_();
             }
-
-            private protected abstract TSelf Map(ref Context context);
 
             private static async ValueTask<int> EnsureWholeInBufferAndGetSpanningBytesAsync(JsonStreamReader json, CancellationToken token)
             {
@@ -124,169 +243,6 @@ namespace Apache.Druid.Querying.Internal
                     await json.AdvanceAsync(token);
                 return (int)bytesConsumed;
             }
-
-            protected private ref struct Context
-            {
-                private static readonly byte[] comaBytes = Encoding.UTF8.GetBytes(",");
-                private readonly int spanningBytes;
-                private readonly int trimBytes;
-                private long deserializeConsumedBytes = 0;
-                public readonly QueryResultMapperContext MapperContext;
-
-                public Context(QueryResultMapperContext mapperContext, int spanningBytes)
-                {
-                    MapperContext = mapperContext;
-                    this.spanningBytes = spanningBytes;
-
-                    var startWithComa = mapperContext.Json.UnreadPartOfBufferStartsWith(comaBytes);
-                    trimBytes = startWithComa ? comaBytes.Length : 0;
-                }
-
-                private static Utf8JsonReader WrapInReader(ReadOnlySpan<byte> slice)
-                    => new(slice, false, default);
-
-                public TObject Deserialize<TObject>(bool checkForAtomicity = true)
-                {
-                    var (json, options, atomicity, _) = MapperContext;
-                    var slice = json.GetSliceOfBuffer(spanningBytes, trimBytes);
-                    deserializeConsumedBytes = slice.Length;
-                    SectionAtomicity atomicity_;
-                    if (checkForAtomicity && (atomicity_ = atomicity.Get<TObject>()).Atomic)
-                    {
-                        var reader = WrapInReader(slice);
-                        JsonStreamReader.ReadToProperty(ref reader, atomicity_.ColumnNameIfAtomicUtf8);
-                        var start = (int)reader.BytesConsumed;
-                        var propertyDepth = reader.CurrentDepth;
-                        do
-                            reader.Read();
-                        while (reader.CurrentDepth < propertyDepth);
-                        slice = slice[start..(int)reader.BytesConsumed];
-                    }
-
-                    var result = JsonSerializer.Deserialize<TObject>(slice, options)!;
-                    return result;
-                }
-
-                public readonly void UpdateState()
-                {
-                    var json = MapperContext.Json;
-                    var reader = json.GetReader();
-                    while (reader.BytesConsumed < deserializeConsumedBytes + trimBytes)
-                        reader.Read();
-                    json.UpdateState(reader);
-                }
-            }
-        }
-
-        public class WithTimestamp<TValue, TValueMapper>
-            : WithTwoProperties<DateTimeOffset, TValue, TValueMapper, WithTimestamp<TValue>>
-            where TValueMapper : IQueryResultMapper<TValue>, new()
-        {
-            public WithTimestamp() : this("result")
-            {
-            }
-
-            public WithTimestamp(string valuePropertyNameBase)
-                : base(nameof(WithTimestamp<TValue>.Timestamp), valuePropertyNameBase, static (t, value) => new(t, value))
-            {
-            }
-        }
-
-        public sealed class GroupByResult<TValue, TValueMapper>
-            : WithTimestamp<TValue, TValueMapper>
-            where TValueMapper : IQueryResultMapper<TValue>, new()
-        {
-            public GroupByResult() : base("event")
-            {
-            }
-        }
-
-        public sealed class ScanResult<TValue, TValueMapper>
-            : WithTwoProperties<string?, TValue, TValueMapper, ScanResult<TValue>>
-            where TValueMapper : IQueryResultMapper<TValue>, new()
-        {
-            public ScanResult() : base(nameof(ScanResult<TValue>.SegmentId), "events", static (id, value) => new(id, value))
-            {
-            }
-        }
-
-        public sealed class Aggregations_PostAggregations_<TAggregations, TPostAggregations>
-            : Atom<Aggregations_PostAggregations<TAggregations, TPostAggregations>>
-        {
-            private protected override Aggregations_PostAggregations<TAggregations, TPostAggregations> Map(ref Context context)
-                => new(
-                    context.Deserialize<TAggregations>(),
-                    context.Deserialize<TPostAggregations>());
-        }
-
-        public sealed class Dimension_Aggregations_<TDimension, TAggregations> :
-            Atom<Dimension_Aggregations<TDimension, TAggregations>>
-        {
-            private protected override Dimension_Aggregations<TDimension, TAggregations> Map(ref Context context)
-                => new(
-                    context.Deserialize<TDimension>(),
-                    context.Deserialize<TAggregations>());
-        }
-
-        public sealed class Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations>
-             : Atom<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>
-        {
-            private protected override Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations> Map(ref Context context)
-                => new(
-                    context.Deserialize<TDimension>(),
-                    context.Deserialize<TAggregations>(),
-                    context.Deserialize<TPostAggregations>());
-        }
-
-        public sealed class Dimensions_Aggregations_<TDimensions, TAggregations>
-            : Atom<Dimensions_Aggregations<TDimensions, TAggregations>>
-        {
-            private protected override Dimensions_Aggregations<TDimensions, TAggregations> Map(ref Context context)
-                => new(
-                    context.Deserialize<TDimensions>(),
-                    context.Deserialize<TAggregations>());
-        }
-
-        public sealed class Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>
-             : Atom<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>
-        {
-            private protected override Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations> Map(ref Context context)
-                => new(
-                    context.Deserialize<TDimensions>(),
-                    context.Deserialize<TAggregations>(),
-                    context.Deserialize<TPostAggregations>());
-        }
-
-        public sealed class SourceColumns<TSelf> : Atom<TSelf>
-        {
-            private static readonly string[] propertyNames = typeof(TSelf)
-                .GetProperties()
-                .Select(property => property.Name)
-                .ToArray();
-
-            // TODO Optimize.
-            private protected override TSelf Map(ref Context context)
-            {
-                var json = context.Deserialize<System.Text.Json.Nodes.JsonObject>(false);
-                foreach (var name in propertyNames)
-                {
-                    var columnName = context.MapperContext.ColumnNames.Get(name);
-                    if (columnName != name && json.Remove(columnName, out var value))
-                    {
-                        if (columnName == "__time")
-                        {
-                            var unixMs = (long)value!;
-                            var t = DateTimeOffset.FromUnixTimeMilliseconds(unixMs);
-                            json[name] = t;
-                        }
-                        else
-                            json[name] = value;
-                    }
-                }
-
-                return json.Deserialize<TSelf>(context.MapperContext.Options)!;
-            }
         }
     }
-
 }
