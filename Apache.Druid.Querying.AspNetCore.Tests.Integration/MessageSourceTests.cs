@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using Apache.Druid.Querying.Json;
+using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 using static Apache.Druid.Querying.AspNetCore.Tests.Integration.ServiceProvider;
@@ -46,10 +47,10 @@ internal class MessageSourceTests
 
         var query = new Query<InlineData>
             .Scan()
-            .Filter(type => type.Range(
+            .Interval(new(default, DateTimeOffset.MaxValue))
+            .Filter(type => type.In(
                 data => data.Value,
-                upper: 2,
-                upperOpen: true));
+                new[] { 0, 1 }));
         var inline = Druid
             .Inline(new InlineData[]
             {
@@ -158,5 +159,5 @@ internal class MessageSourceTests
     public sealed record Aggregations(double Sum, int Count, string Variable, double? FirstValue);
     public sealed record PostAggregations(double Average);
     public sealed record GroupByDimensions(Guid ObjectId, string VariableName);
-    public sealed record InlineData(int Value, string MessageOfTheDay);
+    public sealed record InlineData(int Value, [property: DataSourceColumn("MessageOfTheNight")] string MessageOfTheDay);
 }

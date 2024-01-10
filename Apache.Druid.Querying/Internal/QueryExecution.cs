@@ -1,7 +1,7 @@
 ﻿using Apache.Druid.Querying.Internal.Sections;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
@@ -107,19 +107,25 @@ namespace Apache.Druid.Querying.Internal
                     return deserializer as IDeserializer<TElement>;
                 }
 
-                var @new = elementType
-                    .GetNestedTypes()
-                    .SingleOrDefault(type => type == elementType)
-                    is Type existing ?
-                    Activator.CreateInstance(existing) as IDeserializer<TElement>
-                    : null;
-                deserializers.Add(elementType, @new);
-                return @new;
+                var interfaceType = typeof(IDeserializer<TElement>);
+                var interfaceOpenType = interfaceType.GetGenericTypeDefinition();
+                var nestedTypes = elementType.GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic);
+                var some = Array.Find(nestedTypes, type => type.Name == "Deserializer");
+                var result = some switch
+                {
+                    { ContainsGenericParameters: true } => Activator.CreateInstance(some.MakeGenericType(elementType.GetGenericArguments())),
+                    { ContainsGenericParameters: false } => Activator.CreateInstance(some),
+                    _ => null
+                }
+                as IDeserializer<TElement>;
+
+                deserializers.Add(elementType, result);
+                return result;
             }
         }
     }
 
-    public static class QueryResultMapper
+    public static partial class QueryResultMapper
     {
         public abstract class TwoPropertyObject<TFirst, TSecond, TSecondMapper, TResult> :
             IQueryResultMapper<TResult>
@@ -205,18 +211,6 @@ namespace Apache.Druid.Querying.Internal
             }
         }
 
-        public abstract class TwoPropertyObject<TFirst, TSecond, TResult>
-            : TwoPropertyObject<TFirst, TSecond, Element<TSecond>, TResult>
-        {
-            protected TwoPropertyObject(string firstName, string secondName, Func<TFirst, TSecond, TResult> create) : base(firstName, secondName, create)
-            {
-            }
-        }
-
-        public sealed class Array<TElement> : Array<TElement, Element<TElement>>
-        {
-        }
-
         // "Element" are objects small enough that whole their data can be fit into buffer. 
         public sealed class Element<TSelf> : IQueryResultMapper<TSelf>
         {
@@ -228,7 +222,7 @@ namespace Apache.Druid.Querying.Internal
                 TSelf Map_()
                 {
                     var context_ = new QueryResultElement.DeserializerContext(context, bytes);
-                    var result = context_.Deserialize<TSelf>(checkForAtomicity: false);
+                    var result = context_.Deserialize<TSelf>(checkForAtomicity: false); // TODO verify atomicity
                     context_.UpdateState();
                     return result;
                 }

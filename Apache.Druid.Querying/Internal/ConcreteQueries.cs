@@ -8,10 +8,10 @@ using System.Text.Json;
 
 namespace Apache.Druid.Querying.Internal
 {
-    public static class IQueryWithMappedResult<TSource>
+    public static partial class QueryResultMapper
     {
         public class WithTimestamp<TValue, TValueMapper>
-            : QueryResultMapper.TwoPropertyObject<DateTimeOffset, TValue, TValueMapper, WithTimestamp<TValue>>
+            : TwoPropertyObject<DateTimeOffset, TValue, TValueMapper, WithTimestamp<TValue>>
             where TValueMapper : IQueryResultMapper<TValue>, new()
         {
             public WithTimestamp() : this("result")
@@ -24,14 +24,7 @@ namespace Apache.Druid.Querying.Internal
             }
         }
 
-        public class WithTimestamp_<TValue> : WithTimestamp<TValue, QueryResultMapper.Element<TValue>>
-        {
-            public WithTimestamp_(string valuePropertyNameBase) : base(valuePropertyNameBase)
-            {
-            }
-        }
-
-        public sealed class GroupByResult<TValue> : WithTimestamp_<TValue>
+        public sealed class GroupByResult<TValue> : WithTimestamp<TValue, QueryResultMapper.Element<TValue>>
         {
             public GroupByResult() : base("event")
             {
@@ -39,30 +32,35 @@ namespace Apache.Druid.Querying.Internal
         }
 
         public sealed class ScanResult<TValue, TValueMapper>
-            : QueryResultMapper.TwoPropertyObject<string?, TValue, TValueMapper, ScanResult<TValue>>
+            : TwoPropertyObject<string?, TValue, TValueMapper, ScanResult<TValue>>
             where TValueMapper : IQueryResultMapper<TValue>, new()
         {
             public ScanResult() : base(nameof(ScanResult<TValue>.SegmentId), "events", static (id, value) => new(id, value))
             {
             }
         }
+    }
 
+    public static class IQueryWithMappedResult<TSource>
+    {
         public interface ArrayOfObjectsWithTimestamp<TValue, TValueMapper> :
             IQueryWithSource<TSource>.AndMappedResult<WithTimestamp<TValue>,
-            QueryResultMapper.Array<WithTimestamp<TValue>, WithTimestamp<TValue, TValueMapper>>>
+            QueryResultMapper.Array<WithTimestamp<TValue>, QueryResultMapper.WithTimestamp<TValue, TValueMapper>>>
             where TValueMapper : IQueryResultMapper<TValue>, new()
         {
         }
 
         public interface ArrayOfObjectsWithTimestamp<TValue> :
             IQueryWithSource<TSource>.AndMappedResult<WithTimestamp<TValue>,
-            QueryResultMapper.Array<WithTimestamp<TValue>>>
+            QueryResultMapper.Array<
+                WithTimestamp<TValue>,
+                QueryResultMapper.WithTimestamp<TValue, QueryResultMapper.Element<TValue>>>>
         {
         }
 
         public interface ArrayOfGroupByResults<TValue> :
             IQueryWithSource<TSource>.AndMappedResult<WithTimestamp<TValue>,
-            QueryResultMapper.Array<WithTimestamp<TValue>, GroupByResult<TValue>>>
+            QueryResultMapper.Array<WithTimestamp<TValue>, QueryResultMapper.GroupByResult<TValue>>>
         {
         }
 
@@ -73,13 +71,17 @@ namespace Apache.Druid.Querying.Internal
 
         public interface Dimension_Aggregations_<TDimension, TAggregations> : ArrayOfObjectsWithTimestamp<
             Dimension_Aggregations<TDimension, TAggregations>,
-            QueryResultMapper.Array<Dimension_Aggregations<TDimension, TAggregations>>>
+            QueryResultMapper.Array<
+                Dimension_Aggregations<TDimension, TAggregations>,
+                QueryResultMapper.Element<Dimension_Aggregations<TDimension, TAggregations>>>>
         {
         }
 
         public interface Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations> : ArrayOfObjectsWithTimestamp<
             Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>,
-            QueryResultMapper.Array<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>>
+            QueryResultMapper.Array<
+                Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>,
+                QueryResultMapper.Element<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>>>
         {
         }
 
@@ -99,9 +101,9 @@ namespace Apache.Druid.Querying.Internal
                 ScanResult<TColumns>,
                 QueryResultMapper.Array<
                     ScanResult<TColumns>,
-                    ScanResult<
+                    QueryResultMapper.ScanResult<
                         TColumns,
-                        QueryResultMapper.Array<TColumns>>>>
+                        QueryResultMapper.Array<TColumns, QueryResultMapper.Element<TColumns>>>>>
         {
         }
     }

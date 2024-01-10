@@ -1,6 +1,7 @@
 ﻿using Apache.Druid.Querying.DependencyInjection;
 using Apache.Druid.Querying.Internal;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using MappingBuilders = Apache.Druid.Querying.IColumnNameMappingProvider.ImmutableBuilder;
@@ -10,7 +11,7 @@ namespace Apache.Druid.Querying
     public readonly record struct Lookup<TKey, TValue>(
         [property: DataSourceColumn("k")] TKey Key, [property: DataSourceColumn("v")] TValue Value);
 
-    public readonly record struct Union<TFirst, TSecond>(TFirst? First, TSecond? Second) 
+    public readonly record struct Union<TFirst, TSecond>(TFirst? First, TSecond? Second)
     {
         private sealed class Deserializer : QueryResultElement.IDeserializer<Union<TFirst, TSecond>>
         {
@@ -21,7 +22,7 @@ namespace Apache.Druid.Querying
         }
     }
 
-    public readonly record struct Union<TFirst, TSecond, TThird>(TFirst? First, TSecond? Second, TThird? Third) 
+    public readonly record struct Union<TFirst, TSecond, TThird>(TFirst? First, TSecond? Second, TThird? Third)
     {
         private sealed class Deserializer : QueryResultElement.IDeserializer<Union<TFirst, TSecond, TThird>>
         {
@@ -67,13 +68,42 @@ namespace Apache.Druid.Querying
                 });
 
         public DataSource<TSource> Inline<TSource>(IEnumerable<TSource> rows)
-            => Create<TSource>(
-                MappingBuilders.Create<TSource>(),
+        {
+            var allMappings = MappingBuilders.Create<TSource>();
+            var mappings = allMappings.Get<TSource>();
+            var properties = typeof(TSource).GetProperties();
+            var columnNames = properties
+                .Select(property => mappings
+                    .FirstOrDefault(mapping => mapping.Property == property.Name)?.ColumnName ?? property.Name);
+            JsonArray Map(TSource element)
+            {
+                var result = new JsonArray();
+                foreach (var property in properties)
+                {
+                    var value = property.GetValue(element);
+                    result.Add(JsonSerializer.SerializeToNode(value, property.PropertyType, Options.Serializer));
+                }
+                return result;
+            }
+            JsonArray MapAll()
+            {
+                var result = new JsonArray();
+                foreach (var row in rows)
+                {
+                    result.Add(Map(row));
+                }
+                return result;
+            }
+
+            return Create<TSource>(
+                allMappings,
                 () => new JsonObject
                 {
                     [Constants.type] = "inline",
-                    [Constants.dataSources] = JsonSerializer.SerializeToNode(rows, Options.Serializer) // TODO Map property names to column names?
-                });
+                    ["rows"] = MapAll(),
+                    ["columnNames"] = JsonSerializer.SerializeToNode(columnNames, Options.Serializer)
+                }); ;
+        }
 
         public DataSource<TResult> Query<TSource, TResult>(DataSource<TSource> dataSource, IQueryWithSource<TSource>.AndResult<TResult> query)
             => dataSource.WrapQuery(query);

@@ -28,8 +28,8 @@ namespace Apache.Druid.Querying
                     return GetColumnName(unary.Operand);
 
                 var expression = (MemberExpression)selectorBody;
-                var property = (PropertyInfo)expression.Member;
-                return columnNames.GetColumnName(property.PropertyType, property.Name);
+                var member = expression.Member;
+                return columnNames.GetColumnName(member.DeclaringType!, member.Name);
             }
 
             protected string GetColumnName<TSelector>(Expression<TSelector> selector)

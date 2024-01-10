@@ -46,6 +46,7 @@ namespace Apache.Druid.Querying
                     .Select(property => new PropertyColumnNameMapping(
                         property.Name,
                         property.GetCustomAttribute<DataSourceColumnAttribute>(true)?.Name ?? convention.Apply(property.Name)))
+                    .Where(mapping => mapping.Property != mapping.ColumnName)
                     .ToImmutableArray();
                 return new(All = All.Add(type, result));
             }
