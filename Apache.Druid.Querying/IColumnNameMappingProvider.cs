@@ -11,10 +11,11 @@ namespace Apache.Druid.Querying
     public interface IColumnNameMappingProvider
     {
         IReadOnlyList<PropertyColumnNameMapping> Get<TModel>();
+        string GetColumnName(Type modelType, string propertyName);
 
         internal sealed class ImmutableBuilder : IColumnNameMappingProvider
         {
-            public static ImmutableBuilder Create<TFirstModel>() 
+            public static ImmutableBuilder Create<TFirstModel>()
                 => new ImmutableBuilder().Add<TFirstModel>();
 
             public ImmutableDictionary<Type, ImmutableArray<PropertyColumnNameMapping>> All { get; private set; }
@@ -22,7 +23,17 @@ namespace Apache.Druid.Querying
             public ImmutableBuilder(ImmutableDictionary<Type, ImmutableArray<PropertyColumnNameMapping>>? all = null)
                 => All = all ?? ImmutableDictionary<Type, ImmutableArray<PropertyColumnNameMapping>>.Empty;
 
-            public IReadOnlyList<PropertyColumnNameMapping> Get<TModel>() => All.GetValueOrDefault(typeof(TModel));
+            public IReadOnlyList<PropertyColumnNameMapping> Get<TModel>() => Get(typeof(TModel));
+            public IReadOnlyList<PropertyColumnNameMapping> Get(Type modelType)
+                => All.TryGetValue(modelType, out var result) ?
+                    result :
+                    Array.Empty<PropertyColumnNameMapping>();
+
+            public string GetColumnName(Type modelType, string propertyName)
+                => Get(modelType)
+                .FirstOrDefault(mapping => mapping.Property == propertyName)
+                ?.ColumnName
+                ?? propertyName;
 
             public ImmutableBuilder Add<TModel>()
             {

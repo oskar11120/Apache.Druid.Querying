@@ -3,6 +3,7 @@ using Apache.Druid.Querying.Internal.QuerySectionFactory;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Reflection;
 using Filter_ = Apache.Druid.Querying.Internal.QuerySectionFactory.Filter;
 using Having_ = Apache.Druid.Querying.Internal.QuerySectionFactory.Having;
 
@@ -27,8 +28,8 @@ namespace Apache.Druid.Querying
                     return GetColumnName(unary.Operand);
 
                 var expression = (MemberExpression)selectorBody;
-                var memberName = expression.Member.Name;
-                return columnNames.Get(memberName);
+                var property = (PropertyInfo)expression.Member;
+                return columnNames.GetColumnName(property.PropertyType, property.Name);
             }
 
             protected string GetColumnName<TSelector>(Expression<TSelector> selector)

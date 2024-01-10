@@ -13,24 +13,24 @@ namespace Apache.Druid.Querying.Internal.Sections
             IReadOnlyList<ElementFactoryCall> calls,
             SectionAtomicity atomicity,
             JsonSerializerOptions serializerOptions,
-            IColumnNameMappingProvider columnNames,
+            IColumnNameMappingProvider columnNameMappings,
             Options options)
         {
             void MapCallParam(ElementFactoryCall.Parameter.Any param, JsonObject result)
                 => param.Switch(
-                    result,
-                    (selector, result) => result.Add(selector.Name, columnNames.Get(selector.MemberName)),
-                    (scalar, result) =>
-                    {
-                        if (options.SkipScalarParameter?.Invoke(scalar) is true)
-                            return;
+                result,
+                (selector, result) => result.Add(selector.Name, columnNameMappings.GetColumnName(selector.MemberType, selector.MemberName)),
+                (scalar, result) =>
+                {
+                    if (options.SkipScalarParameter?.Invoke(scalar) is true)
+                        return;
 
-                        scalar = options.ReplaceScalarParameter?.Invoke(scalar) ?? scalar;
-                        result.Add(
-                            scalar.Name,
-                            JsonSerializer.SerializeToNode(scalar.Value, scalar.Type, serializerOptions));
-                    },
-                    (nested, element) => element.Add(nested.Name, Map(nested.Calls, true)));
+                    scalar = options.ReplaceScalarParameter?.Invoke(scalar) ?? scalar;
+                    result.Add(
+                        scalar.Name,
+                        JsonSerializer.SerializeToNode(scalar.Value, scalar.Type, serializerOptions));
+                },
+                (nested, element) => element.Add(nested.Name, Map(nested.Calls, true)));
 
             JsonObject MapCall(ElementFactoryCall call, bool nested)
             {
