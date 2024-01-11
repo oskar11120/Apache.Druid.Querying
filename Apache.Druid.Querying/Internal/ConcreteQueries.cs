@@ -114,10 +114,23 @@ namespace Apache.Druid.Querying.Internal
         public sealed record Dimensions;
     }
 
+    public abstract class QueryBase : IQuery, IQueryWithSectionFactoryExpressions
+    {
+        public QueryBase(string? type = null)
+        {
+            state = new() { ["queryType"] = (_, _) => (type ?? GetType().Name.ToCamelCase())! };
+        }
+
+        private readonly Dictionary<string, QuerySectionValueFactory> state;
+        Dictionary<string, QuerySectionValueFactory> IQuery.State => state;
+
+        SectionAtomicity.IProvider.Builder IQueryWithSectionFactoryExpressions.SectionAtomicity { get; } = new();
+    }
+
     public static class QueryBase<TArguments, TSelf> where TSelf : IQuery<TSelf>
     {
         public abstract class TimeSeries :
-            Query,
+            QueryBase,
             IQueryWith.Order,
             IQueryWith.Intervals,
             IQueryWith.Granularity,
@@ -143,12 +156,12 @@ namespace Apache.Druid.Querying.Internal
 
         private static readonly SectionFactoryJsonMapper.Options dimensionsMapperOptions = new(SectionColumnNameKey: "outputName");
         public abstract class TopN_<TDimension, TMetricArguments> :
-            Query,
+            QueryBase,
             IQueryWith.Intervals,
             IQueryWith.Granularity,
             IQueryWith.Filter<TArguments, TSelf>,
             IQueryWith.Context<QueryContext.TopN, TSelf>,
-            IQuery<TArguments, TSelf, Marker.Dimension>
+            IQueryWithSectionFactoryExpressions<TArguments, TSelf, Marker.Dimension>
         {
             private static readonly SectionFactoryJsonMapper.Options mapperOptions = dimensionsMapperOptions with { ForceSingle = true };
 
@@ -186,12 +199,12 @@ namespace Apache.Druid.Querying.Internal
         }
 
         public abstract class GroupBy_<TDimensions, TOrderByAndHavingArguments> :
-            Query,
+            QueryBase,
             IQueryWith.Intervals,
             IQueryWith.Granularity,
             IQueryWith.Filter<TArguments, TSelf>,
             IQueryWith.Context<QueryContext.GroupBy, TSelf>,
-            IQuery<TArguments, TSelf, Marker.Dimensions>
+            IQueryWithSectionFactoryExpressions<TArguments, TSelf, Marker.Dimensions>
         {
             public GroupBy_() : base("groupBy")
             {
@@ -233,7 +246,7 @@ namespace Apache.Druid.Querying.Internal
         }
 
         public abstract class Scan :
-            Query,
+            QueryBase,
             IQueryWith.Order,
             IQueryWith.Intervals,
             IQueryWith.Filter<TArguments, TSelf>,

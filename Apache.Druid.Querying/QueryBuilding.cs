@@ -85,17 +85,6 @@ namespace Apache.Druid.Querying
             => AddOrUpdateSection(key, _ => value, convertKeyToCamelCase);
     }
 
-    public abstract class Query : IQuery
-    {
-        public Query(string? type = null)
-        {
-            state = new() { ["queryType"] = (_, _) => (type ?? GetType().Name.ToCamelCase())! };
-        }
-
-        private readonly Dictionary<string, QuerySectionValueFactory> state;
-        Dictionary<string, QuerySectionValueFactory> IQuery.State => state;
-    }
-
     public interface IQuery<TSelf> : IQuery where TSelf : IQuery<TSelf>
     {
         public TSelf Unwrapped => (TSelf)this;
@@ -130,19 +119,19 @@ namespace Apache.Druid.Querying
         }
 
         public interface VirtualColumns<TArguments, TVirtualColumns, TSelf> :
-            IQuery<TArguments, TSelf, Marker.VirtualColumns>
+            IQueryWithSectionFactoryExpressions<TArguments, TSelf, Marker.VirtualColumns>
             where TSelf : IQuery<TSelf>
         {
         }
 
         public interface Aggregations<TArguments, TAggregations, TSelf> :
-            IQuery<TArguments, TSelf, Marker.Aggregations>
+            IQueryWithSectionFactoryExpressions<TArguments, TSelf, Marker.Aggregations>
             where TSelf : IQuery<TSelf>
         {
         }
 
         public interface PostAggregations<TArguments, TPostAggregations, TSelf>
-            : IQuery<TArguments, TSelf, Marker.PostAggregations>
+            : IQueryWithSectionFactoryExpressions<TArguments, TSelf, Marker.PostAggregations>
             where TSelf : IQuery<TSelf>
         {
         }

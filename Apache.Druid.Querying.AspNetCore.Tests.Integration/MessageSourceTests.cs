@@ -44,6 +44,29 @@ internal class MessageSourceTests
     private static EcDruid Druid => Services.GetRequiredService<EcDruid>();
 
     [Test]
+    public async Task Query_Works()
+    {
+        var first = new Query<VariableMessage>
+            .TimeSeries
+            .WithNoVirtualColumns
+            .WithAggregations<Aggregations>()
+            .IntervalFilterDefaults()
+            .AggregationsDefaults();
+        var firstSource = Druid
+            .Variables
+            .WrapQuery(first);
+        var firstJson = firstSource.GetJsonRepresentation();
+        var second = new Query<WithTimestamp<Aggregations>>
+            .Scan()
+            .Interval(interval)
+            .Filter(type => type.Not(type.Selector(first => first.Value.Count, 6)));
+        var secondJson = firstSource.MapQueryToJson(second);
+        var results = await firstSource
+            .ExecuteQuery(second)
+            .ToListAsync();
+    }
+
+    [Test]
     public async Task Join_Works()
     {
         var inline = Druid

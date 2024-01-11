@@ -30,7 +30,7 @@ namespace Apache.Druid.Querying
         internal IAsyncEnumerable<TResult> Map(QueryResultMapperContext context, CancellationToken token);
     }
 
-    public interface IQueryWithSource<TSource> : IQuery
+    public interface IQueryWithSource<TSource> : IQuery, IQueryWithSectionFactoryExpressions
     {
         public interface AndResult<TResult> : IQueryWithSource<TSource>
         {
@@ -44,6 +44,17 @@ namespace Apache.Druid.Querying
     }
 
     public delegate JsonNode? DataSourceJsonProvider();
+
+    public readonly record struct Union<TFirst, TSecond>(TFirst? First, TSecond? Second)
+    {
+        private sealed class Deserializer : QueryResultElement.IDeserializer<Union<TFirst, TSecond>>
+        {
+            public Union<TFirst, TSecond> Deserialize(ref QueryResultElement.DeserializerContext context)
+                => new(
+                    context.Deserialize<TFirst>(),
+                    context.Deserialize<TSecond>());
+        }
+    }
 
     public readonly record struct InnerJoinResult<TLeft, TRight>(TLeft Left, TRight Right)
     {
@@ -71,6 +82,8 @@ namespace Apache.Druid.Querying
     {
         private static readonly StringWithQualityHeaderValue gzip = new("gzip");
 
+        private readonly IColumnNameMappingProvider.ImmutableBuilder columnNameMappings;
+        private readonly SectionAtomicity.IProvider.Builder? sectionAtomicity;
         private readonly Func<DataSourceOptions> getOptions;
         private JsonSerializerOptions? serializerOptionsWithFormatting;
         private DataSourceOptions options => getOptions();
@@ -78,19 +91,20 @@ namespace Apache.Druid.Querying
         internal DataSource(
             Func<DataSourceOptions> getOptions,
             DataSourceJsonProvider getJsonRepresentation,
-            IColumnNameMappingProvider.ImmutableBuilder columnNameMappings)
+            IColumnNameMappingProvider.ImmutableBuilder columnNameMappings,
+            SectionAtomicity.IProvider.Builder? sectionAtomicity = null)
         {
             this.getOptions = getOptions;
             GetJsonRepresentation = getJsonRepresentation;
-            ColumnNameMappings = columnNameMappings;
+            this.columnNameMappings = columnNameMappings;
+            this.sectionAtomicity = sectionAtomicity;
         }
 
         public readonly DataSourceJsonProvider GetJsonRepresentation;
-        internal readonly IColumnNameMappingProvider.ImmutableBuilder ColumnNameMappings;
 
         public JsonObject MapQueryToJson(IQueryWithSource<TSource> query)
         {
-            var result = query.MapToJson(options.Serializer, ColumnNameMappings);
+            var result = query.MapToJson(options.Serializer, columnNameMappings);
             result.Add("dataSource", GetJsonRepresentation());
             return result;
         }
@@ -105,7 +119,7 @@ namespace Apache.Druid.Querying
             IQueryWithSource<TSource>.AndMappedResult<TResult, TMapper> query, CancellationToken token = default)
             where TMapper : IQueryResultMapper<TResult>, new()
         {
-            var atomicity = query.GetSectionAtomicity();
+            var atomicity = SectionAtomicity.IProvider.Builder.CreateCombined(query.SectionAtomicity, sectionAtomicity);
             async IAsyncEnumerable<TResult> Deserialize(Stream stream, JsonSerializerOptions options, [EnumeratorCancellation] CancellationToken token)
             {
                 var mapper = new TMapper();
@@ -114,7 +128,7 @@ namespace Apache.Druid.Querying
                 try
                 {
                     var read = await stream.ReadAsync(buffer, token);
-                    var results = mapper.Map(new(new(stream, buffer, read), options, atomicity, ColumnNameMappings), token);
+                    var results = mapper.Map(new(new(stream, buffer, read), options, atomicity, columnNameMappings), token);
                     await foreach (var result in results)
                         yield return result!;
                 }
@@ -182,7 +196,8 @@ namespace Apache.Druid.Querying
                 ["type"] = "query",
                 ["query"] = MapQueryToJson(query)
             },
-            ColumnNameMappings);
+            columnNameMappings, 
+            query.SectionAtomicity);
 
         public DataSource<InnerJoinResult<TSource, TRight>> InnerJoin<TRight>(DataSource<TRight> right, string rightPrefix, string condition)
             => Join<TRight, InnerJoinResult<TSource, TRight>>(right, rightPrefix, condition, "INNER");
@@ -202,11 +217,43 @@ namespace Apache.Druid.Querying
                 [nameof(condition)] = condition,
                 [nameof(joinType)] = joinType
             },
-            ColumnNameMappings
-                .Combine(right.ColumnNameMappings)
+            columnNameMappings
+                .Combine(right.columnNameMappings)
                 .Update<TRight>(mappings => mappings
                     .Select(mapping => mapping with { ColumnName = mapping.ColumnName + rightPrefix })
-                    .ToImmutableArray()));
+                    .ToImmutableArray()),
+            SectionAtomicity.IProvider.Builder.CreateCombined(sectionAtomicity, right.sectionAtomicity));
+
+        public DataSource<Union<TSource, TSecond>> Union<TSecond>(DataSource<TSecond> second)
+            => new(
+                getOptions,
+                () => new JsonObject
+                {
+                    ["type"] = "union",
+                    ["dataSources"] = new JsonArray
+                    {
+                        GetJsonRepresentation(),
+                        second.GetJsonRepresentation()
+                    }
+                },
+                columnNameMappings.Combine(second.columnNameMappings),
+                SectionAtomicity.IProvider.Builder.CreateCombined(sectionAtomicity, second.sectionAtomicity));
+
+        public DataSource<Union<TSource, TSecond, TThird>> Union<TSecond, TThird>(DataSource<TSecond> second, DataSource<TThird> third)
+            => new(
+                getOptions,
+                () => new JsonObject
+                {
+                    ["type"] = "union",
+                    ["dataSources"] = new JsonArray
+                    {
+                        GetJsonRepresentation(),
+                        second.GetJsonRepresentation(),
+                        third.GetJsonRepresentation()
+                    }
+                },
+                columnNameMappings.Combine(second.columnNameMappings).Combine(third.columnNameMappings),
+                SectionAtomicity.IProvider.Builder.CreateCombined(sectionAtomicity, second.sectionAtomicity, third.sectionAtomicity));
 
         internal string? JsonRepresentationDebugView => GetJsonRepresentation()?.ToJsonString(options.Serializer);
     }

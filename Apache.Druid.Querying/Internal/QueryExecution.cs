@@ -1,6 +1,7 @@
 ﻿using Apache.Druid.Querying.Internal.Sections;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -23,6 +24,7 @@ namespace Apache.Druid.Querying.Internal
             [ThreadStatic]
             private static Dictionary<Type, object?>? deserializers;
 
+            private static readonly byte[] timestampPropertyNameBytes = Encoding.UTF8.GetBytes("__time");
             private static readonly byte[] comaBytes = Encoding.UTF8.GetBytes(",");
             private readonly int spanningBytes;
             private readonly int trimBytes;
@@ -50,24 +52,43 @@ namespace Apache.Druid.Querying.Internal
                     return DeserializeApplyMappings<TElementOrElementPart>(mappings);
 
                 var (json, options, atomicity, _) = mapperContext;
-                var slice = json.GetSliceOfBuffer(spanningBytes, trimBytes);
-                deserializeConsumedBytes = slice.Length;
                 SectionAtomicity atomicity_;
                 if (checkForAtomicity && (atomicity_ = atomicity.Get<TElementOrElementPart>()).Atomic)
-                {
-                    var reader = WrapInReader(slice);
-                    JsonStreamReader.ReadToProperty(ref reader, atomicity_.ColumnNameIfAtomicUtf8);
-                    var start = (int)reader.BytesConsumed;
-                    var propertyDepth = reader.CurrentDepth;
-                    do
-                        reader.Read();
-                    while (reader.CurrentDepth < propertyDepth);
-                    slice = slice[start..(int)reader.BytesConsumed];
-                }
+                    return DeserializeProperty<TElementOrElementPart>(atomicity_.ColumnNameIfAtomicUtf8);
 
+                var slice = json.GetSliceOfBuffer(spanningBytes, trimBytes);
+                deserializeConsumedBytes = slice.Length;
                 var result = JsonSerializer.Deserialize<TElementOrElementPart>(slice, options)!;
                 return result;
             }
+
+            public TProperty DeserializeProperty<TProperty>(ReadOnlySpan<byte> propertyNameUtf8)
+            {
+                var (json, options, _, _) = mapperContext;
+                var @object = json.GetSliceOfBuffer(spanningBytes, trimBytes);
+                deserializeConsumedBytes = @object.Length;
+                var reader = WrapInReader(@object);
+                JsonStreamReader.ReadToProperty(ref reader, propertyNameUtf8);
+                var start = (int)reader.BytesConsumed;
+                var propertyDepth = reader.CurrentDepth;
+                do
+                    reader.Read();
+                while (reader.CurrentDepth < propertyDepth);
+                var property = @object[start..(int)reader.BytesConsumed];
+
+                // TODO More TProperty types
+                if (typeof(TProperty) == typeof(DateTimeOffset) && propertyNameUtf8 == timestampPropertyNameBytes)
+                {
+                    var unixMs = JsonSerializer.Deserialize<long>(property, options);
+                    var t = DateTimeOffset.FromUnixTimeMilliseconds(unixMs);
+                    return Unsafe.As<DateTimeOffset, TProperty>(ref t);
+                }
+
+                return JsonSerializer.Deserialize<TProperty>(property, options)!;
+            }
+
+            public DateTimeOffset DeserializeTimeProperty()
+                 => DeserializeProperty<DateTimeOffset>(timestampPropertyNameBytes);
 
             public readonly void UpdateState()
             {

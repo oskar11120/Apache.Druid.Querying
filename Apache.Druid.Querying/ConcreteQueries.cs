@@ -10,7 +10,16 @@ namespace Apache.Druid.Querying
     public readonly record struct Source_VirtualColumns<TSource, TVirtualColumns>(TSource Source, TVirtualColumns VirtualColumns);
     public readonly record struct ScanResult<TValue>(string? SegmentId, TValue Value);
 
-    public readonly record struct WithTimestamp<TValue>(DateTimeOffset Timestamp, TValue Value);
+    public readonly record struct WithTimestamp<TValue>(DateTimeOffset Timestamp, TValue Value)
+    {
+        private sealed class Deserializer : QueryResultElement.IDeserializer<WithTimestamp<TValue>>
+        {
+            public WithTimestamp<TValue> Deserialize(ref QueryResultElement.DeserializerContext context)
+                => new(
+                    context.DeserializeTimeProperty(),
+                    context.Deserialize<TValue>());
+        }
+    }
 
     public readonly record struct Dimension_Aggregations<TDimension, TAggregations>(TDimension Dimension, TAggregations Aggregations) 
     {
