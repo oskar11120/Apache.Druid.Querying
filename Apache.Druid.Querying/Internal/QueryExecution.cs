@@ -21,7 +21,7 @@ namespace Apache.Druid.Querying.Internal
         public ref struct DeserializerContext
         {
             [ThreadStatic]
-            private static readonly Dictionary<Type, object?> deserializers = new();
+            private static Dictionary<Type, object?>? deserializers;
 
             private static readonly byte[] comaBytes = Encoding.UTF8.GetBytes(",");
             private readonly int spanningBytes;
@@ -102,6 +102,7 @@ namespace Apache.Druid.Querying.Internal
             private static IDeserializer<TElement>? GetDeserializer<TElement>()
             {
                 var elementType = typeof(TElement);
+                deserializers ??= new();
                 if (deserializers.TryGetValue(elementType, out var deserializer))
                 {
                     return deserializer as IDeserializer<TElement>;
