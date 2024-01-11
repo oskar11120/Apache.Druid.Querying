@@ -56,6 +56,18 @@ namespace Apache.Druid.Querying
         }
     }
 
+    public readonly record struct Union<TFirst, TSecond, TThird>(TFirst? First, TSecond? Second, TThird? Third)
+    {
+        private sealed class Deserializer : QueryResultElement.IDeserializer<Union<TFirst, TSecond, TThird>>
+        {
+            public Union<TFirst, TSecond, TThird> Deserialize(ref QueryResultElement.DeserializerContext context)
+                => new(
+                    context.Deserialize<TFirst>(),
+                    context.Deserialize<TSecond>(),
+                    context.Deserialize<TThird>());
+        }
+    }
+
     public readonly record struct InnerJoinResult<TLeft, TRight>(TLeft Left, TRight Right)
     {
         private sealed class Deserializer : QueryResultElement.IDeserializer<InnerJoinResult<TLeft, TRight>>
