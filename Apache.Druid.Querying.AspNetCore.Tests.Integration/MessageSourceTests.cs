@@ -41,7 +41,7 @@ internal class MessageSourceTests
     private static EcDruid Druid => Services.GetRequiredService<EcDruid>();
 
     [Test]
-    public async Task InlineWorks()
+    public async Task Inline_Works()
     {
 
         var query = new Query<InlineData>
