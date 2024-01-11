@@ -24,7 +24,7 @@ namespace Apache.Druid.Querying
         }
     }
 
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
     public sealed class DataSourceColumnNamingConventionAttribute : Attribute
     {
         public DataSourceColumnNamingConventionAttribute(IDataSourceColumnNamingConvention convention)
