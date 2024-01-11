@@ -219,7 +219,7 @@ namespace Apache.Druid.Querying
                         nameof(QueryElementFactory<TArguments>.IAggregations.Last) or
                         nameof(QueryElementFactory<TArguments>.IAggregations.Any) =>
                             (call.TryGetScalarParameter<SimpleDataType>()?.Value?.ToString()
-                            ?? DataType.GetSimple(call.GetMemberSelectorParameter("fieldName").MemberType).ToString())
+                            ?? DataType.GetSimple(call.GetMemberSelectorParameter("fieldName").SelectedType).ToString())
                             .ToCamelCase()
                             + call.MethodName,
 

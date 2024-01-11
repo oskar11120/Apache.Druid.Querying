@@ -3,7 +3,6 @@ using Apache.Druid.Querying.Internal.QuerySectionFactory;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Reflection;
 using Filter_ = Apache.Druid.Querying.Internal.QuerySectionFactory.Filter;
 using Having_ = Apache.Druid.Querying.Internal.QuerySectionFactory.Having;
 

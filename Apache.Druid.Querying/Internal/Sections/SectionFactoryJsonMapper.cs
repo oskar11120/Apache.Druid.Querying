@@ -19,7 +19,7 @@ namespace Apache.Druid.Querying.Internal.Sections
             void MapCallParam(ElementFactoryCall.Parameter.Any param, JsonObject result)
                 => param.Switch(
                 result,
-                (selector, result) => result.Add(selector.Name, columnNameMappings.GetColumnName(selector.MemberType, selector.MemberName)),
+                (selector, result) => result.Add(selector.Name, columnNameMappings.GetColumnName(selector.SelectedFromType, selector.SelectedName)),
                 (scalar, result) =>
                 {
                     if (options.SkipScalarParameter?.Invoke(scalar) is true)

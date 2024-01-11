@@ -26,20 +26,19 @@ namespace Apache.Druid.Querying.Internal.Sections
             SectionFactoryJsonMapper.Options? mapperOptions = null,
             bool convertKeyToCamelCase = true)
             where TSelf : IQuery<TSelf>
-            => query.AddOrUpdateSection(
+        {
+            var calls = SectionFactoryInterpreter
+                .Execute(
+                    factory,
+                    typeof(TElementFactory),
+                    typeof(TArguments))
+                .ToList();
+            var atomicity = query.GetBuilder().Add<TSection>(calls, atomicSectionColumnName);
+            return query.AddOrUpdateSection(
                 atomicSectionColumnName,
-                (options, columnNames) =>
-                {
-                    var calls = SectionFactoryInterpreter
-                        .Execute(
-                            factory,
-                            typeof(TElementFactory),
-                            typeof(TArguments))
-                        .ToList();
-                    var atomicity = query.GetBuilder().Add<TSection>(calls, atomicSectionColumnName);
-                    return SectionFactoryJsonMapper.Map(
-                        calls, atomicity, options, columnNames, mapperOptions ?? SectionFactoryJsonMapper.Options.Default);
-                },
+                (options, columnNames) => SectionFactoryJsonMapper.Map(
+                     calls, atomicity, options, columnNames, mapperOptions ?? SectionFactoryJsonMapper.Options.Default),
                 convertKeyToCamelCase);
+        }
     }
 }

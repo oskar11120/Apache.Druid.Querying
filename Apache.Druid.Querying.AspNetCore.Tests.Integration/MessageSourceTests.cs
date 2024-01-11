@@ -149,6 +149,9 @@ internal class MessageSourceTests
                     factory.FieldAccess(aggrgations => aggrgations.Sum),
                     factory.FieldAccess(aggregations => aggregations.Count))))
             .Context(new() { SkipEmptyBuckets = true });
+        var json = Druid
+            .Variables
+            .MapQueryToJson(query);
         var result = await Druid
             .Variables
             .ExecuteQuery(query)
