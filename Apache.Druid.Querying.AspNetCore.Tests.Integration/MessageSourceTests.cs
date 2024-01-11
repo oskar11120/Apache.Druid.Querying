@@ -1,5 +1,4 @@
-﻿using Apache.Druid.Querying.Json;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 using static Apache.Druid.Querying.AspNetCore.Tests.Integration.ServiceProvider;
