@@ -2,26 +2,29 @@
 using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 using static Apache.Druid.Querying.AspNetCore.Tests.Integration.ServiceProvider;
+using static Apache.Druid.Querying.AspNetCore.Tests.Integration.TestData;
 
 namespace Apache.Druid.Querying.AspNetCore.Tests.Integration;
 
-internal static class TestExtensions
+internal static class TestData
 {
+    public const string pmPAct = nameof(pmPAct);
+    public static readonly Guid tenantId = Guid.Parse("55022f5d-d9c4-4773-86e5-fbce823cd287");
+    public static readonly DateTimeOffset t0 = DateTime.Parse("2023-10-19T16:57:00.000Z", null, DateTimeStyles.AssumeUniversal).ToUniversalTime();
+    public static readonly Interval interval = new(t0, t0.AddDays(5));
+
     public static TQuery IntervalFilterDefaults<TQuery>(this TQuery query) where TQuery :
         IQueryWith.Intervals,
         IQueryWith.Filter<VariableMessage, TQuery>
-    {
-        var t = DateTime.Parse("2023-10-19T16:57:00.000Z", null, DateTimeStyles.AssumeUniversal).ToUniversalTime();
-        return query
-            .Interval(new(t, t.AddDays(5)))
+        => query
+            .Interval(interval)
             .Filter(filter => filter.And(
                 filter.Selector(
                     message => message.VariableName,
                     "pmPAct"),
                 filter.Selector(
                     message => message.TenantId,
-                    Guid.Parse("55022f5d-d9c4-4773-86e5-fbce823cd287"))));
-    }
+                    tenantId)));
 
     public static TQuery AggregationsDefaults<TQuery>(this TQuery query) where TQuery :
         IQueryWith.Granularity,
@@ -41,20 +44,47 @@ internal class MessageSourceTests
     private static EcDruid Druid => Services.GetRequiredService<EcDruid>();
 
     [Test]
+    public async Task Join_Works()
+    {
+        var inline = Druid
+            .Inline(new InlineData[]
+            {
+                new("pmPAct", "hello!"),
+                new("notPmPAct", "goodbye!")
+            });
+        var join = Druid
+            .Variables
+            .LeftJoin(inline, "r.", "variable == r.variable");
+        var query = new Query<LeftJoinResult<VariableMessage, InlineData>>
+            .Scan()
+            .Interval(interval)
+            .Filter(type => type.And(
+                type.Selector(
+                    join => join.Left.VariableName,
+                    pmPAct),
+                type.Selector(
+                    join => join.Left.TenantId,
+                    tenantId)));
+        var json = join.MapQueryToJson(query);
+        var results = await join
+            .ExecuteQuery(query)
+            .ToListAsync();
+    }
+
+    [Test]
     public async Task Inline_Works()
     {
-
         var query = new Query<InlineData>
             .Scan()
             .Interval(new(default, DateTimeOffset.MaxValue))
             .Filter(type => type.In(
-                data => data.Value,
-                new[] { 0, 1 }));
+                data => data.Variable,
+                new[] { "zero" }));
         var inline = Druid
             .Inline(new InlineData[]
             {
-                new(1, "one"),
-                new(2, "two")
+                new("zero", "hello!"),
+                new("one", "goodbye!")
             });
         var result = await inline
             .ExecuteQuery(query)
@@ -63,8 +93,8 @@ internal class MessageSourceTests
             .Single()
             .Value
             .Should()
-            .Be(new InlineData(1, "one"));
-    } 
+            .Be(new InlineData("zero", "hello!"));
+    }
 
     [Test]
     public async Task Scan_ReturnsAnything()
@@ -161,5 +191,5 @@ internal class MessageSourceTests
     public sealed record Aggregations(double Sum, int Count, string Variable, double? FirstValue);
     public sealed record PostAggregations(double Average);
     public sealed record GroupByDimensions(Guid ObjectId, string VariableName);
-    public sealed record InlineData(int Value, [property: DataSourceColumn("MessageOfTheNight")] string MessageOfTheDay);
+    public sealed record InlineData(string Variable, [property: DataSourceColumn("MessageOfTheNight")] string MessageOfTheDay);
 }

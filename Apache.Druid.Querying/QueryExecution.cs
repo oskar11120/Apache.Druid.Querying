@@ -5,8 +5,10 @@ using Apache.Druid.Querying.Json;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -200,7 +202,11 @@ namespace Apache.Druid.Querying
                 [nameof(condition)] = condition,
                 [nameof(joinType)] = joinType
             },
-            ColumnNameMappings.Combine(right.ColumnNameMappings));
+            ColumnNameMappings
+                .Combine(right.ColumnNameMappings)
+                .Update<TRight>(mappings => mappings
+                    .Select(mapping => mapping with { ColumnName = mapping.ColumnName + rightPrefix })
+                    .ToImmutableArray()));
 
         internal string? JsonRepresentationDebugView => GetJsonRepresentation()?.ToJsonString(options.Serializer);
     }
