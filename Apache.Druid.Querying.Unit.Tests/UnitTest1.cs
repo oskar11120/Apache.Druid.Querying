@@ -14,7 +14,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .BatchSize(2000)
                 .Offset(4000)
                 .Filter(type => type.Range(
-                    type => type.Value,
+                    columns => columns.Value,
                     lower: 100))
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .Order(OrderDirection.Ascending)
