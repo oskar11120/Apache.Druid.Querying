@@ -23,9 +23,7 @@ namespace Apache.Druid.Querying
 
             private string GetColumnName(Expression selectorBody)
             {
-                if (selectorBody is UnaryExpression unary)
-                    return GetColumnName(unary.Operand);
-
+                selectorBody = selectorBody.UnwrapUnary();
                 var expression = (MemberExpression)selectorBody;
                 var member = expression.Member;
                 return columnNames.GetColumnName(member.DeclaringType!, member.Name);

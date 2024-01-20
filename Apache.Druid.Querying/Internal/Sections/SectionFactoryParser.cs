@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Xml.Linq;
 
 namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 {
@@ -79,12 +80,14 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
                 var lambda = selector as LambdaExpression ?? throw new InvalidOperationException();
                 if (lambda.Parameters.Count is not 1 || lambda.Parameters[0].Type != argumentsType)
                     throw new InvalidOperationException();
-                return SectionFactoryParser.GetSelectedProperty(lambda.Body);
+                return SelectedProperty.Get(lambda.Body);
             }
 
             ElementFactoryCall Execute(Expression factoryCall, string? resultMemberName)
             {
-                factoryCall = UnwrapUnary(factoryCall);
+                static ElementFactoryCall.Parameter.ArgumentsMemberSelector Map(SelectedProperty property, string name)
+                    => new(property.Type, property.Name, name, property.SelectedFromType);
+                factoryCall = factoryCall.UnwrapUnary();
                 var call = factoryCall as MethodCallExpression ?? throw new InvalidOperationException();
                 var method = call.Method;
                 var methodName = method.Name;
@@ -101,7 +104,7 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
                         var isNested = paramType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(paramType);
                         ElementFactoryCall.Parameter.Any result = (expectedMemberSelector, isNested) switch
                         {
-                            (true, _) => new(Selector: GetSelectedProperty(arg).Map(paramName)),
+                            (true, _) => new(Selector: Map(GetSelectedProperty(arg), paramName)),
                             (_, true) => new(Nested: new(Execute__(arg).ToList(), paramName)),
                             _ => new(Scalar: new ElementFactoryCall.Parameter.Scalar(paramType, paramName, arg.GetValue()))
                         };
@@ -158,21 +161,6 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
             return Execute__(querySectionFactory.Body).DistinctBy(call => call.ResultMemberName);
         }
 
-        private static SelectedProperty GetSelectedProperty(Expression selectorBody)
-        {
-            selectorBody = UnwrapUnary(selectorBody);
-            var expression = (MemberExpression)selectorBody;
-            var name = expression.Member.Name;
-            var property = expression.Member as PropertyInfo ?? throw new InvalidOperationException();
-            return new(property.PropertyType, name, property.DeclaringType!);
-        }
 
-        private static Expression UnwrapUnary(Expression expression)
-            => expression is UnaryExpression unary ? UnwrapUnary(unary.Operand) : expression;
-
-        private readonly record struct SelectedProperty(Type Type, string Name, Type SelectedFromType)
-        {
-            public ElementFactoryCall.Parameter.ArgumentsMemberSelector Map(string name) => new(Type, Name, name, SelectedFromType);
-        }
     }
 }

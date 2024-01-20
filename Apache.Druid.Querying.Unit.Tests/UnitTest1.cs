@@ -276,7 +276,7 @@ namespace Apache.Druid.Querying.Unit.Tests
 
         [DataSourceColumnNamingConvention(DataSourceColumnNamingConventionType.CamelCase)]
         internal record Message(
-            [property: DataSourceColumn("Variable")] string VariableName,
+            [property: DataSourceColumn("variable")] string VariableName,
             Guid ObjectId,
             double Value,
             DateTimeOffset Timestamp);
