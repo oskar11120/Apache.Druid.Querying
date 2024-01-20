@@ -248,9 +248,7 @@ namespace Apache.Druid.Querying
         public static TQuery Intervals<TQuery>(this TQuery query, IEnumerable<Interval> intervals)
             where TQuery : IQueryWith.Intervals
         {
-            static string ToIsoString(DateTimeOffset t) => t.ToString("o", CultureInfo.InvariantCulture);
-            var mapped = intervals.Select(interval => $"{ToIsoString(interval.From)}/{ToIsoString(interval.To)}");
-            query.AddOrUpdateSection(nameof(intervals), mapped);
+            query.AddOrUpdateSection(nameof(intervals), intervals.Select(IntervalExtensions.Map));
             return query;
         }
 

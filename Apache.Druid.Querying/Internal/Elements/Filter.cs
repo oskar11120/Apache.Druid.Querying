@@ -5,6 +5,16 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 {
     internal abstract class Filter : WithType, IFilter
     {
+        public sealed class True : Filter
+        {
+            public static readonly True Singleton = new();
+        }
+
+        public sealed class False : Filter
+        {
+            public static readonly True Singleton = new();
+        }
+
         public sealed class And : Filter
         {
             public IEnumerable<IFilter> Fields { get; }
@@ -50,6 +60,18 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
             }
 
             public string Column { get; }
+        }
+
+        public sealed class Interval : Filter
+        {
+            public Interval(string dimension, IEnumerable<string> intervals)
+            {
+                Dimension = dimension;
+                Intervals = intervals;
+            }
+
+            public string Dimension { get; }
+            public IEnumerable<string> Intervals { get; }
         }
     }
 

@@ -2,6 +2,7 @@
 using Apache.Druid.Querying.Internal.QuerySectionFactory;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using Filter_ = Apache.Druid.Querying.Internal.QuerySectionFactory.Filter;
 using Having_ = Apache.Druid.Querying.Internal.QuerySectionFactory.Having;
@@ -39,6 +40,8 @@ namespace Apache.Druid.Querying
             {
             }
 
+            public IFilter True() => Filter_.True.Singleton;
+            public IFilter False() => Filter_.False.Singleton;
             public IFilter And(params IFilter[] filters) => new Filter_.And(filters);
             public IFilter Or(params IFilter[] filters) => new Filter_.Or(filters);
             public IFilter Not(IFilter filter) => new Filter_.Not(filter);
@@ -65,9 +68,10 @@ namespace Apache.Druid.Querying
                 bool upperOpen = false)
                 where TColumn : class
                 => new Filter<TColumn>.Range(GetColumnName(column), matchValueType ?? DataType.Get<TColumn>(), lower, upper, lowerOpen, upperOpen);
-
             public IFilter Selector<TColumn>(Expression<ColumnSelector<TColumn>> dimension, TColumn value)
                 => new Filter<TColumn>.Selector(GetColumnName(dimension), value);
+            public IFilter Interval<TColumn>(Expression<ColumnSelector<TColumn>> dimension, params Interval[] intervals)
+                => new Filter_.Interval(GetColumnName(dimension), intervals.Select(IntervalExtensions.Map));
         }
 
         public class MetricSpec : UsingArgumentColumnNames
