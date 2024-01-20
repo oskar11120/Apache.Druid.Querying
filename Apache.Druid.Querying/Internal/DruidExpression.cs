@@ -3,9 +3,9 @@ using System.Linq.Expressions;
 
 namespace Apache.Druid.Querying.Internal
 {
-    internal static class DruidExpressionTextMapper
+    internal static class DruidExpression
     {
-        public static string Map<TArguments>(Expression<Func<TArguments, string>> factory, IColumnNameMappingProvider columnNameMappings)
+        public static MapResult Map<TArguments>(Expression<QueryElementFactory<TArguments>.DruidExpression> factory, IColumnNameMappingProvider columnNameMappings)
         {
             Exception Invalid() => new InvalidOperationException($"{factory} has to return an interpolated string where each argument is a property of {typeof(TArguments)}.");
 
@@ -27,7 +27,9 @@ namespace Apache.Druid.Querying.Internal
                 @params[i] = columnNameMappings.GetColumnName(member.SelectedFromType, member.Name);
             }
 
-            return string.Format(template, @params);
+            return new(string.Format(template, @params), @params);
         }
+
+        public readonly record struct MapResult(string Expression, string[] ColumnNames);
     }
 }

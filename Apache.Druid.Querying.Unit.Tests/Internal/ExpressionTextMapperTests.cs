@@ -9,10 +9,10 @@ namespace Apache.Druid.Querying.Unit.Tests.Internal
         public void Map_Works()
         {
             var columnNameMap = IColumnNameMappingProvider.ImmutableBuilder.Create<Tests.Message>();
-            var result = DruidExpressionTextMapper.Map<Tests.Message>(
+            var result = DruidExpression.Map<Tests.Message>(
                 message => $"{message.VariableName} == 42",
                 columnNameMap);
-            result.Should().Be("variable == 42");
+            result.Expression.Should().Be("variable == 42");
         }
     }
 }

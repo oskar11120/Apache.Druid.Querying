@@ -57,7 +57,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .WithAggregations<Aggregations>()
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .Granularity(Granularity.Minute)
-                .VirtualColumns(type => type.Expression<DateTimeOffset>("__time"))
+                .VirtualColumns(type => type.Expression<DateTimeOffset>(message => $"{message.Timestamp}"))
                 .Dimensions(type => new
                 (
                     type.Default(message => message.Source.ObjectId),
@@ -110,7 +110,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .WithVirtualColumns<DateTimeOffset>
                 .WithAggregations<Aggregations>()
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
-                .VirtualColumns(type => type.Expression<DateTimeOffset>("__time"))
+                .VirtualColumns(type => type.Expression<DateTimeOffset>(_ => $"__time"))
                 .Filter(type => type.Or(
                     type.Null(pair => pair.VirtualColumns),
                     type.Equals(
@@ -161,7 +161,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .WithAggregations<Aggregations>
                 .WithPostAggregations<PostAggregations>()
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
-                .VirtualColumns(type => new(type.Expression<DateTimeOffset>("__time")))
+                .VirtualColumns(type => new(type.Expression<DateTimeOffset>(_ => "__time")))
                 .Filter(type => type.Or(
                     type.Null(pair => pair.VirtualColumns.TReal),
                     type.Equals(
@@ -210,7 +210,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .Order(OrderDirection.Ascending)
                 .Granularity(Granularity.Minute)
-                .VirtualColumns(type => new(type.Expression<DateTimeOffset>("__time")))
+                .VirtualColumns(type => new(type.Expression<DateTimeOffset>(_ => "__time")))
                 .Filter(type => type.Or(
                     type.Null(pair => pair.VirtualColumns.TReal),
                     type.Equals(
@@ -255,7 +255,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .Order(OrderDirection.Ascending)
                 .Granularity(Granularity.Minute)
-                .VirtualColumns(type => new(type.Expression<DateTimeOffset>("__time")))
+                .VirtualColumns(type => new(type.Expression<DateTimeOffset>(_ => "__time")))
                 .Filter(type => type.Or(
                     type.Null(pair => pair.VirtualColumns.TReal),
                     type.Equals(

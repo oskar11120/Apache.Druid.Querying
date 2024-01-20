@@ -12,6 +12,7 @@ namespace Apache.Druid.Querying
     public static class QueryElementFactory<TArguments>
     {
         public delegate TColumn ColumnSelector<TColumn>(TArguments arguments);
+        public delegate string DruidExpression(TArguments arguments);
 
         public abstract class UsingArgumentColumnNames
         {
@@ -72,8 +73,8 @@ namespace Apache.Druid.Querying
                 => new Filter<TColumn>.Selector(GetColumnName(dimension), value);
             public IFilter Interval<TColumn>(Expression<ColumnSelector<TColumn>> dimension, params Interval[] intervals)
                 => new Filter_.Interval(GetColumnName(dimension), intervals.Select(IntervalExtensions.Map));
-            public IFilter Expression(Expression<Func<TArguments, string>> factory)
-                => new Filter_.Expression_(DruidExpressionTextMapper.Map(factory, columnNames));
+            public IFilter Expression(Expression<DruidExpression> expression)
+                => new Filter_.Expression_(Internal.DruidExpression.Map(expression, columnNames).Expression);
         }
 
         public class MetricSpec : UsingArgumentColumnNames
@@ -123,9 +124,14 @@ namespace Apache.Druid.Querying
                 return new Having_.Filter_(filter);
             }
         }
-        public interface IVirtualColumns
+
+        public interface IExpression
         {
-            TColumn Expression<TColumn>(string expression);
+            TColumn Expression<TColumn>(DruidExpression expression);
+        }
+
+        public interface IVirtualColumns : IExpression
+        {
         }
 
         public interface IAggregations
@@ -148,15 +154,15 @@ namespace Apache.Druid.Querying
                 SimpleDataType dataType);
             TColumn Sum<TColumn>(
                 ColumnSelector<TColumn> fieldName,
-                string expression,
+                DruidExpression expression,
                 SimpleDataType dataType);
             TColumn Min<TColumn>(
                 ColumnSelector<TColumn> fieldName,
-                string expression,
+                DruidExpression expression,
                 SimpleDataType dataType);
             TColumn Max<TColumn>(
                 ColumnSelector<TColumn> fieldName,
-                string expression,
+                DruidExpression expression,
                 SimpleDataType dataType);
 
             TColumn Sum<TColumn>(ColumnSelector<TColumn> fieldName);
@@ -164,13 +170,13 @@ namespace Apache.Druid.Querying
             TColumn Max<TColumn>(ColumnSelector<TColumn> fieldName);
             TColumn Sum<TColumn>(
                 ColumnSelector<TColumn> fieldName,
-                string expression);
+                DruidExpression expression);
             TColumn Min<TColumn>(
                 ColumnSelector<TColumn> fieldName,
-                string expression);
+                DruidExpression expression);
             TColumn Max<TColumn>(
                 ColumnSelector<TColumn> fieldName,
-                string expression);
+                DruidExpression expression);
 
             TColumn First<TColumn, TTimeColumn>(
                 ColumnSelector<TColumn> fieldName,
@@ -229,17 +235,46 @@ namespace Apache.Druid.Querying
             string Last(
                 ColumnSelector<string> fieldName,
                 long maxStringBytes);
+
+            TColumn Expression<TColumn>(
+                TColumn initialValue,
+                DruidExpression fold);
+            TColumn Expression<TColumn>(
+                TColumn initialValue,
+                DruidExpression fold,
+                DruidExpression combine);
+            TColumn Expression<TColumn>(
+                TColumn initialValue,
+                DruidExpression fold,
+                DruidExpression combine,
+                DruidExpression compare);
+            TColumn Expression<TColumn>(
+                TColumn initialValue,
+                DruidExpression fold,
+                DruidExpression combine,
+                DruidExpression compare,
+                DruidExpression finalize);
+            TColumn Expression<TColumn>(
+                TColumn initialValue,
+                string? accumulatorIdentifier,
+                DruidExpression fold,
+                DruidExpression? combine,
+                DruidExpression? compare,
+                DruidExpression? finalize,
+                DruidExpression? initialValueCombine,
+                bool? isNullUnlessAggregated,
+                bool? shouldAggregateNullInputs,
+                bool? shouldCombineAggregateNullInputs,
+                long? maxSizeBytes);
         }
 
-
-        public interface IPostAggregators
+        public interface IPostAggregators : IExpression
         {
             TColumn Arithmetic<TColumn>(ArithmeticFunction fn, IEnumerable<TColumn> fields);
             TColumn Arithmetic<TColumn>(ArithmeticFunction fn, params TColumn[] fields);
             TColumn FieldAccess<TColumn>(ColumnSelector<TColumn> fieldName, bool finalizing);
             TColumn FieldAccess<TColumn>(ColumnSelector<TColumn> fieldName);
             TColumn Constant<TColumn>(TColumn value);
-            TColumn Expression<TColumn>(string expression);
         }
 
         public interface IDimensions
