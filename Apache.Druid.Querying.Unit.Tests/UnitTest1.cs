@@ -30,14 +30,14 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .WithAggregations<Aggregations>()
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .Granularity(Granularity.Minute)
-                .Dimensions(types => new
+                .Dimensions(type => new
                 (
-                    types.Default(message => message.ObjectId),
-                    types.Default(message => message.VariableName)
+                    type.Default(message => message.ObjectId),
+                    type.Default(message => message.VariableName)
                 ))
-                .Aggregations(aggregators => new(
-                    aggregators.Max(message => message.Timestamp),
-                    aggregators.Last(message => message.Value)
+                .Aggregations(type => new(
+                    type.Max(message => message.Timestamp),
+                    type.Last(message => message.Value)
                 ))
                 .LimitSpec(
                     5000,
@@ -58,14 +58,14 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .Granularity(Granularity.Minute)
                 .VirtualColumns(type => type.Expression<DateTimeOffset>("__time"))
-                .Dimensions(types => new
+                .Dimensions(type => new
                 (
-                    types.Default(message => message.Source.ObjectId),
-                    types.Default(message => message.Source.VariableName)
+                    type.Default(message => message.Source.ObjectId),
+                    type.Default(message => message.Source.VariableName)
                 ))
-                .Aggregations(aggregators => new(
-                    aggregators.Max(message => message.Source.Timestamp),
-                    aggregators.Last(message => message.Source.Value)
+                .Aggregations(type => new(
+                    type.Max(message => message.Source.Timestamp),
+                    type.Last(message => message.Source.Value)
                 ))
                 .LimitSpec(
                     5000,
