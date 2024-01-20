@@ -27,7 +27,7 @@ namespace Apache.Druid.Querying.Internal.Sections
             bool convertKeyToCamelCase = true)
             where TSelf : IQuery<TSelf>
         {
-            var calls = SectionFactoryInterpreter
+            var calls = SectionFactoryParser
                 .Execute(
                     factory,
                     typeof(TElementFactory),

@@ -67,7 +67,7 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
         }
     }
 
-    internal static class SectionFactoryInterpreter
+    internal static class SectionFactoryParser
     {
         public static IEnumerable<ElementFactoryCall> Execute(
             LambdaExpression querySectionFactory,
@@ -79,7 +79,7 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
                 var lambda = selector as LambdaExpression ?? throw new InvalidOperationException();
                 if (lambda.Parameters.Count is not 1 || lambda.Parameters[0].Type != argumentsType)
                     throw new InvalidOperationException();
-                return SectionFactoryInterpreter.GetSelectedProperty(lambda.Body);
+                return SectionFactoryParser.GetSelectedProperty(lambda.Body);
             }
 
             ElementFactoryCall Execute(Expression factoryCall, string? resultMemberName)
