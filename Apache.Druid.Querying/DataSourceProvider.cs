@@ -75,12 +75,12 @@ namespace Apache.Druid.Querying
             => first.Union(second, third);
 
         public DataSource<TResult> Query<TSource, TResult>(DataSource<TSource> dataSource, IQueryWithSource<TSource>.AndResult<TResult> query)
-            => dataSource.WrapQuery(query);
+            => dataSource.WrapOverQuery(query);
 
         public DataSource<TResult> Query<TSource, TResult, TMapper>(
             DataSource<TSource> dataSource, IQueryWithSource<TSource>.AndMappedResult<TResult, TMapper> query)
             where TMapper : IQueryResultMapper<TResult>, new()
-            => dataSource.WrapQuery(query);
+            => dataSource.WrapOverQuery(query);
 
         public DataSource<InnerJoinResult<TLeft, TRight>> InnerJoin<TLeft, TRight>(DataSource<TLeft> left, DataSource<TRight> right, string rightPrefix, string condition)
             => left.InnerJoin(right, rightPrefix, condition);

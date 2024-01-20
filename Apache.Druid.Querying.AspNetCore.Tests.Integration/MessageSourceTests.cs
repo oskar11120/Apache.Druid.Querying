@@ -54,7 +54,7 @@ internal class MessageSourceTests
             .AggregationsDefaults();
         var firstSource = Druid
             .Variables
-            .WrapQuery(first);
+            .WrapOverQuery(first);
         var firstJson = firstSource.GetJsonRepresentation();
         var second = new Query<WithTimestamp<Aggregations>>
             .Scan()

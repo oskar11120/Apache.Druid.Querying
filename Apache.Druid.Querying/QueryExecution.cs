@@ -194,10 +194,10 @@ namespace Apache.Druid.Querying
                 yield return result!;
         }
 
-        public DataSource<TResult> WrapQuery<TResult>(IQueryWithSource<TSource>.AndResult<TResult> query)
+        public DataSource<TResult> WrapOverQuery<TResult>(IQueryWithSource<TSource>.AndResult<TResult> query)
             => Wrap<TResult>(query);
 
-        public DataSource<TResult> WrapQuery<TResult, TMapper>(IQueryWithSource<TSource>.AndMappedResult<TResult, TMapper> query)
+        public DataSource<TResult> WrapOverQuery<TResult, TMapper>(IQueryWithSource<TSource>.AndMappedResult<TResult, TMapper> query)
             where TMapper : IQueryResultMapper<TResult>, new()
             => Wrap<TResult>(query);
 
