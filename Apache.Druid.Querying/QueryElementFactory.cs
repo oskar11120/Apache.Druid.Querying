@@ -128,9 +128,15 @@ namespace Apache.Druid.Querying
         public interface IExpression
         {
             TColumn Expression<TColumn>(DruidExpression expression);
+
+            public interface WithOutputType : IExpression
+            {
+                TColumn Expression<TColumn>(DruidExpression expression, string outputType);
+                TColumn Expression<TColumn>(DruidExpression expression, SimpleDataType outputType);
+            }
         }
 
-        public interface IVirtualColumns : IExpression
+        public interface IVirtualColumns : IExpression.WithOutputType
         {
         }
 
@@ -268,13 +274,15 @@ namespace Apache.Druid.Querying
                 long? maxSizeBytes);
         }
 
-        public interface IPostAggregators : IExpression
+        public interface IPostAggregators : IExpression.WithOutputType
         {
             TColumn Arithmetic<TColumn>(ArithmeticFunction fn, IEnumerable<TColumn> fields);
             TColumn Arithmetic<TColumn>(ArithmeticFunction fn, params TColumn[] fields);
             TColumn FieldAccess<TColumn>(ColumnSelector<TColumn> fieldName, bool finalizing);
             TColumn FieldAccess<TColumn>(ColumnSelector<TColumn> fieldName);
             TColumn Constant<TColumn>(TColumn value);
+            TColumn Expression<TColumn>(DruidExpression expression, string outputType, string? ordering);
+            TColumn Expression<TColumn>(DruidExpression expression, SimpleDataType outputType, string? ordering);
         }
 
         public interface IDimensions
