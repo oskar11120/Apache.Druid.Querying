@@ -14,7 +14,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .BatchSize(2000)
                 .Offset(4000)
                 .Filter(type => type.Range(
-                    columns => columns.Value,
+                    type => type.Value,
                     lower: 100))
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .Order(OrderDirection.Ascending)
@@ -30,10 +30,10 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .WithAggregations<Aggregations>()
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .Granularity(Granularity.Minute)
-                .Dimensions(dimensions => new
+                .Dimensions(types => new
                 (
-                    dimensions.Default(message => message.ObjectId),
-                    dimensions.Default(message => message.VariableName)
+                    types.Default(message => message.ObjectId),
+                    types.Default(message => message.VariableName)
                 ))
                 .Aggregations(aggregators => new(
                     aggregators.Max(message => message.Timestamp),
@@ -41,13 +41,13 @@ namespace Apache.Druid.Querying.Unit.Tests
                 ))
                 .LimitSpec(
                     5000,
-                    columns: columns => new[]
+                    columns: type => new[]
                     {
-                        columns.OrderBy(tuple => tuple.Dimensions.ObjectId),
-                        columns.OrderBy(tuple => tuple.Aggregations.LastValue)
+                        type.OrderBy(data => data.Dimensions.ObjectId),
+                        type.OrderBy(data => data.Aggregations.LastValue)
                     })
-                .HavingFilter(filter => filter.Range(
-                    tuple => tuple.Aggregations.LastValue,
+                .HavingFilter(type => type.Range(
+                    data => data.Aggregations.LastValue,
                     lower: 0))
                 .MapToJson();
 
@@ -57,11 +57,11 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .WithAggregations<Aggregations>()
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .Granularity(Granularity.Minute)
-                .VirtualColumns(columns => columns.Expression<DateTimeOffset>("__time"))
-                .Dimensions(dimensions => new
+                .VirtualColumns(type => type.Expression<DateTimeOffset>("__time"))
+                .Dimensions(types => new
                 (
-                    dimensions.Default(message => message.Source.ObjectId),
-                    dimensions.Default(message => message.Source.VariableName)
+                    types.Default(message => message.Source.ObjectId),
+                    types.Default(message => message.Source.VariableName)
                 ))
                 .Aggregations(aggregators => new(
                     aggregators.Max(message => message.Source.Timestamp),
@@ -69,13 +69,13 @@ namespace Apache.Druid.Querying.Unit.Tests
                 ))
                 .LimitSpec(
                     5000,
-                    columns: columns => new[]
+                    columns: type => new[]
                     {
-                        columns.OrderBy(tuple => tuple.Dimensions.ObjectId),
-                        columns.OrderBy(tuple => tuple.Aggregations.LastValue)
+                        type.OrderBy(data => data.Dimensions.ObjectId),
+                        type.OrderBy(data => data.Aggregations.LastValue)
                     })
-                .HavingFilter(filter => filter.Range(
-                    tuple => tuple.Aggregations.LastValue,
+                .HavingFilter(type => type.Range(
+                    data => data.Aggregations.LastValue,
                     lower: 0))
                 .MapToJson();
         }
@@ -88,20 +88,20 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .WithNoVirtualColumns
                 .WithAggregations<Aggregations>()
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
-                .Dimension(dimension => dimension.Default(message => message.ObjectId))
+                .Dimension(type => type.Default(message => message.ObjectId))
                 .Threshold(5)
                 .Granularity(Granularity.Minute)
-                .Filter(filter => filter.Or(
-                    filter.Null(message => message.Value),
-                    filter.Equals(
+                .Filter(type => type.Or(
+                    type.Null(message => message.Value),
+                    type.Equals(
                         message => message.ObjectId,
                         Guid.NewGuid())))
-                .Aggregations(aggregations => new(
-                    aggregations.Max(message => message.Timestamp),
-                    aggregations.Last(message => message.Value)
+                .Aggregations(type => new(
+                    type.Max(message => message.Timestamp),
+                    type.Last(message => message.Value)
                 ))
-                .Metric(metric => metric.Numeric(
-                    tuple => tuple.Aggregations.LastValue))
+                .Metric(type => type.Numeric(
+                    data => data.Aggregations.LastValue))
                 .Context(new() { MinTopNThreshold = 5 })
                 .MapToJson();
 
@@ -110,22 +110,22 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .WithVirtualColumns<DateTimeOffset>
                 .WithAggregations<Aggregations>()
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
-                .VirtualColumns(columns => columns.Expression<DateTimeOffset>("__time"))
-                .Filter(filter => filter.Or(
-                    filter.Null(pair => pair.VirtualColumns),
-                    filter.Equals(
+                .VirtualColumns(type => type.Expression<DateTimeOffset>("__time"))
+                .Filter(type => type.Or(
+                    type.Null(pair => pair.VirtualColumns),
+                    type.Equals(
                         pair => pair.Source.ObjectId,
                         Guid.NewGuid())))
-                .Dimension(dimension => dimension.Default(
+                .Dimension(type => type.Default(
                     message => message.Source.ObjectId))
                 .Threshold(5)
                 .Granularity(Granularity.Minute)
-                .Aggregations(aggregations => new(
-                    aggregations.Max(tuple => tuple.Source.Timestamp),
-                    aggregations.Last(tuple => tuple.Source.Value)
+                .Aggregations(type => new(
+                    type.Max(data => data.Source.Timestamp),
+                    type.Last(data => data.Source.Value)
                 ))
-                .Metric(metric => metric.Numeric(
-                    tuple => tuple.Aggregations.LastValue))
+                .Metric(type => type.Numeric(
+                    data => data.Aggregations.LastValue))
                 .Context(new() { MinTopNThreshold = 5 })
                 .MapToJson();
 
@@ -135,23 +135,23 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .WithAggregations<Aggregations>
                 .WithPostAggregations<double>()
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
-                .Dimension(dimension => new(dimension.Default(
+                .Dimension(type => new(type.Default(
                     message => message.ObjectId)))
                 .Threshold(5)
                 .Granularity(Granularity.Minute)
-                .Filter(filter => filter.Or(
-                    filter.Null(message => message.Value),
-                    filter.Equals(
+                .Filter(type => type.Or(
+                    type.Null(message => message.Value),
+                    type.Equals(
                         message => message.ObjectId,
                         Guid.NewGuid())))
-                .Aggregations(aggregations => new(
-                    aggregations.Max(message => message.Timestamp),
-                    aggregations.Last(message => message.Value)
+                .Aggregations(type => new(
+                    type.Max(message => message.Timestamp),
+                    type.Last(message => message.Value)
                 ))
-                .PostAggregations(postAggregators => postAggregators.Arithmetic(
+                .PostAggregations(type => type.Arithmetic(
                     ArithmeticFunction.Add,
-                    postAggregators.FieldAccess(aggregations => aggregations.LastValue, true)))
-                .Metric(metric => metric.Numeric(tuple => tuple.PostAggregations))
+                    type.FieldAccess(type => type.LastValue, true)))
+                .Metric(type => type.Numeric(data => data.PostAggregations))
                 .Context(new() { MinTopNThreshold = 5 })
                 .MapToJson();
 
@@ -161,26 +161,26 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .WithAggregations<Aggregations>
                 .WithPostAggregations<PostAggregations>()
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
-                .VirtualColumns(columns => new(columns.Expression<DateTimeOffset>("__time")))
-                .Filter(filter => filter.Or(
-                    filter.Null(pair => pair.VirtualColumns.TReal),
-                    filter.Equals(
+                .VirtualColumns(type => new(type.Expression<DateTimeOffset>("__time")))
+                .Filter(type => type.Or(
+                    type.Null(pair => pair.VirtualColumns.TReal),
+                    type.Equals(
                         pair => pair.Source.ObjectId,
                         Guid.NewGuid())))
-                .Dimension(dimension => new(
-                    dimension.Default(message => message.Source.ObjectId)))
+                .Dimension(type => new(
+                    type.Default(message => message.Source.ObjectId)))
                 .Threshold(5)
                 .Granularity(Granularity.Minute)
-                .Aggregations(aggregations => new(
-                    aggregations.Max(tuple => tuple.Source.Timestamp),
-                    aggregations.Last(tuple => tuple.Source.Value)
+                .Aggregations(type => new(
+                    type.Max(data => data.Source.Timestamp),
+                    type.Last(data => data.Source.Value)
                 ))
-                .PostAggregations(postAggregators => new(
-                    postAggregators.Arithmetic(
+                .PostAggregations(type => new(
+                    type.Arithmetic(
                         ArithmeticFunction.Add,
-                        postAggregators.FieldAccess(aggregations => aggregations.LastValue, true))))
-                .Metric(metric => metric.Numeric(
-                    tuple => tuple.PostAggregations.Sum))
+                        type.FieldAccess(type => type.LastValue, true))))
+                .Metric(type => type.Numeric(
+                    data => data.PostAggregations.Sum))
                 .Context(new() { MinTopNThreshold = 5 })
                 .MapToJson();
         }
@@ -195,12 +195,12 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .Order(OrderDirection.Ascending)
                 .Granularity(Granularity.Minute)
-                .Filter(filter => filter.Or(
-                    filter.Null(message => message.Value),
-                    filter.Equals(
+                .Filter(type => type.Or(
+                    type.Null(message => message.Value),
+                    type.Equals(
                         message => message.ObjectId,
                         Guid.NewGuid())))
-                .Aggregations(aggregations => aggregations.Last(message => message.Value, SimpleDataType.Float))
+                .Aggregations(type => type.Last(message => message.Value, SimpleDataType.Float))
                 .MapToJson();
 
             var test1 = new Query<Message>
@@ -210,15 +210,15 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .Order(OrderDirection.Ascending)
                 .Granularity(Granularity.Minute)
-                .VirtualColumns(columns => new(columns.Expression<DateTimeOffset>("__time")))
-                .Filter(filter => filter.Or(
-                    filter.Null(pair => pair.VirtualColumns.TReal),
-                    filter.Equals(
+                .VirtualColumns(type => new(type.Expression<DateTimeOffset>("__time")))
+                .Filter(type => type.Or(
+                    type.Null(pair => pair.VirtualColumns.TReal),
+                    type.Equals(
                         pair => pair.Source.ObjectId,
                         Guid.NewGuid())))
-                .Aggregations(aggregations => new(
-                    aggregations.Max(tuple => tuple.Source.Timestamp),
-                    aggregations.Last(tuple => tuple.Source.Value)
+                .Aggregations(type => new(
+                    type.Max(data => data.Source.Timestamp),
+                    type.Last(data => data.Source.Value)
                 ))
                 .MapToJson();
 
@@ -230,20 +230,20 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .Order(OrderDirection.Ascending)
                 .Granularity(Granularity.Minute)
-                .Filter(filter => filter.Or(
-                    filter.Null(message => message.Value),
-                    filter.Equals(
+                .Filter(type => type.Or(
+                    type.Null(message => message.Value),
+                    type.Equals(
                         message => message.ObjectId,
                         Guid.NewGuid())))
-                .Aggregations(aggregations => new(
-                    aggregations.Max(message => message.Timestamp),
-                    aggregations.Last(message => message.Value)
+                .Aggregations(type => new(
+                    type.Max(message => message.Timestamp),
+                    type.Last(message => message.Value)
                 ))
-                .PostAggregations(postAggregators => new
+                .PostAggregations(type => new
                 (
-                    postAggregators.Arithmetic(
+                    type.Arithmetic(
                         ArithmeticFunction.Add,
-                        postAggregators.FieldAccess(aggregations => aggregations.LastValue, true))
+                        type.FieldAccess(type => type.LastValue, true))
                 ))
                 .MapToJson();
 
@@ -255,21 +255,21 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow))
                 .Order(OrderDirection.Ascending)
                 .Granularity(Granularity.Minute)
-                .VirtualColumns(columns => new(columns.Expression<DateTimeOffset>("__time")))
-                .Filter(filter => filter.Or(
-                    filter.Null(pair => pair.VirtualColumns.TReal),
-                    filter.Equals(
+                .VirtualColumns(type => new(type.Expression<DateTimeOffset>("__time")))
+                .Filter(type => type.Or(
+                    type.Null(pair => pair.VirtualColumns.TReal),
+                    type.Equals(
                         pair => pair.Source.ObjectId,
                         Guid.NewGuid())))
-                .Aggregations(aggregations => new(
-                    aggregations.Max(tuple => tuple.Source.Timestamp),
-                    aggregations.Last(tuple => tuple.Source.Value)
+                .Aggregations(type => new(
+                    type.Max(data => data.Source.Timestamp),
+                    type.Last(data => data.Source.Value)
                 ))
-                .PostAggregations(postAggregators => new
+                .PostAggregations(type => new
                 (
-                    postAggregators.Arithmetic(
+                    type.Arithmetic(
                         ArithmeticFunction.Add,
-                        postAggregators.FieldAccess(aggregations => aggregations.LastValue, true))
+                        type.FieldAccess(type => type.LastValue, true))
                 ))
                 .MapToJson();
         }
