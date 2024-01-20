@@ -73,6 +73,16 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
             public string Dimension { get; }
             public IEnumerable<string> Intervals { get; }
         }
+
+        public sealed class Expression_ : Filter
+        {
+            public string Expression { get; }
+
+            public Expression_(string expression)
+            {
+                Expression = expression;
+            }
+        }
     }
 
     internal abstract class Filter<TColumn> : Filter.WithColumn
