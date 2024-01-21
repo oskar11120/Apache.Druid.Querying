@@ -77,7 +77,7 @@ internal class MessageSourceTests
             });
         var join = Druid
             .Variables
-            .LeftJoin(inline, "r.", "variable == r.variable");
+            .LeftJoin(inline, data => $"{data.Left.VariableName} == {data.Right.Variable}");
         var query = new Query<LeftJoinResult<VariableMessage, InlineData>>
             .Scan()
             .Interval(interval)

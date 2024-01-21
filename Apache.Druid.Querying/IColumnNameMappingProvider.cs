@@ -51,16 +51,23 @@ namespace Apache.Druid.Querying
                 return new(All = All.Add(type, result));
             }
 
-            public ImmutableBuilder Update<TModel>(Func<ImmutableArray<PropertyColumnNameMapping>, ImmutableArray<PropertyColumnNameMapping>> update)
+            public ImmutableBuilder Update<TModel>(Func<PropertyColumnNameMapping, PropertyColumnNameMapping> update)
             {
                 var type = typeof(TModel);
-                if (All.TryGetValue(type, out var existing))
+                if (!All.TryGetValue(type, out var existing))
                 {
-                    var result = All.Remove(type);
-                    return new(All = result.Add(type, update(existing)));
+                    throw new InvalidOperationException($"No mapping for type {type} exist.");
                 }
 
-                throw new InvalidOperationException($"No mapping for type {type} exist.");
+                var @new = type
+                    .GetProperties()
+                    .Where(property => !existing.Any(mapping => mapping.Property == property.Name))
+                    .Select(property => new PropertyColumnNameMapping(property.Name, property.Name))
+                    .Concat(existing)
+                    .Select(update)
+                    .ToImmutableArray();
+                var result = All.Remove(type);
+                return new(All = result.Add(type, @new));
             }
 
             public ImmutableBuilder Combine(ImmutableBuilder other)

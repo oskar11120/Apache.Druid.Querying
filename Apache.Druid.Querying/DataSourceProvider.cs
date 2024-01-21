@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using MappingBuilders = Apache.Druid.Querying.IColumnNameMappingProvider.ImmutableBuilder;
@@ -82,11 +83,19 @@ namespace Apache.Druid.Querying
             where TMapper : IQueryResultMapper<TResult>, new()
             => dataSource.WrapOverQuery(query);
 
-        public DataSource<InnerJoinResult<TLeft, TRight>> InnerJoin<TLeft, TRight>(DataSource<TLeft> left, DataSource<TRight> right, string rightPrefix, string condition)
-            => left.InnerJoin(right, rightPrefix, condition);
+        public DataSource<InnerJoinData<TLeft, TRight>> InnerJoin<TLeft, TRight>(
+            DataSource<TLeft> left,
+            DataSource<TRight> right,
+            Expression<QueryElementFactory<InnerJoinData<TLeft, TRight>>.DruidExpression> condition,
+            string rightPrefix = "r.")
+            => left.InnerJoin(right, condition, rightPrefix);
 
-        public DataSource<LeftJoinResult<TLeft, TRight>> LeftJoin<TLeft, TRight>(DataSource<TLeft> left, DataSource<TRight> right, string rightPrefix, string condition)
-            => left.LeftJoin(right, rightPrefix, condition);
+        public DataSource<LeftJoinResult<TLeft, TRight>> LeftJoin<TLeft, TRight>(
+            DataSource<TLeft> left,
+            DataSource<TRight> right,
+            Expression<QueryElementFactory<LeftJoinData<TLeft, TRight>>.DruidExpression> condition,
+            string rightPrefix = "r.")
+            => left.LeftJoin(right, condition, rightPrefix);
 
         private DataSource<TSource> Create<TSource>(MappingBuilders mappings, DataSourceJsonProvider createJson)
             => new(() => Options, createJson, mappings);

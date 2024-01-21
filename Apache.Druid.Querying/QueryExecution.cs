@@ -9,6 +9,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -68,17 +69,18 @@ namespace Apache.Druid.Querying
         }
     }
 
-    public readonly record struct InnerJoinResult<TLeft, TRight>(TLeft Left, TRight Right)
+    public readonly record struct InnerJoinData<TLeft, TRight>(TLeft Left, TRight Right)
     {
-        private sealed class Deserializer : QueryResultElement.IDeserializer<InnerJoinResult<TLeft, TRight>>
+        private sealed class Deserializer : QueryResultElement.IDeserializer<InnerJoinData<TLeft, TRight>>
         {
-            public InnerJoinResult<TLeft, TRight> Deserialize(ref QueryResultElement.DeserializerContext context)
+            public InnerJoinData<TLeft, TRight> Deserialize(ref QueryResultElement.DeserializerContext context)
                 => new(
                     context.Deserialize<TLeft>(),
                     context.Deserialize<TRight>());
         }
     }
 
+    public readonly record struct LeftJoinData<TLeft, TRight>(TLeft Left, TRight Right);
     public readonly record struct LeftJoinResult<TLeft, TRight>(TLeft Left, TRight? Right)
     {
         private sealed class Deserializer : QueryResultElement.IDeserializer<LeftJoinResult<TLeft, TRight>>
@@ -208,33 +210,41 @@ namespace Apache.Druid.Querying
                 ["type"] = "query",
                 ["query"] = MapQueryToJson(query)
             },
-            columnNameMappings, 
+            columnNameMappings,
             query.SectionAtomicity);
 
-        public DataSource<InnerJoinResult<TSource, TRight>> InnerJoin<TRight>(DataSource<TRight> right, string rightPrefix, string condition)
-            => Join<TRight, InnerJoinResult<TSource, TRight>>(right, rightPrefix, condition, "INNER");
+        public DataSource<InnerJoinData<TSource, TRight>> InnerJoin<TRight>(
+            DataSource<TRight> right,
+            Expression<QueryElementFactory<InnerJoinData<TSource, TRight>>.DruidExpression> condition,
+            string rightPrefix = "r.")
+            => Join<TRight, InnerJoinData<TSource, TRight>, InnerJoinData<TSource, TRight>>(right, rightPrefix, condition, "INNER");
 
-        public DataSource<LeftJoinResult<TSource, TRight>> LeftJoin<TRight>(DataSource<TRight> right, string rightPrefix, string condition)
-            => Join<TRight, LeftJoinResult<TSource, TRight>>(right, rightPrefix, condition, "LEFT");
+        public DataSource<LeftJoinResult<TSource, TRight>> LeftJoin<TRight>(
+            DataSource<TRight> right,
+            Expression<QueryElementFactory<LeftJoinData<TSource, TRight>>.DruidExpression> condition,
+            string rightPrefix = "r.")
+            => Join<TRight, LeftJoinData<TSource, TRight>, LeftJoinResult<TSource, TRight>>(right, rightPrefix, condition, "LEFT");
 
-        private DataSource<TResult> Join<TRight, TResult>(
-            DataSource<TRight> right, string rightPrefix, string condition, string joinType) => new(
-            getOptions,
-            () => new JsonObject
-            {
-                ["type"] = "join",
-                ["left"] = GetJsonRepresentation(),
-                ["right"] = right.GetJsonRepresentation(),
-                [nameof(rightPrefix)] = rightPrefix,
-                [nameof(condition)] = condition,
-                [nameof(joinType)] = joinType
-            },
-            columnNameMappings
+        private DataSource<TResult> Join<TRight, TData, TResult>(
+            DataSource<TRight> right, string rightPrefix, Expression<QueryElementFactory<TData>.DruidExpression> condition, string joinType)
+        {
+            var mappings = columnNameMappings
                 .Combine(right.columnNameMappings)
-                .Update<TRight>(mappings => mappings
-                    .Select(mapping => mapping with { ColumnName = mapping.ColumnName + rightPrefix })
-                    .ToImmutableArray()),
-            SectionAtomicity.IProvider.Builder.CreateCombined(sectionAtomicity, right.sectionAtomicity));
+                .Update<TRight>(mapping => mapping with { ColumnName = rightPrefix + mapping.ColumnName });
+            return new(
+                getOptions,
+                () => new JsonObject
+                {
+                    ["type"] = "join",
+                    ["left"] = GetJsonRepresentation(),
+                    ["right"] = right.GetJsonRepresentation(),
+                    [nameof(rightPrefix)] = rightPrefix,
+                    [nameof(condition)] = DruidExpression.Map(condition, mappings).Expression,
+                    [nameof(joinType)] = joinType
+                },
+                mappings,
+                SectionAtomicity.IProvider.Builder.CreateCombined(sectionAtomicity, right.sectionAtomicity));
+        }
 
         public DataSource<Union<TSource, TSecond>> Union<TSecond>(DataSource<TSecond> second)
             => new(
