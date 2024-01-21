@@ -279,7 +279,7 @@ namespace Apache.Druid.Querying.Unit.Tests
             [property: DataSourceColumn("variable")] string VariableName,
             Guid ObjectId,
             double Value,
-            DateTimeOffset Timestamp);
+            [property: DataSourceTimeColumn] DateTimeOffset Timestamp);
         record VirtualColumns(DateTimeOffset TReal);
         record Aggregations(DateTimeOffset TMax, double LastValue);
         record PostAggregations(double Sum);

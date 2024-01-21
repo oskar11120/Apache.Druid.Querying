@@ -7,7 +7,7 @@ namespace Apache.Druid.Querying.Internal
     {
         public static MapResult Map(LambdaExpression factory, IColumnNameMappingProvider columnNameMappings)
         {
-            Exception Invalid() => new InvalidOperationException($"{factory} has to return an interpolated string.");
+            Exception Invalid() => new InvalidOperationException($"{factory} has to return an interpolated string."); // TODO Better error message.
             var body = factory.Body;
 
             if(body is ConstantExpression constant_ && constant_.Type == typeof(string)) 
