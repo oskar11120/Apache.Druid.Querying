@@ -1,5 +1,6 @@
 ﻿using Apache.Druid.Querying.Internal;
 using FluentAssertions;
+using System.Linq.Expressions;
 
 namespace Apache.Druid.Querying.Unit.Tests.Internal
 {
@@ -9,10 +10,10 @@ namespace Apache.Druid.Querying.Unit.Tests.Internal
         public void Map_Works()
         {
             var columnNameMap = IColumnNameMappingProvider.ImmutableBuilder.Create<Tests.Message>();
-            var result = DruidExpression.Map<Tests.Message>(
-                message => $"{message.VariableName} == 42",
-                columnNameMap);
-            result.Expression.Should().Be("variable == 42");
+            string Map(Expression<QueryElementFactory<Tests.Message>.DruidExpression> factory)
+                => DruidExpression.Map(factory, columnNameMap).Expression;
+            var result = Map(message => $"{message.VariableName} == 42");
+            result.Should().Be("variable == 42");
         }
     }
 }

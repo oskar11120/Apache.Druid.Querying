@@ -30,7 +30,14 @@ namespace Apache.Druid.Querying.Internal.Sections
                         scalar.Name,
                         JsonSerializer.SerializeToNode(scalar.Value, scalar.Type, serializerOptions));
                 },
-                (nested, element) => element.Add(nested.Name, Map(nested.Calls, true)));
+                (nested, element) => element.Add(nested.Name, Map(nested.Calls, true)),
+                (expression, result) =>
+                {
+                    var (value, columnNames) = DruidExpression.Map(expression.Value, columnNameMappings);
+                    result.Add(expression.Name, value);
+                    if (options.ExpressionColumnNamesKey is string existing)
+                        result.Add(existing, JsonSerializer.SerializeToNode(columnNames, serializerOptions));
+                });
 
             JsonObject MapCall(ElementFactoryCall call, bool nested)
             {
@@ -70,7 +77,8 @@ namespace Apache.Druid.Querying.Internal.Sections
             Func<ElementFactoryCall.Parameter.Scalar, bool>? SkipScalarParameter = null,
             Func<ElementFactoryCall.Parameter.Scalar, ElementFactoryCall.Parameter.Scalar>? ReplaceScalarParameter = null,
             string SectionColumnNameKey = "name",
-            bool ForceSingle = false)
+            bool ForceSingle = false,
+            string? ExpressionColumnNamesKey = null)
         {
             public static readonly Options Default = new();
         }

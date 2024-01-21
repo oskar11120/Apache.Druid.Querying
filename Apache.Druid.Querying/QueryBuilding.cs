@@ -195,7 +195,7 @@ namespace Apache.Druid.Querying
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IAggregations, TAggregations>> factory)
             where TQuery : IQuery<TQuery>
             => query.AddOrUpdateSectionWithSectionFactory(nameof(Aggregations), factory, new(
-                static call =>
+                MapType: static call =>
                 {
                     return call.MethodName switch
                     {
@@ -215,7 +215,8 @@ namespace Apache.Druid.Querying
                         _ => call.MethodName.ToCamelCase()
                     };
                 },
-                static scalar => scalar.Type == typeof(SimpleDataType)));
+                SkipScalarParameter: static scalar => scalar.Type == typeof(SimpleDataType),
+                ExpressionColumnNamesKey: "fields"));
 
         public static TQuery PostAggregations<TArguments, TPostAggregations, TQuery>(
             this IQueryWith.PostAggregations<TArguments, TPostAggregations, TQuery> query,

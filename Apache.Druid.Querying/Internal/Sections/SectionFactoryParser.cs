@@ -3,8 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Xml.Linq;
 
 namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 {
@@ -24,18 +22,20 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 
         public static class Parameter
         {
-            public sealed record Any(ArgumentsMemberSelector? Selector = null, Scalar? Scalar = null, Nested? Nested = null)
+            public sealed record Any(ArgumentsMemberSelector? Selector = null, Scalar? Scalar = null, Nested? Nested = null, DruidExpression? Expression = null)
             {
                 public TResult Switch<TResult, TArg>(
                     TArg argument,
                     Func<ArgumentsMemberSelector, TArg, TResult> ifMemberSelector,
                     Func<Scalar, TArg, TResult> ifScalar,
-                    Func<Nested, TArg, TResult> ifNested)
-                    => (Selector, Scalar, Nested) switch
+                    Func<Nested, TArg, TResult> ifNested,
+                    Func<DruidExpression, TArg, TResult> ifExpression)
+                    => (Selector, Scalar, Nested, Expression) switch
                     {
-                        (ArgumentsMemberSelector selector, null, null) => ifMemberSelector(selector, argument),
-                        (null, Scalar scalar, null) => ifScalar(scalar, argument),
-                        (null, null, Nested nested) => ifNested(nested, argument),
+                        (ArgumentsMemberSelector selector, null, null, null) => ifMemberSelector(selector, argument),
+                        (null, Scalar scalar, null, null) => ifScalar(scalar, argument),
+                        (null, null, Nested nested, null) => ifNested(nested, argument),
+                        (null, null, null, DruidExpression expression) => ifExpression(expression, argument),
                         _ => throw new InvalidOperationException()
                     };
 
@@ -43,8 +43,9 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
                     TArg argument,
                     Action<ArgumentsMemberSelector, TArg> ifMemberSelector,
                     Action<Scalar, TArg> ifScalar,
-                    Action<Nested, TArg> ifNested) => Switch(
-                        (argument, ifMemberSelector, ifScalar, ifNested),
+                    Action<Nested, TArg> ifNested,
+                    Action<DruidExpression, TArg> ifExpression) => Switch(
+                        (argument, ifMemberSelector, ifScalar, ifNested, ifExpression),
                         (selector, arg) =>
                         {
                             arg.ifMemberSelector(selector, arg.argument);
@@ -59,12 +60,18 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
                         {
                             arg.ifNested(nested, arg.argument);
                             return 0;
+                        },
+                        (expression, arg) => 
+                        {
+                            arg.ifExpression(expression, arg.argument);
+                            return 0;
                         });
             }
 
             public sealed record ArgumentsMemberSelector(Type SelectedType, string SelectedName, string Name, Type SelectedFromType);
             public sealed record Scalar(Type Type, string Name, object? Value);
             public sealed record Nested(IReadOnlyList<ElementFactoryCall> Calls, string Name);
+            public sealed record DruidExpression(LambdaExpression Value, string Name);
         }
     }
 
@@ -98,17 +105,21 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
                     {
                         var paramType = @param.ParameterType;
                         var paramName = @param.Name!;
-                        var expectedMemberSelector =
-                            paramType.IsGenericType &&
-                            paramType.GetGenericTypeDefinition() == typeof(QueryElementFactory<>.ColumnSelector<>);
+                        var openGeneric = paramType.IsGenericType ? paramType.GetGenericTypeDefinition() : null;
+
+                        var isMemberSelector = openGeneric == typeof(QueryElementFactory<>.ColumnSelector<>);
+                        if (isMemberSelector)
+                            return new ElementFactoryCall.Parameter.Any(Selector: Map(GetSelectedProperty(arg), paramName));
+
+                        var isDruidExpression = openGeneric == typeof(QueryElementFactory<>.DruidExpression);
+                        if (isDruidExpression)
+                            return new(Expression: new((LambdaExpression)arg, paramName));
+
                         var isNested = paramType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(paramType);
-                        ElementFactoryCall.Parameter.Any result = (expectedMemberSelector, isNested) switch
-                        {
-                            (true, _) => new(Selector: Map(GetSelectedProperty(arg), paramName)),
-                            (_, true) => new(Nested: new(Execute__(arg).ToList(), paramName)),
-                            _ => new(Scalar: new ElementFactoryCall.Parameter.Scalar(paramType, paramName, arg.GetValue()))
-                        };
-                        return result;
+                        if (isNested)
+                            return new(Nested: new(Execute__(arg).ToList(), paramName));
+
+                        return new(Scalar: new ElementFactoryCall.Parameter.Scalar(paramType, paramName, arg.GetValue()));
                     })
                     .ToList();
                 return new(resultMemberName, methodName, callParameters);

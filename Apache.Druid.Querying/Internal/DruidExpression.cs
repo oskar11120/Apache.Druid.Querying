@@ -5,10 +5,9 @@ namespace Apache.Druid.Querying.Internal
 {
     internal static class DruidExpression
     {
-        public static MapResult Map<TArguments>(Expression<QueryElementFactory<TArguments>.DruidExpression> factory, IColumnNameMappingProvider columnNameMappings)
+        public static MapResult Map(LambdaExpression factory, IColumnNameMappingProvider columnNameMappings)
         {
-            Exception Invalid() => new InvalidOperationException($"{factory} has to return an interpolated string where each argument is a property of {typeof(TArguments)}.");
-
+            Exception Invalid() => new InvalidOperationException($"{factory} has to return an interpolated string.");
             if (factory.Body is not MethodCallExpression call ||
                 call.Method.DeclaringType != typeof(string) ||
                 call.Method.Name != nameof(string.Format))
