@@ -78,47 +78,39 @@ internal sealed class JsonStreamReader
         return text.Length;
     }
 
-    public bool ReadToDepth(int depth, bool updateState = true)
+    public async ValueTask<JsonTokenType> ReadNextAsync(CancellationToken token, bool updateState = true)
     {
-        var reader = GetReader();
-        var found = false;
-
-        while (reader.Read())
+        bool Try(out JsonTokenType type)
         {
-            if (reader.CurrentDepth <= depth)
+            var reader = GetReader();
+            if (reader.Read())
             {
-                found = true;
-                break;
+                type = reader.TokenType;
+                if (updateState)
+                    UpdateState(reader);
+                return true;
             }
+
+            type = default;
+            return false;
         }
 
-        if (updateState)
-            UpdateState(reader);
-        return found;
+        JsonTokenType type;
+        while (!Try(out type))
+            await AdvanceAsync(token);
+        return type;
     }
 
-    public bool ReadNext([NotNullWhen(true)] out JsonTokenType tokenType)
+    public async ValueTask<long> ReadPastAllOfGreaterThanCurrentDepth(CancellationToken token, bool updateState = true)
     {
-        var reader = GetReader();
-
-        if (reader.Read())
-        {
-            tokenType = reader.TokenType;
-            return true;
-        }
-
-        tokenType = default;
-        return false;
-    }
-
-    public async ValueTask<long> AdvanceTillAllOfGreaterThanCurrentDepthInBufferAsync(CancellationToken token)
-    {
-        bool TryRead(out long consumed)
+        bool Try(out long consumed)
         {
             var reader = GetReader();
             if (reader.ReadThroughAllOfGreaterThanCurrentDepth())
             {
                 consumed = reader.BytesConsumed;
+                if (updateState)
+                    UpdateState(reader);
                 return true;
             }
 
@@ -127,40 +119,55 @@ internal sealed class JsonStreamReader
         }
 
         long consumed;
-        while (!TryRead(out consumed))
+        while (!Try(out consumed))
             await AdvanceAsync(token);
         return consumed;
     }
 
-    public bool ReadToToken(JsonTokenType ofType, bool updateState = true)
+    public async ValueTask ReadToTokenAsync(JsonTokenType ofType, CancellationToken token, bool updateState = true)
     {
-        var reader = GetReader();
-        return ReadToToken(ref reader, ofType, updateState);
+        bool Try()
+        {
+            var reader = GetReader();
+            var found = reader.ReadToToken(ofType);
+            if (updateState)
+                UpdateState(reader);
+            return found;
+        }
+
+        while (!Try())
+            await AdvanceAsync(token);
     }
 
-    public bool ReadToToken(ref Utf8JsonReader reader, JsonTokenType ofType, bool updateState = true)
+    public async ValueTask ReadToPropertyAsync(ReadOnlyMemory<byte> name, CancellationToken token, bool updateState = true)
     {
-        var found = reader.ReadToToken(ofType);
-        if (updateState)
-            UpdateState(reader);
-        return found;
+        bool Try()
+        {
+            var reader = GetReader();
+            var found = reader.ReadToProperty(name.Span);
+            if (updateState)
+                UpdateState(reader);
+            return found;
+        }
+
+        while (!Try())
+            await AdvanceAsync(token);
     }
 
-    public bool ReadToProperty(ReadOnlySpan<byte> name, bool updateState = true)
+    public async ValueTask<TValue> ReadToPropertyValueAsync<TValue>(ReadOnlyMemory<byte> name, CancellationToken token, bool updateState = true)
     {
-        var reader = GetReader();
-        var found = reader.ReadToProperty(name);
-        if (updateState)
-            UpdateState(reader);
-        return found;
-    }
+        bool Try(out TValue value)
+        {
+            var reader = GetReader();
+            var found = reader.ReadToPropertyValue(name.Span, out value);
+            if (updateState)
+                UpdateState(reader);
+            return found;
+        }
 
-    public bool ReadToPropertyValue<T>(ReadOnlySpan<byte> name, [NotNullWhen(true)] out T value, bool updateState = true)
-    {
-        var reader = GetReader();
-        var found = reader.ReadToPropertyValue(name, out value);
-        if (updateState)
-            UpdateState(reader);
-        return found;
+        TValue value;
+        while (!Try(out value))
+            await AdvanceAsync(token);
+        return value;
     }
 }

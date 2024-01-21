@@ -167,18 +167,12 @@ namespace Apache.Druid.Querying.Internal
                 QueryResultMapperContext context, [EnumeratorCancellation] CancellationToken token)
             {
                 var json = context.Json;
-                TFirst first;
-                while (!json.ReadToPropertyValue(names.First, out first))
-                    await json.AdvanceAsync(token);
-                while (!json.ReadToProperty(names.Second))
-                    await json.AdvanceAsync(token);
-
+                var first = await json.ReadToPropertyValueAsync<TFirst>(names.First, token);
+                await json.ReadToPropertyAsync(names.Second, token);
                 var results = mapper.Map(context, token);
                 await foreach (var result in results)
                     yield return create(first, result);
-
-                while (!json.ReadToToken(JsonTokenType.EndObject))
-                    await json.AdvanceAsync(token);
+                await json.ReadToTokenAsync(JsonTokenType.EndObject, token);
             }
 
             private static byte[] ToJson(string propertyName) =>
@@ -195,39 +189,29 @@ namespace Apache.Druid.Querying.Internal
                 QueryResultMapperContext context, [EnumeratorCancellation] CancellationToken token)
             {
                 var json = context.Json;
-                bool SkipEndArray(out bool skippedEndArray)
+                async ValueTask<bool> TrySkipEndArray()
                 {
-                    var reader = json.GetReader();
-                    var read = reader.Read();
-                    if (!read)
+                    var next = await json.ReadNextAsync(token, updateState: false);
+                    if (next is JsonTokenType.EndArray)
                     {
-                        skippedEndArray = default;
-                        return false;
+                        await json.ReadNextAsync(token);
+                        return true;
                     }
 
-                    skippedEndArray = reader.TokenType is JsonTokenType.EndArray;
-                    if (skippedEndArray)
-                        json.UpdateState(reader);
-                    return true;
+                    return false;
                 }
 
-                while (!json.ReadToToken(JsonTokenType.StartArray))
-                    await json.AdvanceAsync(token);
+                await json.ReadToTokenAsync(JsonTokenType.StartArray, token);
                 while (true)
                 {
-                    bool skippedEndArray;
-                    while (!SkipEndArray(out skippedEndArray))
-                        await json.AdvanceAsync(token);
-                    if (skippedEndArray)
+                    if (await TrySkipEndArray())
                         yield break;
 
                     var results = mapper.Map(context, token);
                     await foreach (var result in results)
                         yield return result;
 
-                    while (!SkipEndArray(out skippedEndArray))
-                        await json.AdvanceAsync(token);
-                    if (skippedEndArray)
+                    if (await TrySkipEndArray())
                         yield break;
                 }
             }
@@ -240,7 +224,7 @@ namespace Apache.Druid.Querying.Internal
                 QueryResultMapperContext context, [EnumeratorCancellation] CancellationToken token)
             {
                 var json = context.Json;
-                var bytes = (int)await json.AdvanceTillAllOfGreaterThanCurrentDepthInBufferAsync(token);
+                var bytes = (int)await json.ReadPastAllOfGreaterThanCurrentDepth(token, updateState: false);
                 TSelf Map_()
                 {
                     var context_ = new QueryResultElement.DeserializerContext(context, bytes);
