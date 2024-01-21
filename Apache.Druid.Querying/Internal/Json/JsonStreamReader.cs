@@ -91,10 +91,7 @@ internal sealed class JsonStreamReader
         }
 
         if (updateState)
-        {
             UpdateState(reader);
-        }
-
         return found;
     }
 
@@ -154,56 +151,17 @@ internal sealed class JsonStreamReader
     {
         var reader = GetReader();
         var found = reader.ReadToProperty(name);
-
         if (updateState)
-        {
             UpdateState(reader);
-        }
-
         return found;
     }
 
     public bool ReadToPropertyValue<T>(ReadOnlySpan<byte> name, [NotNullWhen(true)] out T value, bool updateState = true)
     {
         var reader = GetReader();
-        var found = reader.ReadToProperty(name);
-        value = default!;
-
-        if (found && reader.Read())
-        {
-            var type = typeof(T);
-
-            if (type == typeof(bool))
-            {
-                var @bool = reader.GetBoolean();
-                value = Unsafe.As<bool, T>(ref @bool);
-            }
-            else if (type == typeof(string))
-            {
-                var @string = reader.GetString() ?? throw new Exception("BAD JSON");
-                value = Unsafe.As<string, T>(ref @string);
-            }
-            else if (type == typeof(DateTimeOffset))
-            {
-                var t = reader.GetDateTimeOffset();
-                value = Unsafe.As<DateTimeOffset, T>(ref t);
-            }
-            else
-            {
-                throw new Exception("Unsupported type");
-            }
-
-        }
-        else if (found)
-        {
-            found = false;
-        }
-
+        var found = reader.ReadToPropertyValue(name, out value);
         if (updateState)
-        {
             UpdateState(reader);
-        }
-
         return found;
     }
 }
