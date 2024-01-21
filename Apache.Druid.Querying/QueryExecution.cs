@@ -1,5 +1,6 @@
 ﻿using Apache.Druid.Querying.DependencyInjection;
 using Apache.Druid.Querying.Internal;
+using Apache.Druid.Querying.Internal.Json;
 using Apache.Druid.Querying.Internal.Sections;
 using Apache.Druid.Querying.Json;
 using System;

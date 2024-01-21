@@ -8,7 +8,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Apache.Druid.Querying.Internal;
+namespace Apache.Druid.Querying.Internal.Json;
 
 // Based on https://github.com/richlander/convenience/blob/main/releasejson/releasejson/JsonStreamReader.cs.
 internal sealed class JsonStreamReader
@@ -44,7 +44,7 @@ internal sealed class JsonStreamReader
     {
         var consumed = (int)_bytesConsumed;
         var slice = _buffer.AsSpan()[(consumed + trimStart)..(consumed + sliceLengthInBytes)];
-        return  slice;
+        return slice;
     }
 
     public ReadOnlySpan<byte> GetSpan() => _bytesConsumed > 0 || _readCount < Size ? _buffer.AsSpan()[(int)_bytesConsumed.._readCount] : _buffer;
