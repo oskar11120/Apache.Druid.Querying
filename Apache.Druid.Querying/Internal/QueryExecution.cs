@@ -240,7 +240,7 @@ namespace Apache.Druid.Querying.Internal
                 QueryResultMapperContext context, [EnumeratorCancellation] CancellationToken token)
             {
                 var json = context.Json;
-                var bytes = await EnsureWholeInBufferAndGetSpanningBytesAsync(json, token);
+                var bytes = (int)await json.AdvanceTillAllOfGreaterThanCurrentDepthInBufferAsync(token);
                 TSelf Map_()
                 {
                     var context_ = new QueryResultElement.DeserializerContext(context, bytes);
@@ -250,14 +250,6 @@ namespace Apache.Druid.Querying.Internal
                 }
 
                 yield return Map_();
-            }
-
-            private static async ValueTask<int> EnsureWholeInBufferAndGetSpanningBytesAsync(JsonStreamReader json, CancellationToken token)
-            {
-                long bytesConsumed;
-                while (!json.ReadToTokenTypeAtNextTokenDepth(JsonTokenType.EndObject, out bytesConsumed, false))
-                    await json.AdvanceAsync(token);
-                return (int)bytesConsumed;
             }
         }
     }

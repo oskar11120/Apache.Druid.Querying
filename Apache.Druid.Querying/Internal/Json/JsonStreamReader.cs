@@ -59,10 +59,14 @@ internal sealed class JsonStreamReader
     {
         // Save off existing text
         int leftoverLength = FlipBuffer();
+        if (leftoverLength <= 0)
+            throw new InvalidOperationException("Buffer full.");
 
         // Read from stream to fill remainder of buffer
         int read = await _stream.ReadAsync(_buffer.AsMemory()[leftoverLength..], token);
         _readCount = read + leftoverLength;
+        if (read == 0)
+            throw new InvalidOperationException("Reached end of the stream.");
     }
 
     private int FlipBuffer()
@@ -107,28 +111,25 @@ internal sealed class JsonStreamReader
         return false;
     }
 
-    public bool ReadToTokenTypeAtNextTokenDepth(JsonTokenType tokenType, out long bytesConsumed, bool updateState = true)
+    public async ValueTask<long> AdvanceTillAllOfGreaterThanCurrentDepthInBufferAsync(CancellationToken token)
     {
-        bytesConsumed = default;
-        var reader = GetReader();
-        if (!reader.Read())
-            return false;
-
-        var depth = reader.CurrentDepth;
-        while (true)
+        bool TryRead(out long consumed)
         {
-            var read = ReadToToken(ref reader, tokenType, false);
-            if (!read)
-                return false;
+            var reader = GetReader();
+            if (reader.ReadThroughAllOfGreaterThanCurrentDepth())
+            {
+                consumed = reader.BytesConsumed;
+                return true;
+            }
 
-            if (reader.CurrentDepth != depth)
-                continue;
-
-            if (updateState)
-                UpdateState(reader);
-            bytesConsumed = reader.BytesConsumed;
-            return true;
+            consumed = default;
+            return false;
         }
+
+        long consumed;
+        while (!TryRead(out consumed))
+            await AdvanceAsync(token);
+        return consumed;
     }
 
     public bool ReadToToken(JsonTokenType ofType, bool updateState = true)
