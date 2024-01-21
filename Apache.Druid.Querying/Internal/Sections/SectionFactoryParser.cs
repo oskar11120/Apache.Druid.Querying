@@ -71,7 +71,7 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
             public sealed record ArgumentsMemberSelector(Type SelectedType, string SelectedName, string Name, Type SelectedFromType);
             public sealed record Scalar(Type Type, string Name, object? Value);
             public sealed record Nested(IReadOnlyList<ElementFactoryCall> Calls, string Name);
-            public sealed record DruidExpression(LambdaExpression Value, string Name);
+            public sealed record DruidExpression(LambdaExpression? Value, string Name);
         }
     }
 
@@ -113,7 +113,7 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
 
                         var isDruidExpression = openGeneric == typeof(QueryElementFactory<>.DruidExpression);
                         if (isDruidExpression)
-                            return new(Expression: new((LambdaExpression)arg, paramName));
+                            return new(Expression: new(arg as LambdaExpression, paramName));
 
                         var isNested = paramType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(paramType);
                         if (isNested)

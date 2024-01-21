@@ -33,6 +33,9 @@ namespace Apache.Druid.Querying.Internal.Sections
                 (nested, element) => element.Add(nested.Name, Map(nested.Calls, true)),
                 (expression, result) =>
                 {
+                    if (expression.Value is null)
+                        return;
+
                     var (value, columnNames) = DruidExpression.Map(expression.Value, columnNameMappings);
                     result.Add(expression.Name, value);
                     if (options.ExpressionColumnNamesKey is string existing)
