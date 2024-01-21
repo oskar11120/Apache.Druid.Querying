@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -46,21 +47,11 @@ internal sealed class JsonStreamReader
         return  slice;
     }
 
-    public Utf8JsonReader GetReader()
-    {
-        ReadOnlySpan<byte> slice = _bytesConsumed > 0 || _readCount < Size ? _buffer.AsSpan()[(int)_bytesConsumed.._readCount] : _buffer;
-        var reader = new Utf8JsonReader(slice, false, _readerState);
-        return reader;
-    }
+    public ReadOnlySpan<byte> GetSpan() => _bytesConsumed > 0 || _readCount < Size ? _buffer.AsSpan()[(int)_bytesConsumed.._readCount] : _buffer;
 
-    public string DebugString => Debug();
+    public Utf8JsonReader GetReader() => new(GetSpan(), false, _readerState);
 
-    private string Debug()
-    {
-        ReadOnlySpan<byte> slice = _bytesConsumed > 0 || _readCount < Size ? _buffer.AsSpan()[(int)_bytesConsumed.._readCount] : _buffer;
-        return Encoding.UTF8.GetString(slice);
-    }
-
+    internal string DebugView => Encoding.UTF8.GetString(GetSpan());
 
     public int Depth => _depth;
 
