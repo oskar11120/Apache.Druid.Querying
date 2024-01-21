@@ -177,7 +177,7 @@ namespace Apache.Druid.Querying.Internal
                 await foreach (var result in results)
                     yield return create(first, result);
 
-                while (!json.ReadToTokenType(JsonTokenType.EndObject))
+                while (!json.ReadToToken(JsonTokenType.EndObject))
                     await json.AdvanceAsync(token);
             }
 
@@ -211,7 +211,7 @@ namespace Apache.Druid.Querying.Internal
                     return true;
                 }
 
-                while (!json.ReadToTokenType(JsonTokenType.StartArray))
+                while (!json.ReadToToken(JsonTokenType.StartArray))
                     await json.AdvanceAsync(token);
                 while (true)
                 {

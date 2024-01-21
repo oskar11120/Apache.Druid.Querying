@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -133,15 +131,15 @@ internal sealed class JsonStreamReader
         }
     }
 
-    public bool ReadToTokenType(JsonTokenType tokenType, bool updateState = true)
+    public bool ReadToToken(JsonTokenType ofType, bool updateState = true)
     {
         var reader = GetReader();
-        return ReadToToken(ref reader, tokenType, updateState);
+        return ReadToToken(ref reader, ofType, updateState);
     }
 
-    public bool ReadToToken(ref Utf8JsonReader reader, JsonTokenType tokenType, bool updateState = true)
+    public bool ReadToToken(ref Utf8JsonReader reader, JsonTokenType ofType, bool updateState = true)
     {
-        var found = reader.ReadToToken(tokenType);
+        var found = reader.ReadToToken(ofType);
         if (updateState)
             UpdateState(reader);
         return found;
