@@ -122,7 +122,7 @@ internal sealed class JsonStreamReader
         var depth = reader.CurrentDepth;
         while (true)
         {
-            var read = ReadToTokenType(ref reader, tokenType, false);
+            var read = ReadToToken(ref reader, tokenType, false);
             if (!read)
                 return false;
 
@@ -139,34 +139,21 @@ internal sealed class JsonStreamReader
     public bool ReadToTokenType(JsonTokenType tokenType, bool updateState = true)
     {
         var reader = GetReader();
-        return ReadToTokenType(ref reader, tokenType, updateState);
+        return ReadToToken(ref reader, tokenType, updateState);
     }
 
-    public bool ReadToTokenType(ref Utf8JsonReader reader, JsonTokenType tokenType, bool updateState = true)
+    public bool ReadToToken(ref Utf8JsonReader reader, JsonTokenType tokenType, bool updateState = true)
     {
-        var found = false;
-
-        while (reader.Read())
-        {
-            if (reader.TokenType == tokenType)
-            {
-                found = true;
-                break;
-            }
-        }
-
+        var found = reader.ReadToToken(tokenType);
         if (updateState)
-        {
             UpdateState(reader);
-        }
-
         return found;
     }
 
     public bool ReadToProperty(ReadOnlySpan<byte> name, bool updateState = true)
     {
         var reader = GetReader();
-        var found = ReadToProperty(ref reader, name);
+        var found = reader.ReadToProperty(name);
 
         if (updateState)
         {
@@ -179,7 +166,7 @@ internal sealed class JsonStreamReader
     public bool ReadToPropertyValue<T>(ReadOnlySpan<byte> name, [NotNullWhen(true)] out T value, bool updateState = true)
     {
         var reader = GetReader();
-        var found = ReadToProperty(ref reader, name);
+        var found = reader.ReadToProperty(name);
         value = default!;
 
         if (found && reader.Read())
@@ -215,23 +202,6 @@ internal sealed class JsonStreamReader
         if (updateState)
         {
             UpdateState(reader);
-        }
-
-        return found;
-    }
-
-    public static bool ReadToProperty(ref Utf8JsonReader reader, ReadOnlySpan<byte> name)
-    {
-        var found = false;
-
-        while (reader.Read())
-        {
-            if (reader.TokenType is JsonTokenType.PropertyName &&
-                reader.ValueTextEquals(name))
-            {
-                found = true;
-                break;
-            }
         }
 
         return found;

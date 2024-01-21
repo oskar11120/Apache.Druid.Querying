@@ -68,7 +68,7 @@ namespace Apache.Druid.Querying.Internal
                 var @object = json.GetSliceOfBuffer(spanningBytes, trimBytes);
                 deserializeConsumedBytes = @object.Length;
                 var reader = WrapInReader(@object);
-                JsonStreamReader.ReadToProperty(ref reader, propertyNameUtf8);
+                reader.ReadToProperty(propertyNameUtf8);
                 var start = (int)reader.BytesConsumed;
                 var propertyDepth = reader.CurrentDepth;
                 do
