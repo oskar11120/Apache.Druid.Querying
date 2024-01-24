@@ -24,25 +24,14 @@ internal sealed class JsonStreamReader
     private int _depth = 0;
     private long _bytesConsumed = 0;
     private int _readCount;
+    public JsonTokenType TokenType { get; private set; } = JsonTokenType.None;
 
     public void UpdateState(Utf8JsonReader reader)
     {
         _bytesConsumed += reader.BytesConsumed;
         _readerState = reader.CurrentState;
         _depth = reader.CurrentDepth;
-    }
-
-    public bool UnreadPartOfBufferStartsWith(ReadOnlySpan<byte> bytes)
-    {
-        var consumed = (int)_bytesConsumed;
-        return bytes.SequenceEqual(_buffer.AsSpan()[consumed..(consumed + bytes.Length)]);
-    }
-
-    public ReadOnlySpan<byte> GetSliceOfBuffer(int sliceLengthInBytes, int trimStart)
-    {
-        var consumed = (int)_bytesConsumed;
-        var slice = _buffer.AsSpan()[(consumed + trimStart)..(consumed + sliceLengthInBytes)];
-        return slice;
+        TokenType = reader.TokenType;
     }
 
     public ReadOnlySpan<byte> GetSpan() => _bytesConsumed > 0 || _readCount < Size ? _buffer.AsSpan()[(int)_bytesConsumed.._readCount] : _buffer;
@@ -66,7 +55,7 @@ internal sealed class JsonStreamReader
         int read = await _stream.ReadAsync(_buffer.AsMemory()[leftoverLength..], token);
         _readCount = read + leftoverLength;
         if (read == 0)
-            throw new InvalidOperationException("Reached end of the stream.");
+            throw new InvalidOperationException("Reached end of the stream before finishing deserialization.");
     }
 
     private int FlipBuffer()
@@ -101,29 +90,6 @@ internal sealed class JsonStreamReader
         return type;
     }
 
-    public async ValueTask<long> ReadPastAllOfGreaterThanCurrentDepth(CancellationToken token, bool updateState = true)
-    {
-        bool Try(out long consumed)
-        {
-            var reader = GetReader();
-            if (reader.ReadThroughAllOfGreaterThanCurrentDepth())
-            {
-                consumed = reader.BytesConsumed;
-                if (updateState)
-                    UpdateState(reader);
-                return true;
-            }
-
-            consumed = default;
-            return false;
-        }
-
-        long consumed;
-        while (!Try(out consumed))
-            await AdvanceAsync(token);
-        return consumed;
-    }
-
     public async ValueTask ReadToTokenAsync(JsonTokenType ofType, CancellationToken token, bool updateState = true)
     {
         bool Try()
@@ -137,6 +103,24 @@ internal sealed class JsonStreamReader
 
         while (!Try())
             await AdvanceAsync(token);
+    }
+
+    public async ValueTask<long> ReadToTokenAsync(JsonTokenType ofType, int atDepth, CancellationToken token, bool updateState = true)
+    {
+        bool Try(out long consumed)
+        {
+            var reader = GetReader();
+            var found = reader.ReadToToken(ofType, atDepth);
+            if (updateState)
+                UpdateState(reader);
+            consumed = reader.BytesConsumed;
+            return found;
+        }
+
+        long consumed;
+        while (!Try(out consumed))
+            await AdvanceAsync(token);
+        return consumed;
     }
 
     public async ValueTask ReadToPropertyAsync(ReadOnlyMemory<byte> name, CancellationToken token, bool updateState = true)

@@ -23,81 +23,67 @@ namespace Apache.Druid.Querying.Internal
         {
             [ThreadStatic]
             private static Dictionary<Type, object?>? deserializers;
-
             private static readonly byte[] timestampPropertyNameBytes = Encoding.UTF8.GetBytes("__time");
-            private static readonly byte[] comaBytes = Encoding.UTF8.GetBytes(",");
-            private readonly int spanningBytes;
-            private readonly int trimBytes;
-            private long deserializeConsumedBytes = 0;
-            private readonly QueryResultMapperContext mapperContext;
 
-            public DeserializerContext(QueryResultMapperContext mapperContext, int spanningBytes)
+            private readonly ReadOnlySpan<byte> json;
+            private readonly JsonSerializerOptions serializerOptions;
+            private readonly IColumnNameMappingProvider columnNameMappings;
+            private readonly SectionAtomicity.IProvider atomicity;
+
+            public DeserializerContext(
+                ReadOnlySpan<byte> json,
+                JsonSerializerOptions serializerOptions,
+                IColumnNameMappingProvider columnNameMappings,
+                SectionAtomicity.IProvider atomicity)
             {
-                this.mapperContext = mapperContext;
-                this.spanningBytes = spanningBytes;
-
-                var startWithComa = mapperContext.Json.UnreadPartOfBufferStartsWith(comaBytes);
-                trimBytes = startWithComa ? comaBytes.Length : 0;
+                this.json = json;
+                this.serializerOptions = serializerOptions;
+                this.columnNameMappings = columnNameMappings;
+                this.atomicity = atomicity;
             }
-
-            private static Utf8JsonReader WrapInReader(ReadOnlySpan<byte> slice)
-                => new(slice, false, default);
 
             public TElementOrElementPart Deserialize<TElementOrElementPart>(bool checkForAtomicity = true)
             {
                 if (GetDeserializer<TElementOrElementPart>() is IDeserializer<TElementOrElementPart> existing)
                     return existing.Deserialize(ref this);
 
-                if (mapperContext.ColumnNameMappings.Get<TElementOrElementPart>() is var mappings and { Count: > 0 })
+                if (columnNameMappings.Get<TElementOrElementPart>() is var mappings and { Count: > 0 })
                     return DeserializeApplyMappings<TElementOrElementPart>(mappings);
 
-                var (json, options, atomicity, _) = mapperContext;
                 SectionAtomicity atomicity_;
                 if (checkForAtomicity && (atomicity_ = atomicity.Get<TElementOrElementPart>()).Atomic)
                     return DeserializeProperty<TElementOrElementPart>(atomicity_.ColumnNameIfAtomicUtf8);
 
-                var slice = json.GetSliceOfBuffer(spanningBytes, trimBytes);
-                deserializeConsumedBytes = slice.Length;
-                var result = JsonSerializer.Deserialize<TElementOrElementPart>(slice, options)!;
+                var result = JsonSerializer.Deserialize<TElementOrElementPart>(json, serializerOptions)!;
                 return result;
             }
 
-            public TProperty DeserializeProperty<TProperty>(ReadOnlySpan<byte> propertyNameUtf8)
+            private readonly TProperty DeserializePropertyBase<TProperty>(ReadOnlySpan<byte> propertyNameUtf8)
             {
-                var (json, options, _, _) = mapperContext;
-                var @object = json.GetSliceOfBuffer(spanningBytes, trimBytes);
-                deserializeConsumedBytes = @object.Length;
-                var reader = WrapInReader(@object);
-                reader.ReadToProperty(propertyNameUtf8);
-                var start = (int)reader.BytesConsumed;
-                var propertyDepth = reader.CurrentDepth;
-                do
-                    reader.Read();
-                while (reader.CurrentDepth < propertyDepth);
-                var property = @object[start..(int)reader.BytesConsumed];
+                var reader = new Utf8JsonReader(json, false, default);
+                return reader.ReadToPropertyValue(propertyNameUtf8, out TProperty property) ?
+                    property :
+                    throw new InvalidOperationException($"Object {ToString(json)} is missing required property {ToString(propertyNameUtf8)}.");
+            }
 
-                // TODO More TProperty types
-                if (typeof(TProperty) == typeof(DateTimeOffset) && propertyNameUtf8 == timestampPropertyNameBytes)
+            private readonly TProperty DeserializeProperty<TProperty>(ReadOnlySpan<byte> propertyNameUtf8)
+            {
+                var type = typeof(TProperty);
+                var timeRelated = type == typeof(DateTimeOffset) || type == typeof(DateTime) || type == typeof(DateOnly);
+                if (timeRelated && propertyNameUtf8.SequenceEqual(timestampPropertyNameBytes))
                 {
-                    var unixMs = JsonSerializer.Deserialize<long>(property, options);
+                    var unixMs = DeserializePropertyBase<long>(propertyNameUtf8);
                     var t = DateTimeOffset.FromUnixTimeMilliseconds(unixMs);
                     return Unsafe.As<DateTimeOffset, TProperty>(ref t);
                 }
 
-                return JsonSerializer.Deserialize<TProperty>(property, options)!;
+                return DeserializePropertyBase<TProperty>(propertyNameUtf8);
             }
 
-            public DateTimeOffset DeserializeTimeProperty()
+            public readonly DateTimeOffset DeserializeTimeProperty()
                  => DeserializeProperty<DateTimeOffset>(timestampPropertyNameBytes);
 
-            public readonly void UpdateState()
-            {
-                var json = mapperContext.Json;
-                var reader = json.GetReader();
-                while (reader.BytesConsumed < deserializeConsumedBytes + trimBytes)
-                    reader.Read();
-                json.UpdateState(reader);
-            }
+            private static string ToString(ReadOnlySpan<byte> utf8) => Encoding.UTF8.GetString(utf8);
 
             private T DeserializeApplyMappings<T>(IReadOnlyList<PropertyColumnNameMapping> mappings)
             {
@@ -117,7 +103,7 @@ namespace Apache.Druid.Querying.Internal
                     }
                 }
 
-                return json.Deserialize<T>(mapperContext.Options)!;
+                return json.Deserialize<T>(serializerOptions)!;
             }
 
             private static IDeserializer<TElement>? GetDeserializer<TElement>()
@@ -220,20 +206,32 @@ namespace Apache.Druid.Querying.Internal
         // "Element" are objects small enough that whole their data can be fit into buffer. 
         public sealed class Element<TSelf> : IQueryResultMapper<TSelf>
         {
+            private static readonly byte[] comaBytes = Encoding.UTF8.GetBytes(",");
+
             async IAsyncEnumerable<TSelf> IQueryResultMapper<TSelf>.Map(
                 QueryResultMapperContext context, [EnumeratorCancellation] CancellationToken token)
             {
-                var json = context.Json;
-                var bytes = (int)await json.ReadPastAllOfGreaterThanCurrentDepth(token, updateState: false);
+                var (json, options, atomicity, columnNameMappings) = context;
+                async ValueTask<int> ReadThroghWholeAsync(bool updateState = true)
+                    => (int)await json.ReadToTokenAsync(
+                        JsonTokenType.EndObject,
+                        json.Depth + (json.TokenType is JsonTokenType.StartArray ? 1 : 0),
+                        token,
+                        updateState);
+                var read = await ReadThroghWholeAsync(updateState: false);
                 TSelf Map_()
                 {
-                    var context_ = new QueryResultElement.DeserializerContext(context, bytes);
+                    var span = json.GetSpan()[..read];
+                    var test = Encoding.UTF8.GetString(span);
+                    var startsWithComa = comaBytes.AsSpan().SequenceEqual(span[..comaBytes.Length]);
+                    span = startsWithComa ? span[comaBytes.Length..] : span;
+                    var context_ = new QueryResultElement.DeserializerContext(span, options, columnNameMappings, atomicity);
                     var result = context_.Deserialize<TSelf>(checkForAtomicity: false); // TODO verify atomicity
-                    context_.UpdateState();
                     return result;
                 }
 
                 yield return Map_();
+                await ReadThroghWholeAsync();
             }
         }
     }
