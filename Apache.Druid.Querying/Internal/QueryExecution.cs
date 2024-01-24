@@ -69,15 +69,19 @@ namespace Apache.Druid.Querying.Internal
             private readonly TProperty DeserializeProperty<TProperty>(ReadOnlySpan<byte> propertyNameUtf8)
             {
                 var type = typeof(TProperty);
-                var timeRelated = type == typeof(DateTimeOffset) || type == typeof(DateTime) || type == typeof(DateOnly);
-                if (timeRelated && propertyNameUtf8.SequenceEqual(timestampPropertyNameBytes))
+                var timeRelated = type == typeof(DateTimeOffset) || type == typeof(DateTime);
+                if (!timeRelated || !propertyNameUtf8.SequenceEqual(timestampPropertyNameBytes))
                 {
-                    var unixMs = DeserializePropertyBase<long>(propertyNameUtf8);
-                    var t = DateTimeOffset.FromUnixTimeMilliseconds(unixMs);
-                    return Unsafe.As<DateTimeOffset, TProperty>(ref t);
+                    return DeserializePropertyBase<TProperty>(propertyNameUtf8);
                 }
 
-                return DeserializePropertyBase<TProperty>(propertyNameUtf8);
+                var unixMs = DeserializePropertyBase<long>(propertyNameUtf8);
+                var t = DateTimeOffset.FromUnixTimeMilliseconds(unixMs);
+                if (type == typeof(DateTimeOffset))
+                    return Unsafe.As<DateTimeOffset, TProperty>(ref t);
+
+                var dateTime = t.UtcDateTime;
+                return Unsafe.As<DateTime, TProperty>(ref dateTime);
             }
 
             public readonly DateTimeOffset DeserializeTimeProperty()
