@@ -222,7 +222,6 @@ namespace Apache.Druid.Querying.Internal
                 TSelf Map_()
                 {
                     var span = json.GetSpan()[..read];
-                    var test = Encoding.UTF8.GetString(span);
                     var startsWithComa = comaBytes.AsSpan().SequenceEqual(span[..comaBytes.Length]);
                     span = startsWithComa ? span[comaBytes.Length..] : span;
                     var context_ = new QueryResultElement.DeserializerContext(span, options, columnNameMappings, atomicity);
