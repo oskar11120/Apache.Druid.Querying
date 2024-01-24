@@ -75,6 +75,18 @@ namespace Apache.Druid.Querying
                 => new Filter_.Interval(GetColumnName(dimension), intervals.Select(IntervalExtensions.Map));
             public IFilter Expression(Expression<DruidExpression> expression)
                 => new Filter_.Expression_(Internal.DruidExpression.Map(expression, columnNames).Expression);
+            public IFilter Bound<TColumn>(
+                Expression<ColumnSelector<TColumn>> dimension,
+                TColumn? lower = default,
+                TColumn? upper = default,
+                bool lowerStrict = false,
+                bool upperStrict = false,
+                SortingOrder ordering = SortingOrder.Lexicographic)
+                => new Filter<TColumn>.Bound(GetColumnName(dimension), lower, upper, lowerStrict, upperStrict, ordering);
+            public IFilter Like<TColumn>(Expression<ColumnSelector<TColumn>> dimension, string pattern, char? escape = null)
+                => new Filter_.Like(GetColumnName(dimension), pattern, escape);
+            public IFilter Regex<TColumn>(Expression<ColumnSelector<TColumn>> dimension, string pattern)
+                => new Filter_.Regex(GetColumnName(dimension), pattern);
         }
 
         public class MetricSpec : UsingArgumentColumnNames

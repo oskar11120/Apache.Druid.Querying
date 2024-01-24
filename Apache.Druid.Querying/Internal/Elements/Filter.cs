@@ -62,6 +62,16 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
             public string Column { get; }
         }
 
+        public abstract class WithDimension : Filter
+        {
+            public WithDimension(string dimension)
+            {
+                Dimension = dimension;
+            }
+
+            public string Dimension { get; }
+        }
+
         public sealed class Interval : Filter
         {
             public Interval(string dimension, IEnumerable<string> intervals)
@@ -83,6 +93,28 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
                 Expression = expression;
             }
         }
+
+        public sealed class Like : WithDimension
+        {
+            public Like(string dimension, string pattern, char? escape) : base(dimension)
+            {
+                Pattern = pattern;
+                Escape = escape;
+            }
+
+            public string Pattern { get; }
+            public char? Escape { get; }
+        }
+
+        public sealed class Regex : WithDimension
+        {
+            public Regex(string dimension, string pattern) : base(dimension)
+            {
+                Pattern = pattern;
+            }
+
+            public string Pattern { get; }
+        }
     }
 
     internal abstract class Filter<TColumn> : Filter.WithColumn
@@ -101,7 +133,7 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
             public string MatchValueType { get; }
         }
 
-        public abstract class WithDimension : Filter
+        public new abstract class WithDimension : Filter
         {
             public WithDimension(string dimension)
             {
@@ -170,6 +202,31 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
             }
 
             public TColumn Value { get; }
+        }
+
+        public sealed class Bound : WithDimension
+        {
+            public Bound(
+                string dimension,
+                TColumn? lower,
+                TColumn? upper,
+                bool lowerStrict,
+                bool upperStrict,
+                SortingOrder ordering)
+                : base(dimension)
+            {
+                Lower = lower;
+                Upper = upper;
+                LowerStrict = lowerStrict;
+                UpperStrict = upperStrict;
+                Ordering = ordering;
+            }
+
+            public TColumn? Lower { get; }
+            public TColumn? Upper { get; }
+            public bool LowerStrict { get; }
+            public bool UpperStrict { get; }
+            public SortingOrder Ordering { get; }
         }
     }
 }
