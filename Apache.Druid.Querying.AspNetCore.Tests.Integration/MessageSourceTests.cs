@@ -216,15 +216,23 @@ internal class MessageSourceTests
     {
         var query = new Query<VariableMessage>
             .GroupBy<Variable>
-           .WithNoVirtualColumns
+           .WithVirtualColumns<DateTimeOffset>
            .WithAggregations<LatestForecast>()
-           .IntervalFilterDefaults()
+           .Interval(interval)
+           .Filter(filter => filter.And(
+                filter.Selector(
+                    data => data.Source.VariableName,
+                    "pmPAct"),
+                filter.Selector(
+                    data => data.Source.TenantId,
+                    tenantId)))
+           .VirtualColumns(type => type.Expression<DateTimeOffset>(message => $"timestamp({message.ProcessedTimestamp})"))
            .Dimensions(type => new(
-               type.Default(message => message.ObjectId),
-               type.Default(message => message.VariableName)))
+               type.Default(data => data.Source.ObjectId),
+               type.Default(data => data.Source.VariableName)))
            .Aggregations(type => new(
-               type.Max(message => message.ProcessedTimestamp),
-               type.Last(message => message.Value, message => message.ProcessedTimestamp)))
+               type.Max(data => data.VirtualColumns),
+               type.Last(data => data.Source.Value, data => data.VirtualColumns, SimpleDataType.String)))
            .Granularity(Granularity.Hour);
         var json = Druid
             .Variables
