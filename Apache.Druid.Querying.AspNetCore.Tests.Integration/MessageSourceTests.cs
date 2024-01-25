@@ -211,8 +211,35 @@ internal class MessageSourceTests
         result.Should().NotBeEmpty();
     }
 
+    [Test]
+    public async Task LatestForecastQuery_Works()
+    {
+        var query = new Query<VariableMessage>
+            .GroupBy<Variable>
+           .WithNoVirtualColumns
+           .WithAggregations<LatestForecast>()
+           .IntervalFilterDefaults()
+           .Dimensions(type => new(
+               type.Default(message => message.ObjectId),
+               type.Default(message => message.VariableName)))
+           .Aggregations(type => new(
+               type.Max(message => message.ProcessedTimestamp),
+               type.Last(message => message.Value, message => message.ProcessedTimestamp)))
+           .Granularity(Granularity.Hour);
+        var json = Druid
+            .Variables
+            .MapQueryToJson(query);
+        var result = await Druid
+            .Variables
+            .ExecuteQuery(query)
+            .ToListAsync();
+        result.Should().NotBeEmpty();
+    }
+
     public sealed record Aggregations(double Sum, int Count, string Variable, double? FirstValue);
     public sealed record PostAggregations(double Average);
     public sealed record GroupByDimensions(Guid ObjectId, string VariableName);
     public sealed record InlineData(string Variable, [property: DataSourceColumn("MessageOfTheNight")] string MessageOfTheDay);
+    public sealed record LatestForecast(DateTimeOffset Timestamp, double Value);
+    public sealed record Variable(Guid ObjectId, string Name);
 }

@@ -59,40 +59,21 @@ namespace Apache.Druid.Querying.Internal
                 return result;
             }
 
-            private readonly TProperty DeserializePropertyBase<TProperty>(ReadOnlySpan<byte> propertyNameUtf8)
+            private readonly TProperty DeserializeProperty<TProperty>(ReadOnlySpan<byte> propertyNameUtf8)
             {
                 var reader = new Utf8JsonReader(json, false, default);
                 if (!reader.ReadToProperty(propertyNameUtf8))
                     throw new InvalidOperationException($"Object {ToString(json)} is missing required property {ToString(propertyNameUtf8)}.");
-                var left = reader.BytesConsumed;
+                var left = (int)reader.BytesConsumed;
                 reader.Read();
                 if (reader.TokenType is JsonTokenType.StartObject or JsonTokenType.StartArray)
                 {
                     var endToken = reader.TokenType is JsonTokenType.StartObject ? JsonTokenType.EndObject : JsonTokenType.EndArray;
                     reader.ReadToToken(endToken, reader.CurrentDepth);
-                    var value = propertyNameUtf8.Slice((int)left, (int)reader.BytesConsumed);
-                    return JsonSerializer.Deserialize<TProperty>(value, serializerOptions)!;
                 }
 
-                return reader.GetValue<TProperty>();
-            }
-
-            private readonly TProperty DeserializeProperty<TProperty>(ReadOnlySpan<byte> propertyNameUtf8)
-            {
-                var type = typeof(TProperty);
-                var timeRelated = type == typeof(DateTimeOffset) || type == typeof(DateTime);
-                if (!timeRelated || !propertyNameUtf8.SequenceEqual(timeColumnUtf8Bytes))
-                {
-                    return DeserializePropertyBase<TProperty>(propertyNameUtf8);
-                }
-
-                var unixMs = DeserializePropertyBase<long>(propertyNameUtf8);
-                var t = DateTimeOffset.FromUnixTimeMilliseconds(unixMs);
-                if (type == typeof(DateTimeOffset))
-                    return Unsafe.As<DateTimeOffset, TProperty>(ref t);
-
-                var dateTime = t.UtcDateTime;
-                return Unsafe.As<DateTime, TProperty>(ref dateTime);
+                var value = json[left..(int)reader.BytesConsumed];
+                return JsonSerializer.Deserialize<TProperty>(value, serializerOptions)!;
             }
 
             public readonly DateTimeOffset DeserializeTimeProperty()
@@ -240,8 +221,16 @@ namespace Apache.Druid.Querying.Internal
                     var startsWithComa = comaBytes.AsSpan().SequenceEqual(span[..comaBytes.Length]);
                     span = startsWithComa ? span[comaBytes.Length..] : span;
                     var context_ = new QueryResultElement.DeserializerContext(span, options, columnNameMappings, atomicity);
-                    var result = context_.Deserialize<TSelf>(checkForAtomicity: false); // TODO verify atomicity
-                    return result;
+                    try
+                    {
+                        var result = context_.Deserialize<TSelf>(checkForAtomicity: false); // TODO verify atomicity
+                        return result;
+                    }
+                    catch (Exception ex)
+                    {
+                        ex.Data.Add("thrownWhileDeserializingElement", Encoding.UTF8.GetString(span));
+                        throw;
+                    }
                 }
 
                 yield return Map_();
