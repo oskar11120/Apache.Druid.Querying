@@ -30,14 +30,14 @@ namespace Apache.Druid.Querying
         internal IAsyncEnumerable<TResult> Map(QueryResultMapperContext context, CancellationToken token);
     }
 
-    public interface IQueryWithSource<TSource> : IQuery, IQueryWithSectionFactoryExpressions
+    public interface IExecutableQuery<TSource> : IQuery, IQueryWithSectionFactoryExpressions
     {
-        public interface AndResult<TResult> : IQueryWithSource<TSource>
+        public interface WithResult<TResult> : IExecutableQuery<TSource>
         {
         }
 
-        public interface AndMappedResult<TResult, TMapper> :
-            IQueryWithSource<TSource>
+        public interface WithMappedResult<TResult, TMapper> :
+            IExecutableQuery<TSource>
             where TMapper : IQueryResultMapper<TResult>, new()
         {
         }
@@ -115,21 +115,21 @@ namespace Apache.Druid.Querying
 
         public readonly DataSourceJsonProvider GetJsonRepresentation;
 
-        public JsonObject MapQueryToJson(IQueryWithSource<TSource> query)
+        public JsonObject MapQueryToJson(IExecutableQuery<TSource> query)
         {
             var result = query.MapToJson(options.Serializer, columnNameMappings);
             result.Add("dataSource", GetJsonRepresentation());
             return result;
         }
 
-        public IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQueryWithSource<TSource> query, CancellationToken token = default)
+        public IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IExecutableQuery<TSource> query, CancellationToken token = default)
             => Execute<TResult>(query, token);
 
-        public IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IQueryWithSource<TSource>.AndResult<TResult> query, CancellationToken token = default)
+        public IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IExecutableQuery<TSource>.WithResult<TResult> query, CancellationToken token = default)
             => Execute<TResult>(query, token);
 
         public IAsyncEnumerable<TResult> ExecuteQuery<TResult, TMapper>(
-            IQueryWithSource<TSource>.AndMappedResult<TResult, TMapper> query, CancellationToken token = default)
+            IExecutableQuery<TSource>.WithMappedResult<TResult, TMapper> query, CancellationToken token = default)
             where TMapper : IQueryResultMapper<TResult>, new()
         {
             var atomicity = SectionAtomicity.IProvider.Builder.CreateCombined(query.SectionAtomicity, sectionAtomicity);
@@ -155,12 +155,12 @@ namespace Apache.Druid.Querying
         }
 
 #pragma warning disable CS8621 // Nullability of reference types in return type doesn't match the target delegate (possibly because of nullability attributes).
-        private IAsyncEnumerable<TResult> Execute<TResult>(IQueryWithSource<TSource> query, CancellationToken token = default)
+        private IAsyncEnumerable<TResult> Execute<TResult>(IExecutableQuery<TSource> query, CancellationToken token = default)
             => Execute<TResult>(query, JsonSerializer.DeserializeAsyncEnumerable<TResult>, token);
 #pragma warning restore CS8621 // Nullability of reference types in return type doesn't match the target delegate (possibly because of nullability attributes).
 
         private async IAsyncEnumerable<TResult> Execute<TResult>(
-            IQueryWithSource<TSource> query,
+            IExecutableQuery<TSource> query,
             Func<Stream, JsonSerializerOptions, CancellationToken, IAsyncEnumerable<TResult>> deserialize,
             [EnumeratorCancellation] CancellationToken token = default)
         {
@@ -195,14 +195,14 @@ namespace Apache.Druid.Querying
                 yield return result!;
         }
 
-        public DataSource<TResult> WrapOverQuery<TResult>(IQueryWithSource<TSource>.AndResult<TResult> query)
+        public DataSource<TResult> WrapOverQuery<TResult>(IExecutableQuery<TSource>.WithResult<TResult> query)
             => Wrap<TResult>(query);
 
-        public DataSource<TResult> WrapOverQuery<TResult, TMapper>(IQueryWithSource<TSource>.AndMappedResult<TResult, TMapper> query)
+        public DataSource<TResult> WrapOverQuery<TResult, TMapper>(IExecutableQuery<TSource>.WithMappedResult<TResult, TMapper> query)
             where TMapper : IQueryResultMapper<TResult>, new()
             => Wrap<TResult>(query);
 
-        private DataSource<TResult> Wrap<TResult>(IQueryWithSource<TSource> query) => new(
+        private DataSource<TResult> Wrap<TResult>(IExecutableQuery<TSource> query) => new(
             getOptions,
             () => new JsonObject
             {

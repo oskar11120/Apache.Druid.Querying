@@ -44,14 +44,14 @@ namespace Apache.Druid.Querying.Internal
     public static class IQueryWithMappedResult<TSource>
     {
         public interface ArrayOfObjectsWithTimestamp<TValue, TValueMapper> :
-            IQueryWithSource<TSource>.AndMappedResult<WithTimestamp<TValue>,
+            IExecutableQuery<TSource>.WithMappedResult<WithTimestamp<TValue>,
             QueryResultMapper.Array<WithTimestamp<TValue>, QueryResultMapper.WithTimestamp<TValue, TValueMapper>>>
             where TValueMapper : IQueryResultMapper<TValue>, new()
         {
         }
 
         public interface ArrayOfObjectsWithTimestamp<TValue> :
-            IQueryWithSource<TSource>.AndMappedResult<WithTimestamp<TValue>,
+            IExecutableQuery<TSource>.WithMappedResult<WithTimestamp<TValue>,
             QueryResultMapper.Array<
                 WithTimestamp<TValue>,
                 QueryResultMapper.WithTimestamp<TValue, QueryResultMapper.Element<TValue>>>>
@@ -59,7 +59,7 @@ namespace Apache.Druid.Querying.Internal
         }
 
         public interface ArrayOfGroupByResults<TValue> :
-            IQueryWithSource<TSource>.AndMappedResult<WithTimestamp<TValue>,
+            IExecutableQuery<TSource>.WithMappedResult<WithTimestamp<TValue>,
             QueryResultMapper.Array<WithTimestamp<TValue>, QueryResultMapper.GroupByResult<TValue>>>
         {
         }
@@ -96,8 +96,8 @@ namespace Apache.Druid.Querying.Internal
         }
 
         public interface ScanResult_<TColumns> :
-            IQueryWithSource<TSource>
-            .AndMappedResult<
+            IExecutableQuery<TSource>
+            .WithMappedResult<
                 ScanResult<TColumns>,
                 QueryResultMapper.Array<
                     ScanResult<TColumns>,
