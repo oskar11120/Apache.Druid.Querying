@@ -23,7 +23,8 @@ namespace Apache.Druid.Querying.Internal
         {
             [ThreadStatic]
             private static Dictionary<Type, object?>? deserializers;
-            private static readonly byte[] timestampPropertyNameBytes = Encoding.UTF8.GetBytes("__time");
+            private const string timeColumn = "__time";
+            private static readonly byte[] timeColumnUtf8Bytes = Encoding.UTF8.GetBytes(timeColumn);
 
             private readonly ReadOnlySpan<byte> json;
             private readonly JsonSerializerOptions serializerOptions;
@@ -70,7 +71,7 @@ namespace Apache.Druid.Querying.Internal
             {
                 var type = typeof(TProperty);
                 var timeRelated = type == typeof(DateTimeOffset) || type == typeof(DateTime);
-                if (!timeRelated || !propertyNameUtf8.SequenceEqual(timestampPropertyNameBytes))
+                if (!timeRelated || !propertyNameUtf8.SequenceEqual(timeColumnUtf8Bytes))
                 {
                     return DeserializePropertyBase<TProperty>(propertyNameUtf8);
                 }
@@ -85,7 +86,7 @@ namespace Apache.Druid.Querying.Internal
             }
 
             public readonly DateTimeOffset DeserializeTimeProperty()
-                 => DeserializeProperty<DateTimeOffset>(timestampPropertyNameBytes);
+                 => DeserializeProperty<DateTimeOffset>(timeColumnUtf8Bytes);
 
             private static string ToString(ReadOnlySpan<byte> utf8) => Encoding.UTF8.GetString(utf8);
 
@@ -96,7 +97,7 @@ namespace Apache.Druid.Querying.Internal
                 {
                     if (json.Remove(column, out var value))
                     {
-                        if (column == "__time")
+                        if (column == timeColumn)
                         {
                             var unixMs = (long)value!;
                             var t = DateTimeOffset.FromUnixTimeMilliseconds(unixMs);
