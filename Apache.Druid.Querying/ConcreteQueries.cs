@@ -1,5 +1,6 @@
 ﻿using Apache.Druid.Querying.Internal;
 using System;
+using System.Text;
 
 namespace Apache.Druid.Querying
 {
@@ -14,9 +15,11 @@ namespace Apache.Druid.Querying
     {
         private sealed class Deserializer : QueryResultElement.IDeserializer<WithTimestamp<TValue>>
         {
+            private static readonly byte[] timeColumnUtf8Bytes = Encoding.UTF8.GetBytes("__time");
+
             public WithTimestamp<TValue> Deserialize(ref QueryResultElement.DeserializerContext context)
                 => new(
-                    context.DeserializeTimeProperty(),
+                    context.DeserializeProperty<DateTimeOffset>(timeColumnUtf8Bytes),
                     context.Deserialize<TValue>());
         }
     }

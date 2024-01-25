@@ -23,8 +23,6 @@ namespace Apache.Druid.Querying.Internal
         {
             [ThreadStatic]
             private static Dictionary<Type, object?>? deserializers;
-            private const string timeColumn = "__time";
-            private static readonly byte[] timeColumnUtf8Bytes = Encoding.UTF8.GetBytes(timeColumn);
 
             private readonly ReadOnlySpan<byte> json;
             private readonly JsonSerializerOptions serializerOptions;
@@ -59,7 +57,7 @@ namespace Apache.Druid.Querying.Internal
                 return result;
             }
 
-            private readonly TProperty DeserializeProperty<TProperty>(ReadOnlySpan<byte> propertyNameUtf8)
+            public readonly TProperty DeserializeProperty<TProperty>(ReadOnlySpan<byte> propertyNameUtf8)
             {
                 var reader = new Utf8JsonReader(json, false, default);
                 if (!reader.ReadToProperty(propertyNameUtf8))
@@ -76,29 +74,14 @@ namespace Apache.Druid.Querying.Internal
                 return JsonSerializer.Deserialize<TProperty>(value, serializerOptions)!;
             }
 
-            public readonly DateTimeOffset DeserializeTimeProperty()
-                 => DeserializeProperty<DateTimeOffset>(timeColumnUtf8Bytes);
-
             private static string ToString(ReadOnlySpan<byte> utf8) => Encoding.UTF8.GetString(utf8);
 
             private T DeserializeApplyMappings<T>(IReadOnlyList<PropertyColumnNameMapping> mappings)
             {
                 var json = Deserialize<System.Text.Json.Nodes.JsonObject>(false);
                 foreach (var (property, column) in mappings)
-                {
                     if (json.Remove(column, out var value))
-                    {
-                        if (column == timeColumn)
-                        {
-                            var unixMs = (long)value!;
-                            var t = DateTimeOffset.FromUnixTimeMilliseconds(unixMs);
-                            json[property] = t;
-                        }
-                        else
-                            json[property] = value;
-                    }
-                }
-
+                        json[property] = value;
                 return json.Deserialize<T>(serializerOptions)!;
             }
 
@@ -199,7 +182,7 @@ namespace Apache.Druid.Querying.Internal
             }
         }
 
-        // "Element" are objects small enough that whole their data can be fit into buffer. 
+        // "Elements" are objects small enough that whole their data can be fit into buffer. 
         public sealed class Element<TSelf> : IQueryResultMapper<TSelf>
         {
             private static readonly byte[] comaBytes = Encoding.UTF8.GetBytes(",");
