@@ -15,10 +15,12 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
             .SingleOrDefault(param => param.Scalar?.Type == typeof(TParameter))
             ?.Scalar;
 
-        public Parameter.ArgumentsMemberSelector GetMemberSelectorParameter(string name) => Parameters
-            .SingleOrDefault(param => param.Selector?.Name == name)
-            ?.Selector
-            ?? throw new InvalidOperationException(); // TODO
+        public Parameter.ArgumentsMemberSelector? TryGetMemberSelectorParameter(string name) => Parameters
+           .SingleOrDefault(param => param.Selector?.Name == name)
+           ?.Selector;
+
+        public Parameter.ArgumentsMemberSelector GetMemberSelectorParameter(string name) 
+            => TryGetMemberSelectorParameter(name) ?? throw new InvalidOperationException(); // TODO
 
         public static class Parameter
         {

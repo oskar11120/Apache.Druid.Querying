@@ -216,24 +216,24 @@ internal class MessageSourceTests
     {
         var query = new Query<VariableMessage>
             .GroupBy<Variable>
-           .WithVirtualColumns<DateTimeOffset>
-           .WithAggregations<LatestForecast>()
-           .Interval(interval)
-           .Filter(filter => filter.And(
+            .WithVirtualColumns<DateTimeOffset>
+            .WithAggregations<LatestForecast>()
+            .Interval(interval)
+            .Filter(filter => filter.And(
                 filter.Selector(
                     data => data.Source.VariableName,
                     "pmPAct"),
                 filter.Selector(
                     data => data.Source.TenantId,
                     tenantId)))
-           .VirtualColumns(type => type.Expression<DateTimeOffset>(message => $"timestamp({message.ProcessedTimestamp})"))
-           .Dimensions(type => new(
-               type.Default(data => data.Source.ObjectId),
-               type.Default(data => data.Source.VariableName)))
-           .Aggregations(type => new(
-               type.Max(data => data.VirtualColumns),
-               type.Last(data => data.Source.Value, data => data.VirtualColumns, SimpleDataType.String)))
-           .Granularity(Granularity.Hour);
+            .VirtualColumns(type => type.Expression<DateTimeOffset>(message => $"timestamp({message.ProcessedTimestamp})"))
+            .Dimensions(type => new(
+                type.Default(data => data.Source.ObjectId),
+                type.Default(data => data.Source.VariableName)))
+            .Aggregations(type => new(
+                type.Max(data => data.VirtualColumns),
+                type.Last(data => data.Source.Value, data => data.VirtualColumns)))
+            .Granularity(Granularity.Hour);
         var json = Druid
             .Variables
             .MapQueryToJson(query);
