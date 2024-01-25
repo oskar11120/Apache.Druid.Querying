@@ -10,7 +10,7 @@ internal static class TestData
 {
     public const string pmPAct = nameof(pmPAct);
     public static readonly Guid tenantId = Guid.Parse("55022f5d-d9c4-4773-86e5-fbce823cd287");
-    public static readonly DateTimeOffset t0 = DateTime.Parse("2023-10-19T16:57:00.000Z", null, DateTimeStyles.AssumeUniversal).ToUniversalTime();
+    public static readonly DateTimeOffset t0 = DateTime.Parse("2024-01-20T16:57:00.000Z", null, DateTimeStyles.AssumeUniversal).ToUniversalTime();
     public static readonly Interval interval = new(t0, t0.AddDays(5));
 
     public static TQuery IntervalFilterDefaults<TQuery>(this TQuery query) where TQuery :
