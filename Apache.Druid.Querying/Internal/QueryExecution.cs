@@ -62,9 +62,19 @@ namespace Apache.Druid.Querying.Internal
             private readonly TProperty DeserializePropertyBase<TProperty>(ReadOnlySpan<byte> propertyNameUtf8)
             {
                 var reader = new Utf8JsonReader(json, false, default);
-                return reader.ReadToPropertyValue(propertyNameUtf8, out TProperty property) ?
-                    property :
+                if (!reader.ReadToProperty(propertyNameUtf8))
                     throw new InvalidOperationException($"Object {ToString(json)} is missing required property {ToString(propertyNameUtf8)}.");
+                var left = reader.BytesConsumed;
+                reader.Read();
+                if (reader.TokenType is JsonTokenType.StartObject or JsonTokenType.StartArray)
+                {
+                    var endToken = reader.TokenType is JsonTokenType.StartObject ? JsonTokenType.EndObject : JsonTokenType.EndArray;
+                    reader.ReadToToken(endToken, reader.CurrentDepth);
+                    var value = propertyNameUtf8.Slice((int)left, (int)reader.BytesConsumed);
+                    return JsonSerializer.Deserialize<TProperty>(value, serializerOptions)!;
+                }
+
+                return reader.GetValue<TProperty>();
             }
 
             private readonly TProperty DeserializeProperty<TProperty>(ReadOnlySpan<byte> propertyNameUtf8)
