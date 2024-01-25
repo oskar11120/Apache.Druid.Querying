@@ -276,7 +276,7 @@ namespace Apache.Druid.Querying.Internal
 
                 public WithColumns()
                 {
-                    Self.AddOrUpdateSection("columns", (options, columnNameMappings) => 
+                    Self.AddOrUpdateSection("columns", (options, columnNameMappings) =>
                     {
                         var mappings = columnNameMappings.Get<TArguments>();
                         var columnNames = propertyNames;
@@ -284,7 +284,7 @@ namespace Apache.Druid.Querying.Internal
                             .FirstOrDefault(mapping => mapping.Property == propertyName)
                             ?.ColumnName
                             ?? propertyName;
-                        return JsonSerializer.SerializeToNode( propertyNames.Select(GetColumnName), options)!;
+                        return JsonSerializer.SerializeToNode(propertyNames.Select(GetColumnName), options)!;
                     });
                 }
             }
