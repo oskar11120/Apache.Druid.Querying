@@ -61,7 +61,9 @@ namespace Apache.Druid.Querying.Internal
         {
         }
 
-        public interface ArrayOfObjectsWithTimestampAndArray<TValue> : ArrayOfObjectsWithTimestamp<TValue, Element<TValue>>
+        public interface ArrayOfObjectsWithTimestampAndArray<TValue> : ArrayOfObjectsWithTimestamp<
+            TValue, 
+            Array<TValue, Element<TValue>>>
         {
         }
 
