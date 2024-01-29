@@ -112,13 +112,12 @@ namespace Apache.Druid.Querying.Internal
         }
     }
 
-    public static partial class QueryResultMapper
+    public static partial class QueryResultDeserializer
     {
         public abstract class TwoPropertyObject<TFirst, TSecond, TSecondMapper, TResult> :
-            IQueryResultMapper<TResult>
-            where TSecondMapper : IQueryResultMapper<TSecond>, new()
+            IQueryResultDeserializer<TResult>
+            where TSecondMapper : IQueryResultDeserializer<TSecond>, new()
         {
-            private static readonly IQueryResultMapper<TSecond> mapper = new TSecondMapper();
             private readonly (byte[] First, byte[] Second) names;
             private readonly Func<TFirst, TSecond, TResult> create;
 
@@ -128,13 +127,13 @@ namespace Apache.Druid.Querying.Internal
                 this.create = create;
             }
 
-            async IAsyncEnumerable<TResult> IQueryResultMapper<TResult>.Map(
-                QueryResultMapperContext context, [EnumeratorCancellation] CancellationToken token)
+            async IAsyncEnumerable<TResult> IQueryResultDeserializer<TResult>.Deserialize(
+                QueryResultDeserializerContext context, [EnumeratorCancellation] CancellationToken token)
             {
                 var json = context.Json;
                 var first = await json.ReadToPropertyValueAsync<TFirst>(names.First, token);
                 await json.ReadToPropertyAsync(names.Second, token);
-                var results = mapper.Map(context, token);
+                var results = Singleton<TSecondMapper>.Value.Deserialize(context, token);
                 await foreach (var result in results)
                     yield return create(first, result);
                 await json.ReadToTokenAsync(JsonTokenType.EndObject, token);
@@ -145,13 +144,11 @@ namespace Apache.Druid.Querying.Internal
         }
 
         public class Array<TElement, TElementMapper> :
-            IQueryResultMapper<TElement>
-            where TElementMapper : IQueryResultMapper<TElement>, new()
+            IQueryResultDeserializer<TElement>
+            where TElementMapper : IQueryResultDeserializer<TElement>, new()
         {
-            private static readonly IQueryResultMapper<TElement> mapper = new TElementMapper();
-
-            async IAsyncEnumerable<TElement> IQueryResultMapper<TElement>.Map(
-                QueryResultMapperContext context, [EnumeratorCancellation] CancellationToken token)
+            async IAsyncEnumerable<TElement> IQueryResultDeserializer<TElement>.Deserialize(
+                QueryResultDeserializerContext context, [EnumeratorCancellation] CancellationToken token)
             {
                 var json = context.Json;
                 async ValueTask<bool> TrySkipEndArray()
@@ -172,7 +169,7 @@ namespace Apache.Druid.Querying.Internal
                     if (await TrySkipEndArray())
                         yield break;
 
-                    var results = mapper.Map(context, token);
+                    var results = Singleton<TElementMapper>.Value.Deserialize(context, token);
                     await foreach (var result in results)
                         yield return result;
 
@@ -183,12 +180,12 @@ namespace Apache.Druid.Querying.Internal
         }
 
         // "Elements" are objects small enough that whole their data can be fit into buffer. 
-        public sealed class Element<TSelf> : IQueryResultMapper<TSelf>
+        public sealed class Element<TSelf> : IQueryResultDeserializer<TSelf>
         {
             private static readonly byte[] comaBytes = Encoding.UTF8.GetBytes(",");
 
-            async IAsyncEnumerable<TSelf> IQueryResultMapper<TSelf>.Map(
-                QueryResultMapperContext context, [EnumeratorCancellation] CancellationToken token)
+            async IAsyncEnumerable<TSelf> IQueryResultDeserializer<TSelf>.Deserialize(
+                QueryResultDeserializerContext context, [EnumeratorCancellation] CancellationToken token)
             {
                 var (json, options, atomicity, columnNameMappings) = context;
                 async ValueTask<int> ReadThroghWholeAsync(bool updateState = true)

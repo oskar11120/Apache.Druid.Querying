@@ -2,7 +2,6 @@
 using Apache.Druid.Querying.Internal.Sections;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.Json;
@@ -150,6 +149,12 @@ namespace Apache.Druid.Querying
 
         public interface Intervals : IQuery
         {
+            internal IReadOnlyCollection<Interval>? Intervals { get; set; }
+
+            internal IReadOnlyCollection<Interval> GetIntervals()
+                => Intervals is null or { Count: 0 } ?
+                    throw new InvalidOperationException($"Mssing required query section: {nameof(Intervals)}.") :
+                    Intervals;
         }
 
         public interface Order : IQuery
@@ -158,6 +163,12 @@ namespace Apache.Druid.Querying
 
         public interface Granularity : IQuery
         {
+        }
+
+        public interface OffsetAndLimit : IQuery
+        {
+            internal int Offset { get; set; }
+            internal int Limit { get; set; }
         }
     }
 
@@ -247,9 +258,10 @@ namespace Apache.Druid.Querying
                 nameof(Filter),
                 columnNames => factory(new(columnNames)));
 
-        public static TQuery Intervals<TQuery>(this TQuery query, IEnumerable<Interval> intervals)
+        public static TQuery Intervals<TQuery>(this TQuery query, IReadOnlyCollection<Interval> intervals)
             where TQuery : IQueryWith.Intervals
         {
+            query.Intervals = intervals;
             query.AddOrUpdateSection(nameof(intervals), intervals.Select(IntervalExtensions.Map));
             return query;
         }
@@ -280,6 +292,22 @@ namespace Apache.Druid.Querying
             where TQuery : IQueryWith.Granularity
         {
             query.AddOrUpdateSection(nameof(granularity), granularityMap[granularity]);
+            return query;
+        }
+
+        public static TQuery Offset<TQuery>(this TQuery query, int offset)
+            where TQuery : IQueryWith.OffsetAndLimit
+        {
+            query.Offset = offset;
+            query.AddOrUpdateSection(nameof(offset), offset);
+            return query;
+        }
+
+        public static TQuery Limit<TQuery>(this TQuery query, int limit)
+            where TQuery : IQueryWith.OffsetAndLimit
+        {
+            query.Limit = limit;
+            query.AddOrUpdateSection(nameof(limit), limit);
             return query;
         }
     }

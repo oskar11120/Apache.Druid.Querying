@@ -8,7 +8,7 @@ namespace Apache.Druid.Querying.Json
         private static readonly JsonSerializerOptions @default = DefaultSerializerOptions.Create();
 
         public static JsonObject MapToJson<TSource>(
-            this IExecutableQuery<TSource> query,
+            this IQueryWithSource<TSource> query,
             JsonSerializerOptions? serializerOptions = null,
             IColumnNameMappingProvider? columNames = null)
         {

@@ -7,6 +7,13 @@ using System.Threading.Tasks;
 
 namespace Apache.Druid.Querying.Internal.Json;
 
+internal sealed class UnexpectedEndOfStreamException : JsonException
+{
+    public UnexpectedEndOfStreamException() : base("Reached end of stream before finishing deserialization.")
+    {          
+    }
+}
+
 // Based on https://github.com/richlander/convenience/blob/main/releasejson/releasejson/JsonStreamReader.cs.
 internal sealed class JsonStreamReader
 {
@@ -54,7 +61,7 @@ internal sealed class JsonStreamReader
         int read = await _stream.ReadAsync(_buffer.AsMemory()[leftoverLength..], token);
         _readCount = read + leftoverLength;
         if (read == 0)
-            throw new InvalidOperationException("Reached end of the stream before finishing deserialization.");
+            throw new UnexpectedEndOfStreamException();
     }
 
     private int FlipBuffer()

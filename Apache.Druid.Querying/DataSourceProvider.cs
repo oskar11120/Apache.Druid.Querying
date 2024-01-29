@@ -75,11 +75,11 @@ namespace Apache.Druid.Querying
             DataSource<TFirst> first, DataSource<TSecond> second, DataSource<TThird> third)
             => first.Union(second, third);
 
-        public DataSource<TResult> Query<TSource, TResult>(DataSource<TSource> dataSource, IExecutableQuery<TSource>.WithResult<TResult> query)
+        public DataSource<TResult> Query<TSource, TResult>(DataSource<TSource> dataSource, IQueryWithSource<TSource>.AndResult<TResult> query)
             => dataSource.WrapOverQuery(query);
 
         public DataSource<TResult> Query<TSource, TResult, TMapper>(
-            DataSource<TSource> dataSource, IExecutableQuery<TSource>.WithMappedResult<TResult, TMapper> query)
+            DataSource<TSource> dataSource, IQueryWithSource<TSource>.WithMappedResult<TResult, TMapper> query)
             where TMapper : IQueryResultMapper<TResult>, new()
             => dataSource.WrapOverQuery(query);
 

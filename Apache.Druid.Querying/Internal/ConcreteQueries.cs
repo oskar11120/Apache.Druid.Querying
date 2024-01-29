@@ -8,11 +8,11 @@ using System.Text.Json;
 
 namespace Apache.Druid.Querying.Internal
 {
-    public static partial class QueryResultMapper
+    public static partial class QueryResultDeserializer
     {
         public class WithTimestamp<TValue, TValueMapper>
             : TwoPropertyObject<DateTimeOffset, TValue, TValueMapper, WithTimestamp<TValue>>
-            where TValueMapper : IQueryResultMapper<TValue>, new()
+            where TValueMapper : IQueryResultDeserializer<TValue>, new()
         {
             public WithTimestamp() : this("result")
             {
@@ -24,7 +24,7 @@ namespace Apache.Druid.Querying.Internal
             }
         }
 
-        public sealed class GroupByResult<TValue> : WithTimestamp<TValue, QueryResultMapper.Element<TValue>>
+        public sealed class GroupByResult<TValue> : WithTimestamp<TValue, Element<TValue>>
         {
             public GroupByResult() : base("event")
             {
@@ -33,7 +33,7 @@ namespace Apache.Druid.Querying.Internal
 
         public sealed class ScanResult<TValue, TValueMapper>
             : TwoPropertyObject<string?, TValue, TValueMapper, ScanResult<TValue>>
-            where TValueMapper : IQueryResultMapper<TValue>, new()
+            where TValueMapper : IQueryResultDeserializer<TValue>, new()
         {
             public ScanResult() : base(nameof(ScanResult<TValue>.SegmentId), "events", static (id, value) => new(id, value))
             {
@@ -44,23 +44,31 @@ namespace Apache.Druid.Querying.Internal
     public static class IQueryWithMappedResult<TSource>
     {
         public interface ArrayOfObjectsWithTimestamp<TValue, TValueMapper> :
-            IExecutableQuery<TSource>.WithMappedResult<WithTimestamp<TValue>,
-            QueryResultMapper.Array<WithTimestamp<TValue>, QueryResultMapper.WithTimestamp<TValue, TValueMapper>>>
-            where TValueMapper : IQueryResultMapper<TValue>, new()
+            QueryResultDeserializer.Array<
+                WithTimestamp<TValue>,
+                QueryResultDeserializer.WithTimestamp<TValue, TValueMapper>>
+            where TValueMapper : IQueryResultDeserializer<TValue>, new()
         {
         }
 
-        public interface ArrayOfObjectsWithTimestamp<TValue> :
-            IExecutableQuery<TSource>.WithMappedResult<WithTimestamp<TValue>,
-            QueryResultMapper.Array<
-                WithTimestamp<TValue>,
-                QueryResultMapper.WithTimestamp<TValue, QueryResultMapper.Element<TValue>>>>
+        public interface ArrayOfObjectsWithTimestamp<TValue> : ArrayOfObjectsWithTimestamp<TValue, QueryResultDeserializer.Element<TValue>>
+        {
+        }
+
+        public interface ArrayOfObjectsWithTimestampAndArray<TValue, TValueMapper> : ArrayOfObjectsWithTimestamp<
+            TValue,
+            QueryResultDeserializer.Array<TValue, TValueMapper>>
+            where TValueMapper : IQueryResultDeserializer<TValue>, new()
+        {
+        }
+
+        public interface ArrayOfObjectsWithTimestampAndArray<TValue> : ArrayOfObjectsWithTimestamp<TValue, QueryResultDeserializer.Element<TValue>>
         {
         }
 
         public interface ArrayOfGroupByResults<TValue> :
-            IExecutableQuery<TSource>.WithMappedResult<WithTimestamp<TValue>,
-            QueryResultMapper.Array<WithTimestamp<TValue>, QueryResultMapper.GroupByResult<TValue>>>
+            IQueryWithSource<TSource>.AndResult<WithTimestamp<TValue>,
+            QueryResultDeserializer.Array<WithTimestamp<TValue>, QueryResultDeserializer.GroupByResult<TValue>>>
         {
         }
 
@@ -69,19 +77,12 @@ namespace Apache.Druid.Querying.Internal
         {
         }
 
-        public interface Dimension_Aggregations_<TDimension, TAggregations> : ArrayOfObjectsWithTimestamp<
-            Dimension_Aggregations<TDimension, TAggregations>,
-            QueryResultMapper.Array<
-                Dimension_Aggregations<TDimension, TAggregations>,
-                QueryResultMapper.Element<Dimension_Aggregations<TDimension, TAggregations>>>>
+        public interface Dimension_Aggregations_<TDimension, TAggregations> : ArrayOfObjectsWithTimestampAndArray<Dimension_Aggregations<TDimension, TAggregations>>
         {
         }
 
-        public interface Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations> : ArrayOfObjectsWithTimestamp<
-            Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>,
-            QueryResultMapper.Array<
-                Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>,
-                QueryResultMapper.Element<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>>>
+        public interface Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations> 
+            : ArrayOfObjectsWithTimestampAndArray<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>
         {
         }
 
@@ -96,14 +97,14 @@ namespace Apache.Druid.Querying.Internal
         }
 
         public interface ScanResult_<TColumns> :
-            IExecutableQuery<TSource>
-            .WithMappedResult<
+            IQueryWithSource<TSource>
+            .AndResult<
                 ScanResult<TColumns>,
-                QueryResultMapper.Array<
+                QueryResultDeserializer.Array<
                     ScanResult<TColumns>,
-                    QueryResultMapper.ScanResult<
+                    QueryResultDeserializer.ScanResult<
                         TColumns,
-                        QueryResultMapper.Array<TColumns, QueryResultMapper.Element<TColumns>>>>>
+                        QueryResultDeserializer.Array<TColumns, QueryResultDeserializer.Element<TColumns>>>>>
         {
         }
     }
@@ -114,7 +115,7 @@ namespace Apache.Druid.Querying.Internal
         public sealed record Dimensions;
     }
 
-    public abstract class QueryBase : IQuery, IQueryWithSectionFactoryExpressions
+    public abstract class QueryBase : IQuery, IQueryWithSectionFactoryExpressions, IQueryWith.Intervals
     {
         public QueryBase(string? type = null)
         {
@@ -123,8 +124,8 @@ namespace Apache.Druid.Querying.Internal
 
         private readonly Dictionary<string, QuerySectionValueFactory> state;
         Dictionary<string, QuerySectionValueFactory> IQuery.State => state;
-
         SectionAtomicity.IProvider.Builder IQueryWithSectionFactoryExpressions.SectionAtomicity { get; } = new();
+        IReadOnlyCollection<Interval>? IQueryWith.Intervals.Intervals { get; set; }
     }
 
     public static class QueryBase<TArguments, TSelf> where TSelf : IQuery<TSelf>
@@ -157,7 +158,6 @@ namespace Apache.Druid.Querying.Internal
         private static readonly SectionFactoryJsonMapper.Options dimensionsMapperOptions = new(SectionColumnNameKey: "outputName");
         public abstract class TopN_<TDimension, TMetricArguments> :
             QueryBase,
-            IQueryWith.Intervals,
             IQueryWith.Granularity,
             IQueryWith.Filter<TArguments, TSelf>,
             IQueryWith.Context<QueryContext.TopN, TSelf>,
@@ -200,7 +200,6 @@ namespace Apache.Druid.Querying.Internal
 
         public abstract class GroupBy_<TDimensions, TOrderByAndHavingArguments> :
             QueryBase,
-            IQueryWith.Intervals,
             IQueryWith.Granularity,
             IQueryWith.Filter<TArguments, TSelf>,
             IQueryWith.Context<QueryContext.GroupBy, TSelf>,
@@ -248,21 +247,17 @@ namespace Apache.Druid.Querying.Internal
         public abstract class Scan :
             QueryBase,
             IQueryWith.Order,
-            IQueryWith.Intervals,
+            IQueryWith.OffsetAndLimit,
             IQueryWith.Filter<TArguments, TSelf>,
             IQueryWith.Context<QueryContext.Scan, TSelf>
         {
             protected IQuery<TSelf> Self => this;
+            int IQueryWith.OffsetAndLimit.Offset { get; set; }
+            int IQueryWith.OffsetAndLimit.Limit { get; set; }
 
             public Scan() : base("scan")
             {
             }
-
-            public TSelf Offset(int offset)
-                => Self.AddOrUpdateSection(nameof(offset), offset);
-
-            public TSelf Limit(int limit)
-                => Self.AddOrUpdateSection(nameof(limit), limit);
 
             public TSelf BatchSize(int batchSize)
                 => Self.AddOrUpdateSection(nameof(batchSize), batchSize);

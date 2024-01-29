@@ -19,26 +19,38 @@ using System.Threading;
 
 namespace Apache.Druid.Querying
 {
-    internal readonly record struct QueryResultMapperContext(
+    internal sealed record QueryResultDeserializerContext(
         JsonStreamReader Json,
         JsonSerializerOptions Options,
         SectionAtomicity.IProvider Atomicity,
         IColumnNameMappingProvider ColumnNameMappings);
 
-    public interface IQueryResultMapper<TResult>
+    internal sealed class Mutable<TValue>
     {
-        internal IAsyncEnumerable<TResult> Map(QueryResultMapperContext context, CancellationToken token);
+        public TValue? Value { get; set; }
     }
 
-    public interface IExecutableQuery<TSource> : IQuery, IQueryWithSectionFactoryExpressions
+    public interface IQueryResultDeserializer<TResult>
     {
-        public interface WithResult<TResult> : IExecutableQuery<TSource>
-        {
-        }
+        internal IAsyncEnumerable<TResult> Deserialize(QueryResultDeserializerContext context, CancellationToken token);
+    }
 
-        public interface WithMappedResult<TResult, TMapper> :
-            IExecutableQuery<TSource>
-            where TMapper : IQueryResultMapper<TResult>, new()
+    public interface IQueryWithSource<TSource> : IQuery, IQueryWithSectionFactoryExpressions
+    {
+        public interface AndResult<TResult> : IQueryWithSource<TSource>
+        {
+            public interface AndDeserializationAndTruncatedResultHandling<TContext> : AndResult<TResult>, IQueryResultDeserializer<TResult>
+                where TContext : new()
+            {
+                internal IAsyncEnumerable<TResult> OnTruncatedResultsSetQueryForRemaining(
+                    IAsyncEnumerable<TResult> results, TContext context, Mutable<IQueryWithSource<TSource>> setter, CancellationToken token);
+            }
+        }
+    }
+
+    public class TruncatedResultsException : Exception
+    {
+        public TruncatedResultsException(string? message = null, Exception? inner = null) : base(message ?? "Druid query returned truncated results.", inner)
         {
         }
     }
@@ -115,53 +127,58 @@ namespace Apache.Druid.Querying
 
         public readonly DataSourceJsonProvider GetJsonRepresentation;
 
-        public JsonObject MapQueryToJson(IExecutableQuery<TSource> query)
+        public JsonObject MapQueryToJson(IQueryWithSource<TSource> query)
         {
             var result = query.MapToJson(options.Serializer, columnNameMappings);
             result.Add("dataSource", GetJsonRepresentation());
             return result;
         }
 
-        public IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IExecutableQuery<TSource> query, CancellationToken token = default)
-            => Execute<TResult>(query, token);
-
-        public IAsyncEnumerable<TResult> ExecuteQuery<TResult>(IExecutableQuery<TSource>.WithResult<TResult> query, CancellationToken token = default)
-            => Execute<TResult>(query, token);
-
-        public IAsyncEnumerable<TResult> ExecuteQuery<TResult, TMapper>(
-            IExecutableQuery<TSource>.WithMappedResult<TResult, TMapper> query, CancellationToken token = default)
-            where TMapper : IQueryResultMapper<TResult>, new()
+        public async IAsyncEnumerable<TResult> ExecuteQuery<TResult, TContext>(
+            IQueryWithSource<TSource>.AndResult<TResult>.AndDeserializationAndTruncatedResultHandling<TContext> query,
+            bool onTruncatedResultsQueryRemaining = true,
+            [EnumeratorCancellation] CancellationToken token = default)
+            where TContext : new()
         {
+            var queryForRemaining = new Mutable<IQueryWithSource<TSource>> { Value = query };
             var atomicity = SectionAtomicity.IProvider.Builder.CreateCombined(query.SectionAtomicity, sectionAtomicity);
-            async IAsyncEnumerable<TResult> Deserialize(Stream stream, JsonSerializerOptions options, [EnumeratorCancellation] CancellationToken token)
+            var deserializer = query;
+            var truncatedResultHandler = query;
+            byte[]? buffer = null;
+            var context = new TContext();
+            async IAsyncEnumerable<TResult> Deserialize(Stream utf8Json, [EnumeratorCancellation] CancellationToken token)
             {
-                var mapper = new TMapper();
-                var buffer = ArrayPool<byte>.Shared.Rent(JsonStreamReader.Size);
-
-                try
-                {
-                    var read = await stream.ReadAsync(buffer, token);
-                    var results = mapper.Map(new(new(stream, buffer, read), options, atomicity, columnNameMappings), token);
-                    await foreach (var result in results)
-                        yield return result!;
-                }
-                finally
-                {
-                    ArrayPool<byte>.Shared.Return(buffer);
-                }
+                buffer ??= ArrayPool<byte>.Shared.Rent(JsonStreamReader.Size);
+                var read = await utf8Json.ReadAsync(buffer, token);
+                var results = deserializer
+                    .Deserialize(new(new(utf8Json, buffer, read), options.Serializer, atomicity, columnNameMappings), token)
+                    .Catch<TResult, UnexpectedEndOfStreamException>(exception => throw new TruncatedResultsException(inner: exception), token);
+                queryForRemaining.Value = null;
+                if (onTruncatedResultsQueryRemaining)
+                    results = truncatedResultHandler.OnTruncatedResultsSetQueryForRemaining(results, context, queryForRemaining, token);
+                await foreach (var result in results)
+                    yield return result;
             }
 
-            return Execute(query, Deserialize, token);
+            try
+            {
+                while (queryForRemaining.Value != null)
+                {
+                    var results = ExecuteQuery(queryForRemaining.Value, Deserialize, token);
+                    await foreach (var result in results)
+                        yield return result;
+                }
+            }
+            finally
+            {
+                if (buffer is not null)
+                    ArrayPool<byte>.Shared.Return(buffer);
+            }
         }
 
-#pragma warning disable CS8621 // Nullability of reference types in return type doesn't match the target delegate (possibly because of nullability attributes).
-        private IAsyncEnumerable<TResult> Execute<TResult>(IExecutableQuery<TSource> query, CancellationToken token = default)
-            => Execute<TResult>(query, JsonSerializer.DeserializeAsyncEnumerable<TResult>, token);
-#pragma warning restore CS8621 // Nullability of reference types in return type doesn't match the target delegate (possibly because of nullability attributes).
-
-        private async IAsyncEnumerable<TResult> Execute<TResult>(
-            IExecutableQuery<TSource> query,
-            Func<Stream, JsonSerializerOptions, CancellationToken, IAsyncEnumerable<TResult>> deserialize,
+        public async IAsyncEnumerable<TResult> ExecuteQuery<TResult>(
+            IQueryWithSource<TSource> query,
+            Func<Stream, CancellationToken, IAsyncEnumerable<TResult>> deserialize,
             [EnumeratorCancellation] CancellationToken token = default)
         {
             var json = MapQueryToJson(query);
@@ -190,19 +207,12 @@ namespace Apache.Druid.Querying
             using var raw = await response.Content.ReadAsStreamAsync(token);
             var isGzip = response.Content.Headers.ContentEncoding.Contains(gzip.Value);
             using var decompressed = isGzip ? new GZipStream(raw, CompressionMode.Decompress) : raw;
-            var results = deserialize(decompressed, options.Serializer, token);
+            var results = deserialize(decompressed, token);
             await foreach (var result in results)
-                yield return result!;
+                yield return result;
         }
 
-        public DataSource<TResult> WrapOverQuery<TResult>(IExecutableQuery<TSource>.WithResult<TResult> query)
-            => Wrap<TResult>(query);
-
-        public DataSource<TResult> WrapOverQuery<TResult, TMapper>(IExecutableQuery<TSource>.WithMappedResult<TResult, TMapper> query)
-            where TMapper : IQueryResultMapper<TResult>, new()
-            => Wrap<TResult>(query);
-
-        private DataSource<TResult> Wrap<TResult>(IExecutableQuery<TSource> query) => new(
+        public DataSource<TResult> WrapOverQuery<TResult>(IQueryWithSource<TSource>.AndResult<TResult> query) => new(
             getOptions,
             () => new JsonObject
             {
