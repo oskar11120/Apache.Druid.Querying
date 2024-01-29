@@ -5,11 +5,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.Json;
+using System.Threading;
 
 namespace Apache.Druid.Querying.Internal
 {
     public static partial class QueryResultDeserializer
     {
+        public interface IArray<TElement, TElementMapper> :
+            IQueryResultDeserializer<TElement>
+            where TElementMapper : IQueryResultDeserializer<TElement>, new()
+        {
+            private static readonly IQueryResultDeserializer<TElement> array = new Array<TElement, TElementMapper>();
+
+            IAsyncEnumerable<TElement> IQueryResultDeserializer<TElement>.Deserialize(
+                QueryResultDeserializerContext context, CancellationToken token)
+                => array.Deserialize(context, token);
+        }
+
         public class WithTimestamp<TValue, TValueMapper>
             : TwoPropertyObject<DateTimeOffset, TValue, TValueMapper, WithTimestamp<TValue>>
             where TValueMapper : IQueryResultDeserializer<TValue>, new()
@@ -39,72 +51,30 @@ namespace Apache.Druid.Querying.Internal
             {
             }
         }
-    }
-
-    public static class IQueryWithMappedResult<TSource>
-    {
         public interface ArrayOfObjectsWithTimestamp<TValue, TValueMapper> :
-            QueryResultDeserializer.Array<
-                WithTimestamp<TValue>,
-                QueryResultDeserializer.WithTimestamp<TValue, TValueMapper>>
+            IArray<WithTimestamp<TValue>, WithTimestamp<TValue, TValueMapper>>
             where TValueMapper : IQueryResultDeserializer<TValue>, new()
         {
         }
 
-        public interface ArrayOfObjectsWithTimestamp<TValue> : ArrayOfObjectsWithTimestamp<TValue, QueryResultDeserializer.Element<TValue>>
+        public interface ArrayOfObjectsWithTimestamp<TValue> : ArrayOfObjectsWithTimestamp<TValue, Element<TValue>>
         {
         }
 
-        public interface ArrayOfObjectsWithTimestampAndArray<TValue, TValueMapper> : ArrayOfObjectsWithTimestamp<
-            TValue,
-            QueryResultDeserializer.Array<TValue, TValueMapper>>
-            where TValueMapper : IQueryResultDeserializer<TValue>, new()
+        public interface ArrayOfObjectsWithTimestampAndArray<TValue> : ArrayOfObjectsWithTimestamp<TValue, Element<TValue>>
         {
         }
 
-        public interface ArrayOfObjectsWithTimestampAndArray<TValue> : ArrayOfObjectsWithTimestamp<TValue, QueryResultDeserializer.Element<TValue>>
+        public interface ArrayOfGroupByResults<TValue> : IArray<WithTimestamp<TValue>, GroupByResult<TValue>>
         {
         }
 
-        public interface ArrayOfGroupByResults<TValue> :
-            IQueryWithSource<TSource>.AndResult<WithTimestamp<TValue>,
-            QueryResultDeserializer.Array<WithTimestamp<TValue>, QueryResultDeserializer.GroupByResult<TValue>>>
-        {
-        }
-
-        public interface Aggregations_PostAggregations_<TAggregations, TPostAggregations> : ArrayOfObjectsWithTimestamp<
-            Aggregations_PostAggregations<TAggregations, TPostAggregations>>
-        {
-        }
-
-        public interface Dimension_Aggregations_<TDimension, TAggregations> : ArrayOfObjectsWithTimestampAndArray<Dimension_Aggregations<TDimension, TAggregations>>
-        {
-        }
-
-        public interface Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations> 
-            : ArrayOfObjectsWithTimestampAndArray<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>
-        {
-        }
-
-        public interface Dimensions_Aggregations_<TDimensions, TAggregations> : ArrayOfGroupByResults<
-            Dimensions_Aggregations<TDimensions, TAggregations>>
-        {
-        }
-
-        public interface Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations> : ArrayOfGroupByResults<
-            Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>
-        {
-        }
-
-        public interface ScanResult_<TColumns> :
-            IQueryWithSource<TSource>
-            .AndResult<
+        public interface ArrayOfScanResults<TColumns> :
+            IArray<
                 ScanResult<TColumns>,
-                QueryResultDeserializer.Array<
-                    ScanResult<TColumns>,
-                    QueryResultDeserializer.ScanResult<
-                        TColumns,
-                        QueryResultDeserializer.Array<TColumns, QueryResultDeserializer.Element<TColumns>>>>>
+                ScanResult<
+                    TColumns,
+                    Array<TColumns, Element<TColumns>>>>
         {
         }
     }
@@ -128,15 +98,15 @@ namespace Apache.Druid.Querying.Internal
         IReadOnlyCollection<Interval>? IQueryWith.Intervals.Intervals { get; set; }
     }
 
-    public static class QueryBase<TArguments, TSelf> where TSelf : IQuery<TSelf>
+    public static class QueryBase<TArguments, TSelf, TResult> where TSelf : IQuery<TSelf>
     {
         public abstract class TimeSeries :
             QueryBase,
             IQueryWith.Order,
-            IQueryWith.Intervals,
             IQueryWith.Granularity,
             IQueryWith.Filter<TArguments, TSelf>,
-            IQueryWith.Context<QueryContext.TimeSeries, TSelf>
+            IQueryWith.Context<QueryContext.TimeSeries, TSelf>,
+            QueryResultDeserializer.ArrayOfObjectsWithTimestamp<TResult>
         {
             public TimeSeries() : base("timeseries")
             {
@@ -145,13 +115,15 @@ namespace Apache.Druid.Querying.Internal
 
         public abstract class TimeSeries<TAggregations> :
             TimeSeries,
-            IQueryWith.Aggregations<TArguments, TAggregations, TSelf>
+            IQueryWith.Aggregations<TArguments, TAggregations, TSelf>,
+            QueryResultDeserializer.ArrayOfObjectsWithTimestamp<TAggregations>
         {
         }
 
         public abstract class TimeSeries<TAggregations, TPostAggregations> :
             TimeSeries<TAggregations>,
-            IQueryWith.PostAggregations<TAggregations, TPostAggregations, TSelf>
+            IQueryWith.PostAggregations<TAggregations, TPostAggregations, TSelf>,
+            QueryResultDeserializer.ArrayOfObjectsWithTimestamp<Aggregations_PostAggregations<TAggregations, TPostAggregations>>
         {
         }
 
@@ -161,7 +133,8 @@ namespace Apache.Druid.Querying.Internal
             IQueryWith.Granularity,
             IQueryWith.Filter<TArguments, TSelf>,
             IQueryWith.Context<QueryContext.TopN, TSelf>,
-            IQueryWithSectionFactoryExpressions<TArguments, TSelf, Marker.Dimension>
+            IQueryWithSectionFactoryExpressions<TArguments, TSelf, Marker.Dimension>,
+            QueryResultDeserializer.ArrayOfObjectsWithTimestampAndArray<TResult>
         {
             private static readonly SectionFactoryJsonMapper.Options mapperOptions = dimensionsMapperOptions with { ForceSingle = true };
 
@@ -203,7 +176,8 @@ namespace Apache.Druid.Querying.Internal
             IQueryWith.Granularity,
             IQueryWith.Filter<TArguments, TSelf>,
             IQueryWith.Context<QueryContext.GroupBy, TSelf>,
-            IQueryWithSectionFactoryExpressions<TArguments, TSelf, Marker.Dimensions>
+            IQueryWithSectionFactoryExpressions<TArguments, TSelf, Marker.Dimensions>,
+            QueryResultDeserializer.ArrayOfGroupByResults<TResult>
         {
             public GroupBy_() : base("groupBy")
             {
@@ -249,7 +223,8 @@ namespace Apache.Druid.Querying.Internal
             IQueryWith.Order,
             IQueryWith.OffsetAndLimit,
             IQueryWith.Filter<TArguments, TSelf>,
-            IQueryWith.Context<QueryContext.Scan, TSelf>
+            IQueryWith.Context<QueryContext.Scan, TSelf>,
+            QueryResultDeserializer.ArrayOfScanResults<TResult>
         {
             protected IQuery<TSelf> Self => this;
             int IQueryWith.OffsetAndLimit.Offset { get; set; }

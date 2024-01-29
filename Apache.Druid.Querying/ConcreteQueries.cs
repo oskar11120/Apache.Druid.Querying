@@ -128,133 +128,133 @@ namespace Apache.Druid.Querying
 
     public static class Query<TSource>
     {
-        public class TimeSeries :
-            QueryBase<TSource, TimeSeries>.TimeSeries,
-            IQueryWithSource<TSource>.AndResult<WithTimestamp<None>>
+        public class TimeSeries : QueryBase<TSource, TimeSeries, None>.TimeSeries
         {
             public class WithVirtualColumns<TVirtualColumns> :
-                QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>.TimeSeries,
-                IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithVirtualColumns<TVirtualColumns>>,
-                IQueryWithSource<TSource>.AndResult<WithTimestamp<None>>
+                QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>, None>.TimeSeries,
+                IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithVirtualColumns<TVirtualColumns>>
             {
                 public class WithAggregations<TAggregations> :
-                    QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>.TimeSeries<TAggregations>,
-                    IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithAggregations<TAggregations>>,
-                    IQueryWithSource<TSource>.AndResult<WithTimestamp<TAggregations>>
+                    QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>, TAggregations>.TimeSeries<TAggregations>,
+                    IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithAggregations<TAggregations>>
                 {
                     public class WithPostAggregations<TPostAggregations> :
-                        QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>.TimeSeries<TAggregations, TPostAggregations>,
-                        IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithPostAggregations<TPostAggregations>>,
-                        IQueryWithMappedResult<TSource>.Aggregations_PostAggregations_<TAggregations, TPostAggregations>
+                        QueryBase<
+                            Source_VirtualColumns<TSource, TVirtualColumns>, 
+                            WithPostAggregations<TPostAggregations>, 
+                            Aggregations_PostAggregations<TAggregations, TPostAggregations>>
+                        .TimeSeries<TAggregations, TPostAggregations>,
+                        IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithPostAggregations<TPostAggregations>>
                     {
                     }
                 }
             }
 
-            public class WithNoVirtualColumns :
-                QueryBase<TSource, WithNoVirtualColumns>.TimeSeries,
-                IQueryWithSource<TSource>.AndResult<WithTimestamp<None>>
+            public class WithNoVirtualColumns : QueryBase<TSource, WithNoVirtualColumns, None>.TimeSeries
             {
-                public class WithAggregations<TAggregations> :
-                    QueryBase<TSource, WithAggregations<TAggregations>>.TimeSeries<TAggregations>,
-                    IQueryWithSource<TSource>.AndResult<WithTimestamp<TAggregations>>
+                public class WithAggregations<TAggregations> : QueryBase<TSource, WithAggregations<TAggregations>, TAggregations>.TimeSeries<TAggregations>
                 {
-                    public class WithPostAggregations<TPostAggregations> :
-                        QueryBase<TSource, WithPostAggregations<TPostAggregations>>.TimeSeries<TAggregations, TPostAggregations>,
-                        IQueryWithMappedResult<TSource>.Aggregations_PostAggregations_<TAggregations, TPostAggregations>
+                    public class WithPostAggregations<TPostAggregations> : 
+                        QueryBase<
+                            TSource, 
+                            WithPostAggregations<TPostAggregations>, 
+                            Aggregations_PostAggregations<TAggregations, TPostAggregations>>
+                        .TimeSeries<TAggregations, TPostAggregations>
                     {
                     }
                 }
             }
         }
 
-        public class TopN<TDimension> :
-            QueryBase<TSource, TopN<TDimension>>.TopN<TDimension>,
-            IQueryWithSource<TSource>.AndResult<WithTimestamp<TDimension>>
+        public class TopN<TDimension> : QueryBase<TSource, TopN<TDimension>, TDimension>.TopN<TDimension>
         {
             public class WithVirtualColumns<TVirtualColumns> :
-                QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>.TopN<TDimension>,
-                IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithVirtualColumns<TVirtualColumns>>,
-                IQueryWithSource<TSource>.AndResult<WithTimestamp<TDimension>>
+                QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>, TDimension>.TopN<TDimension>,
+                IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithVirtualColumns<TVirtualColumns>>
             {
                 public class WithAggregations<TAggregations> :
-                    QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>.TopN<TDimension, TAggregations>,
-                    IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithAggregations<TAggregations>>,
-                    IQueryWithMappedResult<TSource>.Dimension_Aggregations_<TDimension, TAggregations>
+                    QueryBase<
+                        Source_VirtualColumns<TSource, TVirtualColumns>, 
+                        WithAggregations<TAggregations>, 
+                        Dimensions_Aggregations<TDimension, TAggregations>>
+                    .TopN<TDimension, TAggregations>,
+                    IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithAggregations<TAggregations>>
                 {
                     public class WithPostAggregations<TPostAggregations> :
-                        QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>.TopN<TDimension, TAggregations, TPostAggregations>,
-                        IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithPostAggregations<TPostAggregations>>,
-                        IQueryWithMappedResult<TSource>.Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations>
+                        QueryBase<
+                            Source_VirtualColumns<TSource, TVirtualColumns>, 
+                            WithPostAggregations<TPostAggregations>, 
+                            Dimensions_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>
+                        .TopN<TDimension, TAggregations, TPostAggregations>,
+                        IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithPostAggregations<TPostAggregations>>
                     {
                     }
                 }
             }
 
-            public class WithNoVirtualColumns :
-                QueryBase<TSource, WithNoVirtualColumns>.TopN<TDimension>,
-                IQueryWithSource<TSource>.AndResult<WithTimestamp<TDimension>>
+            public class WithNoVirtualColumns : QueryBase<TSource, WithNoVirtualColumns, TDimension>.TopN<TDimension>
             {
                 public class WithAggregations<TAggregations> :
-                    QueryBase<TSource, WithAggregations<TAggregations>>.TopN<TDimension, TAggregations>,
-                    IQueryWithMappedResult<TSource>.Dimension_Aggregations_<TDimension, TAggregations>
+                    QueryBase<
+                        TSource, 
+                        WithAggregations<TAggregations>, 
+                        Dimensions_Aggregations<TDimension, TAggregations>>
+                    .TopN<TDimension, TAggregations>
                 {
                     public class WithPostAggregations<TPostAggregations> :
-                        QueryBase<TSource, WithPostAggregations<TPostAggregations>>.TopN<TDimension, TAggregations, TPostAggregations>,
-                        IQueryWithMappedResult<TSource>.Dimension_Aggregations_PostAggregations_<TDimension, TAggregations, TPostAggregations>
+                        QueryBase<
+                            TSource, 
+                            WithPostAggregations<TPostAggregations>, 
+                            Dimensions_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>
+                        .TopN<TDimension, TAggregations, TPostAggregations>
                     {
                     }
                 }
             }
         }
 
-        public class GroupBy<TDimensions> :
-            QueryBase<TSource, GroupBy<TDimensions>>.GroupBy<TDimensions>,
-            IQueryWithSource<TSource>.AndResult<WithTimestamp<TDimensions>>
+        public class GroupBy<TDimensions> : QueryBase<TSource, GroupBy<TDimensions>, TDimensions>.GroupBy<TDimensions>
         {
-            public class WithVirtualColumns<TVirtualColumns> :
-                QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>.GroupBy<TDimensions>,
-                IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithVirtualColumns<TVirtualColumns>>,
-                IQueryWithSource<TSource>.AndResult<WithTimestamp<TDimensions>>
+            public class WithVirtualColumns<TVirtualColumns> : 
+                QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>, TDimensions>.GroupBy<TDimensions>,
+                IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithVirtualColumns<TVirtualColumns>>
             {
                 public class WithAggregations<TAggregations> :
-                    QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>.GroupBy<TDimensions, TAggregations>,
-                    IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithAggregations<TAggregations>>,
-                    IQueryWithMappedResult<TSource>.Dimensions_Aggregations_<TDimensions, TAggregations>
+                    QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>, Dimensions_Aggregations<TDimensions, TAggregations>>.GroupBy<TDimensions, TAggregations>,
+                    IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithAggregations<TAggregations>>
                 {
                     public class WithPostAggregations<TPostAggregations> :
-                        QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithPostAggregations<TPostAggregations>>.GroupBy<TDimensions, TAggregations, TPostAggregations>,
-                        IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithPostAggregations<TPostAggregations>>,
-                        IQueryWithMappedResult<TSource>.Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>
+                        QueryBase<
+                            Source_VirtualColumns<TSource, TVirtualColumns>, 
+                            WithPostAggregations<TPostAggregations>,
+                            Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>
+                        .GroupBy<TDimensions, TAggregations, TPostAggregations>,
+                        IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithPostAggregations<TPostAggregations>>
                     {
                     }
                 }
             }
 
-            public class WithNoVirtualColumns :
-                QueryBase<TSource, WithNoVirtualColumns>.GroupBy<TDimensions>,
-                IQueryWithSource<TSource>.AndResult<WithTimestamp<TDimensions>>
+            public class WithNoVirtualColumns : QueryBase<TSource, WithNoVirtualColumns, TDimensions>.GroupBy<TDimensions>
             {
                 public class WithAggregations<TAggregations> :
-                    QueryBase<TSource, WithAggregations<TAggregations>>.GroupBy<TDimensions, TAggregations>,
-                    IQueryWithMappedResult<TSource>.Dimensions_Aggregations_<TDimensions, TAggregations>
+                    QueryBase<TSource, WithAggregations<TAggregations>, Dimensions_Aggregations<TDimensions, TAggregations>>.GroupBy<TDimensions, TAggregations>
                 {
                     public class WithPostAggregations<TPostAggregations> :
-                        QueryBase<TSource, WithPostAggregations<TPostAggregations>>.GroupBy<TDimensions, TAggregations, TPostAggregations>,
-                        IQueryWithMappedResult<TSource>.Dimensions_Aggregations_PostAggregations_<TDimensions, TAggregations, TPostAggregations>
+                        QueryBase<
+                            TSource, 
+                            WithPostAggregations<TPostAggregations>, 
+                            Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>
+                        .GroupBy<TDimensions, TAggregations, TPostAggregations>
                     {
                     }
                 }
             }
         }
 
-        public class Scan :
-           QueryBase<TSource, Scan>.Scan,
-           IQueryWithMappedResult<TSource>.ScanResult_<TSource>
+        public class Scan : QueryBase<TSource, Scan, TSource>.Scan
         {
-            public class WithColumns<TColumns> :
-                QueryBase<TColumns, WithColumns<TColumns>>.Scan.WithColumns,
-                IQueryWithMappedResult<TSource>.ScanResult_<TColumns>
+            public class WithColumns<TColumns> : QueryBase<TColumns, WithColumns<TColumns>, TColumns>.Scan.WithColumns
             {
             }
         }
