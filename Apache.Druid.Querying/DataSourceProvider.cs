@@ -78,11 +78,6 @@ namespace Apache.Druid.Querying
         public DataSource<TResult> Query<TSource, TResult>(DataSource<TSource> dataSource, IQueryWithSource<TSource>.AndResult<TResult> query)
             => dataSource.WrapOverQuery(query);
 
-        public DataSource<TResult> Query<TSource, TResult, TMapper>(
-            DataSource<TSource> dataSource, IQueryWithSource<TSource>.WithMappedResult<TResult, TMapper> query)
-            where TMapper : IQueryResultMapper<TResult>, new()
-            => dataSource.WrapOverQuery(query);
-
         public DataSource<InnerJoinData<TLeft, TRight>> InnerJoin<TLeft, TRight>(
             DataSource<TLeft> left,
             DataSource<TRight> right,
