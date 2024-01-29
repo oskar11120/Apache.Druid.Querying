@@ -24,7 +24,7 @@ namespace Apache.Druid.Querying
         }
     }
 
-    public readonly record struct Dimension_Aggregations<TDimension, TAggregations>(TDimension Dimension, TAggregations Aggregations) 
+    public readonly record struct Dimension_Aggregations<TDimension, TAggregations>(TDimension Dimension, TAggregations Aggregations)
         : IWithDimensions<TDimension>
     {
         TDimension IWithDimensions<TDimension>.Dimensions => Dimension;
@@ -128,21 +128,21 @@ namespace Apache.Druid.Querying
 
     public static class Query<TSource>
     {
-        public class TimeSeries : QueryBase<TSource, TimeSeries, None>.TimeSeries
+        public class TimeSeries : QueryBase<TSource, TSource, TimeSeries>.TimeSeries
         {
             public class WithVirtualColumns<TVirtualColumns> :
-                QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>, None>.TimeSeries,
+                QueryBase<TSource, Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>.TimeSeries,
                 IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithVirtualColumns<TVirtualColumns>>
             {
                 public class WithAggregations<TAggregations> :
-                    QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>, TAggregations>.TimeSeries<TAggregations>,
+                    QueryBase<TSource, Source_VirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>.TimeSeries<TAggregations>,
                     IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithAggregations<TAggregations>>
                 {
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<
-                            Source_VirtualColumns<TSource, TVirtualColumns>, 
-                            WithPostAggregations<TPostAggregations>, 
-                            Aggregations_PostAggregations<TAggregations, TPostAggregations>>
+                            TSource,
+                            Source_VirtualColumns<TSource, TVirtualColumns>,
+                            WithPostAggregations<TPostAggregations>>
                         .TimeSeries<TAggregations, TPostAggregations>,
                         IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithPostAggregations<TPostAggregations>>
                     {
@@ -150,15 +150,15 @@ namespace Apache.Druid.Querying
                 }
             }
 
-            public class WithNoVirtualColumns : QueryBase<TSource, WithNoVirtualColumns, None>.TimeSeries
+            public class WithNoVirtualColumns : QueryBase<TSource, TSource, WithNoVirtualColumns>.TimeSeries
             {
-                public class WithAggregations<TAggregations> : QueryBase<TSource, WithAggregations<TAggregations>, TAggregations>.TimeSeries<TAggregations>
+                public class WithAggregations<TAggregations> : QueryBase<TSource, TSource, WithAggregations<TAggregations>>.TimeSeries<TAggregations>
                 {
-                    public class WithPostAggregations<TPostAggregations> : 
+                    public class WithPostAggregations<TPostAggregations> :
                         QueryBase<
-                            TSource, 
-                            WithPostAggregations<TPostAggregations>, 
-                            Aggregations_PostAggregations<TAggregations, TPostAggregations>>
+                            TSource,
+                            TSource,
+                            WithPostAggregations<TPostAggregations>>
                         .TimeSeries<TAggregations, TPostAggregations>
                     {
                     }
@@ -166,25 +166,26 @@ namespace Apache.Druid.Querying
             }
         }
 
-        public class TopN<TDimension> : QueryBase<TSource, TopN<TDimension>, TDimension>.TopN<TDimension>
+        public class TopN<TDimension> : QueryBase<TSource, TSource, TopN<TDimension>>.TopN<TDimension>
+            where TDimension : IEquatable<TDimension>
         {
             public class WithVirtualColumns<TVirtualColumns> :
-                QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>, TDimension>.TopN<TDimension>,
+                QueryBase<TSource, Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>.TopN<TDimension>,
                 IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithVirtualColumns<TVirtualColumns>>
             {
                 public class WithAggregations<TAggregations> :
                     QueryBase<
-                        Source_VirtualColumns<TSource, TVirtualColumns>, 
-                        WithAggregations<TAggregations>, 
-                        Dimensions_Aggregations<TDimension, TAggregations>>
+                        TSource,
+                        Source_VirtualColumns<TSource, TVirtualColumns>,
+                        WithAggregations<TAggregations>>
                     .TopN<TDimension, TAggregations>,
                     IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithAggregations<TAggregations>>
                 {
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<
-                            Source_VirtualColumns<TSource, TVirtualColumns>, 
-                            WithPostAggregations<TPostAggregations>, 
-                            Dimensions_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>
+                            TSource,
+                            Source_VirtualColumns<TSource, TVirtualColumns>,
+                            WithPostAggregations<TPostAggregations>>
                         .TopN<TDimension, TAggregations, TPostAggregations>,
                         IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithPostAggregations<TPostAggregations>>
                     {
@@ -192,20 +193,20 @@ namespace Apache.Druid.Querying
                 }
             }
 
-            public class WithNoVirtualColumns : QueryBase<TSource, WithNoVirtualColumns, TDimension>.TopN<TDimension>
+            public class WithNoVirtualColumns : QueryBase<TSource, TSource, WithNoVirtualColumns>.TopN<TDimension>
             {
                 public class WithAggregations<TAggregations> :
                     QueryBase<
-                        TSource, 
-                        WithAggregations<TAggregations>, 
-                        Dimensions_Aggregations<TDimension, TAggregations>>
+                        TSource,
+                        TSource,
+                        WithAggregations<TAggregations>>
                     .TopN<TDimension, TAggregations>
                 {
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<
-                            TSource, 
-                            WithPostAggregations<TPostAggregations>, 
-                            Dimensions_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>
+                            TSource,
+                            TSource,
+                            WithPostAggregations<TPostAggregations>>
                         .TopN<TDimension, TAggregations, TPostAggregations>
                     {
                     }
@@ -213,21 +214,22 @@ namespace Apache.Druid.Querying
             }
         }
 
-        public class GroupBy<TDimensions> : QueryBase<TSource, GroupBy<TDimensions>, TDimensions>.GroupBy<TDimensions>
+        public class GroupBy<TDimensions> : QueryBase<TSource, TSource, GroupBy<TDimensions>>.GroupBy<TDimensions>
+             where TDimensions : IEquatable<TDimensions>
         {
-            public class WithVirtualColumns<TVirtualColumns> : 
-                QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>, TDimensions>.GroupBy<TDimensions>,
+            public class WithVirtualColumns<TVirtualColumns> :
+                QueryBase<TSource, Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>.GroupBy<TDimensions>,
                 IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithVirtualColumns<TVirtualColumns>>
             {
                 public class WithAggregations<TAggregations> :
-                    QueryBase<Source_VirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>, Dimensions_Aggregations<TDimensions, TAggregations>>.GroupBy<TDimensions, TAggregations>,
+                    QueryBase<TSource, Source_VirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>.GroupBy<TDimensions, TAggregations>,
                     IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithAggregations<TAggregations>>
                 {
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<
-                            Source_VirtualColumns<TSource, TVirtualColumns>, 
-                            WithPostAggregations<TPostAggregations>,
-                            Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>
+                            TSource,
+                            Source_VirtualColumns<TSource, TVirtualColumns>,
+                            WithPostAggregations<TPostAggregations>>
                         .GroupBy<TDimensions, TAggregations, TPostAggregations>,
                         IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithPostAggregations<TPostAggregations>>
                     {
@@ -235,16 +237,16 @@ namespace Apache.Druid.Querying
                 }
             }
 
-            public class WithNoVirtualColumns : QueryBase<TSource, WithNoVirtualColumns, TDimensions>.GroupBy<TDimensions>
+            public class WithNoVirtualColumns : QueryBase<TSource, TSource, WithNoVirtualColumns>.GroupBy<TDimensions>
             {
                 public class WithAggregations<TAggregations> :
-                    QueryBase<TSource, WithAggregations<TAggregations>, Dimensions_Aggregations<TDimensions, TAggregations>>.GroupBy<TDimensions, TAggregations>
+                    QueryBase<TSource, TSource, WithAggregations<TAggregations>>.GroupBy<TDimensions, TAggregations>
                 {
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<
-                            TSource, 
-                            WithPostAggregations<TPostAggregations>, 
-                            Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>
+                            TSource,
+                            TSource,
+                            WithPostAggregations<TPostAggregations>>
                         .GroupBy<TDimensions, TAggregations, TPostAggregations>
                     {
                     }
@@ -252,9 +254,9 @@ namespace Apache.Druid.Querying
             }
         }
 
-        public class Scan : QueryBase<TSource, Scan, TSource>.Scan
+        public class Scan : QueryBase<TSource, TSource, Scan>.Scan<TSource>
         {
-            public class WithColumns<TColumns> : QueryBase<TColumns, WithColumns<TColumns>, TColumns>.Scan.WithColumns
+            public class WithColumns<TColumns> : QueryBase<TColumns, TColumns, WithColumns<TColumns>>.Scan<TColumns>.WithColumns
             {
             }
         }

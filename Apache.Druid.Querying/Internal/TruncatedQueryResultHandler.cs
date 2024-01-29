@@ -7,33 +7,61 @@ using System.Threading;
 
 namespace Apache.Druid.Querying.Internal;
 
-internal interface IWithDimensions<TDimensions>
+public interface IWithDimensions<TDimensions>
 {
     internal TDimensions Dimensions { get; }
 }
 
-internal static class TruncatedQueryResultHandler<TSource>
+public interface IDimensionsProvider<TResult, TDimensions>
 {
-    private class Copy_<TQuery> : IQueryWithSource<TSource>, IQueryWith.Intervals
-        where TQuery : IQueryWithSource<TSource>, IQueryWith.Intervals
+    internal TDimensions GetDimensions(TResult result);
+}
+
+public static class DimensionsProvider<TDimensions>
+{
+    public sealed class Identity : IDimensionsProvider<TDimensions, TDimensions>
+    {
+        TDimensions IDimensionsProvider<TDimensions, TDimensions>.GetDimensions(TDimensions result) => result;
+    }
+
+    public sealed class FromResult<TResult> 
+        : IDimensionsProvider<TResult, TDimensions>
+        where TResult : IWithDimensions<TDimensions>
+    {
+        TDimensions IDimensionsProvider<TResult, TDimensions>.GetDimensions(TResult result) => result.Dimensions;
+    }
+}
+
+public static class TruncatedQueryResultHandler<TSource>
+{
+    private class Copy_<TQuery> : IQueryWithSource<TSource> where TQuery : IQueryWithSource<TSource>
     {
         public Copy_(TQuery @base)
         {
             State = @base.GetState().ToDictionary(pair => pair.Key, pair => pair.Value);
             SectionAtomicity = @base.SectionAtomicity;
-            Intervals = @base.Intervals;
         }
 
         public Dictionary<string, QuerySectionValueFactory> State { get; }
         public SectionAtomicity.IProvider.Builder SectionAtomicity { get; }
+    }
+
+    private sealed class Copy_WithIntervals<TQuery> : Copy_<TQuery>, IQueryWith.Intervals
+        where TQuery : IQueryWithSource<TSource>, IQueryWith.Intervals
+    {
+        public Copy_WithIntervals(TQuery @base) : base(@base)
+        {
+            Intervals = @base.Intervals;
+        }
+
         public IReadOnlyCollection<Interval>? Intervals { get; set; }
     }
 
-    private static Copy_<TQuery> Copy<TQuery>(TQuery query)
+    private static Copy_WithIntervals<TQuery> Copy<TQuery>(TQuery query)
         where TQuery : IQueryWithSource<TSource>, IQueryWith.Intervals
         => new(query);
 
-    private static Copy_<TQuery> Copy<TQuery>(TQuery query, DateTimeOffset withIntervalsStartingFrom)
+    private static Copy_WithIntervals<TQuery> Copy<TQuery>(TQuery query, DateTimeOffset withIntervalsStartingFrom)
         where TQuery : IQueryWithSource<TSource>, IQueryWith.Intervals
     {
         var newIntervals = query.
@@ -76,17 +104,19 @@ internal static class TruncatedQueryResultHandler<TSource>
         }
     }
 
-    public interface TopN_GroupBy<TResult, TDimensions> :
-        IQueryWithSource<TSource>.AndResult<WithTimestamp<TResult>>.AndDeserializationAndTruncatedResultHandling<TopN_GroupBy<TResult, TDimensions>.LatestReturned>,
+    public interface TopN_GroupBy<TResult, TDimensions, TDimensionsProvider> :
+        IQueryWithSource<TSource>.AndResult<WithTimestamp<TResult>>.AndDeserializationAndTruncatedResultHandling<TopN_GroupBy<TResult, TDimensions, TDimensionsProvider>.LatestReturned>,
         IQueryWith.Intervals
         where TDimensions : IEquatable<TDimensions>
-        where TResult : IWithDimensions<TDimensions>
+        where TDimensionsProvider : IDimensionsProvider<TResult, TDimensions>, new()
     {
         public sealed class LatestReturned
         {
             public DateTimeOffset? Timestamp;
             public Queue<TDimensions> Dimensions = new();
         }
+
+        private static readonly TDimensionsProvider provider = new();
 
         async IAsyncEnumerable<WithTimestamp<TResult>> AndDeserializationAndTruncatedResultHandling<LatestReturned>.OnTruncatedResultsSetQueryForRemaining(
             IAsyncEnumerable<WithTimestamp<TResult>> results,
@@ -107,7 +137,7 @@ internal static class TruncatedQueryResultHandler<TSource>
                     latestReturned.Dimensions.Clear();
                 }
 
-                var resultDimensions = result.Value.Dimensions;
+                var resultDimensions = provider.GetDimensions(result.Value);
                 if (timestampChangedAtLeastOnce || result.Timestamp == latestReturned.Timestamp && !latestReturned.Dimensions.Contains(resultDimensions))
                 {
                     latestReturned.Dimensions.Enqueue(resultDimensions);
@@ -123,13 +153,11 @@ internal static class TruncatedQueryResultHandler<TSource>
 
     // TODO Try to optimize by using intervals if query is ordered.
     public interface Scan<TResult> :
-        IQueryWithSource<TSource>.AndResult<WithTimestamp<TResult>>.AndDeserializationAndTruncatedResultHandling<Scan<TResult>.LatestResult>,
-        IQueryWith.Intervals,
+        IQueryWithSource<TSource>.AndResult<TResult>.AndDeserializationAndTruncatedResultHandling<Scan<TResult>.LatestResult>,
         IQueryWith.OffsetAndLimit
     {
         private sealed class Copy__<TQuery> : Copy_<TQuery>, IQueryWith.OffsetAndLimit where TQuery :
             IQueryWithSource<TSource>,
-            IQueryWith.Intervals,
             IQueryWith.OffsetAndLimit
         {
             public Copy__(TQuery @base) : base(@base)
@@ -144,7 +172,6 @@ internal static class TruncatedQueryResultHandler<TSource>
 
         private static Copy__<TQuery> Copy<TQuery>(TQuery query) where TQuery :
             IQueryWithSource<TSource>,
-            IQueryWith.Intervals,
             IQueryWith.OffsetAndLimit
              => new(query);
 
@@ -153,14 +180,14 @@ internal static class TruncatedQueryResultHandler<TSource>
             public int Count;
         }
 
-        async IAsyncEnumerable<WithTimestamp<TResult>> AndDeserializationAndTruncatedResultHandling<LatestResult>.OnTruncatedResultsSetQueryForRemaining(
-            IAsyncEnumerable<WithTimestamp<TResult>> results,
+        async IAsyncEnumerable<TResult> AndDeserializationAndTruncatedResultHandling<LatestResult>.OnTruncatedResultsSetQueryForRemaining(
+            IAsyncEnumerable<TResult> results,
             LatestResult latestResult,
             Mutable<IQueryWithSource<TSource>> setter,
             [EnumeratorCancellation] CancellationToken token)
         {
             var truncated = false;
-            results = results.Catch<WithTimestamp<TResult>, TruncatedResultsException>(_ => truncated = true, token);
+            results = results.Catch<TResult, TruncatedResultsException>(_ => truncated = true, token);
             await foreach (var result in results)
             {
                 latestResult.Count++;

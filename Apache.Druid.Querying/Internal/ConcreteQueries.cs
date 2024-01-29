@@ -98,43 +98,50 @@ namespace Apache.Druid.Querying.Internal
         IReadOnlyCollection<Interval>? IQueryWith.Intervals.Intervals { get; set; }
     }
 
-    public static class QueryBase<TArguments, TSelf, TResult> where TSelf : IQuery<TSelf>
+    public static class QueryBase<TSource, TArguments, TSelf> where TSelf : IQuery<TSelf>
     {
-        public abstract class TimeSeries :
+        public abstract class TimeSeries_<TResult> :
             QueryBase,
             IQueryWith.Order,
             IQueryWith.Granularity,
             IQueryWith.Filter<TArguments, TSelf>,
             IQueryWith.Context<QueryContext.TimeSeries, TSelf>,
-            QueryResultDeserializer.ArrayOfObjectsWithTimestamp<TResult>
+            QueryResultDeserializer.ArrayOfObjectsWithTimestamp<TResult>,
+            TruncatedQueryResultHandler<TSource>.TimeSeries<TResult>
         {
-            public TimeSeries() : base("timeseries")
+            public TimeSeries_() : base("timeseries")
             {
             }
         }
 
+        public abstract class TimeSeries : TimeSeries_<None>
+        {
+        }
+
         public abstract class TimeSeries<TAggregations> :
-            TimeSeries,
-            IQueryWith.Aggregations<TArguments, TAggregations, TSelf>,
-            QueryResultDeserializer.ArrayOfObjectsWithTimestamp<TAggregations>
+            TimeSeries_<TAggregations>,
+            IQueryWith.Aggregations<TArguments, TAggregations, TSelf>
         {
         }
 
         public abstract class TimeSeries<TAggregations, TPostAggregations> :
-            TimeSeries<TAggregations>,
-            IQueryWith.PostAggregations<TAggregations, TPostAggregations, TSelf>,
-            QueryResultDeserializer.ArrayOfObjectsWithTimestamp<Aggregations_PostAggregations<TAggregations, TPostAggregations>>
+            TimeSeries_<Aggregations_PostAggregations<TAggregations, TPostAggregations>>,
+            IQueryWith.Aggregations<TArguments, TAggregations, TSelf>,
+            IQueryWith.PostAggregations<TAggregations, TPostAggregations, TSelf>
         {
         }
 
         private static readonly SectionFactoryJsonMapper.Options dimensionsMapperOptions = new(SectionColumnNameKey: "outputName");
-        public abstract class TopN_<TDimension, TMetricArguments> :
+        public abstract class TopN_<TDimension, TMetricArgumentsAndResult, TDimensionProvider> :
             QueryBase,
             IQueryWith.Granularity,
             IQueryWith.Filter<TArguments, TSelf>,
             IQueryWith.Context<QueryContext.TopN, TSelf>,
             IQueryWithSectionFactoryExpressions<TArguments, TSelf, Marker.Dimension>,
-            QueryResultDeserializer.ArrayOfObjectsWithTimestampAndArray<TResult>
+            QueryResultDeserializer.ArrayOfObjectsWithTimestampAndArray<TMetricArgumentsAndResult>,
+            TruncatedQueryResultHandler<TSource>.TopN_GroupBy<TMetricArgumentsAndResult, TDimension, TDimensionProvider>
+            where TDimension : IEquatable<TDimension>
+            where TDimensionProvider : IDimensionsProvider<TMetricArgumentsAndResult, TDimension>, new()
         {
             private static readonly SectionFactoryJsonMapper.Options mapperOptions = dimensionsMapperOptions with { ForceSingle = true };
 
@@ -150,34 +157,46 @@ namespace Apache.Druid.Querying.Internal
             public TSelf Threshold(int threshold)
                 => Self.AddOrUpdateSection(nameof(threshold), threshold);
 
-            public TSelf Metric(Func<QueryElementFactory<TMetricArguments>.MetricSpec, IMetric> factory)
+            public TSelf Metric(Func<QueryElementFactory<TMetricArgumentsAndResult>.MetricSpec, IMetric> factory)
                 => Self.AddOrUpdateSection(nameof(Metric), columnNames => factory(new(columnNames)));
         }
 
-        public abstract class TopN<TDimension> : TopN_<TDimension, TDimension>
+        public abstract class TopN<TDimension> : TopN_<TDimension, TDimension, DimensionsProvider<TDimension>.Identity>
+            where TDimension : IEquatable<TDimension>
         {
         }
 
         public abstract class TopN<TDimension, TAggregations> :
-            TopN_<TDimension, Dimension_Aggregations<TDimension, TAggregations>>,
+            TopN_<
+                TDimension,
+                Dimension_Aggregations<TDimension, TAggregations>,
+                DimensionsProvider<TDimension>.FromResult<Dimension_Aggregations<TDimension, TAggregations>>>,
             IQueryWith.Aggregations<TArguments, TAggregations, TSelf>
+            where TDimension : IEquatable<TDimension>
         {
         }
 
         public abstract class TopN<TDimension, TAggregations, TPostAggregations> :
-            TopN_<TDimension, Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>,
+            TopN_<
+                TDimension,
+                Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>,
+                DimensionsProvider<TDimension>.FromResult<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>>,
             IQueryWith.Aggregations<TArguments, TAggregations, TSelf>,
             IQueryWith.PostAggregations<TAggregations, TPostAggregations, TSelf>
+            where TDimension : IEquatable<TDimension>
         {
         }
 
-        public abstract class GroupBy_<TDimensions, TOrderByAndHavingArguments> :
+        public abstract class GroupBy_<TDimensions, TOrderByAndHavingArgumentsAndResult, TDimensionProvider> :
             QueryBase,
             IQueryWith.Granularity,
             IQueryWith.Filter<TArguments, TSelf>,
             IQueryWith.Context<QueryContext.GroupBy, TSelf>,
             IQueryWithSectionFactoryExpressions<TArguments, TSelf, Marker.Dimensions>,
-            QueryResultDeserializer.ArrayOfGroupByResults<TResult>
+            QueryResultDeserializer.ArrayOfGroupByResults<TOrderByAndHavingArgumentsAndResult>,
+            TruncatedQueryResultHandler<TSource>.TopN_GroupBy<TOrderByAndHavingArgumentsAndResult, TDimensions, TDimensionProvider>
+            where TDimensions : IEquatable<TDimensions>
+            where TDimensionProvider : IDimensionsProvider<TOrderByAndHavingArgumentsAndResult, TDimensions>, new()
         {
             public GroupBy_() : base("groupBy")
             {
@@ -191,53 +210,66 @@ namespace Apache.Druid.Querying.Internal
             public TSelf LimitSpec(
                 int? limit = null,
                 int? offset = null,
-                Func<QueryElementFactory<TOrderByAndHavingArguments>.OrderByColumnSpec, IEnumerable<ILimitSpec.OrderBy>>? columns = null)
+                Func<QueryElementFactory<TOrderByAndHavingArgumentsAndResult>.OrderByColumnSpec, IEnumerable<ILimitSpec.OrderBy>>? columns = null)
                 => Self.AddOrUpdateSection(nameof(LimitSpec), columnNames => new LimitSpec(limit, offset, columns?.Invoke(new(columnNames))));
 
-            public TSelf Having(Func<QueryElementFactory<TOrderByAndHavingArguments>.Having, IHaving> factory)
+            public TSelf Having(Func<QueryElementFactory<TOrderByAndHavingArgumentsAndResult>.Having, IHaving> factory)
                 => Self.AddOrUpdateSection(nameof(Having), columnNames => factory(new(columnNames)));
 
-            public TSelf HavingFilter(Func<QueryElementFactory<TOrderByAndHavingArguments>.Filter, IFilter> factory)
-                => Self.AddOrUpdateSection(nameof(Having), columnNames => new QueryElementFactory<TOrderByAndHavingArguments>.Having(columnNames).Filter(factory));
+            public TSelf HavingFilter(Func<QueryElementFactory<TOrderByAndHavingArgumentsAndResult>.Filter, IFilter> factory)
+                => Self.AddOrUpdateSection(nameof(Having), columnNames => new QueryElementFactory<TOrderByAndHavingArgumentsAndResult>.Having(columnNames).Filter(factory));
         }
 
-        public abstract class GroupBy<TDimensions> : GroupBy_<TDimensions, TDimensions>
+        public abstract class GroupBy<TDimensions> : GroupBy_<TDimensions, TDimensions, DimensionsProvider<TDimensions>.Identity>
+            where TDimensions : IEquatable<TDimensions>
         {
         }
 
         public abstract class GroupBy<TDimensions, TAggregations> :
-            GroupBy_<TDimensions, Dimensions_Aggregations<TDimensions, TAggregations>>,
+            GroupBy_<
+                TDimensions,
+                Dimensions_Aggregations<TDimensions, TAggregations>,
+                DimensionsProvider<TDimensions>.FromResult<Dimensions_Aggregations<TDimensions, TAggregations>>>,
             IQueryWith.Aggregations<TArguments, TAggregations, TSelf>
+            where TDimensions : IEquatable<TDimensions>
         {
         }
 
         public abstract class GroupBy<TDimensions, TAggregations, TPostAggregations> :
-            GroupBy_<TDimensions, Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>,
+            GroupBy_<
+                TDimensions,
+                Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>,
+                DimensionsProvider<TDimensions>.FromResult<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>>,
             IQueryWith.Aggregations<TArguments, TAggregations, TSelf>,
             IQueryWith.PostAggregations<TAggregations, TPostAggregations, TSelf>
+            where TDimensions : IEquatable<TDimensions>
         {
         }
 
-        public abstract class Scan :
+        public abstract class Scan_<TColumns> :
             QueryBase,
             IQueryWith.Order,
             IQueryWith.OffsetAndLimit,
             IQueryWith.Filter<TArguments, TSelf>,
             IQueryWith.Context<QueryContext.Scan, TSelf>,
-            QueryResultDeserializer.ArrayOfScanResults<TResult>
+            QueryResultDeserializer.ArrayOfScanResults<TColumns>,
+            TruncatedQueryResultHandler<TSource>.Scan<ScanResult<TColumns>>
         {
             protected IQuery<TSelf> Self => this;
             int IQueryWith.OffsetAndLimit.Offset { get; set; }
             int IQueryWith.OffsetAndLimit.Limit { get; set; }
 
-            public Scan() : base("scan")
+            public Scan_() : base("scan")
             {
             }
 
             public TSelf BatchSize(int batchSize)
                 => Self.AddOrUpdateSection(nameof(batchSize), batchSize);
+        }
 
-            public abstract class WithColumns : Scan
+        public abstract class Scan<TResult> : Scan_<TResult>
+        {
+            public abstract class WithColumns : Scan<TResult>
             {
                 private static readonly string[] propertyNames = typeof(TArguments)
                     .GetProperties()
