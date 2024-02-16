@@ -1,6 +1,6 @@
 using Apache.Druid.Querying.Json;
 
-namespace Apache.Druid.Querying.Unit.Tests
+namespace Apache.Druid.Querying.Tests.Unit
 {
     public class Tests
     {
@@ -188,7 +188,7 @@ namespace Apache.Druid.Querying.Unit.Tests
         [Test]
         public void TimeSeriesQuery_Builds()
         {
-            var test0 = new Query<Message>
+            var zero = new Query<Message>
                 .TimeSeries
                 .WithNoVirtualColumns
                 .WithAggregations<double>()
@@ -203,7 +203,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 .Aggregations(type => type.Last(message => message.Value, SimpleDataType.Float))
                 .MapToJson();
 
-            var test1 = new Query<Message>
+            var one = new Query<Message>
                 .TimeSeries
                 .WithVirtualColumns<VirtualColumns>
                 .WithAggregations<Aggregations>()
@@ -222,7 +222,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 ))
                 .MapToJson();
 
-            var test2 = new Query<Message>
+            var two = new Query<Message>
                 .TimeSeries
                 .WithNoVirtualColumns
                 .WithAggregations<Aggregations>
@@ -247,7 +247,7 @@ namespace Apache.Druid.Querying.Unit.Tests
                 ))
                 .MapToJson();
 
-            var test3 = new Query<Message>
+            var three = new Query<Message>
                 .TimeSeries
                 .WithVirtualColumns<VirtualColumns>
                 .WithAggregations<Aggregations>

@@ -2,7 +2,7 @@
 using FluentAssertions;
 using System.Linq.Expressions;
 
-namespace Apache.Druid.Querying.Unit.Tests.Internal
+namespace Apache.Druid.Querying.Tests.Unit.Internal
 {
     internal class ExpressionTextMapperTests
     {
