@@ -1,11 +1,11 @@
 ﻿using Apache.Druid.Querying.Internal;
-using Apache.Druid.Querying.Internal.QuerySectionFactory;
+using Apache.Druid.Querying.Internal.Elements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using Filter_ = Apache.Druid.Querying.Internal.QuerySectionFactory.Filter;
-using Having_ = Apache.Druid.Querying.Internal.QuerySectionFactory.Having;
+using Filter_ = Apache.Druid.Querying.Internal.Elements.Filter;
+using Having_ = Apache.Druid.Querying.Internal.Elements.Having;
 
 namespace Apache.Druid.Querying
 {

@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 using System;
 using System.Linq;
 
-namespace Apache.Druid.Querying.Internal.QuerySectionFactory
+namespace Apache.Druid.Querying.Internal.Sections
 {
     internal static class ExpressionExtensions
     {

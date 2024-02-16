@@ -1,5 +1,4 @@
-﻿using Apache.Druid.Querying.Internal.QuerySectionFactory;
-using System.Linq;
+﻿using System.Linq;
 using System.Linq.Expressions;
 
 namespace Apache.Druid.Querying.Internal.Sections

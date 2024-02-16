@@ -1,5 +1,4 @@
-﻿using Apache.Druid.Querying.Internal.QuerySectionFactory;
-using Apache.Druid.Querying.Internal.Sections;
+﻿using Apache.Druid.Querying.Internal.Sections;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -213,7 +212,7 @@ namespace Apache.Druid.Querying.Internal
                 int? limit = null,
                 int? offset = null,
                 Func<QueryElementFactory<TOrderByAndHavingArgumentsAndResult>.OrderByColumnSpec, IEnumerable<ILimitSpec.OrderBy>>? columns = null)
-                => Self.AddOrUpdateSection(nameof(LimitSpec), columnNames => new LimitSpec(limit, offset, columns?.Invoke(new(columnNames))));
+                => Self.AddOrUpdateSection(nameof(LimitSpec), columnNames => new Elements.LimitSpec(limit, offset, columns?.Invoke(new(columnNames))));
 
             public TSelf Having(Func<QueryElementFactory<TOrderByAndHavingArgumentsAndResult>.Having, IHaving> factory)
                 => Self.AddOrUpdateSection(nameof(Having), columnNames => factory(new(columnNames)));

@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Apache.Druid.Querying.Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Apache.Druid.Querying.AspNetCore.Tests.Integration
+namespace Apache.Druid.Querying.Tests.Integration
 {
     internal static class ServiceProvider
     {

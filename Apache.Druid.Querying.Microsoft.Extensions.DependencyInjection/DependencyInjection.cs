@@ -3,7 +3,7 @@ using System.Text.Json;
 using Apache.Druid.Querying.Json;
 using Apache.Druid.Querying.DependencyInjection;
 
-namespace Apache.Druid.Querying.AspNetCore
+namespace Apache.Druid.Querying.Microsoft.Extensions.DependencyInjection
 {
     public class DataSourceProviderBuilder
     {

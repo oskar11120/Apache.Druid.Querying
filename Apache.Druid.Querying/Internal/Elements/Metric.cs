@@ -1,4 +1,4 @@
-﻿namespace Apache.Druid.Querying.Internal.QuerySectionFactory
+﻿namespace Apache.Druid.Querying.Internal.Elements
 {
     internal abstract class Metric : WithType, IMetric
     {

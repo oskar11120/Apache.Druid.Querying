@@ -1,10 +1,10 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
-using static Apache.Druid.Querying.AspNetCore.Tests.Integration.ServiceProvider;
-using static Apache.Druid.Querying.AspNetCore.Tests.Integration.TestData;
+using static Apache.Druid.Querying.Tests.Integration.ServiceProvider;
+using static Apache.Druid.Querying.Tests.Integration.TestData;
 
-namespace Apache.Druid.Querying.AspNetCore.Tests.Integration;
+namespace Apache.Druid.Querying.Tests.Integration;
 
 internal static class TestData
 {

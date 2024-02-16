@@ -1,4 +1,4 @@
-﻿namespace Apache.Druid.Querying.AspNetCore.Tests.Integration;
+﻿namespace Apache.Druid.Querying.Tests.Integration;
 
 [DataSourceColumnNamingConvention(DataSourceColumnNamingConventionType.CamelCase)]
 internal record VariableMessage(

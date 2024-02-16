@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Apache.Druid.Querying.Internal.QuerySectionFactory
+namespace Apache.Druid.Querying.Internal.Elements
 {
     internal sealed class LimitSpec : WithType, ILimitSpec
     {

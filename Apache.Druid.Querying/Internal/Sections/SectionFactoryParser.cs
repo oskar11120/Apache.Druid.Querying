@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace Apache.Druid.Querying.Internal.QuerySectionFactory
+namespace Apache.Druid.Querying.Internal.Sections
 {
     internal sealed record ElementFactoryCall(
         string? ResultMemberName,
@@ -19,7 +19,7 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
            .SingleOrDefault(param => param.Selector?.Name == name)
            ?.Selector;
 
-        public Parameter.ArgumentsMemberSelector GetMemberSelectorParameter(string name) 
+        public Parameter.ArgumentsMemberSelector GetMemberSelectorParameter(string name)
             => TryGetMemberSelectorParameter(name) ?? throw new InvalidOperationException(); // TODO
 
         public static class Parameter
@@ -63,7 +63,7 @@ namespace Apache.Druid.Querying.Internal.QuerySectionFactory
                             arg.ifNested(nested, arg.argument);
                             return 0;
                         },
-                        (expression, arg) => 
+                        (expression, arg) =>
                         {
                             arg.ifExpression(expression, arg.argument);
                             return 0;
