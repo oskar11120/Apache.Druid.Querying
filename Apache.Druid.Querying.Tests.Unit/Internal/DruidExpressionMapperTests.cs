@@ -9,8 +9,8 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
         [Test]
         public void Map_Works()
         {
-            var columnNameMap = IColumnNameMappingProvider.ImmutableBuilder.Create<Tests.Message>();
-            string Map(Expression<QueryElementFactory<Tests.Message>.DruidExpression> factory)
+            var columnNameMap = IColumnNameMappingProvider.ImmutableBuilder.Create<QueryTests_MapsToRightJson.Message>();
+            string Map(Expression<QueryElementFactory<QueryTests_MapsToRightJson.Message>.DruidExpression> factory)
                 => DruidExpression.Map(factory, columnNameMap).Expression;
             var result = Map(message => $"{message.VariableName} == 42");
             result.Should().Be("variable == 42");

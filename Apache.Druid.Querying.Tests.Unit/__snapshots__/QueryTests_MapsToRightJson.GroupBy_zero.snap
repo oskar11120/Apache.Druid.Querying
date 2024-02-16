@@ -1,0 +1,56 @@
+﻿{
+  "queryType": "groupBy",
+  "intervals": [
+    "2000-01-02T01:01:00.0000000\u002B00:00/2000-01-02T01:01:00.0000000\u002B00:00"
+  ],
+  "granularity": "minute",
+  "dimensions": [
+    {
+      "type": "default",
+      "outputName": "ObjectId",
+      "dimension": "objectId"
+    },
+    {
+      "type": "default",
+      "outputName": "VariableName",
+      "dimension": "variable"
+    }
+  ],
+  "aggregations": [
+    {
+      "type": "longMax",
+      "name": "TMax",
+      "fieldName": "__time"
+    },
+    {
+      "type": "doubleLast",
+      "name": "LastValue",
+      "fieldName": "value"
+    }
+  ],
+  "limitSpec": {
+    "limit": 5000,
+    "columns": [
+      {
+        "dimension": "ObjectId",
+        "dimensionOrder": "Lexicographic"
+      },
+      {
+        "dimension": "LastValue",
+        "dimensionOrder": "Lexicographic"
+      }
+    ],
+    "type": "default"
+  },
+  "having": {
+    "filter": {
+      "lower": 0,
+      "lowerOpen": false,
+      "upperOpen": false,
+      "matchValueType": "Double",
+      "column": "LastValue",
+      "type": "range"
+    },
+    "type": "filter"
+  }
+}

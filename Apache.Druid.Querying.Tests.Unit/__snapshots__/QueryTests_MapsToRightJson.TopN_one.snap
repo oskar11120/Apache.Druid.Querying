@@ -1,0 +1,54 @@
+﻿{
+  "queryType": "topN",
+  "intervals": [
+    "2000-01-02T01:01:00.0000000\u002B00:00/2000-01-02T01:01:00.0000000\u002B00:00"
+  ],
+  "virtualColumns": [
+    {
+      "type": "expression",
+      "name": "VirtualColumns",
+      "expression": "__time"
+    }
+  ],
+  "filter": {
+    "fields": [
+      {
+        "column": "VirtualColumns",
+        "type": "null"
+      },
+      {
+        "matchValue": "e3af0803-3fc1-407c-9071-29c5f1cdc8d2",
+        "matchValueType": "String",
+        "column": "objectId",
+        "type": "equals"
+      }
+    ],
+    "type": "or"
+  },
+  "dimension": {
+    "type": "default",
+    "outputName": "Dimension",
+    "dimension": "objectId"
+  },
+  "threshold": 5,
+  "granularity": "minute",
+  "aggregations": [
+    {
+      "type": "longMax",
+      "name": "TMax",
+      "fieldName": "__time"
+    },
+    {
+      "type": "doubleLast",
+      "name": "LastValue",
+      "fieldName": "value"
+    }
+  ],
+  "metric": {
+    "metric": "LastValue",
+    "type": "numeric"
+  },
+  "context": {
+    "minTopNThreshold": 5
+  }
+}
