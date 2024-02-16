@@ -2,7 +2,7 @@ using Apache.Druid.Querying.Json;
 
 namespace Apache.Druid.Querying.Tests.Unit
 {
-    public class Tests
+    internal class Tests
     {
         [Test]
         public void Scan_Builds()

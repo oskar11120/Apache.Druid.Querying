@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace Apache.Druid.Querying.Tests.Unit.Internal
 {
-    internal class ExpressionTextMapperTests
+    internal class DruidExpressionMapperTests
     {
         [Test]
         public void Map_Works()
