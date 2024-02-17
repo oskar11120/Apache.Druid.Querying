@@ -5,12 +5,12 @@ using System.Runtime.CompilerServices;
 
 namespace Apache.Druid.Querying.Tests.Unit
 {
-    internal class QueryTests_MapsToRightJson
+    internal class QueryTests_MapToRightJson
     {
         private static readonly DateTimeOffset t = DateTimeOffset.UnixEpoch.AddYears(30).AddDays(1).AddHours(1).AddMinutes(1);
         private static readonly Guid guid = Guid.Parse("e3af0803-3fc1-407c-9071-29c5f1cdc8d2");
 
-        private static void Match<TSource>(IQueryWithSource<TSource> query, [CallerArgumentExpression(nameof(query))] string? snapshotNameExtension = null)
+        private static void AssertMatch<TSource>(IQueryWithSource<TSource> query, [CallerArgumentExpression(nameof(query))] string? snapshotNameExtension = null)
         {
             var json = query
                 .MapToJson()
@@ -21,7 +21,7 @@ namespace Apache.Druid.Querying.Tests.Unit
         [Test]
         public void Scan()
         {
-            var zero = new Query<Message>
+            var zero = new Query<IotMeasurement>
                 .Scan
                 .WithColumns<ScanColumns>() //TODO map column names from Message to ScanColumns
                 .Limit(10000)
@@ -32,13 +32,13 @@ namespace Apache.Druid.Querying.Tests.Unit
                     lower: 100))
                 .Interval(new(t, t))
                 .Order(OrderDirection.Ascending);
-            Match(zero);
+            AssertMatch(zero);
         }
 
         [Test]
         public void GroupBy()
         {
-            var zero = new Query<Message>
+            var zero = new Query<IotMeasurement>
                 .GroupBy<GroupByDimensions>
                 .WithNoVirtualColumns
                 .WithAggregations<Aggregations>()
@@ -46,8 +46,8 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .Granularity(Granularity.Minute)
                 .Dimensions(type => new
                 (
-                    type.Default(message => message.ObjectId),
-                    type.Default(message => message.VariableName)
+                    type.Default(message => message.IotObjectId),
+                    type.Default(message => message.SignalName)
                 ))
                 .Aggregations(type => new(
                     type.Max(message => message.Timestamp),
@@ -57,15 +57,15 @@ namespace Apache.Druid.Querying.Tests.Unit
                     5000,
                     columns: type => new[]
                     {
-                        type.OrderBy(data => data.Dimensions.ObjectId),
+                        type.OrderBy(data => data.Dimensions.IotObjectId),
                         type.OrderBy(data => data.Aggregations.LastValue)
                     })
                 .HavingFilter(type => type.Range(
                     data => data.Aggregations.LastValue,
                     lower: 0));
-            Match(zero);
+            AssertMatch(zero);
 
-            var one = new Query<Message>
+            var one = new Query<IotMeasurement>
                 .GroupBy<GroupByDimensions>
                 .WithVirtualColumns<DateTimeOffset>
                 .WithAggregations<Aggregations>()
@@ -74,8 +74,8 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .VirtualColumns(type => type.Expression<DateTimeOffset>(message => $"{message.Timestamp}"))
                 .Dimensions(type => new
                 (
-                    type.Default(message => message.Source.ObjectId),
-                    type.Default(message => message.Source.VariableName)
+                    type.Default(message => message.Source.IotObjectId),
+                    type.Default(message => message.Source.SignalName)
                 ))
                 .Aggregations(type => new(
                     type.Max(message => message.Source.Timestamp),
@@ -85,30 +85,30 @@ namespace Apache.Druid.Querying.Tests.Unit
                     5000,
                     columns: type => new[]
                     {
-                        type.OrderBy(data => data.Dimensions.ObjectId),
+                        type.OrderBy(data => data.Dimensions.IotObjectId),
                         type.OrderBy(data => data.Aggregations.LastValue)
                     })
                 .HavingFilter(type => type.Range(
                     data => data.Aggregations.LastValue,
                     lower: 0));
-            Match(one);
+            AssertMatch(one);
         }
 
         [Test]
         public void TopN()
         {
-            var zero = new Query<Message>
+            var zero = new Query<IotMeasurement>
                 .TopN<Guid>
                 .WithNoVirtualColumns
                 .WithAggregations<Aggregations>()
                 .Interval(new(t, t))
-                .Dimension(type => type.Default(message => message.ObjectId))
+                .Dimension(type => type.Default(message => message.IotObjectId))
                 .Threshold(5)
                 .Granularity(Granularity.Minute)
                 .Filter(type => type.Or(
                     type.Null(message => message.Value),
                     type.Equals(
-                        message => message.ObjectId,
+                        message => message.IotObjectId,
                         guid)))
                 .Aggregations(type => new(
                     type.Max(message => message.Timestamp),
@@ -117,9 +117,9 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .Metric(type => type.Numeric(
                     data => data.Aggregations.LastValue))
                 .Context(new() { MinTopNThreshold = 5 });
-            Match(zero);
+            AssertMatch(zero);
 
-            var one = new Query<Message>
+            var one = new Query<IotMeasurement>
                 .TopN<Guid>
                 .WithVirtualColumns<DateTimeOffset>
                 .WithAggregations<Aggregations>()
@@ -128,10 +128,10 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .Filter(type => type.Or(
                     type.Null(pair => pair.VirtualColumns),
                     type.Equals(
-                        pair => pair.Source.ObjectId,
+                        pair => pair.Source.IotObjectId,
                         guid)))
                 .Dimension(type => type.Default(
-                    message => message.Source.ObjectId))
+                    message => message.Source.IotObjectId))
                 .Threshold(5)
                 .Granularity(Granularity.Minute)
                 .Aggregations(type => new(
@@ -141,22 +141,22 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .Metric(type => type.Numeric(
                     data => data.Aggregations.LastValue))
                 .Context(new() { MinTopNThreshold = 5 });
-            Match(one);
+            AssertMatch(one);
 
-            var two = new Query<Message>
+            var two = new Query<IotMeasurement>
                 .TopN<TopNDimension>
                 .WithNoVirtualColumns
                 .WithAggregations<Aggregations>
                 .WithPostAggregations<double>()
                 .Interval(new(t, t))
                 .Dimension(type => new(type.Default(
-                    message => message.ObjectId)))
+                    message => message.IotObjectId)))
                 .Threshold(5)
                 .Granularity(Granularity.Minute)
                 .Filter(type => type.Or(
                     type.Null(message => message.Value),
                     type.Equals(
-                        message => message.ObjectId,
+                        message => message.IotObjectId,
                         guid)))
                 .Aggregations(type => new(
                     type.Max(message => message.Timestamp),
@@ -167,9 +167,9 @@ namespace Apache.Druid.Querying.Tests.Unit
                     type.FieldAccess(type => type.LastValue, true)))
                 .Metric(type => type.Numeric(data => data.PostAggregations))
                 .Context(new() { MinTopNThreshold = 5 });
-            Match(two);
+            AssertMatch(two);
 
-            var three = new Query<Message>
+            var three = new Query<IotMeasurement>
                 .TopN<TopNDimension>
                 .WithVirtualColumns<VirtualColumns>
                 .WithAggregations<Aggregations>
@@ -179,10 +179,10 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .Filter(type => type.Or(
                     type.Null(pair => pair.VirtualColumns.TReal),
                     type.Equals(
-                        pair => pair.Source.ObjectId,
+                        pair => pair.Source.IotObjectId,
                         guid)))
                 .Dimension(type => new(
-                    type.Default(message => message.Source.ObjectId)))
+                    type.Default(message => message.Source.IotObjectId)))
                 .Threshold(5)
                 .Granularity(Granularity.Minute)
                 .Aggregations(type => new(
@@ -196,13 +196,13 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .Metric(type => type.Numeric(
                     data => data.PostAggregations.Sum))
                 .Context(new() { MinTopNThreshold = 5 });
-            Match(three);
+            AssertMatch(three);
         }
 
         [Test]
         public void TimeSeries()
         {
-            var zero = new Query<Message>
+            var zero = new Query<IotMeasurement>
                 .TimeSeries
                 .WithNoVirtualColumns
                 .WithAggregations<double>()
@@ -212,12 +212,12 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .Filter(type => type.Or(
                     type.Null(message => message.Value),
                     type.Equals(
-                        message => message.ObjectId,
+                        message => message.IotObjectId,
                         guid)))
                 .Aggregations(type => type.Last(message => message.Value, SimpleDataType.Float));
-            Match(zero);
+            AssertMatch(zero);
 
-            var one = new Query<Message>
+            var one = new Query<IotMeasurement>
                 .TimeSeries
                 .WithVirtualColumns<VirtualColumns>
                 .WithAggregations<Aggregations>()
@@ -228,15 +228,15 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .Filter(type => type.Or(
                     type.Null(pair => pair.VirtualColumns.TReal),
                     type.Equals(
-                        pair => pair.Source.ObjectId,
+                        pair => pair.Source.IotObjectId,
                         guid)))
                 .Aggregations(type => new(
                     type.Max(data => data.Source.Timestamp),
                     type.Last(data => data.Source.Value)
                 ));
-            Match(one);
+            AssertMatch(one);
 
-            var two = new Query<Message>
+            var two = new Query<IotMeasurement>
                 .TimeSeries
                 .WithNoVirtualColumns
                 .WithAggregations<Aggregations>
@@ -247,7 +247,7 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .Filter(type => type.Or(
                     type.Null(message => message.Value),
                     type.Equals(
-                        message => message.ObjectId,
+                        message => message.IotObjectId,
                         guid)))
                 .Aggregations(type => new(
                     type.Max(message => message.Timestamp),
@@ -259,9 +259,9 @@ namespace Apache.Druid.Querying.Tests.Unit
                         ArithmeticFunction.Add,
                         type.FieldAccess(type => type.LastValue, true))
                 ));
-            Match(two);
+            AssertMatch(two);
 
-            var three = new Query<Message>
+            var three = new Query<IotMeasurement>
                 .TimeSeries
                 .WithVirtualColumns<VirtualColumns>
                 .WithAggregations<Aggregations>
@@ -273,7 +273,7 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .Filter(type => type.Or(
                     type.Null(pair => pair.VirtualColumns.TReal),
                     type.Equals(
-                        pair => pair.Source.ObjectId,
+                        pair => pair.Source.IotObjectId,
                         guid)))
                 .Aggregations(type => new(
                     type.Max(data => data.Source.Timestamp),
@@ -285,20 +285,20 @@ namespace Apache.Druid.Querying.Tests.Unit
                         ArithmeticFunction.Add,
                         type.FieldAccess(type => type.LastValue, true))
                 ));
-            Match(three);
+            AssertMatch(three);
         }
 
         [DataSourceColumnNamingConvention(DataSourceColumnNamingConventionType.CamelCase)]
-        internal record Message(
-            [property: DataSourceColumn("variable")] string VariableName,
-            Guid ObjectId,
+        internal record IotMeasurement(
+            [property: DataSourceColumn("signal")] string SignalName,
+            Guid IotObjectId,
             double Value,
             [property: DataSourceTimeColumn] DateTimeOffset Timestamp);
         record VirtualColumns(DateTimeOffset TReal);
         record Aggregations(DateTimeOffset TMax, double LastValue);
         record PostAggregations(double Sum);
-        record TopNDimension(Guid ObjectId);
-        record GroupByDimensions(Guid ObjectId, string VariableName);
+        record TopNDimension(Guid IotObjectId);
+        record GroupByDimensions(Guid IotObjectId, string VariableName);
         record ScanColumns(string VariableName, DateTimeOffset Timestamp, double Value);
     }
 }

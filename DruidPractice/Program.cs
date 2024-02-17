@@ -69,8 +69,6 @@ var results = await client.GroupByAsync<JsonElement>(with => with
         new SelectorFilter("tenantId", "958b85b3-e45f-454e-81ad-3f9edec557ec")))
     .Granularity(Granularities.Hour)
     .Context(finalize: true, useCache: false));
-
-
 var v = results
     .Data
     .GroupBy(result => result.Timestamp);

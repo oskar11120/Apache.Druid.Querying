@@ -9,11 +9,11 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
         [Test]
         public void Map_Works()
         {
-            var columnNameMap = IColumnNameMappingProvider.ImmutableBuilder.Create<QueryTests_MapsToRightJson.Message>();
-            string Map(Expression<QueryElementFactory<QueryTests_MapsToRightJson.Message>.DruidExpression> factory)
+            var columnNameMap = IColumnNameMappingProvider.ImmutableBuilder.Create<QueryTests_MapToRightJson.IotMeasurement>();
+            string Map(Expression<QueryElementFactory<QueryTests_MapToRightJson.IotMeasurement>.DruidExpression> factory)
                 => DruidExpression.Map(factory, columnNameMap).Expression;
-            var result = Map(message => $"{message.VariableName} == 42");
-            result.Should().Be("variable == 42");
+            var result = Map(message => $"{message.SignalName} == 42");
+            result.Should().Be("signal == 42");
         }
     }
 }

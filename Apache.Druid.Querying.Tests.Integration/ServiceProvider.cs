@@ -8,7 +8,7 @@ namespace Apache.Druid.Querying.Tests.Integration
         public static IServiceProvider Services { get; } = Create();
 
         private static IServiceProvider Create() => new ServiceCollection()
-            .AddDataSourceProvider<EcDruid>(DruidSetup.RouterUri)
+            .AddDataSourceProvider<WikipediaDataSourceProvider>(DruidSetup.RouterUri)
             .Services
             .BuildServiceProvider();
     }
