@@ -4,16 +4,23 @@
     "2000-01-02T01:01:00.0000000\u002B00:00/2000-01-02T01:01:00.0000000\u002B00:00"
   ],
   "granularity": "minute",
+  "virtualColumns": [
+    {
+      "type": "expression",
+      "name": "VirtualColumns",
+      "expression": "__time"
+    }
+  ],
   "dimensions": [
     {
       "type": "default",
-      "outputName": "ObjectId",
-      "dimension": "objectId"
+      "outputName": "IotObjectId",
+      "dimension": "iotObjectId"
     },
     {
       "type": "default",
       "outputName": "VariableName",
-      "dimension": "variable"
+      "dimension": "signal"
     }
   ],
   "aggregations": [
@@ -32,7 +39,7 @@
     "limit": 5000,
     "columns": [
       {
-        "dimension": "ObjectId",
+        "dimension": "IotObjectId",
         "dimensionOrder": "Lexicographic"
       },
       {

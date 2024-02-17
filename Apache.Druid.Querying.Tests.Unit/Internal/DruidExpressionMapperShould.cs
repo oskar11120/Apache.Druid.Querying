@@ -4,13 +4,13 @@ using System.Linq.Expressions;
 
 namespace Apache.Druid.Querying.Tests.Unit.Internal
 {
-    internal class DruidExpressionMapperTests
+    internal class DruidExpressionMapperShould
     {
         [Test]
-        public void Map_Works()
+        public void Work()
         {
-            var columnNameMap = IColumnNameMappingProvider.ImmutableBuilder.Create<QueryTests_MapToRightJson.IotMeasurement>();
-            string Map(Expression<QueryElementFactory<QueryTests_MapToRightJson.IotMeasurement>.DruidExpression> factory)
+            var columnNameMap = IColumnNameMappingProvider.ImmutableBuilder.Create<QueryShould_MapToRightJson.IotMeasurement>();
+            string Map(Expression<QueryElementFactory<QueryShould_MapToRightJson.IotMeasurement>.DruidExpression> factory)
                 => DruidExpression.Map(factory, columnNameMap).Expression;
             var result = Map(message => $"{message.SignalName} == 42");
             result.Should().Be("signal == 42");

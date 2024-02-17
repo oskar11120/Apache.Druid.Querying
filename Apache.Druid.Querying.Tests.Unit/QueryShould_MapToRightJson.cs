@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace Apache.Druid.Querying.Tests.Unit
 {
-    internal class QueryTests_MapToRightJson
+    internal class QueryShould_MapToRightJson
     {
         private static readonly DateTimeOffset t = DateTimeOffset.UnixEpoch.AddYears(30).AddDays(1).AddHours(1).AddMinutes(1);
         private static readonly Guid guid = Guid.Parse("e3af0803-3fc1-407c-9071-29c5f1cdc8d2");

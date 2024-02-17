@@ -19,7 +19,7 @@ internal static class TestData
             .Interval(Interval);
 }
 
-internal class QueryTests_ReturnRightData
+internal class QueryShould_ReturnRightData
 {
     private static WikipediaDataSourceProvider Wikipedia => Services.GetRequiredService<WikipediaDataSourceProvider>();
 
@@ -70,6 +70,9 @@ internal class QueryTests_ReturnRightData
 
     private record Country(string Code, string FullName);
     [Test]
+    [Ignore(
+        "Joining inline data sources does not seem to work, even though druid docs suggest it should: " +
+        "(https://druid.apache.org/docs/latest/querying/datasource#join).")]
     public async Task Join()
     {
         var inline = Wikipedia
@@ -227,9 +230,9 @@ internal class QueryTests_ReturnRightData
     //    result.Should().NotBeEmpty();
     //}
 
-    public sealed record Aggregations(double Sum, int Count, string Variable, double? FirstValue);
-    public sealed record PostAggregations(double Average);
-    public sealed record GroupByDimensions(Guid ObjectId, string VariableName);
-    public sealed record LatestForecast(DateTimeOffset Timestamp, double Value);
-    public sealed record Variable(Guid ObjectId, string Name);
+    //public sealed record Aggregations(double Sum, int Count, string Variable, double? FirstValue);
+    //public sealed record PostAggregations(double Average);
+    //public sealed record GroupByDimensions(Guid ObjectId, string VariableName);
+    //public sealed record LatestForecast(DateTimeOffset Timestamp, double Value);
+    //public sealed record Variable(Guid ObjectId, string Name);
 }

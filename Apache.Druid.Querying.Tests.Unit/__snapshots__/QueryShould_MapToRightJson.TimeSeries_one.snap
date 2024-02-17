@@ -21,7 +21,7 @@
       {
         "matchValue": "e3af0803-3fc1-407c-9071-29c5f1cdc8d2",
         "matchValueType": "String",
-        "column": "objectId",
+        "column": "iotObjectId",
         "type": "equals"
       }
     ],
@@ -37,20 +37,6 @@
       "type": "doubleLast",
       "name": "LastValue",
       "fieldName": "value"
-    }
-  ],
-  "postAggregations": [
-    {
-      "type": "arithmetic",
-      "name": "Sum",
-      "fn": "\u002B",
-      "fields": [
-        {
-          "type": "fieldAccess",
-          "fieldName": "LastValue",
-          "finalizing": true
-        }
-      ]
     }
   ]
 }
