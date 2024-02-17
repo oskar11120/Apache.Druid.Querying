@@ -24,7 +24,7 @@ public static class DimensionsProvider<TDimensions>
         TDimensions IDimensionsProvider<TDimensions, TDimensions>.GetDimensions(TDimensions result) => result;
     }
 
-    public sealed class FromResult<TResult> 
+    public sealed class FromResult<TResult>
         : IDimensionsProvider<TResult, TDimensions>
         where TResult : IWithDimensions<TDimensions>
     {
@@ -64,12 +64,18 @@ public static class TruncatedQueryResultHandler<TSource>
     private static Copy_WithIntervals<TQuery> Copy<TQuery>(TQuery query, DateTimeOffset withIntervalsStartingFrom)
         where TQuery : IQueryWithSource<TSource>, IQueryWith.Intervals
     {
-        var newIntervals = query.
-            GetIntervals()
-            .Select(interval => interval.From <= withIntervalsStartingFrom && interval.To < withIntervalsStartingFrom ?
-                interval with { From = withIntervalsStartingFrom } : interval)
+        var newIntervals = query
+            .GetIntervals()
+            .Select(interval =>
+            {
+                if (interval.To <= withIntervalsStartingFrom)
+                    return null;
+                return interval.From <= withIntervalsStartingFrom && interval.To > withIntervalsStartingFrom ?
+                    interval with { From = withIntervalsStartingFrom } : interval;
+            })
+            .Where(inteval => inteval is not null)
             .ToArray();
-        return Copy(query).Intervals(newIntervals);
+        return Copy(query).Intervals(newIntervals!);
     }
 
     public interface TimeSeries<TResult> :
