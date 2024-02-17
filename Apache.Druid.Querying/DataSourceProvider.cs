@@ -12,7 +12,7 @@ namespace Apache.Druid.Querying
     public readonly record struct Lookup<TKey, TValue>(
         [property: DataSourceColumn("k")] TKey Key, [property: DataSourceColumn("v")] TValue Value);
 
-    [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "For consistency public api.")]
+    [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "For consistency of public api.")]
     public abstract class DataSourceProvider : IDataSourceInitializer
     {
         DataSourceOptions? IDataSourceInitializer.options { get; set; }
