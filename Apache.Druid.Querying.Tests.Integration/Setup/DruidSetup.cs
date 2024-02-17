@@ -22,7 +22,7 @@ internal class DruidSetup
             .WaitForHttp(
                 "router", 
                 RouterUri.AbsoluteUri + "status", 
-                continuation: (response, _) => response.Code < HttpStatusCode.InternalServerError ? 0 : (long)TimeSpan.FromSeconds(1).TotalMilliseconds)
+                continuation: (response, _) => response.Code < HttpStatusCode.InternalServerError ? 0 : (long)TimeSpan.FromSeconds(0.5).TotalMilliseconds)
             .Build();
         service.Start();
     }
