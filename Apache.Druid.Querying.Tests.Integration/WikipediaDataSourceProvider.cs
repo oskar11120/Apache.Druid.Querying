@@ -23,7 +23,7 @@
         string CityName,
         string CountryName,
         string? RegionIsoCode,
-        string? MetroCode,
+        int? MetroCode,
         string? CountryIsoCode,
         string? RegionName);
 

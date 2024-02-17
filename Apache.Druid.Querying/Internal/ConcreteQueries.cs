@@ -46,7 +46,8 @@ namespace Apache.Druid.Querying.Internal
             : TwoPropertyObject<string?, TValue, TValueMapper, ScanResult<TValue>>
             where TValueMapper : IQueryResultDeserializer<TValue>, new()
         {
-            public ScanResult() : base(nameof(ScanResult<TValue>.SegmentId), "events", static (id, value) => new(id, value))
+            private static readonly string segmentId = nameof(ScanResult<TValue>.SegmentId).ToCamelCase();
+            public ScanResult() : base(segmentId, "events", static (id, value) => new(id, value))
             {
             }
         }

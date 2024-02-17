@@ -1,0 +1,14 @@
+﻿[
+  {
+    "Timestamp": "2016-06-27T21:00:00+00:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 17,
+        "TotalAdded": 1260
+      },
+      "PostAggregations": {
+        "AverageAdded": 74.11764705882354
+      }
+    }
+  }
+]

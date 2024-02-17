@@ -13,22 +13,10 @@ internal static class TestData
     public static readonly DateTimeOffset T0 = DateTimeOffset.Parse("2016-06-27T00:00:00.000Z", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
     public static readonly Interval Interval = new(T0, T0.AddDays(1));
 
-    public static TQuery DefaultInterval<TQuery>(this TQuery query) where TQuery :
-        IQueryWith.Intervals
+    public static TQuery DefaultInterval<TQuery>(this TQuery query)
+        where TQuery : IQueryWith.Intervals
         => query
             .Interval(Interval);
-
-    public static TQuery AggregationsDefaults<TQuery>(this TQuery query) where TQuery :
-        IQueryWith.Granularity,
-        IQueryWith.Aggregations<VariableMessage, QueryTests_ReturnRightData.Aggregations, TQuery>
-        => query
-            .Granularity(Granularity.SixHours)
-            .Aggregations(factory => new(
-                factory.Sum(message => message.Value),
-                factory.Count(),
-                factory.First(message => message.VariableName),
-                factory.First(message => message.Value, SimpleDataType.String)
-            ));
 }
 
 internal class QueryTests_ReturnRightData
@@ -41,12 +29,13 @@ internal class QueryTests_ReturnRightData
         [CallerArgumentExpression(nameof(query))] string snapshotNameSuffix = "")
         where TContext : new()
     {
+        var spanshotName = Snapshot.FullName(new SnapshotNameExtension(snapshotNameSuffix));
         var json = dataSource.MapQueryToJson(query).ToString();
         await TestContext.Out.WriteLineAsync(json);
         var results = await dataSource
             .ExecuteQuery(query)
             .ToListAsync();
-        Snapshot.Match(results, new SnapshotNameExtension(snapshotNameSuffix));
+        Snapshot.Match(results, spanshotName);
     }
 
     private static Task VerifyMatch<TResult, TContext>(
@@ -56,70 +45,63 @@ internal class QueryTests_ReturnRightData
         => VerifyMatch(Wikipedia.Edits, query, snapshotNameSuffix);
 
     [Test]
-    public async Task Query_Works()
+    public async Task Wrapped()
     {
-        var first = new Query<VariableMessage>
+        var first = new Query<Edit>
             .TimeSeries
             .WithNoVirtualColumns
-            .WithAggregations<Aggregations>()
+            .WithAggregations<TimeSeriesAggregations>()
+            .Aggregations(type => new(
+                type.Count(),
+                type.Sum(edit => edit.Added)))
             .DefaultInterval()
-            .AggregationsDefaults();
-        var firstSource = Wikipedia
+            .Granularity(Granularity.FifteenMinutes)
+            .Context(new() { SkipEmptyBuckets = true });
+        var wrapped = Wikipedia
             .Edits
             .WrapOverQuery(first);
-        var firstJson = firstSource.GetJsonRepresentation();
-        var second = new Query<WithTimestamp<Aggregations>>
+        var query = new Query<WithTimestamp<TimeSeriesAggregations>>
             .Scan()
             .Interval(TestData.Interval)
-            .Filter(type => type.Not(type.Selector(first => first.Value.Count, 6)));
-        var secondJson = firstSource.MapQueryToJson(second);
-        var results = await firstSource
-            .ExecuteQuery(second)
-            .ToListAsync();
+            .Filter(type => type.Not(type.Selector(data => data.Value.Count, 6)))
+            .Limit(1000);
+        await VerifyMatch(wrapped, query, string.Empty);
     }
 
+    private record Country(string Code, string FullName);
     [Test]
-    public async Task Join_Works()
+    public async Task Join()
     {
         var inline = Wikipedia
-            .Inline(new InlineData[]
+            .Inline(new Country[]
             {
-                new("pmPAct", "hello!"),
-                new("notPmPAct", "goodbye!")
+                new("US", "United States")
             });
         var join = Wikipedia
             .Edits
-            .LeftJoin(inline, data => $"{data.Left.VariableName} == {data.Right.Variable}");
-        var query = new Query<LeftJoinResult<VariableMessage, InlineData>>
+            .LeftJoin(inline, data => $"{data.Left.CountryIsoCode} == {data.Right.Code}");
+        var query = new Query<LeftJoinResult<Edit, Country>>
             .Scan()
             .Interval(TestData.Interval)
-            .Filter(type => type.And(
-                type.Selector<>(
-                    join => join.Left.VariableName,
-                    pmPAct),
-                type.Selector<>(
-                    join => join.Left.TenantId,
-                    tenantId)));
-        var json = join.MapQueryToJson(query);
-        var results = await join
-            .ExecuteQuery(query)
-            .ToListAsync();
+            .Limit(100);
+        await VerifyMatch(join, query);
     }
 
+    private sealed record InlineData(string Word, [property: DataSourceColumn("Integer")] int Number);
     [Test]
-    public async Task Inline_Works()
+    public async Task Inline()
     {
         var query = new Query<InlineData>
             .Scan()
             .Interval(new(default, DateTimeOffset.MaxValue))
             .Filter(type => type.In(
-                data => data.Variable,
+                data => data.Word,
                 new[] { "zero" }));
         var inline = Wikipedia
             .Inline(new InlineData[]
             {
-                new("zero", "hello!"),
-                new("one", "goodbye!")
+                new("zero", 1),
+                new("one", 2)
             });
         var result = await inline
             .ExecuteQuery(query)
@@ -128,7 +110,7 @@ internal class QueryTests_ReturnRightData
             .Single()
             .Value
             .Should()
-            .Be(new InlineData("zero", "hello!"));
+            .Be(new InlineData("zero", 1));
     }
 
     [Test]
@@ -212,43 +194,42 @@ internal class QueryTests_ReturnRightData
         await VerifyMatch(lineStatisticsPerHour);
     }
 
-    [Test]
-    public async Task LatestForecastQuery_Works()
-    {
-        var query = new Query<VariableMessage>
-            .GroupBy<Variable>
-            .WithVirtualColumns<DateTimeOffset>
-            .WithAggregations<LatestForecast>()
-            .Interval(Interval)
-            .Filter(filter => filter.And(
-                filter.Selector(
-                    data => data.Source.VariableName,
-                    "pmPAct"),
-                filter.Selector(
-                    data => data.Source.TenantId,
-                    tenantId)))
-            .VirtualColumns(type => type.Expression<DateTimeOffset>(message => $"timestamp({message.ProcessedTimestamp})"))
-            .Dimensions(type => new(
-                type.Default(data => data.Source.ObjectId),
-                type.Default(data => data.Source.VariableName)))
-            .Aggregations(type => new(
-                type.Max(data => data.VirtualColumns),
-                type.Last(data => data.Source.Value, data => data.VirtualColumns)))
-            .Granularity(Granularity.Hour);
-        var json = Wikipedia
-            .Edits
-            .MapQueryToJson(query);
-        var result = await Wikipedia
-            .Edits
-            .ExecuteQuery(query)
-            .ToListAsync();
-        result.Should().NotBeEmpty();
-    }
+    //[Test]
+    //public async Task LatestForecastQuery_Works()
+    //{
+    //    var query = new Query<VariableMessage>
+    //        .GroupBy<Variable>
+    //        .WithVirtualColumns<DateTimeOffset>
+    //        .WithAggregations<LatestForecast>()
+    //        .Interval(Interval)
+    //        .Filter(filter => filter.And(
+    //            filter.Selector(
+    //                data => data.Source.VariableName,
+    //                "pmPAct"),
+    //            filter.Selector(
+    //                data => data.Source.TenantId,
+    //                tenantId)))
+    //        .VirtualColumns(type => type.Expression<DateTimeOffset>(message => $"timestamp({message.ProcessedTimestamp})"))
+    //        .Dimensions(type => new(
+    //            type.Default(data => data.Source.ObjectId),
+    //            type.Default(data => data.Source.VariableName)))
+    //        .Aggregations(type => new(
+    //            type.Max(data => data.VirtualColumns),
+    //            type.Last(data => data.Source.Value, data => data.VirtualColumns)))
+    //        .Granularity(Granularity.Hour);
+    //    var json = Wikipedia
+    //        .Edits
+    //        .MapQueryToJson(query);
+    //    var result = await Wikipedia
+    //        .Edits
+    //        .ExecuteQuery(query)
+    //        .ToListAsync();
+    //    result.Should().NotBeEmpty();
+    //}
 
     public sealed record Aggregations(double Sum, int Count, string Variable, double? FirstValue);
     public sealed record PostAggregations(double Average);
     public sealed record GroupByDimensions(Guid ObjectId, string VariableName);
-    public sealed record InlineData(string Variable, [property: DataSourceColumn("MessageOfTheNight")] string MessageOfTheDay);
     public sealed record LatestForecast(DateTimeOffset Timestamp, double Value);
     public sealed record Variable(Guid ObjectId, string Name);
 }

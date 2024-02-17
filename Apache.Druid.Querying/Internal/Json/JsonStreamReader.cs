@@ -55,7 +55,7 @@ internal sealed class JsonStreamReader
         // Save off existing text
         int leftoverLength = FlipBuffer();
         if (leftoverLength <= 0 && _readCount != Size)
-            throw new InvalidOperationException("Buffer full.");
+            throw new InvalidOperationException($"Buffer full. Content: \n{DebugView}");
 
         // Read from stream to fill remainder of buffer
         int read = await _stream.ReadAsync(_buffer.AsMemory()[leftoverLength..], token);

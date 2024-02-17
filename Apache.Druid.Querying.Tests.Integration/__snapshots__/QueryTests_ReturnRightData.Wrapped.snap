@@ -1,0 +1,872 @@
+﻿[
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T00:00:00+00:00",
+      "Value": {
+        "Count": 212,
+        "TotalAdded": 79470
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T00:15:00+00:00",
+      "Value": {
+        "Count": 218,
+        "TotalAdded": 106625
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T00:30:00+00:00",
+      "Value": {
+        "Count": 222,
+        "TotalAdded": 110569
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T00:45:00+00:00",
+      "Value": {
+        "Count": 224,
+        "TotalAdded": 80888
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T01:00:00+00:00",
+      "Value": {
+        "Count": 217,
+        "TotalAdded": 83337
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T01:15:00+00:00",
+      "Value": {
+        "Count": 203,
+        "TotalAdded": 71554
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T01:30:00+00:00",
+      "Value": {
+        "Count": 235,
+        "TotalAdded": 90246
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T01:45:00+00:00",
+      "Value": {
+        "Count": 215,
+        "TotalAdded": 74335
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T02:00:00+00:00",
+      "Value": {
+        "Count": 196,
+        "TotalAdded": 61483
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T02:15:00+00:00",
+      "Value": {
+        "Count": 240,
+        "TotalAdded": 97575
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T02:30:00+00:00",
+      "Value": {
+        "Count": 242,
+        "TotalAdded": 88944
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T02:45:00+00:00",
+      "Value": {
+        "Count": 282,
+        "TotalAdded": 100740
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T03:00:00+00:00",
+      "Value": {
+        "Count": 268,
+        "TotalAdded": 108025
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T03:15:00+00:00",
+      "Value": {
+        "Count": 267,
+        "TotalAdded": 126085
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T03:30:00+00:00",
+      "Value": {
+        "Count": 243,
+        "TotalAdded": 118902
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T03:45:00+00:00",
+      "Value": {
+        "Count": 247,
+        "TotalAdded": 48087
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T04:00:00+00:00",
+      "Value": {
+        "Count": 252,
+        "TotalAdded": 98069
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T04:15:00+00:00",
+      "Value": {
+        "Count": 279,
+        "TotalAdded": 128609
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T04:30:00+00:00",
+      "Value": {
+        "Count": 230,
+        "TotalAdded": 80458
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T04:45:00+00:00",
+      "Value": {
+        "Count": 175,
+        "TotalAdded": 418238
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T05:00:00+00:00",
+      "Value": {
+        "Count": 186,
+        "TotalAdded": 185644
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T05:15:00+00:00",
+      "Value": {
+        "Count": 201,
+        "TotalAdded": 114105
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T05:30:00+00:00",
+      "Value": {
+        "Count": 229,
+        "TotalAdded": 99357
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T05:45:00+00:00",
+      "Value": {
+        "Count": 220,
+        "TotalAdded": 97368
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T06:00:00+00:00",
+      "Value": {
+        "Count": 242,
+        "TotalAdded": 86218
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T06:15:00+00:00",
+      "Value": {
+        "Count": 270,
+        "TotalAdded": 102467
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T06:30:00+00:00",
+      "Value": {
+        "Count": 239,
+        "TotalAdded": 132618
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T06:45:00+00:00",
+      "Value": {
+        "Count": 218,
+        "TotalAdded": 86259
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T07:00:00+00:00",
+      "Value": {
+        "Count": 225,
+        "TotalAdded": 137778
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T07:15:00+00:00",
+      "Value": {
+        "Count": 298,
+        "TotalAdded": 90254
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T07:30:00+00:00",
+      "Value": {
+        "Count": 298,
+        "TotalAdded": 107995
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T07:45:00+00:00",
+      "Value": {
+        "Count": 314,
+        "TotalAdded": 94242
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T08:00:00+00:00",
+      "Value": {
+        "Count": 300,
+        "TotalAdded": 84104
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T08:15:00+00:00",
+      "Value": {
+        "Count": 307,
+        "TotalAdded": 182156
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T08:30:00+00:00",
+      "Value": {
+        "Count": 272,
+        "TotalAdded": 107605
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T08:45:00+00:00",
+      "Value": {
+        "Count": 262,
+        "TotalAdded": 100716
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T09:00:00+00:00",
+      "Value": {
+        "Count": 250,
+        "TotalAdded": 169180
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T09:15:00+00:00",
+      "Value": {
+        "Count": 306,
+        "TotalAdded": 129148
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T09:30:00+00:00",
+      "Value": {
+        "Count": 308,
+        "TotalAdded": 136524
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T09:45:00+00:00",
+      "Value": {
+        "Count": 273,
+        "TotalAdded": 101887
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T10:00:00+00:00",
+      "Value": {
+        "Count": 278,
+        "TotalAdded": 146203
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T10:15:00+00:00",
+      "Value": {
+        "Count": 293,
+        "TotalAdded": 120584
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T10:30:00+00:00",
+      "Value": {
+        "Count": 263,
+        "TotalAdded": 96934
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T10:45:00+00:00",
+      "Value": {
+        "Count": 301,
+        "TotalAdded": 149404
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T11:00:00+00:00",
+      "Value": {
+        "Count": 247,
+        "TotalAdded": 115553
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T11:15:00+00:00",
+      "Value": {
+        "Count": 294,
+        "TotalAdded": 212654
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T11:30:00+00:00",
+      "Value": {
+        "Count": 292,
+        "TotalAdded": 183458
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T11:45:00+00:00",
+      "Value": {
+        "Count": 282,
+        "TotalAdded": 128742
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T12:00:00+00:00",
+      "Value": {
+        "Count": 274,
+        "TotalAdded": 118540
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T12:15:00+00:00",
+      "Value": {
+        "Count": 310,
+        "TotalAdded": 140259
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T12:30:00+00:00",
+      "Value": {
+        "Count": 337,
+        "TotalAdded": 194900
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T12:45:00+00:00",
+      "Value": {
+        "Count": 298,
+        "TotalAdded": 124033
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T13:00:00+00:00",
+      "Value": {
+        "Count": 296,
+        "TotalAdded": 179694
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T13:15:00+00:00",
+      "Value": {
+        "Count": 306,
+        "TotalAdded": 169144
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T13:30:00+00:00",
+      "Value": {
+        "Count": 326,
+        "TotalAdded": 126792
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T13:45:00+00:00",
+      "Value": {
+        "Count": 283,
+        "TotalAdded": 112473
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T14:00:00+00:00",
+      "Value": {
+        "Count": 349,
+        "TotalAdded": 179205
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T14:15:00+00:00",
+      "Value": {
+        "Count": 304,
+        "TotalAdded": 140512
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T14:30:00+00:00",
+      "Value": {
+        "Count": 328,
+        "TotalAdded": 277249
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T14:45:00+00:00",
+      "Value": {
+        "Count": 372,
+        "TotalAdded": 209583
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T15:00:00+00:00",
+      "Value": {
+        "Count": 400,
+        "TotalAdded": 190270
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T15:15:00+00:00",
+      "Value": {
+        "Count": 383,
+        "TotalAdded": 183102
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T15:30:00+00:00",
+      "Value": {
+        "Count": 350,
+        "TotalAdded": 249910
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T15:45:00+00:00",
+      "Value": {
+        "Count": 289,
+        "TotalAdded": 76888
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T16:00:00+00:00",
+      "Value": {
+        "Count": 367,
+        "TotalAdded": 164217
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T16:15:00+00:00",
+      "Value": {
+        "Count": 320,
+        "TotalAdded": 102249
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T16:30:00+00:00",
+      "Value": {
+        "Count": 363,
+        "TotalAdded": 107095
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T16:45:00+00:00",
+      "Value": {
+        "Count": 392,
+        "TotalAdded": 642595
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T17:00:00+00:00",
+      "Value": {
+        "Count": 333,
+        "TotalAdded": 119303
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T17:15:00+00:00",
+      "Value": {
+        "Count": 356,
+        "TotalAdded": 159909
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T17:30:00+00:00",
+      "Value": {
+        "Count": 314,
+        "TotalAdded": 92735
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T17:45:00+00:00",
+      "Value": {
+        "Count": 336,
+        "TotalAdded": 101810
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T18:00:00+00:00",
+      "Value": {
+        "Count": 337,
+        "TotalAdded": 144244
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T18:15:00+00:00",
+      "Value": {
+        "Count": 339,
+        "TotalAdded": 142167
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T18:30:00+00:00",
+      "Value": {
+        "Count": 331,
+        "TotalAdded": 83496
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T18:45:00+00:00",
+      "Value": {
+        "Count": 314,
+        "TotalAdded": 201269
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T19:00:00+00:00",
+      "Value": {
+        "Count": 298,
+        "TotalAdded": 163137
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T19:15:00+00:00",
+      "Value": {
+        "Count": 289,
+        "TotalAdded": 142317
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T19:30:00+00:00",
+      "Value": {
+        "Count": 292,
+        "TotalAdded": 95535
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T19:45:00+00:00",
+      "Value": {
+        "Count": 296,
+        "TotalAdded": 179016
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T20:00:00+00:00",
+      "Value": {
+        "Count": 280,
+        "TotalAdded": 136266
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T20:15:00+00:00",
+      "Value": {
+        "Count": 281,
+        "TotalAdded": 105790
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T20:30:00+00:00",
+      "Value": {
+        "Count": 315,
+        "TotalAdded": 124376
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T20:45:00+00:00",
+      "Value": {
+        "Count": 337,
+        "TotalAdded": 120550
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T21:00:00+00:00",
+      "Value": {
+        "Count": 344,
+        "TotalAdded": 141756
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T21:15:00+00:00",
+      "Value": {
+        "Count": 247,
+        "TotalAdded": 121632
+      }
+    }
+  },
+  {
+    "SegmentId": "inline_-146136543-09-08T08:23:32.096Z_146140482-04-24T15:36:27.903Z_dummy_version",
+    "Value": {
+      "Timestamp": "2016-06-27T21:30:00+00:00",
+      "Value": {
+        "Count": 12,
+        "TotalAdded": 38851
+      }
+    }
+  }
+]

@@ -133,10 +133,11 @@ namespace Apache.Druid.Querying.Internal
                 var json = context.Json;
                 var first = await json.ReadToPropertyValueAsync<TFirst>(names.First, token);
                 await json.ReadToPropertyAsync(names.Second, token);
-                var results = Singleton<TSecondMapper>.Value.Deserialize(context, token);
+                var results
+                    = Singleton<TSecondMapper>.Value.Deserialize(context, token);
                 await foreach (var result in results)
                     yield return create(first, result);
-                await json.ReadToTokenAsync(JsonTokenType.EndObject, token);
+                await json.ReadToTokenAsync(JsonTokenType.EndObject, json.Depth - 1, token);
             }
 
             private static byte[] ToJson(string propertyName) =>
