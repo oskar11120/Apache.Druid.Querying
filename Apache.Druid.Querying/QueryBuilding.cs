@@ -159,7 +159,6 @@ namespace Apache.Druid.Querying
 
         public interface Order : IQuery
         {
-            internal OrderDirection Order { get; set; }
         }
 
         public interface Granularity : IQuery
@@ -275,7 +274,6 @@ namespace Apache.Druid.Querying
             where TQuery : IQueryWith.Order
         {
             var descending = order is OrderDirection.Descending;
-            query.Order = order;
             query.AddOrUpdateSection(nameof(descending), descending);
             return query;
         }

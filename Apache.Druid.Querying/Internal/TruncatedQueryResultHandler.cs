@@ -98,10 +98,7 @@ public static class TruncatedQueryResultHandler<TSource>
             results = results.Catch<WithTimestamp<TResult>, TruncatedResultsException>(_ => truncated = true, token);
             await foreach (var result in results)
             {
-                if (
-                    latestReturned.Timestamp is null ||
-                    Order is OrderDirection.Ascending && result.Timestamp > latestReturned.Timestamp ||
-                    Order is OrderDirection.Descending && result.Timestamp < latestReturned.Timestamp)
+                if (latestReturned.Timestamp != result.Timestamp)
                 {
                     latestReturned.Timestamp = result.Timestamp;
                     yield return result;
@@ -139,7 +136,7 @@ public static class TruncatedQueryResultHandler<TSource>
             var timestampChangedAtLeastOnce = false;
             await foreach (var result in results)
             {
-                var timestampChanged = latestReturned.Timestamp is null || result.Timestamp > latestReturned.Timestamp;
+                var timestampChanged = latestReturned.Timestamp != result.Timestamp;
                 timestampChangedAtLeastOnce = timestampChangedAtLeastOnce || timestampChanged;
                 if (timestampChanged)
                 {
@@ -148,7 +145,7 @@ public static class TruncatedQueryResultHandler<TSource>
                 }
 
                 var resultDimensions = provider.GetDimensions(result.Value);
-                if (timestampChangedAtLeastOnce || result.Timestamp == latestReturned.Timestamp && !latestReturned.Dimensions.Contains(resultDimensions))
+                if (timestampChangedAtLeastOnce || !latestReturned.Dimensions.Contains(resultDimensions))
                 {
                     latestReturned.Dimensions.Enqueue(resultDimensions);
                     yield return result;
