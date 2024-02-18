@@ -4,7 +4,7 @@
     public record Edit(
         DateTimeOffset? Timestamp,
         bool IsRobot,
-        string Cannel,
+        string Channel,
         string Flags,
         bool IsUnpatroled,
         string Page,
