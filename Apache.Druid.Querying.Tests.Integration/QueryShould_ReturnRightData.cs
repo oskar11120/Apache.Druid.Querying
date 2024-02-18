@@ -158,15 +158,15 @@ internal class QueryShould_ReturnRightData
             .DefaultInterval()
             .Dimensions(type => type.Default(edit => edit.CountryName))
             .Aggregations(type => type.Count())
-            .Granularity(Granularity.All);
+            .Granularity(Granularity.EightHours);
 
-        var second10CountsPerCountry = countsPerCountry
-            .LimitSpec(limit: 10, offset: 10, limit => limit.OrderBy(edit => edit.Dimensions, OrderDirection.Descending));
-        await VerifyMatch(second10CountsPerCountry);
+        var countsPerCountryOrderedByCount = countsPerCountry
+            .LimitSpec(limit: 100, offset: 1, columns => columns.OrderBy(data => data.Aggregations, OrderDirection.Descending, SortingOrder.Numeric));
+        await VerifyMatch(countsPerCountryOrderedByCount);
 
         var countsPerValidCountry = countsPerCountry
             .Filter(type => type.Not(type.Selector(edit => edit.CountryName, string.Empty)));
-        await VerifyMatch(second10CountsPerCountry);
+        await VerifyMatch(countsPerValidCountry);
     }
 
     [Test]
