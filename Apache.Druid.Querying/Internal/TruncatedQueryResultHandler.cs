@@ -80,7 +80,8 @@ public static class TruncatedQueryResultHandler<TSource>
 
     public interface TimeSeries<TResult> :
         IQueryWithSource<TSource>.AndResult<WithTimestamp<TResult>>.AndDeserializationAndTruncatedResultHandling<TimeSeries<TResult>.LatestReturned>,
-        IQueryWith.Intervals
+        IQueryWith.Intervals,
+        IQueryWith.Order
     {
         public sealed class LatestReturned
         {
@@ -97,7 +98,10 @@ public static class TruncatedQueryResultHandler<TSource>
             results = results.Catch<WithTimestamp<TResult>, TruncatedResultsException>(_ => truncated = true, token);
             await foreach (var result in results)
             {
-                if (latestReturned.Timestamp is null || result.Timestamp > latestReturned.Timestamp)
+                if (
+                    latestReturned.Timestamp is null ||
+                    Order is OrderDirection.Ascending && result.Timestamp > latestReturned.Timestamp ||
+                    Order is OrderDirection.Descending && result.Timestamp < latestReturned.Timestamp)
                 {
                     latestReturned.Timestamp = result.Timestamp;
                     yield return result;

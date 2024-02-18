@@ -114,6 +114,8 @@ namespace Apache.Druid.Querying.Internal
             public TimeSeries_() : base("timeseries")
             {
             }
+
+            OrderDirection IQueryWith.Order.Order { get; set; }
         }
 
         public abstract class TimeSeries : TimeSeries_<None>
@@ -267,6 +269,7 @@ namespace Apache.Druid.Querying.Internal
             protected IQuery<TSelf> Self => this;
             int IQueryWith.OffsetAndLimit.Offset { get; set; }
             int IQueryWith.OffsetAndLimit.Limit { get; set; }
+            OrderDirection IQueryWith.Order.Order { get; set; }
 
             public Scan_() : base("scan")
             {
