@@ -219,8 +219,12 @@ namespace Apache.Druid.Querying.Internal
                 int? limit = null,
                 int? offset = null,
                 Func<QueryElementFactory<TOrderByAndHavingArgumentsAndResult>.OrderByColumnSpec, ILimitSpec.OrderBy>? column = null)
-                => Self.AddOrUpdateSection(nameof(LimitSpec), columnNames => new Elements.LimitSpec(
-                    limit, offset, column?.Invoke(new(columnNames)) is ILimitSpec.OrderBy existing ? new[] { existing } : null));
+                => LimitSpec(limit, offset, column is null ? null : columnNames =>  new[] { column(columnNames) }.AsEnumerable());
+
+            public TSelf LimitSpec(
+                int? limit = null,
+                int? offset = null)
+                => LimitSpec(limit, offset, (Func<QueryElementFactory<TOrderByAndHavingArgumentsAndResult>.OrderByColumnSpec, ILimitSpec.OrderBy>?)null);
 
             public TSelf Having(Func<QueryElementFactory<TOrderByAndHavingArgumentsAndResult>.Having, IHaving> factory)
                 => Self.AddOrUpdateSection(nameof(Having), columnNames => factory(new(columnNames)));
