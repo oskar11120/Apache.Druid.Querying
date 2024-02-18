@@ -40,7 +40,7 @@ internal class QueryShould_ReturnRightData
         var withNoTruncatedResultHandling = await dataSource
             .ExecuteQuery(query, onTruncatedResultsQueryRemaining: false)
             .ToListAsync();
-        results.Should().BeEquivalentTo(withNoTruncatedResultHandling);
+        Snapshot.Match(results, spanshotName);
     }
 
     private static Task VerifyMatch<TResult, TContext>(
