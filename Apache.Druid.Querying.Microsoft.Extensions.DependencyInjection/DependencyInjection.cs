@@ -51,7 +51,7 @@ namespace Apache.Druid.Querying.Microsoft.Extensions.DependencyInjection
                         .ToArray();
                     var matchSingle = match.Length == 1 ?
                         match[0] :
-                        throw new InvalidOperationException($"{typeof(TProvider)} has been registered multiple times");
+                        throw new InvalidOperationException($"{typeof(TProvider)} has been registered multiple times.");
                     var factory = services.GetRequiredService<IHttpClientFactory>();
                     matchSingle.Initialize(new(serlializerOptions, () => factory.CreateClient(clientId)));
                     return (TProvider)matchSingle;
