@@ -90,6 +90,20 @@ internal class QueryShould_ReturnRightData
         await VerifyMatch(join, query);
     }
 
+    [Test]
+    public async Task Union()
+    {
+        var union = Wikipedia
+            .Edits
+            .Union(Wikipedia
+                .Edits);
+        var query = new Query<Union<Edit, Edit>>
+            .Scan()
+            .Interval(TestData.Interval)
+            .Limit(10);
+        await VerifyMatch(union, query, string.Empty);
+    }
+
     private sealed record InlineData(string Word, [property: DataSourceColumn("Integer")] int Number);
     [Test]
     public async Task Inline()
