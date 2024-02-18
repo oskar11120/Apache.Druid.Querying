@@ -36,6 +36,11 @@ internal class QueryShould_ReturnRightData
             .ExecuteQuery(query)
             .ToListAsync();
         Snapshot.Match(results, spanshotName);
+
+        var withNoTruncatedResultHandling = await dataSource
+            .ExecuteQuery(query, onTruncatedResultsQueryRemaining: false)
+            .ToListAsync();
+        results.Should().BeEquivalentTo(withNoTruncatedResultHandling);
     }
 
     private static Task VerifyMatch<TResult, TContext>(
