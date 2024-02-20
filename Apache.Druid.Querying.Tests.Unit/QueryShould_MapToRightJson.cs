@@ -23,7 +23,7 @@ namespace Apache.Druid.Querying.Tests.Unit
         {
             var zero = new Query<IotMeasurement>
                 .Scan
-                .WithColumns<ScanColumns>() //TODO map column names from Message to ScanColumns
+                .WithColumns<ScanColumns>()
                 .Limit(10000)
                 .BatchSize(2000)
                 .Offset(4000)
@@ -33,6 +33,18 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .Interval(new(t, t))
                 .Order(OrderDirection.Ascending);
             AssertMatch(zero);
+
+            var one = new Query<IotMeasurement>
+                .Scan()
+                .Limit(10000)
+                .BatchSize(2000)
+                .Offset(4000)
+                .Filter(type => type.Range(
+                    columns => columns.Value,
+                    lower: 100))
+                .Interval(new(t, t))
+                .Order(OrderDirection.Ascending);
+            AssertMatch(one);
         }
 
         [Test]
@@ -299,6 +311,6 @@ namespace Apache.Druid.Querying.Tests.Unit
         record PostAggregations(double Sum);
         record TopNDimension(Guid IotObjectId);
         record GroupByDimensions(Guid IotObjectId, string VariableName);
-        record ScanColumns(string VariableName, DateTimeOffset Timestamp, double Value);
+        record ScanColumns(string SignalName, DateTimeOffset Timestamp, double Value);
     }
 }

@@ -2,8 +2,9 @@
   "queryType": "scan",
   "columns": [
     "signal",
-    "__time",
-    "value"
+    "iotObjectId",
+    "value",
+    "__time"
   ],
   "limit": 10000,
   "batchSize": 2000,

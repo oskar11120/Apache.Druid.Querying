@@ -40,10 +40,12 @@ public static class TruncatedQueryResultHandler<TSource>
         {
             State = @base.GetState().ToDictionary(pair => pair.Key, pair => pair.Value);
             SectionAtomicity = @base.SectionAtomicity;
+            ColumnNameMappings = @base.GetColumnNameMappings();
         }
 
         public Dictionary<string, QuerySectionValueFactory> State { get; }
         public SectionAtomicity.IProvider.Builder SectionAtomicity { get; }
+        public IColumnNameMappingProvider.ImmutableBuilder? ColumnNameMappings { get; set; }
     }
 
     private sealed class Copy_WithIntervals<TQuery> : Copy_<TQuery>, IQueryWith.Intervals

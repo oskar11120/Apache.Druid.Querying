@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Text.Json;
 
@@ -9,7 +8,6 @@ namespace Apache.Druid.Querying.DependencyInjection
 
     public interface IDataSourceInitializer
     {
-        [SuppressMessage("Style", "IDE1006:Naming Styles")]
         private protected DataSourceOptions? options { get; set; }
 
         internal DataSourceOptions Options => options ??
