@@ -1,0 +1,266 @@
+﻿[
+  {
+    "Timestamp": "2016-06-27T23:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 17,
+        "TotalAdded": 1260
+      },
+      "PostAggregations": {
+        "AverageAdded": 74.11764705882354
+      }
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T22:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 25,
+        "TotalAdded": 2150
+      },
+      "PostAggregations": {
+        "AverageAdded": 86.0
+      }
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T21:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 27,
+        "TotalAdded": 10380
+      },
+      "PostAggregations": {
+        "AverageAdded": 384.44444444444446
+      }
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T20:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 26,
+        "TotalAdded": 2430
+      },
+      "PostAggregations": {
+        "AverageAdded": 93.46153846153847
+      }
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T19:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 25,
+        "TotalAdded": 1622
+      },
+      "PostAggregations": {
+        "AverageAdded": 64.88
+      }
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T18:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 19,
+        "TotalAdded": 9819
+      },
+      "PostAggregations": {
+        "AverageAdded": 516.7894736842105
+      }
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T17:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 24,
+        "TotalAdded": 1789
+      },
+      "PostAggregations": {
+        "AverageAdded": 74.54166666666667
+      }
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T16:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 20,
+        "TotalAdded": 1031
+      },
+      "PostAggregations": {
+        "AverageAdded": 51.55
+      }
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T15:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 16,
+        "TotalAdded": 1733
+      },
+      "PostAggregations": {
+        "AverageAdded": 108.3125
+      }
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T14:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 7,
+        "TotalAdded": 620
+      },
+      "PostAggregations": {
+        "AverageAdded": 88.57142857142857
+      }
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T13:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 6,
+        "TotalAdded": 620
+      },
+      "PostAggregations": {
+        "AverageAdded": 103.33333333333333
+      }
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T12:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 7,
+        "TotalAdded": 204
+      },
+      "PostAggregations": {
+        "AverageAdded": 29.142857142857142
+      }
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T11:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 4,
+        "TotalAdded": 467
+      },
+      "PostAggregations": {
+        "AverageAdded": 116.75
+      }
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T10:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 5,
+        "TotalAdded": 6
+      },
+      "PostAggregations": {
+        "AverageAdded": 1.2
+      }
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T09:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 4,
+        "TotalAdded": 407
+      },
+      "PostAggregations": {
+        "AverageAdded": 101.75
+      }
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T08:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 6,
+        "TotalAdded": 73
+      },
+      "PostAggregations": {
+        "AverageAdded": 12.166666666666666
+      }
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T07:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 9,
+        "TotalAdded": 218
+      },
+      "PostAggregations": {
+        "AverageAdded": 24.22222222222222
+      }
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T06:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 20,
+        "TotalAdded": 746
+      },
+      "PostAggregations": {
+        "AverageAdded": 37.3
+      }
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T05:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 20,
+        "TotalAdded": 2354
+      },
+      "PostAggregations": {
+        "AverageAdded": 117.7
+      }
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T04:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 13,
+        "TotalAdded": 301
+      },
+      "PostAggregations": {
+        "AverageAdded": 23.153846153846153
+      }
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T03:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 23,
+        "TotalAdded": 268
+      },
+      "PostAggregations": {
+        "AverageAdded": 11.652173913043478
+      }
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T02:00:00+02:00",
+    "Value": {
+      "Aggregations": {
+        "Count": 16,
+        "TotalAdded": 1423
+      },
+      "PostAggregations": {
+        "AverageAdded": 88.9375
+      }
+    }
+  }
+]

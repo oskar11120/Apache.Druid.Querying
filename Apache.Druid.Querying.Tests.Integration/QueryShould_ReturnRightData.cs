@@ -214,6 +214,10 @@ internal class QueryShould_ReturnRightData
             .Granularity(Granularity.Hour)
             .Context(new() { SkipEmptyBuckets = true });
         await VerifyMatch(lineStatisticsPerHour);
+
+        var inEuWarsawTime = lineStatisticsPerHour
+            .Granularity(Granularity.Hour, "Europe/Warsaw");
+        await VerifyMatch(inEuWarsawTime);
     }
 
     //[Test]
