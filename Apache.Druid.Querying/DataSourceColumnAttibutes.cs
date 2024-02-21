@@ -25,47 +25,20 @@ namespace Apache.Druid.Querying
     }
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
-    public sealed class DataSourceColumnNamingConventionAttribute : Attribute
+    public abstract class DataSourceColumnNamingConvention : Attribute
     {
-        public DataSourceColumnNamingConventionAttribute(IDataSourceColumnNamingConvention convention)
+        public abstract string Apply(string memberName);
+
+        public sealed class CamelCase : DataSourceColumnNamingConvention
         {
-            Convention = convention;
+            public override string Apply(string memberName) => memberName.ToCamelCase();
         }
 
-        public DataSourceColumnNamingConventionAttribute(DataSourceColumnNamingConventionType type)
-        {
-            Convention = type switch
-            {
-                DataSourceColumnNamingConventionType.CamelCase => CamelCase.Singleton,
-                _ => throw new NotSupportedException(nameof(DataSourceColumnNamingConventionType))
-            };
-        }
-
-        public IDataSourceColumnNamingConvention Convention { get; }
-
-        private sealed class CamelCase : IDataSourceColumnNamingConvention
-        {
-            public static readonly CamelCase Singleton = new();
-
-            public string Apply(string memberName) => memberName.ToCamelCase();
-        }
-
-    }
-
-    public interface IDataSourceColumnNamingConvention
-    {
-        string Apply(string memberName);
-
-        internal sealed class None : IDataSourceColumnNamingConvention
+        internal sealed class None : DataSourceColumnNamingConvention
         {
             public static readonly None Singleton = new();
 
-            public string Apply(string memberName) => memberName;
+            public override string Apply(string memberName) => memberName;
         }
-    }
-
-    public enum DataSourceColumnNamingConventionType
-    {
-        CamelCase
     }
 }

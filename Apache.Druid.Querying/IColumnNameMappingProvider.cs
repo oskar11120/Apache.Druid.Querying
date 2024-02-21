@@ -38,9 +38,9 @@ namespace Apache.Druid.Querying
             public ImmutableBuilder Add<TModel>()
             {
                 var type = typeof(TModel);
-                var convention = type.GetCustomAttribute<DataSourceColumnNamingConventionAttribute>()
-                    ?.Convention
-                    ?? IDataSourceColumnNamingConvention.None.Singleton;
+                var convention = type
+                    .GetCustomAttribute<DataSourceColumnNamingConvention>()
+                    ?? DataSourceColumnNamingConvention.None.Singleton;
                 var properties = type.GetProperties();
                 var result = properties
                     .Select(property => new PropertyColumnNameMapping(

@@ -287,7 +287,7 @@ namespace Apache.Druid.Querying.Tests.Unit
             AssertMatch(three);
         }
 
-        [DataSourceColumnNamingConvention(DataSourceColumnNamingConventionType.CamelCase)]
+        [DataSourceColumnNamingConvention.CamelCase]
         internal record IotMeasurement(
             [property: DataSourceColumn("signal")] string SignalName,
             Guid IotObjectId,

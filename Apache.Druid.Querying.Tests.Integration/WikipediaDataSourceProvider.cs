@@ -1,6 +1,6 @@
 ﻿namespace Apache.Druid.Querying.Tests.Integration
 {
-    [DataSourceColumnNamingConvention(DataSourceColumnNamingConventionType.CamelCase)]
+    [DataSourceColumnNamingConvention.CamelCase]
     public record Edit(
         [property: DataSourceTimeColumn] DateTimeOffset Timestamp,
         bool IsRobot,
