@@ -4,12 +4,34 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <NoWarn>IDE1006</NoWarn>
+    
+    <Authors>Oskar Furlepa</Authors>
+    <Version>0.7</Version>
+    <Description>Apache Druid client library for dotnet 6+.</Description>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/oskar11120/Apache.Druid.Querying</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/oskar11120/Apache.Druid.Querying</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>druid;druidio;dotnet;dotnet6</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>Apache.Druid.Querying.Tests.Unit</_Parameter1>
     </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

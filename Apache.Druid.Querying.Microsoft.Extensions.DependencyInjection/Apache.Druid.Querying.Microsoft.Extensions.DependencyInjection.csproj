@@ -4,6 +4,17 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+    <Authors>Oskar Furlepa</Authors>
+    <Version>0.7</Version>
+    <Description>Integrates Apache.Druid.Querying with Microsoft.Extensions.DependencyInjection.</Description>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/oskar11120/Apache.Druid.Querying</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/oskar11120/Apache.Druid.Querying</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>druid;druidio;dotnet;dotnet6</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,6 +23,20 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Apache.Druid.Querying\Apache.Druid.Querying.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 
