@@ -1,0 +1,3 @@
+# Integrates Apache.Druid.Querying with Microsoft.Extensions.DepenedencyInjection
+
+To register a `DataSourceProvider`, use `IServiceCollection.AddDataSourceProvider<TDataSourceProvider>(Uri druid)`. The method returns `Apache.Druid.Querying.Microsoft.Extensions.DependencyInjection.DataSourceProviderBuilder` using which you can configure `HttpClient` and `JsonSerializer` used for querying. The services is registered as a singleton.

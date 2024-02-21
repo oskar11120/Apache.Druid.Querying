@@ -34,12 +34,12 @@ namespace Apache.Druid.Querying.Microsoft.Extensions.DependencyInjection
     public static class ServiceCollectionExtensions
     {
         public static DataSourceProviderBuilder AddDataSourceProvider<TProvider>(
-            this IServiceCollection services, Uri druidApiUri)
+            this IServiceCollection services, Uri druidRouterUri)
             where TProvider : DataSourceProvider
         {
             var clientId = Guid.NewGuid().ToString();
             var clientBuilder = services.AddHttpClient(clientId);
-            clientBuilder.ConfigureHttpClient(client => client.BaseAddress = druidApiUri);
+            clientBuilder.ConfigureHttpClient(client => client.BaseAddress = druidRouterUri);
             var serlializerOptions = DefaultSerializerOptions.Create();
             services
                 .AddSingleton<IDataSourceInitializer, TProvider>()
