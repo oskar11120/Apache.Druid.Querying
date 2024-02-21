@@ -2,11 +2,11 @@
   {
     "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-02-17T12:37:41.909Z",
     "Value": {
-      "Timestamp": null,
+      "Timestamp": "2016-06-27T00:02:59.759+00:00",
       "IsRobot": false,
       "Channel": "#en.wikipedia",
       "Flags": "",
-      "IsUnpatroled": false,
+      "IsUnpatrolled": false,
       "Page": "Deaton-Flanigen Productions",
       "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727144420&oldid=727144324",
       "Added": 1,
@@ -31,11 +31,11 @@
   {
     "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-02-17T12:37:41.909Z",
     "Value": {
-      "Timestamp": null,
+      "Timestamp": "2016-06-27T00:03:27.265+00:00",
       "IsRobot": false,
       "Channel": "#en.wikipedia",
       "Flags": "",
-      "IsUnpatroled": false,
+      "IsUnpatrolled": false,
       "Page": "Sticky Fingers",
       "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727144475&oldid=726755003",
       "Added": 19,
@@ -60,11 +60,11 @@
   {
     "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-02-17T12:37:41.909Z",
     "Value": {
-      "Timestamp": null,
+      "Timestamp": "2016-06-27T00:09:05.633+00:00",
       "IsRobot": false,
       "Channel": "#en.wikipedia",
       "Flags": "",
-      "IsUnpatroled": false,
+      "IsUnpatrolled": false,
       "Page": "Big Brother 17 (U.S.)",
       "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727145106&oldid=727101422",
       "Added": 9,

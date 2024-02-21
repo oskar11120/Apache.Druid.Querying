@@ -1,10 +1,5 @@
 ﻿{
   "queryType": "scan",
-  "columns": [
-    "VariableName",
-    "Timestamp",
-    "Value"
-  ],
   "limit": 10000,
   "batchSize": 2000,
   "offset": 4000,
@@ -13,7 +8,7 @@
     "lowerOpen": false,
     "upperOpen": false,
     "matchValueType": "Double",
-    "column": "Value",
+    "column": "value",
     "type": "range"
   },
   "intervals": [

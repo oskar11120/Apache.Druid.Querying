@@ -2,11 +2,11 @@
 {
     [DataSourceColumnNamingConvention(DataSourceColumnNamingConventionType.CamelCase)]
     public record Edit(
-        DateTimeOffset? Timestamp,
+        [property: DataSourceTimeColumn] DateTimeOffset Timestamp,
         bool IsRobot,
         string Channel,
         string Flags,
-        bool IsUnpatroled,
+        bool IsUnpatrolled,
         string Page,
         [property: DataSourceColumn("diffUrl")] string DiffUri,
         int Added,

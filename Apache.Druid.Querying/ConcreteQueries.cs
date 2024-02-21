@@ -256,9 +256,6 @@ namespace Apache.Druid.Querying
 
         public class Scan : QueryBase<TSource, TSource, Scan>.Scan<TSource>
         {
-            public class WithColumns<TColumns> : QueryBase<TColumns, TColumns, WithColumns<TColumns>>.Scan<TColumns>.WithColumns
-            {
-            }
         }
     }
 }

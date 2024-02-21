@@ -12,7 +12,7 @@
     },
     {
       "type": "default",
-      "outputName": "VariableName",
+      "outputName": "SignalName",
       "dimension": "signal"
     }
   ],

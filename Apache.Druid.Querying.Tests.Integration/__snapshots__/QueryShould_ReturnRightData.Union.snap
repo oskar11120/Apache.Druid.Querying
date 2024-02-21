@@ -3,11 +3,11 @@
     "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-02-17T12:37:41.909Z",
     "Value": {
       "First": {
-        "Timestamp": null,
+        "Timestamp": "2016-06-27T00:00:11.08+00:00",
         "IsRobot": true,
         "Channel": "#sv.wikipedia",
         "Flags": "NB",
-        "IsUnpatroled": false,
+        "IsUnpatrolled": false,
         "Page": "Salo Toraut",
         "DiffUri": "https://sv.wikipedia.org/w/index.php?oldid=36099284&rcid=89369918",
         "Added": 31,
@@ -29,11 +29,11 @@
         "RegionName": null
       },
       "Second": {
-        "Timestamp": null,
+        "Timestamp": "2016-06-27T00:00:11.08+00:00",
         "IsRobot": true,
         "Channel": "#sv.wikipedia",
         "Flags": "NB",
-        "IsUnpatroled": false,
+        "IsUnpatrolled": false,
         "Page": "Salo Toraut",
         "DiffUri": "https://sv.wikipedia.org/w/index.php?oldid=36099284&rcid=89369918",
         "Added": 31,
@@ -60,11 +60,11 @@
     "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-02-17T12:37:41.909Z",
     "Value": {
       "First": {
-        "Timestamp": null,
+        "Timestamp": "2016-06-27T00:00:17.457+00:00",
         "IsRobot": false,
         "Channel": "#ja.wikipedia",
         "Flags": "",
-        "IsUnpatroled": false,
+        "IsUnpatrolled": false,
         "Page": "利用者:ワーナー成増/放送ウーマン賞",
         "DiffUri": "https://ja.wikipedia.org/w/index.php?diff=60239890&oldid=60239620",
         "Added": 125,
@@ -86,11 +86,11 @@
         "RegionName": null
       },
       "Second": {
-        "Timestamp": null,
+        "Timestamp": "2016-06-27T00:00:17.457+00:00",
         "IsRobot": false,
         "Channel": "#ja.wikipedia",
         "Flags": "",
-        "IsUnpatroled": false,
+        "IsUnpatrolled": false,
         "Page": "利用者:ワーナー成増/放送ウーマン賞",
         "DiffUri": "https://ja.wikipedia.org/w/index.php?diff=60239890&oldid=60239620",
         "Added": 125,
@@ -117,11 +117,11 @@
     "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-02-17T12:37:41.909Z",
     "Value": {
       "First": {
-        "Timestamp": null,
+        "Timestamp": "2016-06-27T00:00:34.959+00:00",
         "IsRobot": false,
         "Channel": "#en.wikipedia",
         "Flags": "",
-        "IsUnpatroled": false,
+        "IsUnpatrolled": false,
         "Page": "Bailando 2015",
         "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727144213&oldid=727144184",
         "Added": 2,
@@ -143,11 +143,11 @@
         "RegionName": "Buenos Aires F.D."
       },
       "Second": {
-        "Timestamp": null,
+        "Timestamp": "2016-06-27T00:00:34.959+00:00",
         "IsRobot": false,
         "Channel": "#en.wikipedia",
         "Flags": "",
-        "IsUnpatroled": false,
+        "IsUnpatrolled": false,
         "Page": "Bailando 2015",
         "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727144213&oldid=727144184",
         "Added": 2,
@@ -174,11 +174,11 @@
     "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-02-17T12:37:41.909Z",
     "Value": {
       "First": {
-        "Timestamp": null,
+        "Timestamp": "2016-06-27T00:00:36.027+00:00",
         "IsRobot": false,
         "Channel": "#en.wikipedia",
         "Flags": "M",
-        "IsUnpatroled": false,
+        "IsUnpatrolled": false,
         "Page": "Richie Rich's Christmas Wish",
         "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727144214&oldid=716794477",
         "Added": 0,
@@ -200,11 +200,11 @@
         "RegionName": null
       },
       "Second": {
-        "Timestamp": null,
+        "Timestamp": "2016-06-27T00:00:36.027+00:00",
         "IsRobot": false,
         "Channel": "#en.wikipedia",
         "Flags": "M",
-        "IsUnpatroled": false,
+        "IsUnpatrolled": false,
         "Page": "Richie Rich's Christmas Wish",
         "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727144214&oldid=716794477",
         "Added": 0,
@@ -231,11 +231,11 @@
     "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-02-17T12:37:41.909Z",
     "Value": {
       "First": {
-        "Timestamp": null,
+        "Timestamp": "2016-06-27T00:00:46.874+00:00",
         "IsRobot": true,
         "Channel": "#sh.wikipedia",
         "Flags": "MB",
-        "IsUnpatroled": false,
+        "IsUnpatrolled": false,
         "Page": "El Olivo, Ascensión",
         "DiffUri": "https://sh.wikipedia.org/w/index.php?diff=29388551&oldid=29282558&rcid=34712908",
         "Added": 0,
@@ -257,11 +257,11 @@
         "RegionName": null
       },
       "Second": {
-        "Timestamp": null,
+        "Timestamp": "2016-06-27T00:00:46.874+00:00",
         "IsRobot": true,
         "Channel": "#sh.wikipedia",
         "Flags": "MB",
-        "IsUnpatroled": false,
+        "IsUnpatrolled": false,
         "Page": "El Olivo, Ascensión",
         "DiffUri": "https://sh.wikipedia.org/w/index.php?diff=29388551&oldid=29282558&rcid=34712908",
         "Added": 0,
@@ -288,11 +288,11 @@
     "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-02-17T12:37:41.909Z",
     "Value": {
       "First": {
-        "Timestamp": null,
+        "Timestamp": "2016-06-27T00:00:56.913+00:00",
         "IsRobot": false,
         "Channel": "#en.wikipedia",
         "Flags": "M",
-        "IsUnpatroled": false,
+        "IsUnpatrolled": false,
         "Page": "Blowback (intelligence)",
         "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727144242&oldid=726157098",
         "Added": 76,
@@ -314,11 +314,11 @@
         "RegionName": null
       },
       "Second": {
-        "Timestamp": null,
+        "Timestamp": "2016-06-27T00:00:56.913+00:00",
         "IsRobot": false,
         "Channel": "#en.wikipedia",
         "Flags": "M",
-        "IsUnpatroled": false,
+        "IsUnpatrolled": false,
         "Page": "Blowback (intelligence)",
         "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727144242&oldid=726157098",
         "Added": 76,
@@ -345,11 +345,11 @@
     "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-02-17T12:37:41.909Z",
     "Value": {
       "First": {
-        "Timestamp": null,
+        "Timestamp": "2016-06-27T00:00:58.599+00:00",
         "IsRobot": true,
         "Channel": "#pl.wikipedia",
         "Flags": "NB",
-        "IsUnpatroled": false,
+        "IsUnpatrolled": false,
         "Page": "Kategoria:Dyskusje nad usunięciem artykułu zakończone bez konsensusu − lipiec 2016",
         "DiffUri": "https://pl.wikipedia.org/w/index.php?oldid=46204477&rcid=68522573",
         "Added": 270,
@@ -371,11 +371,11 @@
         "RegionName": null
       },
       "Second": {
-        "Timestamp": null,
+        "Timestamp": "2016-06-27T00:00:58.599+00:00",
         "IsRobot": true,
         "Channel": "#pl.wikipedia",
         "Flags": "NB",
-        "IsUnpatroled": false,
+        "IsUnpatrolled": false,
         "Page": "Kategoria:Dyskusje nad usunięciem artykułu zakończone bez konsensusu − lipiec 2016",
         "DiffUri": "https://pl.wikipedia.org/w/index.php?oldid=46204477&rcid=68522573",
         "Added": 270,
@@ -402,11 +402,11 @@
     "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-02-17T12:37:41.909Z",
     "Value": {
       "First": {
-        "Timestamp": null,
+        "Timestamp": "2016-06-27T00:01:01.364+00:00",
         "IsRobot": true,
         "Channel": "#sh.wikipedia",
         "Flags": "MB",
-        "IsUnpatroled": false,
+        "IsUnpatrolled": false,
         "Page": "El Paraíso, Bachíniva",
         "DiffUri": "https://sh.wikipedia.org/w/index.php?diff=29388564&oldid=29282570&rcid=34712921",
         "Added": 0,
@@ -428,11 +428,11 @@
         "RegionName": null
       },
       "Second": {
-        "Timestamp": null,
+        "Timestamp": "2016-06-27T00:01:01.364+00:00",
         "IsRobot": true,
         "Channel": "#sh.wikipedia",
         "Flags": "MB",
-        "IsUnpatroled": false,
+        "IsUnpatrolled": false,
         "Page": "El Paraíso, Bachíniva",
         "DiffUri": "https://sh.wikipedia.org/w/index.php?diff=29388564&oldid=29282570&rcid=34712921",
         "Added": 0,
@@ -459,11 +459,11 @@
     "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-02-17T12:37:41.909Z",
     "Value": {
       "First": {
-        "Timestamp": null,
+        "Timestamp": "2016-06-27T00:01:03.685+00:00",
         "IsRobot": true,
         "Channel": "#sh.wikipedia",
         "Flags": "MB",
-        "IsUnpatroled": false,
+        "IsUnpatrolled": false,
         "Page": "El Terco, Bachíniva",
         "DiffUri": "https://sh.wikipedia.org/w/index.php?diff=29388566&oldid=29282572&rcid=34712923",
         "Added": 0,
@@ -485,11 +485,11 @@
         "RegionName": null
       },
       "Second": {
-        "Timestamp": null,
+        "Timestamp": "2016-06-27T00:01:03.685+00:00",
         "IsRobot": true,
         "Channel": "#sh.wikipedia",
         "Flags": "MB",
-        "IsUnpatroled": false,
+        "IsUnpatrolled": false,
         "Page": "El Terco, Bachíniva",
         "DiffUri": "https://sh.wikipedia.org/w/index.php?diff=29388566&oldid=29282572&rcid=34712923",
         "Added": 0,
@@ -516,11 +516,11 @@
     "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-02-17T12:37:41.909Z",
     "Value": {
       "First": {
-        "Timestamp": null,
+        "Timestamp": "2016-06-27T00:01:07.347+00:00",
         "IsRobot": true,
         "Channel": "#ceb.wikipedia",
         "Flags": "NB",
-        "IsUnpatroled": false,
+        "IsUnpatrolled": false,
         "Page": "Neqerssuaq",
         "DiffUri": "https://ceb.wikipedia.org/w/index.php?oldid=9563239&rcid=36193146",
         "Added": 4150,
@@ -542,11 +542,11 @@
         "RegionName": null
       },
       "Second": {
-        "Timestamp": null,
+        "Timestamp": "2016-06-27T00:01:07.347+00:00",
         "IsRobot": true,
         "Channel": "#ceb.wikipedia",
         "Flags": "NB",
-        "IsUnpatroled": false,
+        "IsUnpatrolled": false,
         "Page": "Neqerssuaq",
         "DiffUri": "https://ceb.wikipedia.org/w/index.php?oldid=9563239&rcid=36193146",
         "Added": 4150,

@@ -259,7 +259,7 @@ namespace Apache.Druid.Querying.Internal
         {
         }
 
-        public abstract class Scan_<TColumns> :
+        public abstract class Scan<TColumns> :
             QueryBase,
             IQueryWith.Order,
             IQueryWith.OffsetAndLimit,
@@ -272,37 +272,12 @@ namespace Apache.Druid.Querying.Internal
             int IQueryWith.OffsetAndLimit.Offset { get; set; }
             int IQueryWith.OffsetAndLimit.Limit { get; set; }
 
-            public Scan_() : base("scan")
+            public Scan() : base("scan")
             {
             }
 
             public TSelf BatchSize(int batchSize)
                 => Self.AddOrUpdateSection(nameof(batchSize), batchSize);
-        }
-
-        public abstract class Scan<TResult> : Scan_<TResult>
-        {
-            public abstract class WithColumns : Scan<TResult>
-            {
-                private static readonly string[] propertyNames = typeof(TArguments)
-                    .GetProperties()
-                    .Select(property => property.Name)
-                    .ToArray();
-
-                public WithColumns()
-                {
-                    Self.AddOrUpdateSection("columns", (options, columnNameMappings) =>
-                    {
-                        var mappings = columnNameMappings.Get<TArguments>();
-                        var columnNames = propertyNames;
-                        string GetColumnName(string propertyName) => mappings
-                            .FirstOrDefault(mapping => mapping.Property == propertyName)
-                            ?.ColumnName
-                            ?? propertyName;
-                        return JsonSerializer.SerializeToNode(propertyNames.Select(GetColumnName), options)!;
-                    });
-                }
-            }
         }
     }
 }
