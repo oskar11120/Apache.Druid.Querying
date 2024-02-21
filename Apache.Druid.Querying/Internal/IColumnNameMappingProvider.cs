@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 
-namespace Apache.Druid.Querying
+namespace Apache.Druid.Querying.Internal
 {
     public sealed record PropertyColumnNameMapping(string Property, string ColumnName);
 

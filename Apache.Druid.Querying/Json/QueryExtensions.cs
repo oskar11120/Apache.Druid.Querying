@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using Apache.Druid.Querying.Internal;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace Apache.Druid.Querying.Json
@@ -7,10 +8,10 @@ namespace Apache.Druid.Querying.Json
     {
         private static readonly JsonSerializerOptions @default = DefaultSerializerOptions.Create();
 
-        public static JsonObject MapToJson<TSource>(
+        internal static JsonObject MapToJson<TSource>(
             this IQueryWithSource<TSource> query,
-            JsonSerializerOptions? serializerOptions = null,
-            IColumnNameMappingProvider? columNames = null)
+            JsonSerializerOptions? serializerOptions,
+            IColumnNameMappingProvider? columNames)
         {
             serializerOptions ??= @default;
             columNames ??= IColumnNameMappingProvider.ImmutableBuilder.Create<TSource>();
@@ -20,5 +21,10 @@ namespace Apache.Druid.Querying.Json
                 result.Add(key, factory(serializerOptions, columNames));
             return result;
         }
+
+        public static JsonObject MapToJson<TSource>(
+            this IQueryWithSource<TSource> query,
+            JsonSerializerOptions? serializerOptions = null)
+            => MapToJson(query, serializerOptions, null);
     }
 }
