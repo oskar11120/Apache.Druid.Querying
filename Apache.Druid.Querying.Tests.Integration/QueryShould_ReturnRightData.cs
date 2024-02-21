@@ -212,7 +212,7 @@ internal class QueryShould_ReturnRightData
             .Filter(type => type.Selector(edit => edit.CountryIsoCode, "US"))
             .DefaultInterval()
             .Granularity(Granularity.Hour)
-            .Context(new() { SkipEmptyBuckets = true });
+            .Context(new QueryContext.TimeSeries() { SkipEmptyBuckets = true });
         await VerifyMatch(lineStatisticsPerHour);
 
         var inEuWarsawTime = lineStatisticsPerHour

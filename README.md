@@ -86,7 +86,7 @@ Currently available query types:
             .Filter(type => type.Selector(edit => edit.CountryIsoCode, "US"))
             .Interval(new(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddDays(1)))
             .Granularity(Granularity.Hour)
-            .Context(new() { SkipEmptyBuckets = true });
+            .Context(new QueryContext.TimeSeries() { SkipEmptyBuckets = true });
         var json = Wikipedia.Edits.MapQueryToJson(query); // Use MapQueryToJson to look up query's json representation.
         IAsyncEnumerable<WithTimestamp<Aggregations_PostAggregations<Aggregations, PostAggregations>>> results 
             = Wikipedia.Edits.ExecuteQuery(query);
