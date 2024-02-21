@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using MappingBuilders = Apache.Druid.Querying.Internal.IColumnNameMappingProvider.ImmutableBuilder;
@@ -66,31 +65,7 @@ namespace Apache.Druid.Querying
                 {
                     ["type"] = "lookup",
                     [nameof(id)] = id
-                });
-
-        public DataSource<Union<TFirst, TSecond>> Union<TFirst, TSecond>(DataSource<TFirst> first, DataSource<TSecond> second)
-            => first.Union(second);
-
-        public DataSource<Union<TFirst, TSecond, TThird>> Union<TFirst, TSecond, TThird>(
-            DataSource<TFirst> first, DataSource<TSecond> second, DataSource<TThird> third)
-            => first.Union(second, third);
-
-        public DataSource<TResult> Query<TSource, TResult>(DataSource<TSource> dataSource, IQueryWithSource<TSource>.AndResult<TResult> query)
-            => dataSource.WrapOverQuery(query);
-
-        public DataSource<InnerJoinData<TLeft, TRight>> InnerJoin<TLeft, TRight>(
-            DataSource<TLeft> left,
-            DataSource<TRight> right,
-            Expression<QueryElementFactory<InnerJoinData<TLeft, TRight>>.DruidExpression> condition,
-            string rightPrefix = "r.")
-            => left.InnerJoin(right, condition, rightPrefix);
-
-        public DataSource<LeftJoinResult<TLeft, TRight>> LeftJoin<TLeft, TRight>(
-            DataSource<TLeft> left,
-            DataSource<TRight> right,
-            Expression<QueryElementFactory<LeftJoinData<TLeft, TRight>>.DruidExpression> condition,
-            string rightPrefix = "r.")
-            => left.LeftJoin(right, condition, rightPrefix);
+                });      
 
         private DataSource<TSource> Create<TSource>(MappingBuilders mappings, DataSourceJsonProvider createJson)
             => new(() => Options, createJson, mappings);
