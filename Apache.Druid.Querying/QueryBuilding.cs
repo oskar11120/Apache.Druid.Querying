@@ -286,13 +286,58 @@ namespace Apache.Druid.Querying
 
         private static string ToSnake(this string @string)
             => Regex.Replace(Regex.Replace(@string, "(.)([A-Z][a-z]+)", "$1_$2"), "([a-z0-9])([A-Z])", "$1_$2").ToLower();
-        private static readonly Dictionary<Granularity, string> granularityMap = Enum
+        private static readonly Dictionary<Granularity, string> granularityToStringMap = Enum
             .GetValues<Granularity>()
             .ToDictionary(granularity => granularity, granularity => granularity.ToString().TrimEnd('s').ToSnake());
         public static TQuery Granularity<TQuery>(this TQuery query, Granularity granularity)
             where TQuery : IQueryWith.Granularity
         {
-            query.AddOrUpdateSection(nameof(granularity), granularityMap[granularity]);
+            query.AddOrUpdateSection(nameof(granularity), granularityToStringMap[granularity]);
+            return query;
+        }
+
+        public static TQuery Granularity<TQuery>(this TQuery query, TimeSpan duration, DateTimeOffset? origin = null)
+            where TQuery : IQueryWith.Granularity
+        {
+            query.AddOrUpdateSection(nameof(Granularity), new { type = nameof(duration), duration, origin });
+            return query;
+        }
+
+        public static TQuery Granularity<TQuery>(this TQuery query, string period, string? timeZone = null, DateTimeOffset? origin = null)
+           where TQuery : IQueryWith.Granularity
+        {
+            query.AddOrUpdateSection(nameof(Granularity), new { type = nameof(period), period, timeZone, origin });
+            return query;
+        }
+
+        private static readonly Dictionary<Granularity, string> granularityToPeriodMap = new()
+        {
+            [Querying.Granularity.Second] = "T1S",
+            [Querying.Granularity.Minute] = "T1M",
+            [Querying.Granularity.FiveMinutes] = "T5M",
+            [Querying.Granularity.TenMinutes] = "T10M",
+            [Querying.Granularity.FifteenMinutes] = "T15M",
+            [Querying.Granularity.ThrityMinutes] = "T30M",
+            [Querying.Granularity.Hour] = "T1H",
+            [Querying.Granularity.SixHours] = "T6H",
+            [Querying.Granularity.EightHours] = "T8H",
+            [Querying.Granularity.Day] = "P1D",
+            [Querying.Granularity.Week] = "P1W",
+            [Querying.Granularity.Month] = "P1M",
+            [Querying.Granularity.Quarter] = "P3M",
+            [Querying.Granularity.Year] = "P1Y"
+        };
+        public static TQuery Granularity<TQuery>(this TQuery query, Granularity granularity, string timeZone, DateTimeOffset? origin = null)
+            where TQuery : IQueryWith.Granularity
+        {
+            if (granularity is Querying.Granularity.All or Querying.Granularity.None)
+            {
+                query.Granularity(granularity);
+                return query;
+            }
+
+            var period = granularityToPeriodMap[granularity];
+            query.Granularity(period, timeZone, origin);
             return query;
         }
 
