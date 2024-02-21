@@ -1,5 +1,7 @@
 # [Apache Druid](http://druid.io/) client library/micro-orm for dotnet 6+ inspired by [EF Core](https://learn.microsoft.com/pl-pl/ef/core/).
 
+https://www.nuget.org/packages/Apache.Druid.Querying
+
 ## Setup
 To make your Druid data sources available for querying create a class inheriting from `Apache.Druid.Querying.DataSourceProvider`. The class represents collection of data sources available for querying similarity to how `EfCore`'s `DbContext` represents collection of database tables. The class contains methods `Table`, `Lookup` and `Inline` which you can use to create instances of `Apache.Druid.Querying.DataSource` (similar to `EfCore`'s `DbSet`) which in turn turn can be used of querying. The instances are thread safe and so can be used for executing multiple queries at the same time. Some of the `DataSource` creating methods require parameter `id` which corresponds to id of related `Druid` data source.
 
