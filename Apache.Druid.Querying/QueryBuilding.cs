@@ -69,18 +69,19 @@ namespace Apache.Druid.Querying
     public interface IQuery
     {
         private protected Dictionary<string, QuerySectionValueFactory> State { get; }
-        public IReadOnlyDictionary<string, QuerySectionValueFactory> GetState() => State;
-        public void AddOrUpdateSection(string key, QuerySectionValueFactory valueFactory, bool convertKeyToCamelCase = true)
+        internal IReadOnlyDictionary<string, QuerySectionValueFactory> GetState() => State;
+
+        internal void AddOrUpdateSection(string key, QuerySectionValueFactory valueFactory, bool convertKeyToCamelCase = true)
         {
             key = convertKeyToCamelCase ? key.ToCamelCase() : key;
             State.Remove(key);
             State.Add(key, valueFactory);
         }
 
-        public void AddOrUpdateSection<TValue>(string key, Func<IColumnNameMappingProvider, TValue> getValue, bool convertKeyToCamelCase = true)
+        internal void AddOrUpdateSection<TValue>(string key, Func<IColumnNameMappingProvider, TValue> getValue, bool convertKeyToCamelCase = true)
             => AddOrUpdateSection(key, (options, columnNames) => JsonSerializer.SerializeToNode(getValue(columnNames), options)!, convertKeyToCamelCase);
 
-        public void AddOrUpdateSection<TValue>(string key, TValue value, bool convertKeyToCamelCase = true)
+        internal void AddOrUpdateSection<TValue>(string key, TValue value, bool convertKeyToCamelCase = true)
             => AddOrUpdateSection(key, _ => value, convertKeyToCamelCase);
     }
 
@@ -89,19 +90,19 @@ namespace Apache.Druid.Querying
         public TSelf Unwrapped => (TSelf)this;
         private IQuery Base => this;
 
-        public new TSelf AddOrUpdateSection(string key, QuerySectionValueFactory valueFactory, bool convertKeyToCamelCase = true)
+        internal new TSelf AddOrUpdateSection(string key, QuerySectionValueFactory valueFactory, bool convertKeyToCamelCase = true)
         {
             Base.AddOrUpdateSection(key, valueFactory, convertKeyToCamelCase);
             return Unwrapped;
         }
 
-        public new TSelf AddOrUpdateSection<TValue>(string key, Func<IColumnNameMappingProvider, TValue> getValue, bool convertKeyToCamelCase = true)
+        internal new TSelf AddOrUpdateSection<TValue>(string key, Func<IColumnNameMappingProvider, TValue> getValue, bool convertKeyToCamelCase = true)
         {
             Base.AddOrUpdateSection(key, getValue, convertKeyToCamelCase);
             return Unwrapped;
         }
 
-        public new TSelf AddOrUpdateSection<TValue>(string key, TValue value, bool convertKeyToCamelCase = true)
+        internal new TSelf AddOrUpdateSection<TValue>(string key, TValue value, bool convertKeyToCamelCase = true)
         {
             Base.AddOrUpdateSection(key, value, convertKeyToCamelCase);
             return Unwrapped;
