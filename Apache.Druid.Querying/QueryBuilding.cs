@@ -64,7 +64,7 @@ namespace Apache.Druid.Querying
         Strlen
     }
 
-    public delegate JsonNode QuerySectionValueFactory(JsonSerializerOptions serializerOptions, IColumnNameMappingProvider columnNames);
+    internal delegate JsonNode QuerySectionValueFactory(JsonSerializerOptions serializerOptions, IColumnNameMappingProvider columnNames);
 
     public interface IQuery
     {
