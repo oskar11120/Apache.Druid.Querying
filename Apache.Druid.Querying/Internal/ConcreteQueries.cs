@@ -1,7 +1,6 @@
 ﻿using Apache.Druid.Querying.Internal.Sections;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.Json;
@@ -97,7 +96,6 @@ namespace Apache.Druid.Querying.Internal
 
         private readonly Dictionary<string, QuerySectionValueFactory> state;
         Dictionary<string, QuerySectionValueFactory> IQuery.State => state;
-        IColumnNameMappingProvider.ImmutableBuilder? IQuery.ColumnNameMappings { get; set; }
         SectionAtomicity.IProvider.Builder IQueryWithSectionFactoryExpressions.SectionAtomicity { get; } = new();
         IReadOnlyCollection<Interval>? IQueryWith.Intervals.Intervals { get; set; }
     }
@@ -270,44 +268,40 @@ namespace Apache.Druid.Querying.Internal
             QueryResultDeserializer.ArrayOfScanResults<TColumns>,
             TruncatedQueryResultHandler<TSource>.Scan<ScanResult<TColumns>>
         {
-            private static readonly string[] propertyNames =
-                typeof(TColumns)
-                .GetProperties()
-                .Select(property => property.Name)
-                .ToArray();
-            private static readonly IColumnNameMappingProvider.ImmutableBuilder? mappings =
-                typeof(TColumns) == typeof(TSource) ? null : GetMappings();
-
             protected IQuery<TSelf> Self => this;
             int IQueryWith.OffsetAndLimit.Offset { get; set; }
             int IQueryWith.OffsetAndLimit.Limit { get; set; }
 
             public Scan_() : base("scan")
             {
-                if (mappings is not null)
-                    Self.AddColumnNameMappings(mappings);
-                Self.AddOrUpdateSection("columns", (options, columnNameMappings) =>
-                {
-                    var mappings = columnNameMappings.Get<TColumns>();
-                    var mappedPropertyNames = mappings.Select(mapping => mapping.Property);
-                    var unmappedColumns = propertyNames.Except(mappedPropertyNames);
-                    var columns = unmappedColumns.Concat(mappings.Select(mapping => mapping.ColumnName));
-                    return JsonSerializer.SerializeToNode(columns, options)!;
-                });
             }
 
             public TSelf BatchSize(int batchSize)
                 => Self.AddOrUpdateSection(nameof(batchSize), batchSize);
+        }
 
-            private static IColumnNameMappingProvider.ImmutableBuilder GetMappings()
+        public abstract class Scan<TResult> : Scan_<TResult>
+        {
+            public abstract class WithColumns : Scan<TResult>
             {
-                var source = IColumnNameMappingProvider.ImmutableBuilder.Create<TSource>().Get<TSource>()
-                    .ToDictionary(mapping => mapping.Property);
-                var result = propertyNames
-                    .Select(property => source.GetValueOrDefault(property) ?? throw new InvalidOperationException(
-                        $"Property {typeof(TColumns)}.{property} does not have equivalent property in {typeof(TSource)}."))
-                    .ToImmutableArray();
-                return new IColumnNameMappingProvider.ImmutableBuilder().Add<TColumns>(result);
+                private static readonly string[] propertyNames = typeof(TArguments)
+                    .GetProperties()
+                    .Select(property => property.Name)
+                    .ToArray();
+
+                public WithColumns()
+                {
+                    Self.AddOrUpdateSection("columns", (options, columnNameMappings) =>
+                    {
+                        var mappings = columnNameMappings.Get<TArguments>();
+                        var columnNames = propertyNames;
+                        string GetColumnName(string propertyName) => mappings
+                            .FirstOrDefault(mapping => mapping.Property == propertyName)
+                            ?.ColumnName
+                            ?? propertyName;
+                        return JsonSerializer.SerializeToNode(propertyNames.Select(GetColumnName), options)!;
+                    });
+                }
             }
         }
     }

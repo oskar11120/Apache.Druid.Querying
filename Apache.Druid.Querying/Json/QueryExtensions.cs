@@ -7,25 +7,18 @@ namespace Apache.Druid.Querying.Json
     {
         private static readonly JsonSerializerOptions @default = DefaultSerializerOptions.Create();
 
-        internal static JsonObject MapToJson<TSource>(
+        public static JsonObject MapToJson<TSource>(
             this IQueryWithSource<TSource> query,
-            JsonSerializerOptions? serializerOptions,
-            IColumnNameMappingProvider.ImmutableBuilder? columNameMappings)
+            JsonSerializerOptions? serializerOptions = null,
+            IColumnNameMappingProvider? columNames = null)
         {
             serializerOptions ??= @default;
-            columNameMappings ??= IColumnNameMappingProvider.ImmutableBuilder.Create<TSource>();
-            columNameMappings = query.GetColumnNameMappings() is IColumnNameMappingProvider.ImmutableBuilder existing ?
-                columNameMappings.Combine(existing) : columNameMappings;
+            columNames ??= IColumnNameMappingProvider.ImmutableBuilder.Create<TSource>();
             var result = new JsonObject();
             var state = query.GetState();
             foreach (var (key, factory) in state)
-                result.Add(key, factory(serializerOptions, columNameMappings));
+                result.Add(key, factory(serializerOptions, columNames));
             return result;
         }
-
-        public static JsonObject MapToJson<TSource>(
-            this IQueryWithSource<TSource> query,
-            JsonSerializerOptions? serializerOptions = null)
-            => MapToJson(query, serializerOptions, null);
     }
 }

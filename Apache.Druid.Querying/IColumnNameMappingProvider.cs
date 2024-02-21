@@ -35,9 +35,6 @@ namespace Apache.Druid.Querying
                 ?.ColumnName
                 ?? propertyName;
 
-            public ImmutableBuilder Add<TModel>(ImmutableArray<PropertyColumnNameMapping> mappings)
-                => new(All = All.Add(typeof(TModel), mappings));
-
             public ImmutableBuilder Add<TModel>()
             {
                 var type = typeof(TModel);
@@ -51,7 +48,7 @@ namespace Apache.Druid.Querying
                         property.GetCustomAttribute<DataSourceColumnAttribute>(true)?.Name ?? convention.Apply(property.Name)))
                     .Where(mapping => mapping.Property != mapping.ColumnName)
                     .ToImmutableArray();
-                return Add<TModel>(result);
+                return new(All = All.Add(type, result));
             }
 
             public ImmutableBuilder Update<TModel>(Func<PropertyColumnNameMapping, PropertyColumnNameMapping> update)

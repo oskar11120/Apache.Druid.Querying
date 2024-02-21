@@ -70,7 +70,6 @@ namespace Apache.Druid.Querying
     {
         private protected Dictionary<string, QuerySectionValueFactory> State { get; }
         public IReadOnlyDictionary<string, QuerySectionValueFactory> GetState() => State;
-        
         public void AddOrUpdateSection(string key, QuerySectionValueFactory valueFactory, bool convertKeyToCamelCase = true)
         {
             key = convertKeyToCamelCase ? key.ToCamelCase() : key;
@@ -83,11 +82,6 @@ namespace Apache.Druid.Querying
 
         public void AddOrUpdateSection<TValue>(string key, TValue value, bool convertKeyToCamelCase = true)
             => AddOrUpdateSection(key, _ => value, convertKeyToCamelCase);
-
-        private protected IColumnNameMappingProvider.ImmutableBuilder? ColumnNameMappings { get; set; }
-        internal IColumnNameMappingProvider.ImmutableBuilder? GetColumnNameMappings() => ColumnNameMappings;
-        internal void AddColumnNameMappings(IColumnNameMappingProvider.ImmutableBuilder mappings)
-            => ColumnNameMappings = ColumnNameMappings is null ? mappings : ColumnNameMappings.Combine(mappings);
     }
 
     public interface IQuery<TSelf> : IQuery where TSelf : IQuery<TSelf>
