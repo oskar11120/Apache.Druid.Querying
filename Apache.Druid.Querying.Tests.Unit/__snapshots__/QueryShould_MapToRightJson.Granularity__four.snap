@@ -1,0 +1,7 @@
+﻿{
+  "queryType": "timeseries",
+  "granularity": {
+    "type": "duration",
+    "duration": "01:00:00"
+  }
+}

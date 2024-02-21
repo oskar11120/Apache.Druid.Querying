@@ -19,6 +19,39 @@ namespace Apache.Druid.Querying.Tests.Unit
         }
 
         [Test]
+        public void Granularity_()
+        {
+            var query = new Query<IotMeasurement>.TimeSeries();
+
+            var zero = query.Granularity(Granularity.Second);
+            AssertMatch(zero);
+
+            var one = query.Granularity(Granularity.None, "utc");
+            AssertMatch(one);
+
+            var two = query.Granularity(Granularity.Minute, "utc");
+            AssertMatch(two);
+
+            var three = query.Granularity(Granularity.Hour, "utc", t);
+            AssertMatch(three);
+
+            var four = query.Granularity(TimeSpan.FromHours(1));
+            AssertMatch(four);
+
+            var five = query.Granularity(TimeSpan.FromHours(1), t);
+            AssertMatch(five);
+
+            var six = query.Granularity("T1M");
+            AssertMatch(six);
+
+            var seven = query.Granularity("T1M", "utc");
+            AssertMatch(seven);
+
+            var eight = query.Granularity("T1M", "utc", t);
+            AssertMatch(eight);
+        }
+
+        [Test]
         public void Scan()
         {
             var zero = new Query<IotMeasurement>

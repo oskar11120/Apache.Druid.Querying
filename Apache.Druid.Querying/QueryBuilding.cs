@@ -284,6 +284,8 @@ namespace Apache.Druid.Querying
             where TContext : Context
             => query.AddOrUpdateSection(nameof(context), context);
 
+        private static string? MapOrigin(DateTimeOffset? origin)
+            => origin is null ? null : JsonSerializer.Serialize(origin);
         private static string ToSnake(this string @string)
             => Regex.Replace(Regex.Replace(@string, "(.)([A-Z][a-z]+)", "$1_$2"), "([a-z0-9])([A-Z])", "$1_$2").ToLower();
         private static readonly Dictionary<Granularity, string> granularityToStringMap = Enum
@@ -299,14 +301,14 @@ namespace Apache.Druid.Querying
         public static TQuery Granularity<TQuery>(this TQuery query, TimeSpan duration, DateTimeOffset? origin = null)
             where TQuery : IQueryWith.Granularity
         {
-            query.AddOrUpdateSection(nameof(Granularity), new { type = nameof(duration), duration, origin });
+            query.AddOrUpdateSection(nameof(Granularity), new { type = nameof(duration), duration, origin = MapOrigin(origin) });
             return query;
         }
 
         public static TQuery Granularity<TQuery>(this TQuery query, string period, string? timeZone = null, DateTimeOffset? origin = null)
            where TQuery : IQueryWith.Granularity
         {
-            query.AddOrUpdateSection(nameof(Granularity), new { type = nameof(period), period, timeZone, origin });
+            query.AddOrUpdateSection(nameof(Granularity), new { type = nameof(period), period, timeZone, origin = MapOrigin(origin) });
             return query;
         }
 

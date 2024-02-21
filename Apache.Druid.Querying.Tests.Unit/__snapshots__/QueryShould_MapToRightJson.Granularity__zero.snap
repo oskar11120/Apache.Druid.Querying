@@ -1,0 +1,4 @@
+﻿{
+  "queryType": "timeseries",
+  "granularity": "second"
+}
