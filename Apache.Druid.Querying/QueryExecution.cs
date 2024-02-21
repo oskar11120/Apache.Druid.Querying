@@ -59,48 +59,40 @@ namespace Apache.Druid.Querying
 
     public readonly record struct Union<TFirst, TSecond>(TFirst? First, TSecond? Second)
     {
-        private sealed class Deserializer : QueryResultElement.IDeserializer<Union<TFirst, TSecond>>
-        {
-            public Union<TFirst, TSecond> Deserialize(ref QueryResultElement.DeserializerContext context)
+        internal static readonly QueryResultElement.Deserializer<Union<TFirst, TSecond>> Deserializer =
+            (ref QueryResultElement.DeserializerContext context)
                 => new(
                     context.Deserialize<TFirst>(),
                     context.Deserialize<TSecond>());
-        }
     }
 
     public readonly record struct Union<TFirst, TSecond, TThird>(TFirst? First, TSecond? Second, TThird? Third)
     {
-        private sealed class Deserializer : QueryResultElement.IDeserializer<Union<TFirst, TSecond, TThird>>
-        {
-            public Union<TFirst, TSecond, TThird> Deserialize(ref QueryResultElement.DeserializerContext context)
+        internal static readonly QueryResultElement.Deserializer<Union<TFirst, TSecond, TThird>> Deserializer =
+            (ref QueryResultElement.DeserializerContext context)
                 => new(
                     context.Deserialize<TFirst>(),
                     context.Deserialize<TSecond>(),
                     context.Deserialize<TThird>());
-        }
     }
 
     public readonly record struct InnerJoinData<TLeft, TRight>(TLeft Left, TRight Right)
     {
-        private sealed class Deserializer : QueryResultElement.IDeserializer<InnerJoinData<TLeft, TRight>>
-        {
-            public InnerJoinData<TLeft, TRight> Deserialize(ref QueryResultElement.DeserializerContext context)
+        internal static readonly QueryResultElement.Deserializer<InnerJoinData<TLeft, TRight>> Deserializer =
+            (ref QueryResultElement.DeserializerContext context)
                 => new(
                     context.Deserialize<TLeft>(),
                     context.Deserialize<TRight>());
-        }
     }
 
     public readonly record struct LeftJoinData<TLeft, TRight>(TLeft Left, TRight Right);
     public readonly record struct LeftJoinResult<TLeft, TRight>(TLeft Left, TRight? Right)
     {
-        private sealed class Deserializer : QueryResultElement.IDeserializer<LeftJoinResult<TLeft, TRight>>
-        {
-            public LeftJoinResult<TLeft, TRight> Deserialize(ref QueryResultElement.DeserializerContext context)
+        internal static readonly QueryResultElement.Deserializer<LeftJoinResult<TLeft, TRight>> Deserializer =
+            (ref QueryResultElement.DeserializerContext context)
                 => new(
                     context.Deserialize<TLeft>(),
                     context.Deserialize<TRight>());
-        }
     }
 
     public sealed class DataSource<TSource>

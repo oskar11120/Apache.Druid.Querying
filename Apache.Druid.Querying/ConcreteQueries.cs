@@ -13,15 +13,13 @@ namespace Apache.Druid.Querying
 
     public readonly record struct WithTimestamp<TValue>(DateTimeOffset Timestamp, TValue Value)
     {
-        private sealed class Deserializer : QueryResultElement.IDeserializer<WithTimestamp<TValue>>
-        {
-            private static readonly byte[] timeColumnUtf8Bytes = Encoding.UTF8.GetBytes("__time");
+        private static readonly byte[] timeColumnUtf8Bytes = Encoding.UTF8.GetBytes("__time");
 
-            public WithTimestamp<TValue> Deserialize(ref QueryResultElement.DeserializerContext context)
+        internal static readonly QueryResultElement.Deserializer<WithTimestamp<TValue>> Deserializer = 
+            (ref QueryResultElement.DeserializerContext context)
                 => new(
                     context.DeserializeProperty<DateTimeOffset>(timeColumnUtf8Bytes),
                     context.Deserialize<TValue>());
-        }
     }
 
     public readonly record struct Dimension_Aggregations<TDimension, TAggregations>(TDimension Dimension, TAggregations Aggregations)
@@ -29,13 +27,11 @@ namespace Apache.Druid.Querying
     {
         TDimension IWithDimensions<TDimension>.Dimensions => Dimension;
 
-        private sealed class Deserializer : QueryResultElement.IDeserializer<Dimension_Aggregations<TDimension, TAggregations>>
-        {
-            public Dimension_Aggregations<TDimension, TAggregations> Deserialize(ref QueryResultElement.DeserializerContext context)
+        internal static readonly QueryResultElement.Deserializer<Dimension_Aggregations<TDimension, TAggregations>> Deserializer =
+            (ref QueryResultElement.DeserializerContext context)
                 => new(
                     context.Deserialize<TDimension>(),
                     context.Deserialize<TAggregations>());
-        }
     }
 
     public readonly record struct Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>(
@@ -44,51 +40,43 @@ namespace Apache.Druid.Querying
     {
         TDimension IWithDimensions<TDimension>.Dimensions => Dimension;
 
-        private sealed class Deserializer : QueryResultElement.IDeserializer<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>
-        {
-            public Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations> Deserialize(ref QueryResultElement.DeserializerContext context)
+        internal static readonly QueryResultElement.Deserializer<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>> Deserializer =
+            (ref QueryResultElement.DeserializerContext context)
                => new(
                     context.Deserialize<TDimension>(),
                     context.Deserialize<TAggregations>(),
                     context.Deserialize<TPostAggregations>());
-        }
     }
 
     public readonly record struct Aggregations_PostAggregations<TAggregations, TPostAggregations>(TAggregations Aggregations, TPostAggregations PostAggregations)
     {
-        private sealed class Deserializer : QueryResultElement.IDeserializer<Aggregations_PostAggregations<TAggregations, TPostAggregations>>
-        {
-            public Aggregations_PostAggregations<TAggregations, TPostAggregations> Deserialize(ref QueryResultElement.DeserializerContext context)
+        internal static readonly QueryResultElement.Deserializer<Aggregations_PostAggregations<TAggregations, TPostAggregations>> Deserializer =
+            (ref QueryResultElement.DeserializerContext context)
                 => new(
                     context.Deserialize<TAggregations>(),
                     context.Deserialize<TPostAggregations>());
-        }
     }
 
     public readonly record struct Dimensions_Aggregations<TDimensions, TAggregations>(TDimensions Dimensions, TAggregations Aggregations)
         : IWithDimensions<TDimensions>
     {
-        private sealed class Deserializer : QueryResultElement.IDeserializer<Dimensions_Aggregations<TDimensions, TAggregations>>
-        {
-            public Dimensions_Aggregations<TDimensions, TAggregations> Deserialize(ref QueryResultElement.DeserializerContext context)
+        internal static readonly QueryResultElement.Deserializer<Dimensions_Aggregations<TDimensions, TAggregations>> Deserializer =
+            (ref QueryResultElement.DeserializerContext context)
                => new(
                     context.Deserialize<TDimensions>(),
                     context.Deserialize<TAggregations>());
-        }
     }
 
     public readonly record struct Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>(
         TDimensions Dimensions, TAggregations Aggregations, TPostAggregations PostAggregations)
          : IWithDimensions<TDimensions>
     {
-        private sealed class Deserializer : QueryResultElement.IDeserializer<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>
-        {
-            public Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations> Deserialize(ref QueryResultElement.DeserializerContext context)
+        internal static readonly QueryResultElement.Deserializer<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>> Deserializer =
+          (ref QueryResultElement.DeserializerContext context)
                => new(
                     context.Deserialize<TDimensions>(),
                     context.Deserialize<TAggregations>(),
                     context.Deserialize<TPostAggregations>());
-        }
     }
 
     public static class QueryContext

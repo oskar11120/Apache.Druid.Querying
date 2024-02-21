@@ -1,7 +1,9 @@
 ﻿using Apache.Druid.Querying.Internal.Json;
 using Apache.Druid.Querying.Internal.Sections;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -14,15 +16,11 @@ namespace Apache.Druid.Querying.Internal
 {
     internal static class QueryResultElement
     {
-        public interface IDeserializer<TElement>
-        {
-            public TElement Deserialize(ref DeserializerContext context);
-        }
+        public delegate TElement Deserializer<TElement>(ref DeserializerContext context);
 
         public ref struct DeserializerContext
         {
-            [ThreadStatic]
-            private static Dictionary<Type, object?>? deserializers;
+            private static readonly ConcurrentDictionary<Type, object?> deserializers = new();
 
             private readonly ReadOnlySpan<byte> json;
             private readonly JsonSerializerOptions serializerOptions;
@@ -43,8 +41,8 @@ namespace Apache.Druid.Querying.Internal
 
             public TElementOrElementPart Deserialize<TElementOrElementPart>(bool checkForAtomicity = true)
             {
-                if (GetDeserializer<TElementOrElementPart>() is IDeserializer<TElementOrElementPart> existing)
-                    return existing.Deserialize(ref this);
+                if (GetDeserializer<TElementOrElementPart>() is Deserializer<TElementOrElementPart> existing)
+                    return existing(ref this);
 
                 if (columnNameMappings.Get<TElementOrElementPart>() is var mappings and { Count: > 0 })
                     return DeserializeApplyMappings<TElementOrElementPart>(mappings);
@@ -85,29 +83,21 @@ namespace Apache.Druid.Querying.Internal
                 return json.Deserialize<T>(serializerOptions)!;
             }
 
-            private static IDeserializer<TElement>? GetDeserializer<TElement>()
+            private static Deserializer<TElement>? GetDeserializer<TElement>()
             {
                 var elementType = typeof(TElement);
-                deserializers ??= new();
-                if (deserializers.TryGetValue(elementType, out var deserializer))
+                if (deserializers.TryGetValue(elementType, out var existing))
                 {
-                    return deserializer as IDeserializer<TElement>;
+                    return existing as Deserializer<TElement>;
                 }
 
-                var interfaceType = typeof(IDeserializer<TElement>);
-                var interfaceOpenType = interfaceType.GetGenericTypeDefinition();
-                var nestedTypes = elementType.GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic);
-                var some = Array.Find(nestedTypes, type => type.Name == "Deserializer");
-                var result = some switch
-                {
-                    { ContainsGenericParameters: true } => Activator.CreateInstance(some.MakeGenericType(elementType.GetGenericArguments())),
-                    { ContainsGenericParameters: false } => Activator.CreateInstance(some),
-                    _ => null
-                }
-                as IDeserializer<TElement>;
-
-                deserializers.Add(elementType, result);
-                return result;
+                var fields = elementType.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
+                var @new = fields
+                    .FirstOrDefault(field => field.Name.Equals("Deserializer", StringComparison.OrdinalIgnoreCase))
+                    ?.GetValue(null)
+                    as Deserializer<TElement>;
+                deserializers.TryAdd(elementType, @new);
+                return @new;
             }
         }
     }
