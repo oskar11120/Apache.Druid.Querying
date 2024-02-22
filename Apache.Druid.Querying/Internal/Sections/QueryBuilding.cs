@@ -30,7 +30,8 @@ namespace Apache.Druid.Querying.Internal.Sections
                 .Execute(
                     factory,
                     typeof(TElementFactory),
-                    typeof(TArguments))
+                    typeof(TArguments),
+                    typeof(TSection))
                 .ToList();
             var atomicity = query.SectionAtomicity.Add<TSection>(calls, atomicSectionColumnName);
             return query.AddOrUpdateSection(

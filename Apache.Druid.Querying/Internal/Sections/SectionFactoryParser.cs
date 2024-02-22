@@ -20,7 +20,11 @@ namespace Apache.Druid.Querying.Internal.Sections
            ?.Selector;
 
         public Parameter.ArgumentsMemberSelector GetMemberSelectorParameter(string name)
-            => TryGetMemberSelectorParameter(name) ?? throw new InvalidOperationException(); // TODO
+            => TryGetMemberSelectorParameter(name) ??
+            throw new InvalidOperationException($"Method {MethodName} is missing required parameter {name}.")
+            {
+                Data = { ["call"] = this }
+            };
 
         public static class Parameter
         {
@@ -82,22 +86,31 @@ namespace Apache.Druid.Querying.Internal.Sections
         public static IEnumerable<ElementFactoryCall> Execute(
             LambdaExpression querySectionFactory,
             Type factoryType,
-            Type argumentsType)
+            Type argumentsType,
+            Type sectionType)
         {
+            InvalidOperationException Invalid(string? details = null) => new(
+                $"Invalid expression: {querySectionFactory}" +
+                details is null ? "" : "\n" + details);
+            InvalidOperationException ExpectedToBe(Expression expected, string toBe)
+                => Invalid($"Expected {expected} to be {toBe}.");
+
             SelectedProperty GetSelectedProperty(Expression selector)
             {
-                var lambda = selector as LambdaExpression ?? throw new InvalidOperationException();
+                InvalidOperationException Unexpected() => ExpectedToBe(selector, $"a property selector from {argumentsType}");
+                var lambda = selector as LambdaExpression ?? throw Unexpected();
                 if (lambda.Parameters.Count is not 1 || lambda.Parameters[0].Type != argumentsType)
-                    throw new InvalidOperationException();
+                    throw Unexpected();
                 return SelectedProperty.Get(lambda.Body);
             }
 
             ElementFactoryCall Execute(Expression factoryCall, string? resultMemberName)
             {
+                InvalidOperationException Unexpected() => ExpectedToBe(factoryCall, $"a method call on {factoryType}");
                 static ElementFactoryCall.Parameter.ArgumentsMemberSelector Map(SelectedProperty property, string name)
                     => new(property.Type, property.Name, name, property.SelectedFromType);
                 factoryCall = factoryCall.UnwrapUnary();
-                var call = factoryCall as MethodCallExpression ?? throw new InvalidOperationException();
+                var call = factoryCall as MethodCallExpression ?? throw Unexpected();
                 var method = call.Method;
                 var methodName = method.Name;
                 var methodParameters = method.GetParameters();
@@ -143,16 +156,18 @@ namespace Apache.Druid.Querying.Internal.Sections
                     yield break;
                 }
 
+                InvalidOperationException Unexpected()
+                    => ExpectedToBe(sectionFactoryBody, $"a constructor or an initializero of {sectionType}.");
                 var init = sectionFactoryBody as MemberInitExpression;
                 var @new = init is null ?
-                    sectionFactoryBody as NewExpression ?? throw new InvalidOperationException() :
+                    sectionFactoryBody as NewExpression ?? throw Unexpected() :
                     init.NewExpression;
 
                 if (init is not null)
                 {
                     foreach (var binding in init.Bindings)
                     {
-                        var assigment = binding as MemberAssignment ?? throw new InvalidOperationException();
+                        var assigment = binding as MemberAssignment ?? throw Unexpected();
                         var name = assigment.Member.Name;
                         yield return Execute(assigment.Expression, name);
                     }
@@ -166,14 +181,12 @@ namespace Apache.Druid.Querying.Internal.Sections
                 foreach (var (argument, parameter) in @new.Arguments.Zip(@new.Constructor!.GetParameters()))
                 {
                     if (!propertyNames.TryGetValue(parameter.Name!, out var name))
-                        throw new InvalidOperationException();
+                        throw Unexpected();
                     yield return Execute(argument, name);
                 }
             }
 
             return Execute__(querySectionFactory.Body).DistinctBy(call => call.ResultMemberName);
         }
-
-
     }
 }

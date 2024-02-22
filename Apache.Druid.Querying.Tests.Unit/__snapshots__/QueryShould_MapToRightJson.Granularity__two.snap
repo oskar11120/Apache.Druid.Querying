@@ -2,7 +2,7 @@
   "queryType": "timeseries",
   "granularity": {
     "type": "period",
-    "period": "T1M",
+    "period": "PT1M",
     "timeZone": "utc"
   }
 }
