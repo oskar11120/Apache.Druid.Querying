@@ -3,7 +3,6 @@ using Snapshooter;
 using Snapshooter.NUnit;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 using static Apache.Druid.Querying.Tests.Integration.ServiceProvider;
 
 namespace Apache.Druid.Querying.Tests.Integration;
