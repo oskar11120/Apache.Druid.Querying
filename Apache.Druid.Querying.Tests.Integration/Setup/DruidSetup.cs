@@ -10,9 +10,8 @@ using System.Text.Json.Nodes;
 internal static class DruidSetup
 {
     public static readonly Uri RouterUri = new("http://localhost:8888/");
-    private const string OverlordPath = "http://localhost:8081/";
 
-    public static IDisposable StartContainers()
+    public static IDisposable CreateAndStartContainers()
     {
         var service = new Builder()
              .UseContainer()
@@ -138,5 +137,8 @@ internal static class DruidSetup
 
         if (status != success)
             throw new HttpRequestException("Failed to ingest wikipedia edits.");
+
+        // Workaround to Druid returning incomplete data right after ingestion.
+        await Task.Delay(TimeSpan.FromSeconds(5));
     }
 }

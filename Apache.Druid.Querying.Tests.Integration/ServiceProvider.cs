@@ -19,12 +19,22 @@ namespace Apache.Druid.Querying.Tests.Integration
             .AddHttpClient()
             .BuildServiceProvider();
 
+        private static IDisposable? containers;
+
         [OneTimeSetUp]
         protected static async Task SetUp()
         {
-            // Not disposed so to keep it running in between tests.
-            _ = DruidSetup.StartContainers();
+            containers = DruidSetup.CreateAndStartContainers();
             await DruidSetup.IngestWikipediaEdits(Services.GetRequiredService<IHttpClientFactory>(), Wikipedia);
+        }
+
+        [OneTimeTearDown]
+        protected static void TearDown()
+        {
+            // Not disposed so to keep them running in between test runs.
+            containers = null;
+
+            containers?.Dispose();
         }
     }
 }
