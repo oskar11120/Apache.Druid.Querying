@@ -1,9 +1,9 @@
 ﻿using FluentAssertions;
-using Microsoft.Extensions.DependencyInjection;
 using Snapshooter;
 using Snapshooter.NUnit;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using static Apache.Druid.Querying.Tests.Integration.ServiceProvider;
 
 namespace Apache.Druid.Querying.Tests.Integration;
@@ -21,8 +21,6 @@ internal static class TestData
 
 internal class QueryShould_ReturnRightData
 {
-    private static WikipediaDataSourceProvider Wikipedia => Services.GetRequiredService<WikipediaDataSourceProvider>();
-
     private static async Task VerifyMatch<TSource, TResult, TContext>(
         DataSource<TSource> dataSource,
         IQueryWithSource<TSource>.AndResult<TResult>.AndDeserializationAndTruncatedResultHandling<TContext> query,
@@ -32,15 +30,17 @@ internal class QueryShould_ReturnRightData
         var spanshotName = Snapshot.FullName(new SnapshotNameExtension(snapshotNameSuffix));
         var json = dataSource.MapQueryToJson(query).ToString();
         await TestContext.Out.WriteLineAsync(json);
+        void Match(List<TResult> results)
+            => Snapshot.Match(results, spanshotName, options => options.IgnoreField("[:].SegmentId"));
         var results = await dataSource
             .ExecuteQuery(query)
             .ToListAsync();
-        Snapshot.Match(results, spanshotName);
+        Match(results);
 
         var withNoTruncatedResultHandling = await dataSource
             .ExecuteQuery(query, onTruncatedResultsQueryRemaining: false)
             .ToListAsync();
-        Snapshot.Match(withNoTruncatedResultHandling, spanshotName);
+        Match(withNoTruncatedResultHandling);
     }
 
     private static Task VerifyMatch<TResult, TContext>(

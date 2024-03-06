@@ -8,6 +8,7 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <NoWarn>IDE1006</NoWarn>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

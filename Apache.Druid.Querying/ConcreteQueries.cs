@@ -79,6 +79,8 @@ namespace Apache.Druid.Querying
                     context.Deserialize<TPostAggregations>());
     }
 
+    public readonly record struct DataSourceMetadata(DateTimeOffset MaxIngestedEventTime);
+
     public static class QueryContext
     {
         public class TimeSeries : Context.WithVectorization
@@ -243,6 +245,14 @@ namespace Apache.Druid.Querying
         }
 
         public class Scan : QueryBase<TSource, TSource, Scan>.Scan<TSource>
+        {
+        }
+
+        public class DataSourceMetadata : 
+            QueryBase,
+            IQueryWith.Context<Context, DataSourceMetadata>,
+            QueryResultDeserializer.ArrayOfObjectsWithTimestamp<Querying.DataSourceMetadata>,
+            TruncatedQueryResultHandler<TSource>.TimeSeries<Querying.DataSourceMetadata>
         {
         }
     }
