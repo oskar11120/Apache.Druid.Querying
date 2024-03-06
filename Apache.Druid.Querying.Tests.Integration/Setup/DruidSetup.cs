@@ -1,7 +1,6 @@
 ﻿
 using Ductus.FluentDocker.Builders;
 using Ductus.FluentDocker.Model.Compose;
-using Ductus.FluentDocker.Services;
 using System.Net;
 
 [SetUpFixture]
@@ -20,7 +19,7 @@ internal class DruidSetup
              .AssumeComposeVersion(ComposeVersion.V2)
              .WaitForHttp(
                  "router",
-                 RouterUri.AbsoluteUri + "status",
+                 RouterUri.AbsoluteUri + "status/health",
                  continuation: (response, _) => response.Code < HttpStatusCode.InternalServerError ? 0 : (long)TimeSpan.FromSeconds(0.5).TotalMilliseconds)
              .Build();
         service.Start();
