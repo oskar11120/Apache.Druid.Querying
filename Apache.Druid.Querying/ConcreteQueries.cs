@@ -22,10 +22,15 @@ namespace Apache.Druid.Querying
                     context.Deserialize<TValue>());
     }
 
-    public readonly record struct Dimension_Aggregations<TDimension, TAggregations>(TDimension Dimension, TAggregations Aggregations)
-        : IWithDimensions<TDimension>
+    public interface IQueryDataWithDimensions<TDimensions>
     {
-        TDimension IWithDimensions<TDimension>.Dimensions => Dimension;
+        TDimensions Dimensions { get; }
+    }
+
+    public readonly record struct Dimension_Aggregations<TDimension, TAggregations>(TDimension Dimension, TAggregations Aggregations)
+        : IQueryDataWithDimensions<TDimension>
+    {
+        TDimension IQueryDataWithDimensions<TDimension>.Dimensions => Dimension;
 
         internal static readonly QueryResultElement.Deserializer<Dimension_Aggregations<TDimension, TAggregations>> Deserializer =
             (ref QueryResultElement.DeserializerContext context)
@@ -36,9 +41,9 @@ namespace Apache.Druid.Querying
 
     public readonly record struct Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>(
         TDimension Dimension, TAggregations Aggregations, TPostAggregations PostAggregations)
-         : IWithDimensions<TDimension>
+         : IQueryDataWithDimensions<TDimension>
     {
-        TDimension IWithDimensions<TDimension>.Dimensions => Dimension;
+        TDimension IQueryDataWithDimensions<TDimension>.Dimensions => Dimension;
 
         internal static readonly QueryResultElement.Deserializer<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>> Deserializer =
             (ref QueryResultElement.DeserializerContext context)
@@ -58,7 +63,7 @@ namespace Apache.Druid.Querying
     }
 
     public readonly record struct Dimensions_Aggregations<TDimensions, TAggregations>(TDimensions Dimensions, TAggregations Aggregations)
-        : IWithDimensions<TDimensions>
+        : IQueryDataWithDimensions<TDimensions>
     {
         internal static readonly QueryResultElement.Deserializer<Dimensions_Aggregations<TDimensions, TAggregations>> Deserializer =
             (ref QueryResultElement.DeserializerContext context)
@@ -69,7 +74,7 @@ namespace Apache.Druid.Querying
 
     public readonly record struct Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>(
         TDimensions Dimensions, TAggregations Aggregations, TPostAggregations PostAggregations)
-         : IWithDimensions<TDimensions>
+         : IQueryDataWithDimensions<TDimensions>
     {
         internal static readonly QueryResultElement.Deserializer<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>> Deserializer =
           (ref QueryResultElement.DeserializerContext context)

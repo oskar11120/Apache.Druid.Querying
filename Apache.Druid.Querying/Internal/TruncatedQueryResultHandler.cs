@@ -7,11 +7,6 @@ using System.Threading;
 
 namespace Apache.Druid.Querying.Internal;
 
-public interface IWithDimensions<TDimensions>
-{
-    internal TDimensions Dimensions { get; }
-}
-
 public interface IDimensionsProvider<TResult, TDimensions>
 {
     internal TDimensions GetDimensions(TResult result);
@@ -26,7 +21,7 @@ public static class DimensionsProvider<TDimensions>
 
     public sealed class FromResult<TResult>
         : IDimensionsProvider<TResult, TDimensions>
-        where TResult : IWithDimensions<TDimensions>
+        where TResult : IQueryDataWithDimensions<TDimensions>
     {
         TDimensions IDimensionsProvider<TResult, TDimensions>.GetDimensions(TResult result) => result.Dimensions;
     }
