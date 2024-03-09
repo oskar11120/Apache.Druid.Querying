@@ -116,6 +116,8 @@ namespace Apache.Druid.Querying
             public sealed record VirtualColumns;
             public sealed record Aggregations;
             public sealed record PostAggregations;
+            public sealed record Dimension;
+            public sealed record Dimensions;
         }
 
         public interface VirtualColumns<TArguments, TVirtualColumns, TSelf> :
@@ -132,6 +134,18 @@ namespace Apache.Druid.Querying
 
         public interface PostAggregations<TArguments, TPostAggregations, TSelf>
             : IQueryWithSectionFactoryExpressions<TArguments, TSelf, Marker.PostAggregations>
+            where TSelf : IQuery<TSelf>
+        {
+        }
+
+        public interface Dimesion<TArguments, TDimension, TSelf> :
+            IQueryWithSectionFactoryExpressions<TArguments, TSelf, Marker.Dimension>
+            where TSelf : IQuery<TSelf>
+        {
+        }
+
+        public interface Dimesions<TArguments, TDimensions, TSelf> :
+            IQueryWithSectionFactoryExpressions<TArguments, TSelf, Marker.Dimensions>
             where TSelf : IQuery<TSelf>
         {
         }
@@ -170,6 +184,29 @@ namespace Apache.Druid.Querying
         {
             internal int Offset { get; set; }
             internal int Limit { get; set; }
+        }
+
+        public interface Threshold  : IQuery
+        {
+        }
+
+        public interface Metric<TArguments, TSelf> : IQuery<TSelf>
+            where TSelf : IQuery<TSelf>
+        {
+        }
+
+        public interface LimitSpec<TArguments, TSelf> : IQuery<TSelf>
+            where TSelf : IQuery<TSelf>
+        {
+        } 
+
+        public interface Having<TArguments, TSelf> : IQuery<TSelf>
+            where TSelf : IQuery<TSelf>
+        {
+        }
+
+        public interface BatchSize : IQuery
+        {
         }
     }
 
@@ -252,6 +289,20 @@ namespace Apache.Druid.Querying
                         }
                     }
                     : scalar));
+
+        private static readonly SectionFactoryJsonMapper.Options dimensionsMapperOptions = new(SectionColumnNameKey: "outputName");
+        public static TQuery Dimensions<TArguments, TDimensions, TQuery>(
+            this IQueryWith.Dimesions<TArguments, TDimensions, TQuery> query,
+            Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IDimensions, TDimensions>> factory)
+            where TQuery : IQuery<TQuery>
+            => query.AddOrUpdateSectionWithSectionFactory(nameof(Dimensions), factory, dimensionsMapperOptions);
+
+        private static readonly SectionFactoryJsonMapper.Options dimensionMapperOptions = dimensionsMapperOptions with { ForceSingle = true };
+        public static TQuery Dimension<TArguments, TDimension, TQuery>(
+            this IQueryWith.Dimesion<TArguments, TDimension, TQuery> query,
+            Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IDimensions, TDimension>> factory)
+            where TQuery : IQuery<TQuery>
+            => query.AddOrUpdateSectionWithSectionFactory(nameof(Dimension), factory, dimensionMapperOptions);
 
         public static TQuery Filter<TArguments, TQuery>(this IQueryWith.Filter<TArguments, TQuery> query, Func<QueryElementFactory<TArguments>.Filter, IFilter> factory)
             where TQuery : IQuery<TQuery>
@@ -356,6 +407,61 @@ namespace Apache.Druid.Querying
         {
             query.Limit = limit;
             query.AddOrUpdateSection(nameof(limit), limit);
+            return query;
+        }
+
+        public static TQuery Threshold<TQuery>(this TQuery query, int threshold)
+            where TQuery : IQueryWith.Threshold
+        {
+            query.AddOrUpdateSection(nameof(threshold), threshold);
+            return query;
+        }
+
+        public static TQuery Metric<TArguments, TQuery>(
+            this IQueryWith.Metric<TArguments, TQuery> query, 
+            Func<QueryElementFactory<TArguments>.MetricSpec, IMetric> factory)
+            where TQuery : IQuery<TQuery>
+            => query.AddOrUpdateSection(nameof(Metric), columnNames => factory(new(columnNames)));
+
+        public static TQuery LimitSpec<TArguments, TQuery>(
+            this IQueryWith.LimitSpec<TArguments, TQuery> query,
+            int? limit = null,
+            int? offset = null,
+            Func<QueryElementFactory<TArguments>.OrderByColumnSpec, IEnumerable<ILimitSpec.OrderBy>>? columns = null)
+            where TQuery : IQuery<TQuery>
+            => query.AddOrUpdateSection(nameof(LimitSpec), columnNames => new Internal.Elements.LimitSpec(limit, offset, columns?.Invoke(new(columnNames))));
+
+        public static TQuery LimitSpec<TArguments, TQuery>(
+            this IQueryWith.LimitSpec<TArguments, TQuery> query,
+            int? limit = null,
+            int? offset = null,
+            Func<QueryElementFactory<TArguments>.OrderByColumnSpec, ILimitSpec.OrderBy>? column = null)
+            where TQuery : IQuery<TQuery>
+            => query.LimitSpec(limit, offset, column is null ? null : columnNames => new[] { column(columnNames) }.AsEnumerable());
+
+        public static TQuery LimitSpec<TArguments, TQuery>(
+            this IQueryWith.LimitSpec<TArguments, TQuery> query,
+            int? limit = null,
+            int? offset = null)
+            where TQuery : IQuery<TQuery>
+            => query.LimitSpec(limit, offset, (Func<QueryElementFactory<TArguments>.OrderByColumnSpec, ILimitSpec.OrderBy>?)null);
+
+        public static TQuery Having<TArguments, TQuery>(
+            this IQueryWith.Having<TArguments, TQuery> query,
+            Func<QueryElementFactory<TArguments>.Having, IHaving> factory)
+            where TQuery : IQuery<TQuery>
+            => query.AddOrUpdateSection(nameof(Having), columnNames => factory(new(columnNames)));
+
+        public static TQuery HavingFilter<TArguments, TQuery>(
+            this IQueryWith.Having<TArguments, TQuery> query,
+            Func<QueryElementFactory<TArguments>.Filter, IFilter> factory)
+            where TQuery : IQuery<TQuery>
+            => query.AddOrUpdateSection(nameof(Having), columnNames => new QueryElementFactory<TArguments>.Having(columnNames).Filter(factory));
+
+        public static TQuery BatchSize<TQuery>(this TQuery query, int batchSize)
+            where TQuery : IQueryWith.OffsetAndLimit
+        {
+            query.AddOrUpdateSection(nameof(batchSize), batchSize);
             return query;
         }
     }

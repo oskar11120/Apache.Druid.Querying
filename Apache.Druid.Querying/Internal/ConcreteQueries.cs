@@ -1,9 +1,6 @@
 ﻿using Apache.Druid.Querying.Internal.Sections;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text.Json;
 using System.Threading;
 
 namespace Apache.Druid.Querying.Internal
@@ -81,12 +78,6 @@ namespace Apache.Druid.Querying.Internal
         }
     }
 
-    public static class Marker
-    {
-        public sealed record Dimension;
-        public sealed record Dimensions;
-    }
-
     public abstract class QueryBase : IQuery, IQueryWithSectionFactoryExpressions, IQueryWith.Intervals
     {
         public QueryBase(string? type = null)
@@ -133,34 +124,22 @@ namespace Apache.Druid.Querying.Internal
         {
         }
 
-        private static readonly SectionFactoryJsonMapper.Options dimensionsMapperOptions = new(SectionColumnNameKey: "outputName");
         public abstract class TopN_<TDimension, TMetricArgumentsAndResult, TDimensionProvider> :
             QueryBase,
             IQueryWith.Granularity,
             IQueryWith.Filter<TArguments, TSelf>,
             IQueryWith.Context<QueryContext.TopN, TSelf>,
-            IQueryWithSectionFactoryExpressions<TArguments, TSelf, Marker.Dimension>,
+            IQueryWith.Dimesion<TArguments, TDimension, TSelf>,
+            IQueryWith.Threshold,
+            IQueryWith.Metric<TMetricArgumentsAndResult, TSelf>,
             QueryResultDeserializer.ArrayOfObjectsWithTimestampAndArray<TMetricArgumentsAndResult>,
             TruncatedQueryResultHandler<TSource>.TopN_GroupBy<TMetricArgumentsAndResult, TDimension, TDimensionProvider>
             where TDimension : IEquatable<TDimension>
             where TDimensionProvider : IDimensionsProvider<TMetricArgumentsAndResult, TDimension>, new()
         {
-            private static readonly SectionFactoryJsonMapper.Options mapperOptions = dimensionsMapperOptions with { ForceSingle = true };
-
             public TopN_() : base("topN")
             {
             }
-
-            private IQuery<TSelf> Self => this;
-
-            public TSelf Dimension(Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IDimensions, TDimension>> factory)
-                => this.AddOrUpdateSectionWithSectionFactory(nameof(Dimension), factory, mapperOptions);
-
-            public TSelf Threshold(int threshold)
-                => Self.AddOrUpdateSection(nameof(threshold), threshold);
-
-            public TSelf Metric(Func<QueryElementFactory<TMetricArgumentsAndResult>.MetricSpec, IMetric> factory)
-                => Self.AddOrUpdateSection(nameof(Metric), columnNames => factory(new(columnNames)));
         }
 
         public abstract class TopN<TDimension> : TopN_<TDimension, TDimension, DimensionsProvider<TDimension>.Identity>
@@ -194,7 +173,9 @@ namespace Apache.Druid.Querying.Internal
             IQueryWith.Granularity,
             IQueryWith.Filter<TArguments, TSelf>,
             IQueryWith.Context<QueryContext.GroupBy, TSelf>,
-            IQueryWithSectionFactoryExpressions<TArguments, TSelf, Marker.Dimensions>,
+            IQueryWith.Dimesions<TArguments, TDimensions, TSelf>,
+            IQueryWith.LimitSpec<TOrderByAndHavingArgumentsAndResult, TSelf>,
+            IQueryWith.Having<TOrderByAndHavingArgumentsAndResult, TSelf>,
             QueryResultDeserializer.ArrayOfGroupByResults<TOrderByAndHavingArgumentsAndResult>,
             TruncatedQueryResultHandler<TSource>.TopN_GroupBy<TOrderByAndHavingArgumentsAndResult, TDimensions, TDimensionProvider>
             where TDimensions : IEquatable<TDimensions>
@@ -203,34 +184,6 @@ namespace Apache.Druid.Querying.Internal
             public GroupBy_() : base("groupBy")
             {
             }
-
-            private IQuery<TSelf> Self => this;
-
-            public TSelf Dimensions(Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IDimensions, TDimensions>> factory)
-                => this.AddOrUpdateSectionWithSectionFactory(nameof(Dimensions), factory, dimensionsMapperOptions);
-
-            public TSelf LimitSpec(
-                int? limit = null,
-                int? offset = null,
-                Func<QueryElementFactory<TOrderByAndHavingArgumentsAndResult>.OrderByColumnSpec, IEnumerable<ILimitSpec.OrderBy>>? columns = null)
-                => Self.AddOrUpdateSection(nameof(LimitSpec), columnNames => new Elements.LimitSpec(limit, offset, columns?.Invoke(new(columnNames))));
-
-            public TSelf LimitSpec(
-                int? limit = null,
-                int? offset = null,
-                Func<QueryElementFactory<TOrderByAndHavingArgumentsAndResult>.OrderByColumnSpec, ILimitSpec.OrderBy>? column = null)
-                => LimitSpec(limit, offset, column is null ? null : columnNames =>  new[] { column(columnNames) }.AsEnumerable());
-
-            public TSelf LimitSpec(
-                int? limit = null,
-                int? offset = null)
-                => LimitSpec(limit, offset, (Func<QueryElementFactory<TOrderByAndHavingArgumentsAndResult>.OrderByColumnSpec, ILimitSpec.OrderBy>?)null);
-
-            public TSelf Having(Func<QueryElementFactory<TOrderByAndHavingArgumentsAndResult>.Having, IHaving> factory)
-                => Self.AddOrUpdateSection(nameof(Having), columnNames => factory(new(columnNames)));
-
-            public TSelf HavingFilter(Func<QueryElementFactory<TOrderByAndHavingArgumentsAndResult>.Filter, IFilter> factory)
-                => Self.AddOrUpdateSection(nameof(Having), columnNames => new QueryElementFactory<TOrderByAndHavingArgumentsAndResult>.Having(columnNames).Filter(factory));
         }
 
         public abstract class GroupBy<TDimensions> : GroupBy_<TDimensions, TDimensions, DimensionsProvider<TDimensions>.Identity>
@@ -263,21 +216,18 @@ namespace Apache.Druid.Querying.Internal
             QueryBase,
             IQueryWith.Order,
             IQueryWith.OffsetAndLimit,
+            IQueryWith.BatchSize,
             IQueryWith.Filter<TArguments, TSelf>,
             IQueryWith.Context<QueryContext.Scan, TSelf>,
             QueryResultDeserializer.ArrayOfScanResults<TColumns>,
             TruncatedQueryResultHandler<TSource>.Scan<ScanResult<TColumns>>
         {
-            protected IQuery<TSelf> Self => this;
             int IQueryWith.OffsetAndLimit.Offset { get; set; }
             int IQueryWith.OffsetAndLimit.Limit { get; set; }
 
             public Scan() : base("scan")
             {
             }
-
-            public TSelf BatchSize(int batchSize)
-                => Self.AddOrUpdateSection(nameof(batchSize), batchSize);
         }
     }
 }
