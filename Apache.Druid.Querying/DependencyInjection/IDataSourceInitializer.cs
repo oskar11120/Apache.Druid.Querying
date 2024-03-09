@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Text.Json;
 
@@ -16,11 +15,11 @@ namespace Apache.Druid.Querying.DependencyInjection
 
         bool Initialized => options is not null;
 
-        void Initialize(DataSourceOptions state)
+        void Initialize(DataSourceOptions options)
         {
             if (this.options is not null)
                 throw new InvalidOperationException("Already initialized.");
-            this.options = state;
+            this.options = options;
         }
     }
 }

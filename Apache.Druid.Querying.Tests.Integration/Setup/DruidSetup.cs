@@ -119,7 +119,7 @@ internal static class DruidSetup
             """;
         var tasksUri = RouterUri.AbsoluteUri + "druid/indexer/v1/task";
         using var client = clientFactory.CreateClient();
-        using var response = await client.PostAsJsonAsync(tasksUri, JsonObject.Parse(spec), timeout.Token);
+        using var response = await client.PostAsJsonAsync(tasksUri, JsonNode.Parse(spec), timeout.Token);
         var test = await response.Content.ReadAsStringAsync();
         response.EnsureSuccessStatusCode();
         var task = (await response.Content.ReadFromJsonAsync<JsonObject>())!["task"]!.GetValue<string>();
