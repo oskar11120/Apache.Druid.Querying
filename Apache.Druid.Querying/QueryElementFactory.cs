@@ -43,8 +43,10 @@ namespace Apache.Druid.Querying
 
             public IFilter True() => Filter_.True.Singleton;
             public IFilter False() => Filter_.False.Singleton;
-            public IFilter And(params IFilter[] filters) => new Filter_.And(filters);
-            public IFilter Or(params IFilter[] filters) => new Filter_.Or(filters);
+            public IFilter And(IEnumerable<IFilter> filters) => new Filter_.And(filters);
+            public IFilter And(params IFilter[] filters) => And(filters.AsEnumerable());
+            public IFilter Or(IEnumerable<IFilter> filters) => new Filter_.Or(filters);
+            public IFilter Or(params IFilter[] filters) => Or(filters.AsEnumerable());
             public IFilter Not(IFilter filter) => new Filter_.Not(filter);
             public IFilter Null<TColumn>(Expression<ColumnSelector<TColumn?>> column) => new Filter_.Null(GetColumnName(column));
             public IFilter In<TColumn>(Expression<ColumnSelector<TColumn>> column, IEnumerable<TColumn> values)
