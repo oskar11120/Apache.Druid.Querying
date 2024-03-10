@@ -51,7 +51,6 @@ jobs:
         if-no-files-found: error
         retention-days: 7
         path: ${{ env.NuGetDirectory }}/*.nupkg
-
   publish:
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
