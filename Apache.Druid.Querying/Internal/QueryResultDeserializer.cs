@@ -39,7 +39,7 @@ namespace Apache.Druid.Querying.Internal
                 this.atomicity = atomicity;
             }
 
-            public TElementOrElementPart Deserialize<TElementOrElementPart>(bool checkForAtomicity = true)
+            public TElementOrElementPart Deserialize<TElementOrElementPart>()
             {
                 if (GetDeserializer<TElementOrElementPart>() is Deserializer<TElementOrElementPart> existing)
                     return existing(ref this);
@@ -47,9 +47,8 @@ namespace Apache.Druid.Querying.Internal
                 if (columnNameMappings.Get<TElementOrElementPart>() is var mappings and { Count: > 0 })
                     return DeserializeApplyMappings<TElementOrElementPart>(mappings);
 
-                SectionAtomicity atomicity_;
-                if (checkForAtomicity && (atomicity_ = atomicity.Get<TElementOrElementPart>()).Atomic)
-                    return DeserializeProperty<TElementOrElementPart>(atomicity_.ColumnNameIfAtomicUtf8);
+                if (atomicity.TryGet<TElementOrElementPart>() is SectionAtomicity { Atomic: true, ColumnNameIfAtomicUtf8: var atomicColumnName })
+                    return DeserializeProperty<TElementOrElementPart>(atomicColumnName);
 
                 var result = JsonSerializer.Deserialize<TElementOrElementPart>(json, serializerOptions)!;
                 return result;
@@ -76,7 +75,7 @@ namespace Apache.Druid.Querying.Internal
 
             private T DeserializeApplyMappings<T>(IReadOnlyList<PropertyColumnNameMapping> mappings)
             {
-                var json = Deserialize<System.Text.Json.Nodes.JsonObject>(false);
+                var json = Deserialize<System.Text.Json.Nodes.JsonObject>();
                 foreach (var (property, column) in mappings)
                     if (json.Remove(column, out var value))
                         json[property] = value;
@@ -193,7 +192,7 @@ namespace Apache.Druid.Querying.Internal
                     var context_ = new QueryResultElement.DeserializerContext(span, options, columnNameMappings, atomicity);
                     try
                     {
-                        var result = context_.Deserialize<TSelf>(checkForAtomicity: false); // TODO verify atomicity
+                        var result = context_.Deserialize<TSelf>();
                         return result;
                     }
                     catch (Exception ex)

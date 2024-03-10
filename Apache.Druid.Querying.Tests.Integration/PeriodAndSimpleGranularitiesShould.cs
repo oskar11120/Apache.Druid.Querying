@@ -1,4 +1,5 @@
-﻿using MoreLinq;
+﻿using Apache.Druid.Querying.Json;
+using MoreLinq;
 using Snapshooter.NUnit;
 using System.Globalization;
 using static Apache.Druid.Querying.Tests.Integration.ServiceProvider;
@@ -16,7 +17,6 @@ internal class PeriodAndSimpleGranularitiesShould
             (timeZone, granularity) => new object[] { granularity, timeZone })
         .ToArray();
 
-    private readonly record struct Aggregations(int? Sum);
     [TestCaseSource(nameof(testCases))]
     public async Task BeConsistent(Granularity granularity, string timeZone)
     {
@@ -25,10 +25,16 @@ internal class PeriodAndSimpleGranularitiesShould
         var query = new Query<Edit>
             .TimeSeries
             .WithNoVirtualColumns
-            .WithAggregations<Aggregations>()
-            .Aggregations(type => new(type.Sum(edit => edit.Added)))
+            .WithAggregations<int?>()
+            .Aggregations(type => type.Sum(edit => edit.Added))
             .Interval(new(T0.AddDays(-10), T0.AddDays(10)))
             .Granularity(granularity, timeZone);
+
+        var serializerOptions = DefaultSerializerOptions.Create();
+        serializerOptions.WriteIndented = true;
+        var json = Wikipedia.Edits.MapQueryToJson(query).ToJsonString(serializerOptions);
+        TestContext.WriteLine(json);
+
         var results = await Wikipedia.Edits.ExecuteQuery(query).ToListAsync();
         Snapshot.Match(results, snapshotName);
 

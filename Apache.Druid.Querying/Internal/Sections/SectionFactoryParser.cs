@@ -143,6 +143,7 @@ namespace Apache.Druid.Querying.Internal.Sections
 
             IEnumerable<ElementFactoryCall> Execute__(Expression sectionFactoryBody)
             {
+                sectionFactoryBody = sectionFactoryBody.UnwrapUnary();
                 if (sectionFactoryBody.NodeType is ExpressionType.Call)
                 {
                     yield return Execute(sectionFactoryBody, null);
@@ -157,7 +158,7 @@ namespace Apache.Druid.Querying.Internal.Sections
                 }
 
                 InvalidOperationException Unexpected()
-                    => ExpectedToBe(sectionFactoryBody, $"a constructor or an initializero of {sectionType}.");
+                    => ExpectedToBe(sectionFactoryBody, $"a constructor or an initializer of {sectionType}.");
                 var init = sectionFactoryBody as MemberInitExpression;
                 var @new = init is null ?
                     sectionFactoryBody as NewExpression ?? throw Unexpected() :

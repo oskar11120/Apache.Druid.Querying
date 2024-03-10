@@ -9,7 +9,7 @@ namespace Apache.Druid.Querying.Internal.Sections
     {
         public interface IProvider
         {
-            SectionAtomicity Get<TSection>();
+            SectionAtomicity? TryGet<TSection>();
 
             public sealed class Builder : IProvider
             {
@@ -19,7 +19,7 @@ namespace Apache.Druid.Querying.Internal.Sections
                 public Builder(Dictionary<Type, SectionAtomicity>? state = null)
                     => this.state = state ?? new();
 
-                public SectionAtomicity Get<TSection>() => state[typeof(TSection)];
+                public SectionAtomicity? TryGet<TSection>() => state.GetValueOrDefault(typeof(TSection));
 
                 internal SectionAtomicity Add<TSection>(IReadOnlyList<ElementFactoryCall> calls, string columnNameIfAtomic)
                 {
