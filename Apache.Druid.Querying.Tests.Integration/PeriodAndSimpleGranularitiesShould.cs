@@ -29,7 +29,6 @@ internal class PeriodAndSimpleGranularitiesShould
             .Aggregations(type => new(type.Sum(edit => edit.Added)))
             .Interval(new(T0.AddDays(-10), T0.AddDays(10)))
             .Granularity(granularity, timeZone);
-        var test = Wikipedia.Edits.MapQueryToJson(query).ToJsonString();
         var results = await Wikipedia.Edits.ExecuteQuery(query).ToListAsync();
         Snapshot.Match(results, snapshotName);
 
