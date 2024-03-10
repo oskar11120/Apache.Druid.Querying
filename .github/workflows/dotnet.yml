@@ -36,6 +36,7 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
   pack:
+    if: github.event_name == 'release'
     runs-on: ubuntu-latest
     needs: [ test ]
     steps:
