@@ -3,7 +3,7 @@
 https://www.nuget.org/packages/Apache.Druid.Querying
 
 ## Setup
-To make your Druid data sources available for querying create a class inheriting from `Apache.Druid.Querying.DataSourceProvider`. The class represents collection of data sources available for querying similarity to how `EfCore`'s `DbContext` represents collection of database tables. The class contains methods `Table`, `Lookup` and `Inline` which you can use to create instances of `Apache.Druid.Querying.DataSource` (similar to `EfCore`'s `DbSet`) which in turn turn can be used of querying. The instances are thread safe and so can be used for executing multiple queries at the same time. Some of the `DataSource` creating methods require parameter `id` which corresponds to id of related `Druid` data source.
+To make your Druid data sources available for querying create a class deriving from `Apache.Druid.Querying.DataSourceProvider`. The class represents collection of data sources available for querying similarily to how `EfCore`'s `DbContext` represents collection of database tables. The class contains methods `Table`, `Lookup` and `Inline` which you can use to create instances of `Apache.Druid.Querying.DataSource` (similar to `EfCore`'s `DbSet`) which in turn turn can be used of querying. The instances are thread safe and so can be used for executing multiple queries at the same time. Some of the `DataSource` creating methods require parameter `id` which corresponds to id of related `Druid` data source.
 
 The method `Table` additionally requires generic parameter `TSource` depicting a row of your table data, similarily to how `EfCore`'s `Entities` depict database rows. The type's public properties correspond to the data source columns.
 
@@ -43,7 +43,7 @@ By default `TSource` property names map 1-to-1 into `Druid` data source column n
     {
         public WikipediaDataSourceProvider()
         {
-            // Corresponde to Druid's example wikipedia edits data.
+            // Corresponds to Druid's example wikipedia edits data.
             Edits = Table<Edit>("wikipedia");
         }
 
@@ -55,13 +55,14 @@ Then connect up your data source provider to a depency injection framework of yo
 - [Microsoft.Extensions.DependencyInjection](Apache.Druid.Querying.Microsoft.Extensions.DependencyInjection/README.md)
 
 ## Querying
-Choose query type and models representing query's data using nested types of `Apache.Druid.Querying.Query<TSource>`. Create a query by instantiating chosen nested type. Set query data by calling the instance methods. The methods often accept `Expression<Delegate>`, using which given an object representing input data available at that point in a query and an object representing all possible operations on that input data, you create an object representing results of your chosen operation. To get an idea on what's possible it's best look into project's tests. The queries have been designed so as much information as possible is available complie time. Wherever possible, the query results have been "flattened" so they are streams to their consumer as soon as possible.
+Choose query type and models representing query's data using nested types of `Apache.Druid.Querying.Query<TSource>`. Create a query by instantiating chosen nested type. Set query data by calling the instance methods. The methods often accept `Expression<Delegate>`, using which given an object representing input data available at that point in a query and an object representing all possible operations on that input data, you create an object representing results of your chosen operations. To get an idea on what's possible it's best to look into project's tests. The queries have been designed so as much information as possible is available complie time. Wherever possible, the query results have been "flattened" so they are streamed to consumers as soon as possible.
 
 Currently available query types:
 - TimeSeries
 - TopN
 - GroupBy
-- Scan (currently missing option to specifiy a subset columns)
+- Scan (currently missing option to specifiy a subset of columns)
+- DataSourceMetadata
 
 ```cs
     // Getting DataSourceProvider from dependency injection container.
