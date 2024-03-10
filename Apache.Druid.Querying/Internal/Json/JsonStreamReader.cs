@@ -146,10 +146,13 @@ internal sealed class JsonStreamReader
 
     public async ValueTask<TValue> ReadToPropertyValueAsync<TValue>(ReadOnlyMemory<byte> name, CancellationToken token, bool updateState = true)
     {
+        var foundProperty = false;
         bool Try(out TValue value)
         {
             var reader = GetReader();
-            var found = reader.ReadToPropertyValue(name.Span, out value);
+            foundProperty = foundProperty || reader.ReadToProperty(name.Span);
+            var found = foundProperty && reader.Read();
+            value = found ? reader.GetValue<TValue>() : default!;
             if (updateState)
                 UpdateState(reader);
             return found;
