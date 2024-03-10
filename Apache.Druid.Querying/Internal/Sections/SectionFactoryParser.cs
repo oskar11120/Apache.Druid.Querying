@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Apache.Druid.Querying.Internal.Sections
 {
@@ -179,7 +180,7 @@ namespace Apache.Druid.Querying.Internal.Sections
                     .GetProperties()
                     .Select(property => property.Name)
                     .ToHashSet(StringComparer.OrdinalIgnoreCase);
-                foreach (var (argument, parameter) in @new.Arguments.Zip(@new.Constructor!.GetParameters()))
+                foreach (var (argument, parameter) in @new.Arguments.Zip(@new.Constructor?.GetParameters() ?? Array.Empty<ParameterInfo>()))
                 {
                     if (!propertyNames.TryGetValue(parameter.Name!, out var name))
                         throw Unexpected();
