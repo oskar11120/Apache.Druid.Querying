@@ -2,6 +2,10 @@
   <Sdk Name="DotNet.ReproducibleBuilds.Isolated" Version="1.1.1" />
   <ItemGroup>
     <PackageReference Include="DotNet.ReproducibleBuilds" Version="1.1.1" PrivateAssets="All"/>
+    <PackageReference Include="MinVer" Version="5.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
   <PropertyGroup>
     <Authors>Oskar Furlepa</Authors>
