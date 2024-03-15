@@ -234,11 +234,39 @@ In case `SimpleDataType` has not been specified, the library will infer it from 
 </table>
 
 ## Druid expressions
-Library accepts [Druid expressions](https://druid.apache.org/docs/latest/querying/math-expr) in form of a delegate where given object representing data available at that point in a query you are supposed to return an [interpolated string using $](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/tokens/interpolated) where each string's parameter is either:
+The library accepts [Druid expressions](https://druid.apache.org/docs/latest/querying/math-expr) in form of a delegate where given object representing data available at that point in a query you are supposed to return an [interpolated string using $](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/tokens/interpolated) where each string's parameter is either:
 
 - a property of object representing data, which will get mapped to approporiate column
 - a constant, which will get converted to a string.
 
 Passing any other parameters will result in an `InvalidOperationException` being thrown upon execution of the query.
 
-## Types representing data (not data types)
+## Refering to objects representing data
+You can refer objects representing your query data in two way:
+- by its properties, resulting in library mapping them to Druid columns
+- by it as a whole, resulting in library mapping whole the object to a column.
+
+This means the following queries will give you equivalent results.
+
+```cs
+record Aggregations(int AddedSum);
+var first = new Query<Edit>
+    .TimeSeries
+    .WithNoVirtualColumns
+    .WithAggregations<Aggregations>()
+    .Aggregations(type => new(
+        type.Sum(data => edit.Added)));
+var second = new Query<Edit>
+    .TimeSeries
+    .WithNoVirtualColumns
+    .WithAggregations<int>()
+    .Aggregations(type => type.Sum(data => edit.Added));
+```
+
+## Query result deserialization
+The library deserializes query results using System.Text.Json. The deserializer has been tweaked in following ways:
+- applied `System.Text.Json.JsonSerializerDefaults.Web`
+- `DateTime` and `DateTimeOffset` can additionaly be deserialized from unix timestamps
+- `bool` can additionally be deserialized from "true", "false', "True" and "False" string literals in quotes.
+
+Get the tweaked serializer options by calling `Apache.Druid.Querying.Json.DefaultSerializerOptions.Create()`.
