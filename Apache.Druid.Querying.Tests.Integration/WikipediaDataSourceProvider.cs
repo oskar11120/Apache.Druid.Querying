@@ -1,5 +1,14 @@
-﻿namespace Apache.Druid.Querying.Tests.Integration
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
+
+namespace Apache.Druid.Querying.Tests.Integration
 {
+    public interface IEditBooleans
+    {
+        bool IsNew { get; }
+        bool Robot { get; }
+    }
+
     [DataSourceColumnNamingConvention.CamelCase]
     public record Edit(
         [property: DataSourceTimeColumn] DateTimeOffset Timestamp,
@@ -25,7 +34,16 @@
         string? RegionIsoCode,
         int? MetroCode,
         string? CountryIsoCode,
-        string? RegionName);
+        string? RegionName)
+        : IEditBooleans
+    {
+        [JsonInclude]
+        [SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "For deseirialization.")]
+        private bool Robot { init => IsRobot = value; }
+
+        [DataSourceColumn("isRobot")]
+        bool IEditBooleans.Robot { get => IsRobot; }
+    }
 
     internal sealed class WikipediaDataSourceProvider : DataSourceProvider
     {

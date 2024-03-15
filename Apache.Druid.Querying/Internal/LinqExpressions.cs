@@ -17,8 +17,10 @@ namespace Apache.Druid.Querying.Internal
             selectorBody = selectorBody.UnwrapUnary();
             var expression = (MemberExpression)selectorBody;
             var name = expression.Member.Name;
-            var property = expression.Member as PropertyInfo ?? throw new InvalidOperationException();
-            return new(property.PropertyType, name, property.DeclaringType!);
+            var property = expression.Member as PropertyInfo 
+                ?? throw new InvalidOperationException($"{selectorBody} is not a property selector.");
+            var selectedFromExpression = expression.Expression?.UnwrapUnary();
+            return new(property.PropertyType, name, selectedFromExpression?.Type ?? property.DeclaringType!);
         }
     }
 }

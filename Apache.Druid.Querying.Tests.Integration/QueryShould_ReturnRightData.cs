@@ -219,42 +219,44 @@ internal class QueryShould_ReturnRightData
         await VerifyMatch(inEuWarsawTime);
     }
 
-    //[Test]
-    //public async Task LatestForecastQuery_Works()
-    //{
-    //    var query = new Query<VariableMessage>
-    //        .GroupBy<Variable>
-    //        .WithVirtualColumns<DateTimeOffset>
-    //        .WithAggregations<LatestForecast>()
-    //        .Interval(Interval)
-    //        .Filter(filter => filter.And(
-    //            filter.Selector(
-    //                data => data.Source.VariableName,
-    //                "pmPAct"),
-    //            filter.Selector(
-    //                data => data.Source.TenantId,
-    //                tenantId)))
-    //        .VirtualColumns(type => type.Expression<DateTimeOffset>(message => $"timestamp({message.ProcessedTimestamp})"))
-    //        .Dimensions(type => new(
-    //            type.Default(data => data.Source.ObjectId),
-    //            type.Default(data => data.Source.VariableName)))
-    //        .Aggregations(type => new(
-    //            type.Max(data => data.VirtualColumns),
-    //            type.Last(data => data.Source.Value, data => data.VirtualColumns)))
-    //        .Granularity(Granularity.Hour);
-    //    var json = Wikipedia
-    //        .Edits
-    //        .MapQueryToJson(query);
-    //    var result = await Wikipedia
-    //        .Edits
-    //        .ExecuteQuery(query)
-    //        .ToListAsync();
-    //    result.Should().NotBeEmpty();
-    //}
 
-    //public sealed record Aggregations(double Sum, int Count, string Variable, double? FirstValue);
-    //public sealed record PostAggregations(double Average);
-    //public sealed record GroupByDimensions(Guid ObjectId, string VariableName);
-    //public sealed record LatestForecast(DateTimeOffset Timestamp, double Value);
-    //public sealed record Variable(Guid ObjectId, string Name);
+    private sealed record GroupByBooleans(bool Robot, bool New);
+    [TestCase(0)]
+    [TestCase(1)]
+    public async Task WithDataPropertiesAccessedByInterface(int i)
+    {
+        async Task Test<TEdit>(DataSource<TEdit> dataSource) where TEdit : IEditBooleans
+        {
+            var one = new Query<TEdit>
+                .Scan()
+                .DefaultInterval()
+                .Filter(type => type.And(
+                    type.Selector(data => data.IsNew, true),
+                    type.Selector(data => data.Robot, true)))
+                .Limit(100);
+            if (i is 0)
+                await VerifyMatch(dataSource, one);
+
+            var two = new Query<TEdit>
+                .GroupBy<GroupByBooleans>
+                .WithNoVirtualColumns
+                .WithAggregations<int>()
+                .DefaultInterval()
+                .Granularity(Granularity.Hour)
+                .Dimensions(type => new(
+                    type.Default(data => data.Robot),
+                    type.Default(data => data.IsNew)))
+                .Aggregations(type => type.Count());
+            if(i is 1)
+                await VerifyMatch(dataSource, two);
+        }
+
+        await Test(Wikipedia.Edits);
+    }
+
+    interface IIotMeasurement
+    {
+        Guid ObjectId { get; }
+        double Value { get; }
+    }
 }

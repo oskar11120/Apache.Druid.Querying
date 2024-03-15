@@ -311,8 +311,7 @@ namespace Apache.Druid.Querying.Tests.Unit
                     type.Max(data => data.Source.Timestamp),
                     type.Last(data => data.Source.Value)
                 ))
-                .PostAggregations(type => new
-                (
+                .PostAggregations(type => new(
                     type.Arithmetic(
                         ArithmeticFunction.Add,
                         type.FieldAccess(type => type.LastValue, true))
@@ -320,12 +319,41 @@ namespace Apache.Druid.Querying.Tests.Unit
             AssertMatch(three);
         }
 
+        [Test]
+        public void WithDataPropertiesAccessedByInterface()
+        {
+            static void Test<TMeasurement>() where TMeasurement : IIotMeasurement
+            {
+                var one = new Query<TMeasurement>
+                    .Scan()
+                    .Interval(new(t, t))
+                    .Filter(type => type.And(
+                        type.Selector(data => data.ObjectId, Guid.Empty),
+                        type.Selector(data => data.Value, 1)));
+                AssertMatch(one);
+            }
+
+            Test<IotMeasurement>();
+        }
+
+        interface IIotMeasurement
+        {
+            Guid ObjectId { get; }
+            double Value { get; }
+        }
+
         [DataSourceColumnNamingConvention.CamelCase]
         internal record IotMeasurement(
             [property: DataSourceColumn("signal")] string SignalName,
             Guid IotObjectId,
             double Value,
-            [property: DataSourceTimeColumn] DateTimeOffset Timestamp);
+            [property: DataSourceTimeColumn] DateTimeOffset Timestamp)
+            : IIotMeasurement
+        {
+            [property: DataSourceColumn("iotObjectId")]
+            Guid IIotMeasurement.ObjectId => IotObjectId;
+        }
+
         record VirtualColumns(DateTimeOffset TReal);
         record Aggregations(DateTimeOffset TMax, double LastValue);
         record PostAggregations(double Sum);

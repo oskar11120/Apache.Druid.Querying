@@ -41,13 +41,28 @@ namespace Apache.Druid.Querying.Internal
                 var convention = type
                     .GetCustomAttribute<DataSourceColumnNamingConvention>()
                     ?? DataSourceColumnNamingConvention.None.Singleton;
-                var properties = type.GetProperties();
-                var result = properties
-                    .Select(property => new PropertyColumnNameMapping(
-                        property.Name,
-                        property.GetCustomAttribute<DataSourceColumnAttribute>(true)?.Name ?? convention.Apply(property.Name)))
+                var @explicitlyDeclared = type
+                    .GetProperties(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                    .Where(property => property.GetGetMethod(true) is { IsFinal: true, IsPrivate: true })
+                    .Select(property => (property, name: property.Name[(property.Name.LastIndexOf('.') + 1)..]));
+                var normal = type
+                    .GetProperties()
+                    .Select(property => (property, name: property.Name));
+                var result = normal
+                    .Concat(@explicitlyDeclared)
+                    .Select(pair => new PropertyColumnNameMapping(
+                        pair.name,
+                        pair.property.GetCustomAttribute<DataSourceColumnAttribute>(true)?.Name ?? convention.Apply(pair.name)))
                     .Where(mapping => mapping.Property != mapping.ColumnName)
+                    .Distinct()
                     .ToImmutableArray();
+                var mappedIntoMultipleColumns = result
+                    .GroupBy(mapping => mapping.Property)
+                    .Select(group => (count: group.Count(), property: group.Key, mappings: group.AsEnumerable()))
+                    .Where(count => count.count > 1);
+                if (mappedIntoMultipleColumns.Any())
+                    throw new InvalidOperationException($"At least one property of {typeof(TModel)} has been mapped into multiple various columns.")
+                    { Data = { [nameof(mappedIntoMultipleColumns)] = mappedIntoMultipleColumns } };
                 return new(All = All.Add(type, result));
             }
 

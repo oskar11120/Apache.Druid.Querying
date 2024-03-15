@@ -1,0 +1,21 @@
+﻿{
+  "queryType": "scan",
+  "intervals": [
+    "2000-01-02T01:01:00.0000000\u002B00:00/2000-01-02T01:01:00.0000000\u002B00:00"
+  ],
+  "filter": {
+    "fields": [
+      {
+        "value": "00000000-0000-0000-0000-000000000000",
+        "dimension": "iotObjectId",
+        "type": "selector"
+      },
+      {
+        "value": 1,
+        "dimension": "value",
+        "type": "selector"
+      }
+    ],
+    "type": "and"
+  }
+}

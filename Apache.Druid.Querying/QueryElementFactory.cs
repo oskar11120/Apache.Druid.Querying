@@ -25,10 +25,8 @@ namespace Apache.Druid.Querying
 
             private string GetColumnName(Expression selectorBody)
             {
-                selectorBody = selectorBody.UnwrapUnary();
-                var expression = (MemberExpression)selectorBody;
-                var member = expression.Member;
-                return columnNames.GetColumnName(member.DeclaringType!, member.Name);
+                var (_, name, type) = SelectedProperty.Get(selectorBody); 
+                return columnNames.GetColumnName(type, name);
             }
 
             protected string GetColumnName<TSelector>(Expression<TSelector> selector)

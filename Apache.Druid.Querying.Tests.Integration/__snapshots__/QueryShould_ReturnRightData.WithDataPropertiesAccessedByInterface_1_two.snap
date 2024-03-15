@@ -1,0 +1,882 @@
+﻿[
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 444
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 35
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 308
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 89
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T01:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 455
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T01:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 27
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T01:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 294
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T01:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 94
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T02:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 406
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T02:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 37
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T02:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 419
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T02:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 98
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T03:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 448
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T03:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 27
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T03:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 442
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T03:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 108
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T04:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 460
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T04:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 34
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T04:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 351
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T04:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 91
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T05:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 370
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T05:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 33
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T05:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 332
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T05:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 101
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T06:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 462
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T06:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 34
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T06:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 369
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T06:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 104
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T07:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 642
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T07:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 52
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T07:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 341
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T07:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 100
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T08:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 633
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T08:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 51
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T08:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 335
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T08:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 122
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T09:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 637
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T09:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 44
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T09:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 357
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T09:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 99
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T10:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 689
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T10:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 52
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T10:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 279
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T10:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 115
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T11:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 680
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T11:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 58
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T11:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 271
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T11:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 106
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T12:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 712
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T12:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 63
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T12:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 339
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T12:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 105
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T13:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 727
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T13:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 76
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T13:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 313
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T13:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 95
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T14:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 807
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T14:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 67
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T14:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 364
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T14:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 115
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T15:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 792
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T15:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 47
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T15:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 484
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T15:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 99
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T16:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 772
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T16:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 67
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T16:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 510
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T16:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 93
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T17:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 804
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T17:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 67
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T17:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 395
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T17:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 73
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T18:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 834
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T18:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 70
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T18:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 318
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T18:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 99
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T19:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 742
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T19:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 69
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T19:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 278
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T19:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 86
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T20:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 662
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T20:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 58
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T20:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 393
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T20:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 100
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T21:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": false
+      },
+      "Aggregations": 301
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T21:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": false,
+        "New": true
+      },
+      "Aggregations": 22
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T21:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": false
+      },
+      "Aggregations": 241
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T21:00:00+00:00",
+    "Value": {
+      "Dimensions": {
+        "Robot": true,
+        "New": true
+      },
+      "Aggregations": 39
+    }
+  }
+]
