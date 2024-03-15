@@ -43,7 +43,7 @@ By default `TSource` property names map 1-to-1 into `Druid` data source column n
     {
         public WikipediaDataSourceProvider()
         {
-            // Corresponds to Druid's example wikipedia edits data.
+            // Druid's example wikipedia edits data source.
             Edits = Table<Edit>("wikipedia");
         }
 
@@ -95,3 +95,150 @@ Currently available query types:
             = Wikipedia.Edits.ExecuteQuery(query);
     }
 ```
+
+## Data types
+
+In Apache Druid operations on data have multiple "variants". Which variant you may want to choose in which query depends on:
+
+- Data type of column used in the operation.
+- Expected result of the operation.
+
+For example, to perform a sum over some column's values, you may use:
+
+- doubleSum 
+- floatSum 
+- longSum.
+
+Most often though, you want the operation to match your column's data type. For this reason, such operations have been "merged" into one, accepting optional parameter of type `SimpleDataType`. Given example of operation `Sum`:
+<table>
+<thead>
+  <tr>
+    <th>Apache.Druid.Querying</th>
+    <th>Apache Druid</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>
+
+```cs
+query
+    .Aggregations(type => new(
+        type.Sum(edit => edit.Added, SimpleDataType.Double)));
+```
+</td>    
+<td>
+
+```json
+{
+    "aggregations": [
+        {
+          "type": "doubleSum",
+          "name": "TotalAdded",
+          "fieldName": "added"
+        }
+      ]
+}
+```
+</td>
+</tr>
+<tr>
+<td>
+
+```cs
+query
+    .Aggregations(type => new(
+        type.Sum(edit => edit.Added, SimpleDataType.Float)));
+```
+</td>
+<td>
+
+```json
+{
+    "aggregations": [
+        {
+          "type": "floatSum",
+          "name": "TotalAdded",
+          "fieldName": "added"
+        }
+      ]
+}
+```
+</td>
+</tr>
+<tr>
+<td>
+
+```cs
+query
+    .Aggregations(type => new(
+        type.Sum(edit => edit.Added, SimpleDataType.Long)));
+```
+</td>
+<td>
+
+```json
+{
+    "aggregations": [
+        {
+          "type": "longSum",
+          "name": "TotalAdded",
+          "fieldName": "added"
+        }
+      ]
+}
+```
+</td>
+</tr>
+</tbody>
+</table>
+
+In case `SimpleDataType` has not been specified, the library will infer it from related property type with following logic:
+<table>
+<thead>
+  <tr>
+    <th>Property type</th>
+    <th>Druid data type</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>string, Guid, char, Uri, Enum</td>
+    <td>String</td>
+  </tr>
+  <tr>
+    <td>double</td>
+    <td>Double</td>
+  </tr>
+  <tr>
+    <td>float</td>
+    <td>Float</td>
+  </tr>
+  <tr>
+    <td>short, int, long, DateTime, DateTimeOffset</td>
+    <td>Long</td>
+  </tr>
+  <tr>
+    <td>Nullable&lt;T&gt;</td>
+    <td>Result of type inference on T</td>
+  </tr>
+  <tr>
+    <td>IEnumerable&lt;T&gt;</td>
+    <td>Array&lt;Result of type inference on T&gt;</td>
+  </tr>
+  <tr>
+    <td>If property type does not match any above types</td>
+    <td>Complex&lt;json&gt;</td>
+  </tr>
+</tbody>
+</table>
+
+## Druid expressions
+Library accepts [Druid expressions](https://druid.apache.org/docs/latest/querying/math-expr) in form of a delegate where given object representing data available at that point in a query you are supposed to return an [interpolated string using $](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/tokens/interpolated) where each string's parameter is either:
+
+- a property of object representing data, which will get mapped to approporiate column
+- a constant, which will get converted to a string.
+
+Passing any other parameters will result in an `InvalidOperationException` being thrown upon execution of the query.
+
+## Types representing data (not data types)
