@@ -71,8 +71,6 @@ namespace Apache.Druid.Querying.Internal
             return new(string.Format(template, paramStrings), paramStrings);
         }
 
-
-
         public readonly record struct MapResult(string Expression, string[] ColumnNames);
     }
 }
