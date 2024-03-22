@@ -137,6 +137,11 @@ namespace Apache.Druid.Querying
             }
         }
 
+        public interface INone
+        {
+            TColumn None<TColumn>();
+        }
+
         public interface IExpression
         {
             TColumn Expression<TColumn>(DruidExpression expression);
@@ -148,11 +153,11 @@ namespace Apache.Druid.Querying
             }
         }
 
-        public interface IVirtualColumns : IExpression.WithOutputType
+        public interface IVirtualColumns : IExpression.WithOutputType, INone
         {
         }
 
-        public interface IAggregations
+        public interface IAggregations : INone
         {
             int Count();
 
@@ -286,7 +291,7 @@ namespace Apache.Druid.Querying
                 long? maxSizeBytes);
         }
 
-        public interface IPostAggregators : IExpression.WithOutputType
+        public interface IPostAggregators : IExpression.WithOutputType, INone
         {
             TColumn Arithmetic<TColumn>(ArithmeticFunction fn, IEnumerable<TColumn> fields);
             TColumn Arithmetic<TColumn>(ArithmeticFunction fn, params TColumn[] fields);
@@ -297,7 +302,7 @@ namespace Apache.Druid.Querying
             TColumn Expression<TColumn>(DruidExpression expression, SimpleDataType outputType, string? ordering);
         }
 
-        public interface IDimensions
+        public interface IDimensions : INone
         {
             TColumn Default<TColumn>(ColumnSelector<TColumn> dimension);
             TColumn Default<TColumn>(ColumnSelector<TColumn> dimension, SimpleDataType outputType);

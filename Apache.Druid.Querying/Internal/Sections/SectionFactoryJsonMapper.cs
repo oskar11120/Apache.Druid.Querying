@@ -58,16 +58,24 @@ namespace Apache.Druid.Querying.Internal.Sections
 
             JsonNode Map(IReadOnlyCollection<ElementFactoryCall> calls, bool nested)
             {
+                static bool IsNone(ElementFactoryCall call) =>
+                    call.ResultMemberName is null &&
+                    call.MethodName is "None" &&
+                    call.Parameters.Count is 0;
+
                 if (!nested && options.ForceSingle)
                 {
-                    return calls.Count == 1 ?
+                    calls = calls.Where(call => !IsNone(call)).ToArray();
+                    return calls.Count is 1 ?
                         MapCall(calls.Single(), nested) :
-                        throw new InvalidOperationException();
+                        throw new InvalidOperationException($"Expected single {nameof(ElementFactoryCall)} but got {calls.Count}.")
+                        { Data = { [nameof(calls)] = calls } };
                 }
 
                 var array = new JsonArray();
                 foreach (var call in calls)
-                    array.Add(MapCall(call, nested));
+                    if (!IsNone(call))
+                        array.Add(MapCall(call, nested));
                 return array;
             }
 

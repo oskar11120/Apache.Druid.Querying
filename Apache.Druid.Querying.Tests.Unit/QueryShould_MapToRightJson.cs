@@ -18,6 +18,25 @@ namespace Apache.Druid.Querying.Tests.Unit
             Snapshot.Match(json, new SnapshotNameExtension(snapshotNameExtension));
         }
 
+        [Test]
+        public void NoneElementType()
+        {
+            static Query<IotMeasurement>.GroupBy<double>.WithVirtualColumns<int>.WithAggregations<string>.WithPostAggregations<long> Query() 
+                => new Query<IotMeasurement>
+                .GroupBy<double>
+                .WithVirtualColumns<int>
+                .WithAggregations<string>
+                .WithPostAggregations<long>();
+            var dimensions = Query().Dimensions(type => type.None<double>());
+            AssertMatch(dimensions);
+            var virtualColumns = Query().VirtualColumns(type => type.None<int>());
+            AssertMatch(virtualColumns);
+            var aggregations = Query().Aggregations(type => type.None<string>());
+            AssertMatch(aggregations);
+            var postAggregations = Query().PostAggregations(type => type.None<long>());
+            AssertMatch(postAggregations);
+        }
+
         private sealed record AggregationsFromTernary(
             double OnType,
             DateTimeOffset OnData,

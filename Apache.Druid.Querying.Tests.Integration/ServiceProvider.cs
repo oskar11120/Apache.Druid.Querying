@@ -14,7 +14,7 @@ namespace Apache.Druid.Querying.Tests.Integration
             .AddDataSourceProvider<WikipediaDataSourceProvider>(DruidSetup.RouterUri)
             .ConfigureClient(clientBuilder => clientBuilder
                 .AddTransientHttpErrorPolicy(policy => policy
-                    .WaitAndRetryAsync(10, _ => TimeSpan.FromSeconds(1))))
+                    .WaitAndRetryAsync(20, _ => TimeSpan.FromSeconds(1))))
             .Services
             .AddHttpClient()
             .BuildServiceProvider();
