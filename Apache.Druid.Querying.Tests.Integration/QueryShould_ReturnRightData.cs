@@ -63,7 +63,7 @@ internal class QueryShould_ReturnRightData
             .Context(new() { SkipEmptyBuckets = true });
         var wrapped = Wikipedia
             .Edits
-            .WrapOverQuery(first);
+            .ToQueryDataSource(first);
         var query = new Query<WithTimestamp<TimeSeriesAggregations>>
             .Scan()
             .Interval(TestData.Interval)
@@ -92,7 +92,7 @@ internal class QueryShould_ReturnRightData
             .Granularity(Granularity.Day)
             .Dimensions(type => type.Default(data => data.CountryName))
             .Aggregations(type => type.Last(data => data.Timestamp));
-        var latestEditTimestampsPerCountry_dataSource = Wikipedia.Edits.WrapOverQuery(latestEditTimestampsPerCountry_query);
+        var latestEditTimestampsPerCountry_dataSource = Wikipedia.Edits.ToQueryDataSource(latestEditTimestampsPerCountry_query);
         var lastestEditsPerCountry_dataSource = Wikipedia.Edits.InnerJoin(
             latestEditTimestampsPerCountry_dataSource,
             data => $"{data.Left.CountryName} == {data.Right.Value.Dimensions} && {data.Left.Timestamp} == {data.Right.Value.Aggregations}");

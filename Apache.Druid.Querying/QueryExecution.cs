@@ -204,7 +204,7 @@ namespace Apache.Druid.Querying
                 yield return result;
         }
 
-        public DataSource<TResult> WrapOverQuery<TResult>(IQueryWithSource<TSource>.AndResult<TResult> query) => new(
+        public DataSource<TResult> ToQueryDataSource<TResult>(IQueryWithSource<TSource>.AndResult<TResult> query) => new(
             getOptions,
             () => new JsonObject
             {
