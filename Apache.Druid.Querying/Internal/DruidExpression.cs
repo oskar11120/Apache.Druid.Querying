@@ -10,21 +10,30 @@ namespace Apache.Druid.Querying.Internal
         private const char columnPrefixSuffix = '"';
 
         public static MapResult Map(LambdaExpression factory, IColumnNameMappingProvider columnNameMappings)
-        {
-            Exception Invalid() => new InvalidOperationException($"{factory} has to return an interpolated string."); // TODO Better error message.
-            var body = factory.Body;
+            => Map(factory.Body, columnNameMappings);
 
-            if (body is ConstantExpression constant_ && constant_.Type == typeof(string))
+        private static MapResult Map(Expression expression, IColumnNameMappingProvider columnNameMappings)
+        {
+            Exception Invalid(string reason) => new InvalidOperationException($"Invalid Druid expression: {expression}. {reason}.");
+
+            if (expression is ConstantExpression constant_ && constant_.Type == typeof(string))
                 return new((string)constant_.Value!, Array.Empty<string>());
 
-            if (body is not MethodCallExpression call ||
+            if (expression is BinaryExpression binary && binary.NodeType is ExpressionType.Add)
+            {
+                var left = Map(binary.Left, columnNameMappings);
+                var right = Map(binary.Right, columnNameMappings);
+                return new(left.Expression + right.Expression, left.ColumnNames.Concat(right.ColumnNames).ToArray());
+            }
+
+            if (expression is not MethodCallExpression call ||
                 call.Method.DeclaringType != typeof(string) ||
                 call.Method.Name != nameof(string.Format))
-                throw Invalid();
+                throw Invalid($"Expected {expression} to be an interpolated string");
 
             var arguments = call.Arguments;
             if (arguments[0] is not ConstantExpression constant || constant.Type != typeof(string))
-                throw Invalid();
+                throw Invalid($"Expected {arguments[0]} to be {typeof(string).Name}");
             var template = (string)constant.Value!;
 
             if (arguments.Count is 1)
