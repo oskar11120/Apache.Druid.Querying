@@ -20,7 +20,9 @@ namespace Apache.Druid.Querying.Tests.Unit
 
         private sealed record AggregationsFromTernary(
             double OnType,
-            DateTimeOffset OnData);
+            DateTimeOffset OnData,
+            double OnType_Nested,
+            DateTimeOffset OnData_Nested);
         [TestCase(0)]
         [TestCase(1)]
         public void TernaryOperatorsInExpressions(int value)
@@ -33,7 +35,15 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .WithPostAggregations<int>()
                 .Aggregations(type => new(
                     value > 0 ? type.Max(data => data.Value) : type.Min(data => data.Value),
-                    type.Last(data => valueGreaterThanZero() ? data.Timestamp : data.ProcessedTimestamp)))
+                    type.Last(data => valueGreaterThanZero() ? data.Timestamp : data.ProcessedTimestamp),
+                    value > 0 ? 
+                        (value == 1 ?
+                            type.First(data => data.Value) :
+                            type.Last(data => data.Value)) :
+                        type.Min(data => data.Value),
+                    type.Last(data => valueGreaterThanZero() ? 
+                        (valueGreaterThanZero() ? data.Timestamp : data.ProcessedTimestamp) :
+                        data.ProcessedTimestamp)))
                 .PostAggregations(type => valueGreaterThanZero() ? type.Constant(1) : type.Constant(0));
             AssertMatch(query, string.Empty);
         }

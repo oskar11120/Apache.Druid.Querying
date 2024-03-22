@@ -10,6 +10,16 @@
       "type": "longLast",
       "name": "OnData",
       "fieldName": "__time"
+    },
+    {
+      "type": "doubleFirst",
+      "name": "OnType_Nested",
+      "fieldName": "value"
+    },
+    {
+      "type": "longLast",
+      "name": "OnData_Nested",
+      "fieldName": "__time"
     }
   ],
   "postAggregations": [

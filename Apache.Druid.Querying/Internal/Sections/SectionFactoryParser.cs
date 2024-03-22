@@ -118,8 +118,9 @@ namespace Apache.Druid.Querying.Internal.Sections
                 var lambda = selector as LambdaExpression ?? throw Unexpected();
                 if (lambda.Parameters.Count is not 1 || lambda.Parameters[0].Type != argumentsType)
                     throw Unexpected();
-                var body = lambda.Body is ConditionalExpression ternary ?
-                    EvaluateTernary(ternary) : lambda.Body;
+                var body = lambda.Body;
+                while (body is ConditionalExpression ternary)
+                    body = EvaluateTernary(ternary);
                 return SelectedProperty.Get(body);
             }
 

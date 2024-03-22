@@ -10,6 +10,16 @@
       "type": "longLast",
       "name": "OnData",
       "fieldName": "processedTimestamp"
+    },
+    {
+      "type": "doubleMin",
+      "name": "OnType_Nested",
+      "fieldName": "value"
+    },
+    {
+      "type": "longLast",
+      "name": "OnData_Nested",
+      "fieldName": "processedTimestamp"
     }
   ],
   "postAggregations": [
