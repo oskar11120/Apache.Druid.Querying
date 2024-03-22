@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
 using System;
+using Apache.Druid.Querying.Internal.Sections;
 
 namespace Apache.Druid.Querying.Internal
 {
@@ -8,6 +9,21 @@ namespace Apache.Druid.Querying.Internal
     {
         public static Expression UnwrapUnary(this Expression expression)
             => expression is UnaryExpression unary ? UnwrapUnary(unary.Operand) : expression;
+
+        public static Expression EvaluateCondition(this ConditionalExpression ternary)
+        {
+            bool result;
+            try
+            {
+                result = (bool)ternary.Test.GetValue()!;
+            }
+            catch (Exception exception)
+            {
+                throw new InvalidOperationException($"Could not evaluate condition of ternary expression: {ternary}", exception);
+            }
+
+            return result ? ternary.IfTrue : ternary.IfFalse;
+        }
     }
 
     internal readonly record struct SelectedProperty(Type Type, string Name, Type SelectedFromType)

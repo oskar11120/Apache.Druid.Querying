@@ -97,19 +97,16 @@ namespace Apache.Druid.Querying.Internal.Sections
             InvalidOperationException ExpectedToBe(Expression expected, string toBe)
                 => Invalid($"Expected {expected} to be {toBe}.");
 
-            Expression EvaluateTernary(ConditionalExpression ternary)
+            Expression EvaluateTernaryCondition(ConditionalExpression ternary)
             {
-                bool result;
                 try
                 {
-                    result = (bool)ternary.Test.GetValue()!;
+                    return ternary.EvaluateCondition();
                 }
                 catch (Exception exception)
                 {
-                    throw Invalid($"Could not evaluate condition of ternary expression: {ternary}", exception);
+                    throw Invalid(exception.Message, exception);
                 }
-
-                return result ? ternary.IfTrue : ternary.IfFalse;
             }
 
             SelectedProperty GetSelectedProperty(Expression selector)
@@ -120,7 +117,7 @@ namespace Apache.Druid.Querying.Internal.Sections
                     throw Unexpected();
                 var body = lambda.Body;
                 while (body is ConditionalExpression ternary)
-                    body = EvaluateTernary(ternary);
+                    body = EvaluateTernaryCondition(ternary);
                 return SelectedProperty.Get(body);
             }
 
@@ -132,7 +129,7 @@ namespace Apache.Druid.Querying.Internal.Sections
                 factoryCall = factoryCall.UnwrapUnary();
 
                 if (factoryCall is ConditionalExpression ternary)
-                    return Execute(EvaluateTernary(ternary), resultMemberName);
+                    return Execute(EvaluateTernaryCondition(ternary), resultMemberName);
 
                 var call = factoryCall as MethodCallExpression ?? throw Unexpected();
                 var method = call.Method;
@@ -183,7 +180,7 @@ namespace Apache.Druid.Querying.Internal.Sections
 
                 if (sectionFactoryBody is ConditionalExpression ternary)
                 {
-                    foreach (var item in Execute__(EvaluateTernary(ternary)))
+                    foreach (var item in Execute__(EvaluateTernaryCondition(ternary)))
                         yield return item;
                     yield break;
                 }
