@@ -26,6 +26,13 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
         }
 
         [Test]
+        public void NoParameters()
+        {
+            string result = Map(message => $"\"signal\" == 42");
+            result.Should().Be("\"signal\" == 42");
+        }
+
+        [Test]
         public void Concatenation()
         {
             var result = Map(message =>
