@@ -18,6 +18,9 @@ namespace Apache.Druid.Querying.Tests.Unit
             Snapshot.Match(json, new SnapshotNameExtension(snapshotNameExtension));
         }
 
+        private sealed record AggregationsFromTernary(
+            double OnType,
+            DateTimeOffset OnData);
         [TestCase(0)]
         [TestCase(1)]
         public void TernaryOperatorsInExpressions(int value)
@@ -26,9 +29,11 @@ namespace Apache.Druid.Querying.Tests.Unit
             var query = new Query<IotMeasurement>
                 .TimeSeries
                 .WithNoVirtualColumns
-                .WithAggregations<double>
+                .WithAggregations<AggregationsFromTernary>
                 .WithPostAggregations<int>()
-                .Aggregations(type => value > 0 ? type.Max(data => data.Value) : type.Min(data => data.Value))
+                .Aggregations(type => new(
+                    value > 0 ? type.Max(data => data.Value) : type.Min(data => data.Value),
+                    type.Last(data => valueGreaterThanZero() ? data.Timestamp : data.ProcessedTimestamp)))
                 .PostAggregations(type => valueGreaterThanZero() ? type.Constant(1) : type.Constant(0));
             AssertMatch(query, string.Empty);
         }
@@ -362,7 +367,8 @@ namespace Apache.Druid.Querying.Tests.Unit
             [property: DataSourceColumn("signal")] string SignalName,
             Guid IotObjectId,
             double Value,
-            [property: DataSourceTimeColumn] DateTimeOffset Timestamp)
+            [property: DataSourceTimeColumn] DateTimeOffset Timestamp,
+            DateTimeOffset ProcessedTimestamp)
             : IIotMeasurement
         {
             [property: DataSourceColumn("iotObjectId")]

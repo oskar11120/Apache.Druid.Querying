@@ -97,13 +97,30 @@ namespace Apache.Druid.Querying.Internal.Sections
             InvalidOperationException ExpectedToBe(Expression expected, string toBe)
                 => Invalid($"Expected {expected} to be {toBe}.");
 
+            Expression EvaluateTernary(ConditionalExpression ternary)
+            {
+                bool result;
+                try
+                {
+                    result = (bool)ternary.Test.GetValue()!;
+                }
+                catch (Exception exception)
+                {
+                    throw Invalid($"Could not evaluate condition of ternary expression: {ternary}", exception);
+                }
+
+                return result ? ternary.IfTrue : ternary.IfFalse;
+            }
+
             SelectedProperty GetSelectedProperty(Expression selector)
             {
                 InvalidOperationException Unexpected() => ExpectedToBe(selector, $"a property selector from {argumentsType}");
                 var lambda = selector as LambdaExpression ?? throw Unexpected();
                 if (lambda.Parameters.Count is not 1 || lambda.Parameters[0].Type != argumentsType)
                     throw Unexpected();
-                return SelectedProperty.Get(lambda.Body);
+                var body = lambda.Body is ConditionalExpression ternary ?
+                    EvaluateTernary(ternary) : lambda.Body;
+                return SelectedProperty.Get(body);
             }
 
             ElementFactoryCall Execute(Expression factoryCall, string? resultMemberName)
@@ -112,6 +129,10 @@ namespace Apache.Druid.Querying.Internal.Sections
                 static ElementFactoryCall.Parameter.ArgumentsMemberSelector Map(SelectedProperty property, string name)
                     => new(property.Type, property.Name, name, property.SelectedFromType);
                 factoryCall = factoryCall.UnwrapUnary();
+
+                if (factoryCall is ConditionalExpression ternary)
+                    return Execute(EvaluateTernary(ternary), resultMemberName);
+
                 var call = factoryCall as MethodCallExpression ?? throw Unexpected();
                 var method = call.Method;
                 var methodName = method.Name;
@@ -161,18 +182,7 @@ namespace Apache.Druid.Querying.Internal.Sections
 
                 if (sectionFactoryBody is ConditionalExpression ternary)
                 {
-                    bool value;
-                    try
-                    {
-                        value = (bool)ternary.Test.GetValue()!;
-                    }
-                    catch (Exception exception)
-                    {
-                        throw Invalid($"Could not evaluate condition of ternary expression: {ternary}", exception);
-                    }
-
-                    var chosen = value ? ternary.IfTrue : ternary.IfFalse;
-                    foreach (var item in Execute__(chosen))
+                    foreach (var item in Execute__(EvaluateTernary(ternary)))
                         yield return item;
                     yield break;
                 }

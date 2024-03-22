@@ -3,8 +3,13 @@
   "aggregations": [
     {
       "type": "doubleMin",
-      "name": "Aggregations",
+      "name": "OnType",
       "fieldName": "value"
+    },
+    {
+      "type": "longLast",
+      "name": "OnData",
+      "fieldName": "processedTimestamp"
     }
   ],
   "postAggregations": [
