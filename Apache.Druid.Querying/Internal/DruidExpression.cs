@@ -14,7 +14,8 @@ namespace Apache.Druid.Querying.Internal
 
         private static MapResult Map(Expression expression, IColumnNameMappingProvider columnNameMappings)
         {
-            Exception Invalid(string reason) => new InvalidOperationException($"Invalid Druid expression: {expression}. {reason}.");
+            InvalidOperationException Invalid(string reason, Exception? inner = null)
+                => new($"Invalid Druid expression: {expression}. {reason}.", inner);
 
             if (expression is ConstantExpression constant_ && constant_.Type == typeof(string))
                 return new((string)constant_.Value!, Array.Empty<string>());
@@ -47,7 +48,16 @@ namespace Apache.Druid.Querying.Internal
             for (int i = 0; i < @params.Count; i++)
             {
                 var @param = @params[i];
-                var member = SelectedProperty.Get(@param);
+                SelectedProperty member;
+                try
+                {
+                    member = SelectedProperty.Get(@param);
+                }
+                catch (Exception exception)
+                {
+                    throw Invalid(exception.Message, exception);
+                }
+
                 var @string = columnPrefixSuffix + columnNameMappings.GetColumnName(member.SelectedFromType, member.Name) + columnPrefixSuffix;
                 paramStrings[i] = @string;
             }
