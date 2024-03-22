@@ -29,11 +29,11 @@ namespace Apache.Druid.Querying.Internal
             if (expression is not MethodCallExpression call ||
                 call.Method.DeclaringType != typeof(string) ||
                 call.Method.Name != nameof(string.Format))
-                throw Invalid($"Expected {expression} to be an interpolated string");
+                throw Invalid($"{expression} is not an interpolated string");
 
             var arguments = call.Arguments;
             if (arguments[0] is not ConstantExpression constant || constant.Type != typeof(string))
-                throw Invalid($"Expected {arguments[0]} to be {typeof(string).Name}");
+                throw Invalid($"{arguments[0]} in not {typeof(string).Name}");
             var template = (string)constant.Value!;
 
             if (arguments.Count is 1)
