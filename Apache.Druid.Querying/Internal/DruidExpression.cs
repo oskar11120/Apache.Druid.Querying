@@ -15,8 +15,8 @@ namespace Apache.Druid.Querying.Internal
             InvalidOperationException Invalid(string reason, Exception? inner = null)
                 => new($"Invalid Druid expression: {expression}. {reason}.", inner);
 
-            if (expression is ConstantExpression constant_ && constant_.Type == typeof(string))
-                return new((string)constant_.Value!, Array.Empty<string>());
+            if (expression is ConstantExpression constant_)
+                return new(constant_.Value?.ToString() ?? string.Empty, Array.Empty<string>());
 
             if (expression is BinaryExpression binary && binary.NodeType is ExpressionType.Add)
             {
@@ -30,22 +30,18 @@ namespace Apache.Druid.Querying.Internal
                 call.Method.Name != nameof(string.Format))
                 throw Invalid($"{expression} is not an interpolated string");
 
-            var arguments = call.Arguments;
-            if (arguments[0] is not ConstantExpression constant || constant.Type != typeof(string))
-                throw Invalid($"{arguments[0]} in not {typeof(string).Name}");
-            var template = (string)constant.Value!;
-
-            if (arguments.Count is 1)
-                return new(template, Array.Empty<string>());
-
-            var @paramsExpression = arguments[1];
-            var @params = @paramsExpression is NewArrayExpression array ?
-                array.Expressions :
-                new[] { paramsExpression } as IReadOnlyList<Expression>;
-            var paramStrings = new string[@params.Count];
-            for (int i = 0; i < @params.Count; i++)
+            IEnumerable<string> Map_(Expression param)
             {
-                var @param = @params[i];
+                param = param.UnwrapUnary();
+                if (param is NewArrayExpression array)
+                    return array.Expressions.SelectMany(Map_);
+
+                if(param is ConstantExpression constant)
+                    return new[] { constant.Value?.ToString() ?? string.Empty };
+
+                if (param is ConditionalExpression ternary)
+                    return Map_(ternary.EvaluateCondition());
+
                 SelectedProperty member;
                 try
                 {
@@ -58,11 +54,24 @@ namespace Apache.Druid.Querying.Internal
 
                 const char prefixSuffix = '"';
                 var @string = prefixSuffix + columnNameMappings.GetColumnName(member.SelectedFromType, member.Name) + prefixSuffix;
-                paramStrings[i] = @string;
+                return new[] { @string };
             }
 
+            var arguments = call.Arguments;
+            if (arguments[0] is not ConstantExpression constant || constant.Type != typeof(string))
+                throw Invalid($"{arguments[0]} in not {typeof(string).Name}.");
+            var template = (string)constant.Value!;
+
+            if (arguments.Count is 1)
+                return new(template, Array.Empty<string>());
+            var paramStrings = arguments
+                .Skip(1)
+                .SelectMany(Map_)
+                .ToArray();
             return new(string.Format(template, paramStrings), paramStrings);
         }
+
+
 
         public readonly record struct MapResult(string Expression, string[] ColumnNames);
     }

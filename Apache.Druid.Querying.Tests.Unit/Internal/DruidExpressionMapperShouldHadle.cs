@@ -12,10 +12,17 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
             => DruidExpression.Map(factory, columnMappings).Expression;
 
         [Test]
-        public void HotPath()
+        public void OneParameter()
         {
             string result = Map(message => $"{message.SignalName} == 42");
             result.Should().Be("\"signal\" == 42");
+        }
+
+        [Test]
+        public void TwoParameters()
+        {
+            string result = Map(message => $"{message.SignalName} == 42 && {message.Value} > 0");
+            result.Should().Be("\"signal\" == 42 && \"value\" > 0");
         }
 
         [Test]
@@ -26,6 +33,14 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
                 $"{message.Value} > 0 && " + 
                 $"{message.Value} < 1000");
             result.Should().Be("\"signal\" == 42 && \"value\" > 0 && \"value\" < 1000");
+        }
+
+        [Test]
+        public void TernaryOperators()
+        {
+            int value = 1;
+            string result = Map(message => $"{message.SignalName} == {(value == 1 ? 42 : 41)}");
+            result.Should().Be("\"signal\" == 42");
         }
     }
 }
