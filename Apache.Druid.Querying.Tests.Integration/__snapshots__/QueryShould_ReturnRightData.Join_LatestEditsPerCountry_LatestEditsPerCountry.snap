@@ -1,0 +1,3992 @@
+﻿[
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T00:14:33.567+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "FC Dinamo Tbilisi",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727145538&oldid=727145266",
+        "Added": 0,
+        "Comment": "/* Current squad */",
+        "CommentLength": 19,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -16,
+        "IsAnonymous": true,
+        "User": "80.77.54.202",
+        "DeltaBucket": -100,
+        "Deleted": 16,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Georgia",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "GE",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T00:14:33.567+00:00",
+        "Value": {
+          "Dimensions": "Georgia",
+          "Aggregations": "2016-06-27T00:14:33.567+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T00:49:58.225+00:00",
+        "IsRobot": false,
+        "Channel": "#es.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Arroyos y Esteros",
+        "DiffUri": "https://es.wikipedia.org/w/index.php?diff=91938009&oldid=91937958",
+        "Added": 81,
+        "Comment": "/* Cultura */",
+        "CommentLength": 13,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 81,
+        "IsAnonymous": true,
+        "User": "181.121.81.12",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Paraguay",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "PY",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T00:49:58.225+00:00",
+        "Value": {
+          "Dimensions": "Paraguay",
+          "Aggregations": "2016-06-27T00:49:58.225+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T04:38:03.516+00:00",
+        "IsRobot": false,
+        "Channel": "#ru.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Цаллати, Вадим Рамазанович",
+        "DiffUri": "https://ru.wikipedia.org/w/index.php?diff=79215335&oldid=78948231",
+        "Added": 0,
+        "Comment": "/* Фильмография */",
+        "CommentLength": 18,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 0,
+        "IsAnonymous": true,
+        "User": "213.230.102.46",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Tashkent",
+        "CountryName": "Uzbekistan",
+        "RegionIsoCode": "TK",
+        "MetroCode": null,
+        "CountryIsoCode": "UZ",
+        "RegionName": "Toshkent Shahri"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T04:38:03.516+00:00",
+        "Value": {
+          "Dimensions": "Uzbekistan",
+          "Aggregations": "2016-06-27T04:38:03.516+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T05:22:07.917+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Ker and Downey Safaris Ltd.",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727173893&oldid=726182206",
+        "Added": 0,
+        "Comment": "Removed template after I and someone else had made changes - now mentions other companies etc to avoid sounding like advertising",
+        "CommentLength": 128,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -26,
+        "IsAnonymous": true,
+        "User": "197.232.245.116",
+        "DeltaBucket": -100,
+        "Deleted": 26,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Kenya",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "KE",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T05:22:07.917+00:00",
+        "Value": {
+          "Dimensions": "Kenya",
+          "Aggregations": "2016-06-27T05:22:07.917+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T05:48:27.163+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Jarno Trulli",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727176127&oldid=727176048",
+        "Added": 4,
+        "Comment": "/* Minardi and Prost (1997–1999) */'",
+        "CommentLength": 36,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 4,
+        "IsAnonymous": true,
+        "User": "31.22.50.240",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Albania",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "AL",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T05:48:27.163+00:00",
+        "Value": {
+          "Dimensions": "Albania",
+          "Aggregations": "2016-06-27T05:48:27.163+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T06:19:32.759+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Kang Ye-won",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727178689&oldid=727111785",
+        "Added": 0,
+        "Comment": "/* Awards and nominations */",
+        "CommentLength": 28,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 0,
+        "IsAnonymous": true,
+        "User": "213.7.54.216",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Nicosia",
+        "CountryName": "Cyprus",
+        "RegionIsoCode": "01",
+        "MetroCode": null,
+        "CountryIsoCode": "CY",
+        "RegionName": "Nicosia"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T06:19:32.759+00:00",
+        "Value": {
+          "Dimensions": "Cyprus",
+          "Aggregations": "2016-06-27T06:19:32.759+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T08:11:23.867+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Kuch Rang Pyar Ke Aise Bhi",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727188428&oldid=727187652",
+        "Added": 63,
+        "Comment": "/* Plot */",
+        "CommentLength": 10,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 63,
+        "IsAnonymous": true,
+        "User": "37.210.181.169",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Qatar",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "QA",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T08:11:23.867+00:00",
+        "Value": {
+          "Dimensions": "Qatar",
+          "Aggregations": "2016-06-27T08:11:23.867+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T08:39:04.059+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Khalid ibn al-Walid",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727191354&oldid=726094728",
+        "Added": 143,
+        "Comment": "/* In popular culture */",
+        "CommentLength": 24,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 143,
+        "IsAnonymous": true,
+        "User": "92.98.196.174",
+        "DeltaBucket": 100,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Dubai",
+        "CountryName": "United Arab Emirates",
+        "RegionIsoCode": "DU",
+        "MetroCode": null,
+        "CountryIsoCode": "AE",
+        "RegionName": "Dubai"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T08:39:04.059+00:00",
+        "Value": {
+          "Dimensions": "United Arab Emirates",
+          "Aggregations": "2016-06-27T08:39:04.059+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T09:15:32.909+00:00",
+        "IsRobot": false,
+        "Channel": "#de.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Berufjörður (Ostisland)",
+        "DiffUri": "https://de.wikipedia.org/w/index.php?diff=155664778&oldid=144320453",
+        "Added": 1,
+        "Comment": "/* Siehe auch */",
+        "CommentLength": 16,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 1,
+        "IsAnonymous": true,
+        "User": "194.105.229.44",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Reykjavik",
+        "CountryName": "Iceland",
+        "RegionIsoCode": "1",
+        "MetroCode": null,
+        "CountryIsoCode": "IS",
+        "RegionName": "Capital Region"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T09:15:32.909+00:00",
+        "Value": {
+          "Dimensions": "Iceland",
+          "Aggregations": "2016-06-27T09:15:32.909+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T09:34:10.538+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Ryan Jimmo",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727196051&oldid=727195852",
+        "Added": 0,
+        "Comment": "/* Death */",
+        "CommentLength": 11,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -5,
+        "IsAnonymous": true,
+        "User": "125.239.229.70",
+        "DeltaBucket": -100,
+        "Deleted": 5,
+        "Namespace": "Main",
+        "CityName": "Napier City",
+        "CountryName": "New Zealand",
+        "RegionIsoCode": "HKB",
+        "MetroCode": null,
+        "CountryIsoCode": "NZ",
+        "RegionName": "Hawke's Bay"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T09:34:10.538+00:00",
+        "Value": {
+          "Dimensions": "New Zealand",
+          "Aggregations": "2016-06-27T09:34:10.538+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T09:34:57.852+00:00",
+        "IsRobot": false,
+        "Channel": "#ar.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "أبو عبدالله أنس فرج المشرى",
+        "DiffUri": "https://ar.wikipedia.org/w/index.php?diff=20314702&oldid=20313698",
+        "Added": 206,
+        "Comment": "المصدر: كتاب ترجمة الشيخ الطالب للعلم أبو عبدالله أنس فرج المشرى",
+        "CommentLength": 64,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 206,
+        "IsAnonymous": true,
+        "User": "41.254.38.40",
+        "DeltaBucket": 200,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Libya",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "LY",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T09:34:57.852+00:00",
+        "Value": {
+          "Dimensions": "Libya",
+          "Aggregations": "2016-06-27T09:34:57.852+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T10:25:48.275+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Music Bank (TV series)",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727200345&oldid=727200234",
+        "Added": 4,
+        "Comment": "/* Hosts */",
+        "CommentLength": 11,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 4,
+        "IsAnonymous": true,
+        "User": "86.58.36.235",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Slovenia",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "SI",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T10:25:48.275+00:00",
+        "Value": {
+          "Dimensions": "Slovenia",
+          "Aggregations": "2016-06-27T10:25:48.275+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T10:38:22.675+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "2016 Chinese Taipei Open Grand Prix Gold",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727201433&oldid=727201371",
+        "Added": 39,
+        "Comment": "/* Seeds */",
+        "CommentLength": 11,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 39,
+        "IsAnonymous": true,
+        "User": "61.90.87.84",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Thailand",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "TH",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T10:38:22.675+00:00",
+        "Value": {
+          "Dimensions": "Thailand",
+          "Aggregations": "2016-06-27T10:38:22.675+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T11:28:05.291+00:00",
+        "IsRobot": false,
+        "Channel": "#es.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Clima",
+        "DiffUri": "https://es.wikipedia.org/w/index.php?diff=91943972&oldid=91929168",
+        "Added": 106,
+        "Comment": "/* Factores que determinan  el clima */",
+        "CommentLength": 39,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 106,
+        "IsAnonymous": true,
+        "User": "201.207.98.54",
+        "DeltaBucket": 100,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Cartago",
+        "CountryName": "Costa Rica",
+        "RegionIsoCode": "C",
+        "MetroCode": null,
+        "CountryIsoCode": "CR",
+        "RegionName": "Provincia de Cartago"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T11:28:05.291+00:00",
+        "Value": {
+          "Dimensions": "Costa Rica",
+          "Aggregations": "2016-06-27T11:28:05.291+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T11:43:41.895+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Tajikistan",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727206981&oldid=727206771",
+        "Added": 0,
+        "Comment": "/* Sport */",
+        "CommentLength": 11,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -11,
+        "IsAnonymous": true,
+        "User": "79.170.191.153",
+        "DeltaBucket": -100,
+        "Deleted": 11,
+        "Namespace": "Main",
+        "CityName": "Dushanbe",
+        "CountryName": "Tajikistan",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "TJ",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T11:43:41.895+00:00",
+        "Value": {
+          "Dimensions": "Tajikistan",
+          "Aggregations": "2016-06-27T11:43:41.895+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T11:46:21.221+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "List of Naruto characters",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727207221&oldid=727204956",
+        "Added": 0,
+        "Comment": "I wrote a message",
+        "CommentLength": 17,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 0,
+        "IsAnonymous": true,
+        "User": "41.114.130.18",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Johannesburg",
+        "CountryName": "South Africa",
+        "RegionIsoCode": "GP",
+        "MetroCode": null,
+        "CountryIsoCode": "ZA",
+        "RegionName": "Gauteng"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T11:46:21.221+00:00",
+        "Value": {
+          "Dimensions": "South Africa",
+          "Aggregations": "2016-06-27T11:46:21.221+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T11:51:38.658+00:00",
+        "IsRobot": false,
+        "Channel": "#ar.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "جي تي أي 5",
+        "DiffUri": "https://ar.wikipedia.org/w/index.php?diff=20315261&oldid=20276236",
+        "Added": 0,
+        "Comment": "/* الشخصيات */",
+        "CommentLength": 14,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -24,
+        "IsAnonymous": true,
+        "User": "197.18.109.148",
+        "DeltaBucket": -100,
+        "Deleted": 24,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Tunisia",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "TN",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T11:51:38.658+00:00",
+        "Value": {
+          "Dimensions": "Tunisia",
+          "Aggregations": "2016-06-27T11:51:38.658+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T12:28:45.427+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Mongolia national football team",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727210818&oldid=727210324",
+        "Added": 58,
+        "Comment": "/* Current squad */",
+        "CommentLength": 19,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 58,
+        "IsAnonymous": true,
+        "User": "202.9.41.213",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Ulan Bator",
+        "CountryName": "Mongolia",
+        "RegionIsoCode": "1",
+        "MetroCode": null,
+        "CountryIsoCode": "MN",
+        "RegionName": "Ulaanbaatar Hot"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T12:28:45.427+00:00",
+        "Value": {
+          "Dimensions": "Mongolia",
+          "Aggregations": "2016-06-27T12:28:45.427+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T13:12:03.226+00:00",
+        "IsRobot": false,
+        "Channel": "#es.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Memorama",
+        "DiffUri": "https://es.wikipedia.org/w/index.php?diff=91944911&oldid=91881929",
+        "Added": 0,
+        "Comment": "Gramática corregida",
+        "CommentLength": 19,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -1,
+        "IsAnonymous": true,
+        "User": "181.115.128.161",
+        "DeltaBucket": -100,
+        "Deleted": 1,
+        "Namespace": "Main",
+        "CityName": "La Paz",
+        "CountryName": "Bolivia",
+        "RegionIsoCode": "L",
+        "MetroCode": null,
+        "CountryIsoCode": "BO",
+        "RegionName": "Departamento de La Paz"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T13:12:03.226+00:00",
+        "Value": {
+          "Dimensions": "Bolivia",
+          "Aggregations": "2016-06-27T13:12:03.226+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T14:15:37.708+00:00",
+        "IsRobot": false,
+        "Channel": "#zh.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "世界语",
+        "DiffUri": "https://zh.wikipedia.org/w/index.php?diff=40612221&oldid=40609662",
+        "Added": 0,
+        "Comment": "/* 遭受迫害 */",
+        "CommentLength": 10,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -25,
+        "IsAnonymous": true,
+        "User": "161.64.208.98",
+        "DeltaBucket": -100,
+        "Deleted": 25,
+        "Namespace": "Main",
+        "CityName": "Macao",
+        "CountryName": "Macao",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "MO",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T14:15:37.708+00:00",
+        "Value": {
+          "Dimensions": "Macao",
+          "Aggregations": "2016-06-27T14:15:37.708+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T14:17:05.262+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Franz Joseph I of Austria",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727221572&oldid=727185599",
+        "Added": 0,
+        "Comment": "/* Titles, styles, arms and honours */",
+        "CommentLength": 38,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -56,
+        "IsAnonymous": true,
+        "User": "175.156.110.77",
+        "DeltaBucket": -100,
+        "Deleted": 56,
+        "Namespace": "Main",
+        "CityName": "Singapore",
+        "CountryName": "Singapore",
+        "RegionIsoCode": "01",
+        "MetroCode": null,
+        "CountryIsoCode": "SG",
+        "RegionName": "Central Singapore Community Development Council"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T14:17:05.262+00:00",
+        "Value": {
+          "Dimensions": "Singapore",
+          "Aggregations": "2016-06-27T14:17:05.262+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T15:00:12.544+00:00",
+        "IsRobot": false,
+        "Channel": "#sr.wikipedia",
+        "Flags": "!",
+        "IsUnpatrolled": true,
+        "Page": "Тениски рекорди и статистике у отвореној ери — мушкарци",
+        "DiffUri": "https://sr.wikipedia.org/w/index.php?diff=11927067&oldid=11926161&rcid=19253860",
+        "Added": 1,
+        "Comment": "/* Гренд слем турнири */",
+        "CommentLength": 24,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 1,
+        "IsAnonymous": true,
+        "User": "31.223.144.47",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Bosnia and Herzegovina",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "BA",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T15:00:12.544+00:00",
+        "Value": {
+          "Dimensions": "Bosnia and Herzegovina",
+          "Aggregations": "2016-06-27T15:00:12.544+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T15:01:59.753+00:00",
+        "IsRobot": false,
+        "Channel": "#zh.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "副溶血弧菌",
+        "DiffUri": "https://zh.wikipedia.org/w/index.php?diff=40612691&oldid=38444844",
+        "Added": 77,
+        "Comment": "藤原改为藤野",
+        "CommentLength": 6,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 77,
+        "IsAnonymous": true,
+        "User": "223.72.75.116",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "China",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "CN",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T15:01:59.753+00:00",
+        "Value": {
+          "Dimensions": "China",
+          "Aggregations": "2016-06-27T15:01:59.753+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T15:19:23.414+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Kojagori",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727228719&oldid=727228664",
+        "Added": 1,
+        "Comment": "/* Plot summary */",
+        "CommentLength": 18,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 1,
+        "IsAnonymous": true,
+        "User": "103.237.37.230",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Dhaka",
+        "CountryName": "Bangladesh",
+        "RegionIsoCode": "13",
+        "MetroCode": null,
+        "CountryIsoCode": "BD",
+        "RegionName": "Dhaka"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T15:19:23.414+00:00",
+        "Value": {
+          "Dimensions": "Bangladesh",
+          "Aggregations": "2016-06-27T15:19:23.414+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T15:30:49.973+00:00",
+        "IsRobot": false,
+        "Channel": "#et.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Biograafiad (Ja)",
+        "DiffUri": "https://et.wikipedia.org/w/index.php?diff=4444537&oldid=4442148",
+        "Added": 81,
+        "Comment": "/* Jak */",
+        "CommentLength": 9,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 81,
+        "IsAnonymous": true,
+        "User": "85.253.64.90",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Estonia",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "EE",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T15:30:49.973+00:00",
+        "Value": {
+          "Dimensions": "Estonia",
+          "Aggregations": "2016-06-27T15:30:49.973+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T15:44:34.543+00:00",
+        "IsRobot": false,
+        "Channel": "#es.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Andrés Caicedo",
+        "DiffUri": "https://es.wikipedia.org/w/index.php?diff=91947281&oldid=91947241",
+        "Added": 26,
+        "Comment": "/* Últimos años */",
+        "CommentLength": 18,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 26,
+        "IsAnonymous": true,
+        "User": "181.198.52.105",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Guayaquil",
+        "CountryName": "Ecuador",
+        "RegionIsoCode": "G",
+        "MetroCode": null,
+        "CountryIsoCode": "EC",
+        "RegionName": "Provincia del Guayas"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T15:44:34.543+00:00",
+        "Value": {
+          "Dimensions": "Ecuador",
+          "Aggregations": "2016-06-27T15:44:34.543+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T15:46:12.158+00:00",
+        "IsRobot": false,
+        "Channel": "#fr.wikipedia",
+        "Flags": "!",
+        "IsUnpatrolled": true,
+        "Page": "Ville de Bruxelles",
+        "DiffUri": "https://fr.wikipedia.org/w/index.php?diff=127402634&oldid=126979799&rcid=195357973",
+        "Added": 8,
+        "Comment": "/* Évolution de la population */",
+        "CommentLength": 32,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 8,
+        "IsAnonymous": true,
+        "User": "85.27.54.109",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Belgium",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "BE",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T15:46:12.158+00:00",
+        "Value": {
+          "Dimensions": "Belgium",
+          "Aggregations": "2016-06-27T15:46:12.158+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T15:56:00.487+00:00",
+        "IsRobot": false,
+        "Channel": "#ru.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Ханларова, Зейнаб Яхъя кызы",
+        "DiffUri": "https://ru.wikipedia.org/w/index.php?diff=79226015&oldid=79225974",
+        "Added": 103,
+        "Comment": "/* Преамбула */",
+        "CommentLength": 15,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 103,
+        "IsAnonymous": true,
+        "User": "185.30.91.70",
+        "DeltaBucket": 100,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Baku",
+        "CountryName": "Azerbaijan",
+        "RegionIsoCode": "BA",
+        "MetroCode": null,
+        "CountryIsoCode": "AZ",
+        "RegionName": "Baku City"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T15:56:00.487+00:00",
+        "Value": {
+          "Dimensions": "Azerbaijan",
+          "Aggregations": "2016-06-27T15:56:00.487+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T16:07:00.746+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Adam Rose",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727234135&oldid=727212612",
+        "Added": 160,
+        "Comment": "Added some info",
+        "CommentLength": 15,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 160,
+        "IsAnonymous": true,
+        "User": "113.199.191.39",
+        "DeltaBucket": 100,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Kathmandu",
+        "CountryName": "Nepal",
+        "RegionIsoCode": "BA",
+        "MetroCode": null,
+        "CountryIsoCode": "NP",
+        "RegionName": "Bagmati Zone"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T16:07:00.746+00:00",
+        "Value": {
+          "Dimensions": "Nepal",
+          "Aggregations": "2016-06-27T16:07:00.746+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T16:47:14.35+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Two Yoo Project Sugar Man",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727238415&oldid=727238386",
+        "Added": 15,
+        "Comment": "/* List of episodes in 2016 */",
+        "CommentLength": 30,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 15,
+        "IsAnonymous": true,
+        "User": "180.214.232.1",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Bekasi",
+        "CountryName": "Indonesia",
+        "RegionIsoCode": "JB",
+        "MetroCode": null,
+        "CountryIsoCode": "ID",
+        "RegionName": "West Java"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T16:47:14.35+00:00",
+        "Value": {
+          "Dimensions": "Indonesia",
+          "Aggregations": "2016-06-27T16:47:14.35+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T17:06:45.423+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Afrikaner Weerstandsbeweging",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727241457&oldid=725041801",
+        "Added": 19,
+        "Comment": "/* History */",
+        "CommentLength": 13,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 19,
+        "IsAnonymous": true,
+        "User": "41.182.30.181",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Windhoek",
+        "CountryName": "Namibia",
+        "RegionIsoCode": "KH",
+        "MetroCode": null,
+        "CountryIsoCode": "NA",
+        "RegionName": "Khomas"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T17:06:45.423+00:00",
+        "Value": {
+          "Dimensions": "Namibia",
+          "Aggregations": "2016-06-27T17:06:45.423+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T17:09:03.157+00:00",
+        "IsRobot": false,
+        "Channel": "#es.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Anexo:Episodios de Regular Show",
+        "DiffUri": "https://es.wikipedia.org/w/index.php?diff=91948709&oldid=91932420",
+        "Added": 26,
+        "Comment": "/* Temporada 7: 2015-16 */",
+        "CommentLength": 26,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 26,
+        "IsAnonymous": true,
+        "User": "89.40.24.108",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Anexo",
+        "CityName": null,
+        "CountryName": "Romania",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "RO",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T17:09:03.157+00:00",
+        "Value": {
+          "Dimensions": "Romania",
+          "Aggregations": "2016-06-27T17:09:03.157+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T17:12:49.49+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Tripiṭaka",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727242247&oldid=727236320",
+        "Added": 0,
+        "Comment": "/* Sutras */",
+        "CommentLength": 12,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -2,
+        "IsAnonymous": true,
+        "User": "175.157.233.32",
+        "DeltaBucket": -100,
+        "Deleted": 2,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Sri Lanka",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "LK",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T17:12:49.49+00:00",
+        "Value": {
+          "Dimensions": "Sri Lanka",
+          "Aggregations": "2016-06-27T17:12:49.49+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T17:16:53.61+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Aritz Aduriz",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727242772&oldid=726396516",
+        "Added": 0,
+        "Comment": "/* International career */",
+        "CommentLength": 26,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -16,
+        "IsAnonymous": true,
+        "User": "95.175.93.187",
+        "DeltaBucket": -100,
+        "Deleted": 16,
+        "Namespace": "Main",
+        "CityName": "Kuwait City",
+        "CountryName": "Kuwait",
+        "RegionIsoCode": "KU",
+        "MetroCode": null,
+        "CountryIsoCode": "KW",
+        "RegionName": "Al Asimah"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T17:16:53.61+00:00",
+        "Value": {
+          "Dimensions": "Kuwait",
+          "Aggregations": "2016-06-27T17:16:53.61+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T17:25:56.951+00:00",
+        "IsRobot": false,
+        "Channel": "#ru.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Лайвли, Блейк",
+        "DiffUri": "https://ru.wikipedia.org/w/index.php?diff=79227777&oldid=79227638",
+        "Added": 267,
+        "Comment": "Личная жизнь",
+        "CommentLength": 12,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 267,
+        "IsAnonymous": true,
+        "User": "90.143.26.76",
+        "DeltaBucket": 200,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Kazakhstan",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "KZ",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T17:25:56.951+00:00",
+        "Value": {
+          "Dimensions": "Kazakhstan",
+          "Aggregations": "2016-06-27T17:25:56.951+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T17:52:47.8+00:00",
+        "IsRobot": false,
+        "Channel": "#de.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Warendorfer Bahn",
+        "DiffUri": "https://de.wikipedia.org/w/index.php?diff=155677684&oldid=152605593",
+        "Added": 99,
+        "Comment": "/* Strecke */",
+        "CommentLength": 13,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 99,
+        "IsAnonymous": true,
+        "User": "92.250.201.201",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Luxembourg",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "LU",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T17:52:47.8+00:00",
+        "Value": {
+          "Dimensions": "Luxembourg",
+          "Aggregations": "2016-06-27T17:52:47.8+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T17:52:57.233+00:00",
+        "IsRobot": false,
+        "Channel": "#es.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Pinolillo",
+        "DiffUri": "https://es.wikipedia.org/w/index.php?diff=91949471&oldid=91330412",
+        "Added": 0,
+        "Comment": "/* Gofio */",
+        "CommentLength": 11,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 0,
+        "IsAnonymous": true,
+        "User": "165.98.69.222",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Managua",
+        "CountryName": "Nicaragua",
+        "RegionIsoCode": "MN",
+        "MetroCode": null,
+        "CountryIsoCode": "NI",
+        "RegionName": "Departamento de Managua"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T17:52:57.233+00:00",
+        "Value": {
+          "Dimensions": "Nicaragua",
+          "Aggregations": "2016-06-27T17:52:57.233+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T18:05:21.881+00:00",
+        "IsRobot": false,
+        "Channel": "#fa.wikipedia",
+        "Flags": "!",
+        "IsUnpatrolled": true,
+        "Page": "نخ دندان",
+        "DiffUri": "https://fa.wikipedia.org/w/index.php?diff=17449981&oldid=17362777&rcid=29849105",
+        "Added": 9,
+        "Comment": "/* استفاده روزانه */",
+        "CommentLength": 20,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 9,
+        "IsAnonymous": true,
+        "User": "2.176.40.10",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Iran",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "IR",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T18:05:21.881+00:00",
+        "Value": {
+          "Dimensions": "Iran",
+          "Aggregations": "2016-06-27T18:05:21.881+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T18:30:33.457+00:00",
+        "IsRobot": false,
+        "Channel": "#es.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Panamá (ciudad)",
+        "DiffUri": "https://es.wikipedia.org/w/index.php?diff=91950132&oldid=91336181",
+        "Added": 46,
+        "Comment": "/* Hermanamientos */",
+        "CommentLength": 20,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 46,
+        "IsAnonymous": true,
+        "User": "190.141.107.208",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Panama",
+        "RegionIsoCode": "4",
+        "MetroCode": null,
+        "CountryIsoCode": "PA",
+        "RegionName": "Provincia de Chiriqui"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T18:30:33.457+00:00",
+        "Value": {
+          "Dimensions": "Panama",
+          "Aggregations": "2016-06-27T18:30:33.457+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T18:31:00.05+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "List of playing-card nicknames",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727251252&oldid=727251193",
+        "Added": 0,
+        "Comment": "/* Nine higher card */",
+        "CommentLength": 22,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -47,
+        "IsAnonymous": true,
+        "User": "78.99.45.194",
+        "DeltaBucket": -100,
+        "Deleted": 47,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Slovak Republic",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "SK",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T18:31:00.05+00:00",
+        "Value": {
+          "Dimensions": "Slovak Republic",
+          "Aggregations": "2016-06-27T18:31:00.05+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T18:37:25.749+00:00",
+        "IsRobot": false,
+        "Channel": "#ru.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Дудаев, Джохар Мусаевич",
+        "DiffUri": "https://ru.wikipedia.org/w/index.php?diff=79229239&oldid=79086844",
+        "Added": 0,
+        "Comment": "/* Президент Чеченской Республики Ичкерия */ обновление данных",
+        "CommentLength": 62,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -6,
+        "IsAnonymous": true,
+        "User": "87.110.214.55",
+        "DeltaBucket": -100,
+        "Deleted": 6,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Latvia",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "LV",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T18:37:25.749+00:00",
+        "Value": {
+          "Dimensions": "Latvia",
+          "Aggregations": "2016-06-27T18:37:25.749+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T18:47:06.996+00:00",
+        "IsRobot": false,
+        "Channel": "#hr.wikipedia",
+        "Flags": "!",
+        "IsUnpatrolled": true,
+        "Page": "Beyoncé Knowles",
+        "DiffUri": "https://hr.wikipedia.org/w/index.php?diff=4736179&oldid=4684310&rcid=8140617",
+        "Added": 25,
+        "Comment": "/* Diskografija Beyoncé Knowles */",
+        "CommentLength": 34,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 25,
+        "IsAnonymous": true,
+        "User": "93.139.118.168",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Croatia",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "HR",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T18:47:06.996+00:00",
+        "Value": {
+          "Dimensions": "Croatia",
+          "Aggregations": "2016-06-27T18:47:06.996+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T18:53:25.928+00:00",
+        "IsRobot": false,
+        "Channel": "#ar.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "حور تعلا",
+        "DiffUri": "https://ar.wikipedia.org/w/index.php?diff=20316684&oldid=20308944",
+        "Added": 1,
+        "Comment": "ابرز الشخصيات",
+        "CommentLength": 13,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 1,
+        "IsAnonymous": true,
+        "User": "185.99.32.50",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Lebanon",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "LB",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T18:53:25.928+00:00",
+        "Value": {
+          "Dimensions": "Lebanon",
+          "Aggregations": "2016-06-27T18:53:25.928+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T19:00:24.92+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Sledgehammer (disambiguation)",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727254700&oldid=718592253",
+        "Added": 70,
+        "Comment": "/* Music */",
+        "CommentLength": 11,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 70,
+        "IsAnonymous": true,
+        "User": "1.32.77.27",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Seri Kembangan",
+        "CountryName": "Malaysia",
+        "RegionIsoCode": "10",
+        "MetroCode": null,
+        "CountryIsoCode": "MY",
+        "RegionName": "Selangor"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T19:00:24.92+00:00",
+        "Value": {
+          "Dimensions": "Malaysia",
+          "Aggregations": "2016-06-27T19:00:24.92+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T19:00:58.825+00:00",
+        "IsRobot": false,
+        "Channel": "#ar.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "الأحسبة",
+        "DiffUri": "https://ar.wikipedia.org/w/index.php?diff=20316695&oldid=20104863",
+        "Added": 0,
+        "Comment": "/* سكان الوادي */",
+        "CommentLength": 17,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -32,
+        "IsAnonymous": true,
+        "User": "5.41.154.245",
+        "DeltaBucket": -100,
+        "Deleted": 32,
+        "Namespace": "Main",
+        "CityName": "Riyadh",
+        "CountryName": "Saudi Arabia",
+        "RegionIsoCode": "01",
+        "MetroCode": null,
+        "CountryIsoCode": "SA",
+        "RegionName": "Ar Riyāḑ"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T19:00:58.825+00:00",
+        "Value": {
+          "Dimensions": "Saudi Arabia",
+          "Aggregations": "2016-06-27T19:00:58.825+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T19:03:24.437+00:00",
+        "IsRobot": false,
+        "Channel": "#es.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Selección de fútbol de México",
+        "DiffUri": "https://es.wikipedia.org/w/index.php?diff=91950806&oldid=91950328",
+        "Added": 0,
+        "Comment": "México no fue campeón de el mundo en 2014",
+        "CommentLength": 41,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -56,
+        "IsAnonymous": true,
+        "User": "190.150.28.8",
+        "DeltaBucket": -100,
+        "Deleted": 56,
+        "Namespace": "Main",
+        "CityName": "San Salvador",
+        "CountryName": "El Salvador",
+        "RegionIsoCode": "SS",
+        "MetroCode": null,
+        "CountryIsoCode": "SV",
+        "RegionName": "Departamento de San Salvador"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T19:03:24.437+00:00",
+        "Value": {
+          "Dimensions": "El Salvador",
+          "Aggregations": "2016-06-27T19:03:24.437+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T19:03:48.437+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "1978 All-Ireland Senior Football Championship",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727255162&oldid=727254882",
+        "Added": 119,
+        "Comment": "/* Leinster */",
+        "CommentLength": 14,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 119,
+        "IsAnonymous": true,
+        "User": "86.46.143.211",
+        "DeltaBucket": 100,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Ireland",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "IE",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T19:03:48.437+00:00",
+        "Value": {
+          "Dimensions": "Ireland",
+          "Aggregations": "2016-06-27T19:03:48.437+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T19:03:48.701+00:00",
+        "IsRobot": false,
+        "Channel": "#lt.wikipedia",
+        "Flags": "!N",
+        "IsUnpatrolled": true,
+        "Page": "Valų terjeras",
+        "DiffUri": "https://lt.wikipedia.org/w/index.php?oldid=5051122&rcid=8555425",
+        "Added": 4358,
+        "Comment": "Naujas puslapis: Valų terjeras. Kilmė: Kai kurie istorikai mano, kad ši veislė tiesiogiai susijusi su Senosios Anglijos juodaisiais ir rudaisiais (ar laužtakailiais terjerais), tačiau tai y...",
+        "CommentLength": 192,
+        "IsNew": true,
+        "IsMinor": false,
+        "Delta": 4358,
+        "IsAnonymous": true,
+        "User": "77.221.66.41",
+        "DeltaBucket": 4300,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Republic of Lithuania",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "LT",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T19:03:48.701+00:00",
+        "Value": {
+          "Dimensions": "Republic of Lithuania",
+          "Aggregations": "2016-06-27T19:03:48.701+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T19:12:37.213+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Randers FC",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727256099&oldid=726856597",
+        "Added": 0,
+        "Comment": "/* Current squad */",
+        "CommentLength": 19,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -64,
+        "IsAnonymous": true,
+        "User": "82.211.208.242",
+        "DeltaBucket": -100,
+        "Deleted": 64,
+        "Namespace": "Main",
+        "CityName": "Kongens Lyngby",
+        "CountryName": "Denmark",
+        "RegionIsoCode": "84",
+        "MetroCode": null,
+        "CountryIsoCode": "DK",
+        "RegionName": "Capital Region"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T19:12:37.213+00:00",
+        "Value": {
+          "Dimensions": "Denmark",
+          "Aggregations": "2016-06-27T19:12:37.213+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T19:20:39.348+00:00",
+        "IsRobot": false,
+        "Channel": "#ar.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "النادي الأهلي (مصر)",
+        "DiffUri": "https://ar.wikipedia.org/w/index.php?diff=20316773&oldid=20316761",
+        "Added": 0,
+        "Comment": "/* كباتن الفريق */",
+        "CommentLength": 18,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -30,
+        "IsAnonymous": true,
+        "User": "156.202.189.223",
+        "DeltaBucket": -100,
+        "Deleted": 30,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Egypt",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "EG",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T19:20:39.348+00:00",
+        "Value": {
+          "Dimensions": "Egypt",
+          "Aggregations": "2016-06-27T19:20:39.348+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T19:22:18.958+00:00",
+        "IsRobot": false,
+        "Channel": "#uk.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Чемпіонат Європи з футболу 2016",
+        "DiffUri": "https://uk.wikipedia.org/w/index.php?diff=18365849&oldid=18365808",
+        "Added": 79,
+        "Comment": "/* 1/8 фіналу */",
+        "CommentLength": 16,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 79,
+        "IsAnonymous": true,
+        "User": "212.90.63.215",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Kiev",
+        "CountryName": "Ukraine",
+        "RegionIsoCode": "30",
+        "MetroCode": null,
+        "CountryIsoCode": "UA",
+        "RegionName": "Kyiv City"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T19:22:18.958+00:00",
+        "Value": {
+          "Dimensions": "Ukraine",
+          "Aggregations": "2016-06-27T19:22:18.958+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T19:22:36.109+00:00",
+        "IsRobot": false,
+        "Channel": "#ru.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Коутон, Скотт",
+        "DiffUri": "https://ru.wikipedia.org/w/index.php?diff=79230091&oldid=78914158",
+        "Added": 2,
+        "Comment": "/* Игры */",
+        "CommentLength": 10,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 2,
+        "IsAnonymous": true,
+        "User": "62.221.86.151",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Tiraspol",
+        "CountryName": "Republic of Moldova",
+        "RegionIsoCode": "SN",
+        "MetroCode": null,
+        "CountryIsoCode": "MD",
+        "RegionName": "Unitatea Teritoriala din Stinga Nistrului"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T19:22:36.109+00:00",
+        "Value": {
+          "Dimensions": "Republic of Moldova",
+          "Aggregations": "2016-06-27T19:22:36.109+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T19:33:35.118+00:00",
+        "IsRobot": false,
+        "Channel": "#zh.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "I.O.I",
+        "DiffUri": "https://zh.wikipedia.org/w/index.php?diff=40614305&oldid=40603072",
+        "Added": 65,
+        "Comment": "/* 其他綜藝節目 */",
+        "CommentLength": 12,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 65,
+        "IsAnonymous": true,
+        "User": "45.64.242.252",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Sha Tin Wai",
+        "CountryName": "Hong Kong",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "HK",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T19:33:35.118+00:00",
+        "Value": {
+          "Dimensions": "Hong Kong",
+          "Aggregations": "2016-06-27T19:33:35.118+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T19:39:01.223+00:00",
+        "IsRobot": false,
+        "Channel": "#tr.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Samsunspor-Trabzonspor rekabeti",
+        "DiffUri": "https://tr.wikipedia.org/w/index.php?diff=17253615&oldid=17224543",
+        "Added": 10,
+        "Comment": "Ufak bir düzenleme.",
+        "CommentLength": 19,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 10,
+        "IsAnonymous": true,
+        "User": "85.98.73.25",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Turkey",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "TR",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T19:39:01.223+00:00",
+        "Value": {
+          "Dimensions": "Turkey",
+          "Aggregations": "2016-06-27T19:39:01.223+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T19:44:06.772+00:00",
+        "IsRobot": false,
+        "Channel": "#no.wikipedia",
+        "Flags": "!N",
+        "IsUnpatrolled": true,
+        "Page": "Vive Targi Kielce",
+        "DiffUri": "https://no.wikipedia.org/w/index.php?oldid=16493742&rcid=32433675",
+        "Added": 7,
+        "Comment": "Trenger ikke!!!!",
+        "CommentLength": 16,
+        "IsNew": true,
+        "IsMinor": false,
+        "Delta": 7,
+        "IsAnonymous": true,
+        "User": "51.175.159.107",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Oslo",
+        "CountryName": "Norway",
+        "RegionIsoCode": "03",
+        "MetroCode": null,
+        "CountryIsoCode": "NO",
+        "RegionName": "Oslo County"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T19:44:06.772+00:00",
+        "Value": {
+          "Dimensions": "Norway",
+          "Aggregations": "2016-06-27T19:44:06.772+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T19:49:05.749+00:00",
+        "IsRobot": false,
+        "Channel": "#sv.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "James Earl Jones",
+        "DiffUri": "https://sv.wikipedia.org/w/index.php?diff=36123725&oldid=32400799",
+        "Added": 78,
+        "Comment": "/* Filmer */",
+        "CommentLength": 12,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 78,
+        "IsAnonymous": true,
+        "User": "85.76.21.56",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Finland",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "FI",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T19:49:05.749+00:00",
+        "Value": {
+          "Dimensions": "Finland",
+          "Aggregations": "2016-06-27T19:49:05.749+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T19:51:04.015+00:00",
+        "IsRobot": false,
+        "Channel": "#ru.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Варна",
+        "DiffUri": "https://ru.wikipedia.org/w/index.php?diff=79230605&oldid=79230594",
+        "Added": 1,
+        "Comment": "/* Население */",
+        "CommentLength": 15,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 1,
+        "IsAnonymous": true,
+        "User": "82.103.67.190",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Bulgaria",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "BG",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T19:51:04.015+00:00",
+        "Value": {
+          "Dimensions": "Bulgaria",
+          "Aggregations": "2016-06-27T19:51:04.015+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T19:51:58.133+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Fitbit",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727260698&oldid=727260641",
+        "Added": 0,
+        "Comment": "/* Fitbit Flex */",
+        "CommentLength": 17,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -5,
+        "IsAnonymous": true,
+        "User": "200.35.183.118",
+        "DeltaBucket": -100,
+        "Deleted": 5,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Guatemala",
+        "RegionIsoCode": "HU",
+        "MetroCode": null,
+        "CountryIsoCode": "GT",
+        "RegionName": "Departamento de Huehuetenango"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T19:51:58.133+00:00",
+        "Value": {
+          "Dimensions": "Guatemala",
+          "Aggregations": "2016-06-27T19:51:58.133+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T19:53:05.429+00:00",
+        "IsRobot": false,
+        "Channel": "#pt.wikipedia",
+        "Flags": "!",
+        "IsUnpatrolled": true,
+        "Page": "Parque nacional",
+        "DiffUri": "https://pt.wikipedia.org/w/index.php?diff=46019385&oldid=46019384&rcid=67161252",
+        "Added": 0,
+        "Comment": "/* Angola */ Gramática corrigida",
+        "CommentLength": 32,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -4,
+        "IsAnonymous": true,
+        "User": "105.168.25.163",
+        "DeltaBucket": -100,
+        "Deleted": 4,
+        "Namespace": "Main",
+        "CityName": "Luanda",
+        "CountryName": "Angola",
+        "RegionIsoCode": "LUA",
+        "MetroCode": null,
+        "CountryIsoCode": "AO",
+        "RegionName": "Luanda Province"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T19:53:05.429+00:00",
+        "Value": {
+          "Dimensions": "Angola",
+          "Aggregations": "2016-06-27T19:53:05.429+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T19:58:52.548+00:00",
+        "IsRobot": false,
+        "Channel": "#vi.wikipedia",
+        "Flags": "!",
+        "IsUnpatrolled": true,
+        "Page": "Di tích Việt Nam",
+        "DiffUri": "https://vi.wikipedia.org/w/index.php?diff=23885538&oldid=23885536&rcid=46692177",
+        "Added": 40,
+        "Comment": "/* Di sản thế giới */",
+        "CommentLength": 21,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 40,
+        "IsAnonymous": true,
+        "User": "115.76.199.67",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Hanoi",
+        "CountryName": "Vietnam",
+        "RegionIsoCode": "64",
+        "MetroCode": null,
+        "CountryIsoCode": "VN",
+        "RegionName": "Thanh Pho Ha Noi"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T19:58:52.548+00:00",
+        "Value": {
+          "Dimensions": "Vietnam",
+          "Aggregations": "2016-06-27T19:58:52.548+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T20:00:08.096+00:00",
+        "IsRobot": false,
+        "Channel": "#ar.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "ويكيبيديا:الميدان/اقتراحات/06/2016",
+        "DiffUri": "https://ar.wikipedia.org/w/index.php?diff=20317115&oldid=20310899",
+        "Added": 818,
+        "Comment": "/* مشروع الخمس مئة ألف مقالة */",
+        "CommentLength": 31,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 818,
+        "IsAnonymous": true,
+        "User": "46.32.125.52",
+        "DeltaBucket": 800,
+        "Deleted": 0,
+        "Namespace": "ويكيبيديا",
+        "CityName": null,
+        "CountryName": "Hashemite Kingdom of Jordan",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "JO",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T20:00:08.096+00:00",
+        "Value": {
+          "Dimensions": "Hashemite Kingdom of Jordan",
+          "Aggregations": "2016-06-27T20:00:08.096+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T20:06:00.659+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Vanessa Mdee",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727262395&oldid=727261546",
+        "Added": 74,
+        "Comment": "/* Awards and nominations */",
+        "CommentLength": 28,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 74,
+        "IsAnonymous": true,
+        "User": "156.159.110.242",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Tanzania",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "TZ",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T20:06:00.659+00:00",
+        "Value": {
+          "Dimensions": "Tanzania",
+          "Aggregations": "2016-06-27T20:06:00.659+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T20:06:51.963+00:00",
+        "IsRobot": false,
+        "Channel": "#fr.wikipedia",
+        "Flags": "!",
+        "IsUnpatrolled": true,
+        "Page": "Liste des personnages de The King of Fighters",
+        "DiffUri": "https://fr.wikipedia.org/w/index.php?diff=127408933&oldid=119553313&rcid=195612832",
+        "Added": 46,
+        "Comment": "/* Kasumi Todoh   c ma filkldksoskq llosol.😊😉😕😤😕 */",
+        "CommentLength": 56,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 46,
+        "IsAnonymous": true,
+        "User": "105.109.10.114",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Algeria",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "DZ",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T20:06:51.963+00:00",
+        "Value": {
+          "Dimensions": "Algeria",
+          "Aggregations": "2016-06-27T20:06:51.963+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T20:07:10.031+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Nickelodeon Australian Kids' Choice Awards",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727262548&oldid=727262503",
+        "Added": 2,
+        "Comment": "/* 2005 */",
+        "CommentLength": 10,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 2,
+        "IsAnonymous": true,
+        "User": "101.191.150.16",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Abbotsford",
+        "CountryName": "Australia",
+        "RegionIsoCode": "NSW",
+        "MetroCode": null,
+        "CountryIsoCode": "AU",
+        "RegionName": "New South Wales"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T20:07:10.031+00:00",
+        "Value": {
+          "Dimensions": "Australia",
+          "Aggregations": "2016-06-27T20:07:10.031+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T20:13:27.778+00:00",
+        "IsRobot": false,
+        "Channel": "#sr.wikipedia",
+        "Flags": "!",
+        "IsUnpatrolled": true,
+        "Page": "Списак српских олимпијаца",
+        "DiffUri": "https://sr.wikipedia.org/w/index.php?diff=11927353&oldid=11927349&rcid=19254996",
+        "Added": 14,
+        "Comment": "/* 30px|alt=|link= Фудбал */",
+        "CommentLength": 28,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 14,
+        "IsAnonymous": true,
+        "User": "95.85.156.201",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Backa Topola",
+        "CountryName": "Serbia",
+        "RegionIsoCode": "VO",
+        "MetroCode": null,
+        "CountryIsoCode": "RS",
+        "RegionName": "Vojvodina"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T20:13:27.778+00:00",
+        "Value": {
+          "Dimensions": "Serbia",
+          "Aggregations": "2016-06-27T20:13:27.778+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T20:19:29.91+00:00",
+        "IsRobot": false,
+        "Channel": "#nl.wikipedia",
+        "Flags": "!",
+        "IsUnpatrolled": true,
+        "Page": "Logopedie",
+        "DiffUri": "https://nl.wikipedia.org/w/index.php?diff=46996796&oldid=46996777&rcid=82578785",
+        "Added": 135,
+        "Comment": "/* Opleiding */",
+        "CommentLength": 15,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 135,
+        "IsAnonymous": true,
+        "User": "186.179.137.155",
+        "DeltaBucket": 100,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Paramaribo",
+        "CountryName": "Suriname",
+        "RegionIsoCode": "PM",
+        "MetroCode": null,
+        "CountryIsoCode": "SR",
+        "RegionName": "Distrikt Paramaribo"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T20:19:29.91+00:00",
+        "Value": {
+          "Dimensions": "Suriname",
+          "Aggregations": "2016-06-27T20:19:29.91+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T20:24:20.377+00:00",
+        "IsRobot": false,
+        "Channel": "#nl.wikipedia",
+        "Flags": "!",
+        "IsUnpatrolled": true,
+        "Page": "Hittegolf",
+        "DiffUri": "https://nl.wikipedia.org/w/index.php?diff=46996817&oldid=46995387&rcid=82578839",
+        "Added": 5,
+        "Comment": "/* Hittegolven in Nederland */ dode link",
+        "CommentLength": 40,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 5,
+        "IsAnonymous": true,
+        "User": "213.10.103.106",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Rijswijk",
+        "CountryName": "Netherlands",
+        "RegionIsoCode": "ZH",
+        "MetroCode": null,
+        "CountryIsoCode": "NL",
+        "RegionName": "South Holland"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T20:24:20.377+00:00",
+        "Value": {
+          "Dimensions": "Netherlands",
+          "Aggregations": "2016-06-27T20:24:20.377+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T20:31:39.265+00:00",
+        "IsRobot": false,
+        "Channel": "#de.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Bud Spencer",
+        "DiffUri": "https://de.wikipedia.org/w/index.php?diff=155682435&oldid=155620944",
+        "Added": 0,
+        "Comment": "http://www.lastampa.it/2016/06/27/spettacoli/morto-lattore-bud-spencer-aveva-anni-3BAhJZNHIkJtN8CMBZrxEN/pagina.html",
+        "CommentLength": 116,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 0,
+        "IsAnonymous": true,
+        "User": "83.222.137.210",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Düdingen",
+        "CountryName": "Switzerland",
+        "RegionIsoCode": "FR",
+        "MetroCode": null,
+        "CountryIsoCode": "CH",
+        "RegionName": "Fribourg"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T20:31:39.265+00:00",
+        "Value": {
+          "Dimensions": "Switzerland",
+          "Aggregations": "2016-06-27T20:31:39.265+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T20:32:11.401+00:00",
+        "IsRobot": false,
+        "Channel": "#es.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Anexo:Episodios de Power Rangers: Dino Charge",
+        "DiffUri": "https://es.wikipedia.org/w/index.php?diff=91952401&oldid=91952018",
+        "Added": 49,
+        "Comment": "/* Lista de episodios */",
+        "CommentLength": 24,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 49,
+        "IsAnonymous": true,
+        "User": "190.235.66.190",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Anexo",
+        "CityName": null,
+        "CountryName": "Peru",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "PE",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T20:32:11.401+00:00",
+        "Value": {
+          "Dimensions": "Peru",
+          "Aggregations": "2016-06-27T20:32:11.401+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T20:34:38.748+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "DLSU Lady Spikers",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727265496&oldid=724912599",
+        "Added": 0,
+        "Comment": "/* The DLSU Lady Spikers Volleyball Training Pool */",
+        "CommentLength": 52,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -8,
+        "IsAnonymous": true,
+        "User": "120.29.104.56",
+        "DeltaBucket": -100,
+        "Deleted": 8,
+        "Namespace": "Main",
+        "CityName": "Angeles City",
+        "CountryName": "Philippines",
+        "RegionIsoCode": "PAM",
+        "MetroCode": null,
+        "CountryIsoCode": "PH",
+        "RegionName": "Province of Pampanga"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T20:34:38.748+00:00",
+        "Value": {
+          "Dimensions": "Philippines",
+          "Aggregations": "2016-06-27T20:34:38.748+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T20:42:47.762+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Sebastião José de Carvalho e Melo, 1st Marquis of Pombal",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727266364&oldid=727263857",
+        "Added": 288,
+        "Comment": "/* Lisbon earthquake */",
+        "CommentLength": 23,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 288,
+        "IsAnonymous": true,
+        "User": "95.94.96.182",
+        "DeltaBucket": 200,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Portugal",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "PT",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T20:42:47.762+00:00",
+        "Value": {
+          "Dimensions": "Portugal",
+          "Aggregations": "2016-06-27T20:42:47.762+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T20:43:51.967+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Haseeb Hassan",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727266485&oldid=727265034",
+        "Added": 746,
+        "Comment": "/* External links */",
+        "CommentLength": 20,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 746,
+        "IsAnonymous": true,
+        "User": "103.255.4.62",
+        "DeltaBucket": 700,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Karachi",
+        "CountryName": "Pakistan",
+        "RegionIsoCode": "SD",
+        "MetroCode": null,
+        "CountryIsoCode": "PK",
+        "RegionName": "Sindh"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T20:43:51.967+00:00",
+        "Value": {
+          "Dimensions": "Pakistan",
+          "Aggregations": "2016-06-27T20:43:51.967+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T20:48:23.149+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Panathinaikos F.C.",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727266979&oldid=727266894",
+        "Added": 1,
+        "Comment": "/* Current squad */",
+        "CommentLength": 19,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 1,
+        "IsAnonymous": true,
+        "User": "141.8.66.156",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Malta",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "MT",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T20:48:23.149+00:00",
+        "Value": {
+          "Dimensions": "Malta",
+          "Aggregations": "2016-06-27T20:48:23.149+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T20:48:32.642+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Mainstream Top 40",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727266992&oldid=727265834",
+        "Added": 193,
+        "Comment": "/* Highest weekly plays */",
+        "CommentLength": 26,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 193,
+        "IsAnonymous": true,
+        "User": "46.176.195.132",
+        "DeltaBucket": 100,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Greece",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "GR",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T20:48:32.642+00:00",
+        "Value": {
+          "Dimensions": "Greece",
+          "Aggregations": "2016-06-27T20:48:32.642+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T20:49:56.906+00:00",
+        "IsRobot": false,
+        "Channel": "#ko.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "게이한 전기 철도 이시야마사카모토 선",
+        "DiffUri": "https://ko.wikipedia.org/w/index.php?diff=16785851&oldid=16785839",
+        "Added": 261,
+        "Comment": "/* 노선 정보 */",
+        "CommentLength": 11,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 261,
+        "IsAnonymous": true,
+        "User": "114.205.131.60",
+        "DeltaBucket": 200,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Republic of Korea",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "KR",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T20:49:56.906+00:00",
+        "Value": {
+          "Dimensions": "Republic of Korea",
+          "Aggregations": "2016-06-27T20:49:56.906+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T20:50:43.699+00:00",
+        "IsRobot": false,
+        "Channel": "#hu.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Brit-sziget",
+        "DiffUri": "https://hu.wikipedia.org/w/index.php?diff=17663539&oldid=14649969",
+        "Added": 64,
+        "Comment": "/* Történelme */",
+        "CommentLength": 16,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 64,
+        "IsAnonymous": true,
+        "User": "84.0.123.120",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Hungary",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "HU",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T20:50:43.699+00:00",
+        "Value": {
+          "Dimensions": "Hungary",
+          "Aggregations": "2016-06-27T20:50:43.699+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T20:50:58.181+00:00",
+        "IsRobot": false,
+        "Channel": "#es.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Anexo:Episodios de The Thundermans",
+        "DiffUri": "https://es.wikipedia.org/w/index.php?diff=91952766&oldid=91847134",
+        "Added": 39,
+        "Comment": "/* Temporada 3 (2015-2016) */",
+        "CommentLength": 29,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 39,
+        "IsAnonymous": true,
+        "User": "179.26.235.240",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Anexo",
+        "CityName": "Montevideo",
+        "CountryName": "Uruguay",
+        "RegionIsoCode": "MO",
+        "MetroCode": null,
+        "CountryIsoCode": "UY",
+        "RegionName": "Departamento de Montevideo"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T20:50:58.181+00:00",
+        "Value": {
+          "Dimensions": "Uruguay",
+          "Aggregations": "2016-06-27T20:50:58.181+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T20:52:59.449+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Citroën",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727267493&oldid=727064337",
+        "Added": 0,
+        "Comment": "/* 2011-present */Fixed typo",
+        "CommentLength": 28,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -1,
+        "IsAnonymous": true,
+        "User": "2.69.151.184",
+        "DeltaBucket": -100,
+        "Deleted": 1,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Sweden",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "SE",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T20:52:59.449+00:00",
+        "Value": {
+          "Dimensions": "Sweden",
+          "Aggregations": "2016-06-27T20:52:59.449+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T20:53:31.885+00:00",
+        "IsRobot": false,
+        "Channel": "#es.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Ričardas Berankis",
+        "DiffUri": "https://es.wikipedia.org/w/index.php?diff=91952816&oldid=91091457",
+        "Added": 1,
+        "Comment": "/* Carrera */Modifiqué su mejor ranking y la fecha de ese ranking.",
+        "CommentLength": 66,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 1,
+        "IsAnonymous": true,
+        "User": "190.21.113.167",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Santiago",
+        "CountryName": "Chile",
+        "RegionIsoCode": "RM",
+        "MetroCode": null,
+        "CountryIsoCode": "CL",
+        "RegionName": "Santiago Metropolitan"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T20:53:31.885+00:00",
+        "Value": {
+          "Dimensions": "Chile",
+          "Aggregations": "2016-06-27T20:53:31.885+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T20:55:33.212+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Lunar Jim",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727267763&oldid=727266563",
+        "Added": 0,
+        "Comment": "/* Networks that air Lunar Jim */Lunar Jim",
+        "CommentLength": 42,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -27,
+        "IsAnonymous": true,
+        "User": "66.50.164.136",
+        "DeltaBucket": -100,
+        "Deleted": 27,
+        "Namespace": "Main",
+        "CityName": "Catano",
+        "CountryName": "Puerto Rico",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "PR",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T20:55:33.212+00:00",
+        "Value": {
+          "Dimensions": "Puerto Rico",
+          "Aggregations": "2016-06-27T20:55:33.212+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T20:59:03.558+00:00",
+        "IsRobot": false,
+        "Channel": "#de.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Benutzer Diskussion:Doc.Heintz",
+        "DiffUri": "https://de.wikipedia.org/w/index.php?diff=155683101&oldid=155682961",
+        "Added": 106,
+        "Comment": "/* Halbschutz */",
+        "CommentLength": 16,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 106,
+        "IsAnonymous": true,
+        "User": "89.144.224.9",
+        "DeltaBucket": 100,
+        "Deleted": 0,
+        "Namespace": "Benutzer Diskussion",
+        "CityName": null,
+        "CountryName": "Austria",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "AT",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T20:59:03.558+00:00",
+        "Value": {
+          "Dimensions": "Austria",
+          "Aggregations": "2016-06-27T20:59:03.558+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:00:34.327+00:00",
+        "IsRobot": false,
+        "Channel": "#es.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Eurocopa 2016",
+        "DiffUri": "https://es.wikipedia.org/w/index.php?diff=91952971&oldid=91952966",
+        "Added": 6,
+        "Comment": "/* Jugador del partido */",
+        "CommentLength": 25,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 6,
+        "IsAnonymous": true,
+        "User": "187.149.237.13",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Mexico",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "MX",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:00:34.327+00:00",
+        "Value": {
+          "Dimensions": "Mexico",
+          "Aggregations": "2016-06-27T21:00:34.327+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:03:52.32+00:00",
+        "IsRobot": false,
+        "Channel": "#ru.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Панкратова, Анна Михайловна",
+        "DiffUri": "https://ru.wikipedia.org/w/index.php?diff=79231821&oldid=73168193",
+        "Added": 0,
+        "Comment": "/* Семья */",
+        "CommentLength": 11,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -1,
+        "IsAnonymous": true,
+        "User": "176.212.68.48",
+        "DeltaBucket": -100,
+        "Deleted": 1,
+        "Namespace": "Main",
+        "CityName": "Saratov",
+        "CountryName": "Russia",
+        "RegionIsoCode": "SAR",
+        "MetroCode": null,
+        "CountryIsoCode": "RU",
+        "RegionName": "Saratovskaya Oblast'"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:03:52.32+00:00",
+        "Value": {
+          "Dimensions": "Russia",
+          "Aggregations": "2016-06-27T21:03:52.32+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:07:18.052+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Spacecraft propulsion",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727269111&oldid=727266905",
+        "Added": 19,
+        "Comment": "/* Table of methods */",
+        "CommentLength": 22,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 19,
+        "IsAnonymous": true,
+        "User": "87.254.76.130",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Onchan",
+        "CountryName": "Isle of Man",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "IM",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:07:18.052+00:00",
+        "Value": {
+          "Dimensions": "Isle of Man",
+          "Aggregations": "2016-06-27T21:07:18.052+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:09:14.712+00:00",
+        "IsRobot": false,
+        "Channel": "#pt.wikipedia",
+        "Flags": "!",
+        "IsUnpatrolled": true,
+        "Page": "Fanfic",
+        "DiffUri": "https://pt.wikipedia.org/w/index.php?diff=46020107&oldid=46010167&rcid=67162748",
+        "Added": 0,
+        "Comment": "/* Slash */Adição de conteúdo",
+        "CommentLength": 29,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -4,
+        "IsAnonymous": true,
+        "User": "191.183.138.95",
+        "DeltaBucket": -100,
+        "Deleted": 4,
+        "Namespace": "Main",
+        "CityName": "Cotia",
+        "CountryName": "Brazil",
+        "RegionIsoCode": "SP",
+        "MetroCode": null,
+        "CountryIsoCode": "BR",
+        "RegionName": "Sao Paulo"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:09:14.712+00:00",
+        "Value": {
+          "Dimensions": "Brazil",
+          "Aggregations": "2016-06-27T21:09:14.712+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:09:15.152+00:00",
+        "IsRobot": false,
+        "Channel": "#pl.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Mistrzostwa Europy w Piłce Nożnej 2016",
+        "DiffUri": "https://pl.wikipedia.org/w/index.php?diff=46209361&oldid=46209320",
+        "Added": 24,
+        "Comment": "/* Faza pucharowa */",
+        "CommentLength": 20,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 24,
+        "IsAnonymous": true,
+        "User": "83.242.122.132",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Poland",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "PL",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:09:15.152+00:00",
+        "Value": {
+          "Dimensions": "Poland",
+          "Aggregations": "2016-06-27T21:09:15.152+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:13:30.471+00:00",
+        "IsRobot": false,
+        "Channel": "#zh.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "無綫劇集台電視劇集列表 (2007年)",
+        "DiffUri": "https://zh.wikipedia.org/w/index.php?diff=40614612&oldid=36480156",
+        "Added": 41,
+        "Comment": "/* 第一線劇集（韓劇） */",
+        "CommentLength": 15,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 41,
+        "IsAnonymous": true,
+        "User": "1.160.192.46",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Taiwan",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "TW",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:13:30.471+00:00",
+        "Value": {
+          "Dimensions": "Taiwan",
+          "Aggregations": "2016-06-27T21:13:30.471+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:17:58.234+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Comparison of Java and C++",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727270390&oldid=725555455",
+        "Added": 0,
+        "Comment": "/* Design aims */£!",
+        "CommentLength": 19,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -3,
+        "IsAnonymous": true,
+        "User": "81.147.90.20",
+        "DeltaBucket": -100,
+        "Deleted": 3,
+        "Namespace": "Main",
+        "CityName": "Glasgow",
+        "CountryName": "United Kingdom",
+        "RegionIsoCode": "GLG",
+        "MetroCode": null,
+        "CountryIsoCode": "GB",
+        "RegionName": "Glasgow City"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:17:58.234+00:00",
+        "Value": {
+          "Dimensions": "United Kingdom",
+          "Aggregations": "2016-06-27T21:17:58.234+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:18:20.677+00:00",
+        "IsRobot": false,
+        "Channel": "#ja.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "リュディヴィーヌ・サニエ",
+        "DiffUri": "https://ja.wikipedia.org/w/index.php?diff=60250835&oldid=56398982",
+        "Added": 74,
+        "Comment": "/* 外部リンク */",
+        "CommentLength": 11,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 74,
+        "IsAnonymous": true,
+        "User": "153.173.215.158",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Tokyo",
+        "CountryName": "Japan",
+        "RegionIsoCode": "13",
+        "MetroCode": null,
+        "CountryIsoCode": "JP",
+        "RegionName": "Tokyo"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:18:20.677+00:00",
+        "Value": {
+          "Dimensions": "Japan",
+          "Aggregations": "2016-06-27T21:18:20.677+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:18:21.654+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Karmiotissa Pano Polemidion",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727270443&oldid=727270266",
+        "Added": 3,
+        "Comment": "/* Current squad */",
+        "CommentLength": 19,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 3,
+        "IsAnonymous": true,
+        "User": "91.103.29.37",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Armenia",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "AM",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:18:21.654+00:00",
+        "Value": {
+          "Dimensions": "Armenia",
+          "Aggregations": "2016-06-27T21:18:21.654+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:21:59.366+00:00",
+        "IsRobot": false,
+        "Channel": "#es.wikipedia",
+        "Flags": "!N",
+        "IsUnpatrolled": true,
+        "Page": "Festival RetroMadrid",
+        "DiffUri": "https://es.wikipedia.org/w/index.php?oldid=91953366&rcid=124524785",
+        "Added": 11177,
+        "Comment": "Reiteramos, este artículo cumple con el estándar de Wikipedia y estuvo publicado desde 2009 hasta 2015, seguiremos recreándolo cuanto haga falta.",
+        "CommentLength": 145,
+        "IsNew": true,
+        "IsMinor": false,
+        "Delta": 11177,
+        "IsAnonymous": true,
+        "User": "95.22.180.67",
+        "DeltaBucket": 11100,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Spain",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "ES",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:21:59.366+00:00",
+        "Value": {
+          "Dimensions": "Spain",
+          "Aggregations": "2016-06-27T21:21:59.366+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:22:00.254+00:00",
+        "IsRobot": false,
+        "Channel": "#es.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Instrumentación y control de procesos",
+        "DiffUri": "https://es.wikipedia.org/w/index.php?diff=91953367&oldid=89218864",
+        "Added": 0,
+        "Comment": "/* Mantenimiento */",
+        "CommentLength": 19,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 0,
+        "IsAnonymous": true,
+        "User": "190.207.99.11",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Caracas",
+        "CountryName": "Venezuela",
+        "RegionIsoCode": "A",
+        "MetroCode": null,
+        "CountryIsoCode": "VE",
+        "RegionName": "Capital"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:22:00.254+00:00",
+        "Value": {
+          "Dimensions": "Venezuela",
+          "Aggregations": "2016-06-27T21:22:00.254+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:22:18.356+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "2010 Sylvania 300",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727270998&oldid=727270146",
+        "Added": 5,
+        "Comment": "Reverting vandalism.",
+        "CommentLength": 20,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 5,
+        "IsAnonymous": true,
+        "User": "99.243.176.191",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Toronto",
+        "CountryName": "Canada",
+        "RegionIsoCode": "ON",
+        "MetroCode": null,
+        "CountryIsoCode": "CA",
+        "RegionName": "Ontario"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:22:18.356+00:00",
+        "Value": {
+          "Dimensions": "Canada",
+          "Aggregations": "2016-06-27T21:22:18.356+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:23:20.497+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "KeyCreator",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727271150&oldid=727270612",
+        "Added": 92,
+        "Comment": "/* Extensions */",
+        "CommentLength": 16,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 92,
+        "IsAnonymous": true,
+        "User": "12.145.185.163",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "United States",
+        "RegionIsoCode": "IL",
+        "MetroCode": null,
+        "CountryIsoCode": "US",
+        "RegionName": "Illinois"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:23:20.497+00:00",
+        "Value": {
+          "Dimensions": "United States",
+          "Aggregations": "2016-06-27T21:23:20.497+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:23:48.577+00:00",
+        "IsRobot": false,
+        "Channel": "#he.wikipedia",
+        "Flags": "!",
+        "IsUnpatrolled": true,
+        "Page": "אודי דוידי",
+        "DiffUri": "https://he.wikipedia.org/w/index.php?diff=18871731&oldid=18666905&rcid=25558935",
+        "Added": 0,
+        "Comment": "/* \"רוחות טובות\" - אלבום רביעי */",
+        "CommentLength": 33,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -4,
+        "IsAnonymous": true,
+        "User": "213.151.39.214",
+        "DeltaBucket": -100,
+        "Deleted": 4,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Israel",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "IL",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:23:48.577+00:00",
+        "Value": {
+          "Dimensions": "Israel",
+          "Aggregations": "2016-06-27T21:23:48.577+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:25:07.599+00:00",
+        "IsRobot": false,
+        "Channel": "#cs.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Bud Spencer",
+        "DiffUri": "https://cs.wikipedia.org/w/index.php?diff=13874832&oldid=13874813",
+        "Added": 1,
+        "Comment": "Opraven překlep",
+        "CommentLength": 15,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 1,
+        "IsAnonymous": true,
+        "User": "95.80.233.60",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Czech Republic",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "CZ",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:25:07.599+00:00",
+        "Value": {
+          "Dimensions": "Czech Republic",
+          "Aggregations": "2016-06-27T21:25:07.599+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:25:33.786+00:00",
+        "IsRobot": false,
+        "Channel": "#fr.wikipedia",
+        "Flags": "!",
+        "IsUnpatrolled": true,
+        "Page": "Roger Bacon",
+        "DiffUri": "https://fr.wikipedia.org/w/index.php?diff=127411023&oldid=127365763&rcid=195616743",
+        "Added": 0,
+        "Comment": "/* Biographie */",
+        "CommentLength": 16,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -1,
+        "IsAnonymous": true,
+        "User": "89.156.241.221",
+        "DeltaBucket": -100,
+        "Deleted": 1,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "France",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "FR",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:25:33.786+00:00",
+        "Value": {
+          "Dimensions": "France",
+          "Aggregations": "2016-06-27T21:25:33.786+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:25:45.298+00:00",
+        "IsRobot": false,
+        "Channel": "#ru.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Пройас, Алекс",
+        "DiffUri": "https://ru.wikipedia.org/w/index.php?diff=79232147&oldid=66144077",
+        "Added": 38,
+        "Comment": "/* Жизнь и карьера */",
+        "CommentLength": 21,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 38,
+        "IsAnonymous": true,
+        "User": "93.84.6.104",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Minsk",
+        "CountryName": "Belarus",
+        "RegionIsoCode": "HM",
+        "MetroCode": null,
+        "CountryIsoCode": "BY",
+        "RegionName": "Minsk City"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:25:45.298+00:00",
+        "Value": {
+          "Dimensions": "Belarus",
+          "Aggregations": "2016-06-27T21:25:45.298+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:25:49.176+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Herbert Macaulay",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727271472&oldid=724797093",
+        "Added": 6,
+        "Comment": "/* Early life */",
+        "CommentLength": 16,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 6,
+        "IsAnonymous": true,
+        "User": "169.159.107.118",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Nigeria",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "NG",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:25:49.176+00:00",
+        "Value": {
+          "Dimensions": "Nigeria",
+          "Aggregations": "2016-06-27T21:25:49.176+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:26:52.539+00:00",
+        "IsRobot": false,
+        "Channel": "#en.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Desur",
+        "DiffUri": "https://en.wikipedia.org/w/index.php?diff=727271656&oldid=727271500",
+        "Added": 0,
+        "Comment": "/* Tourism */",
+        "CommentLength": 13,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": -58,
+        "IsAnonymous": true,
+        "User": "1.187.121.209",
+        "DeltaBucket": -100,
+        "Deleted": 58,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "India",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "IN",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:26:52.539+00:00",
+        "Value": {
+          "Dimensions": "India",
+          "Aggregations": "2016-06-27T21:26:52.539+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:27:43.154+00:00",
+        "IsRobot": false,
+        "Channel": "#it.wikipedia",
+        "Flags": "!",
+        "IsUnpatrolled": true,
+        "Page": "Rodrigo José Lima dos Santos",
+        "DiffUri": "https://it.wikipedia.org/w/index.php?diff=81718710&oldid=80445845&rcid=115319159",
+        "Added": 1,
+        "Comment": "Aggiornato presenze",
+        "CommentLength": 19,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 1,
+        "IsAnonymous": true,
+        "User": "93.148.83.128",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Carrara",
+        "CountryName": "Italy",
+        "RegionIsoCode": "MS",
+        "MetroCode": null,
+        "CountryIsoCode": "IT",
+        "RegionName": "Province of Massa-Carrara"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:27:43.154+00:00",
+        "Value": {
+          "Dimensions": "Italy",
+          "Aggregations": "2016-06-27T21:27:43.154+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:30:00.395+00:00",
+        "IsRobot": false,
+        "Channel": "#es.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Martin Ødegaard",
+        "DiffUri": "https://es.wikipedia.org/w/index.php?diff=91953516&oldid=91939531",
+        "Added": 105,
+        "Comment": "Error ortografico",
+        "CommentLength": 17,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 105,
+        "IsAnonymous": true,
+        "User": "190.51.161.243",
+        "DeltaBucket": 100,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Llavallol",
+        "CountryName": "Argentina",
+        "RegionIsoCode": "B",
+        "MetroCode": null,
+        "CountryIsoCode": "AR",
+        "RegionName": "Buenos Aires"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:30:00.395+00:00",
+        "Value": {
+          "Dimensions": "Argentina",
+          "Aggregations": "2016-06-27T21:30:00.395+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:30:13.03+00:00",
+        "IsRobot": false,
+        "Channel": "#es.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Anexo Discusión:Emisoras de Bogotá",
+        "DiffUri": "https://es.wikipedia.org/w/index.php?diff=91953524&oldid=91953508",
+        "Added": 9,
+        "Comment": "/* Blu radio Tendrá Nueva Emisora en Bogotá */",
+        "CommentLength": 46,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 9,
+        "IsAnonymous": true,
+        "User": "191.109.195.103",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Anexo Discusión",
+        "CityName": "Bogotá",
+        "CountryName": "Colombia",
+        "RegionIsoCode": "DC",
+        "MetroCode": null,
+        "CountryIsoCode": "CO",
+        "RegionName": "Bogota D.C."
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:30:13.03+00:00",
+        "Value": {
+          "Dimensions": "Colombia",
+          "Aggregations": "2016-06-27T21:30:13.03+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:30:31.015+00:00",
+        "IsRobot": false,
+        "Channel": "#fr.wikipedia",
+        "Flags": "!",
+        "IsUnpatrolled": true,
+        "Page": "Moundir et les Apprentis Aventuriers",
+        "DiffUri": "https://fr.wikipedia.org/w/index.php?diff=127411128&oldid=127410115&rcid=195617183",
+        "Added": 28924,
+        "Comment": "/* Candidats */",
+        "CommentLength": 15,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 28924,
+        "IsAnonymous": true,
+        "User": "105.159.227.23",
+        "DeltaBucket": 28900,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": null,
+        "CountryName": "Morocco",
+        "RegionIsoCode": null,
+        "MetroCode": null,
+        "CountryIsoCode": "MA",
+        "RegionName": null
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:30:31.015+00:00",
+        "Value": {
+          "Dimensions": "Morocco",
+          "Aggregations": "2016-06-27T21:30:31.015+00:00"
+        }
+      }
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Left": {
+        "Timestamp": "2016-06-27T21:30:50.804+00:00",
+        "IsRobot": false,
+        "Channel": "#de.wikipedia",
+        "Flags": "",
+        "IsUnpatrolled": false,
+        "Page": "Fußball-Europameisterschaft 2016/England",
+        "DiffUri": "https://de.wikipedia.org/w/index.php?diff=155683760&oldid=155683358",
+        "Added": 93,
+        "Comment": "alles bei allen Artikeln vereinheitlichen",
+        "CommentLength": 41,
+        "IsNew": false,
+        "IsMinor": false,
+        "Delta": 93,
+        "IsAnonymous": true,
+        "User": "80.187.112.223",
+        "DeltaBucket": 0,
+        "Deleted": 0,
+        "Namespace": "Main",
+        "CityName": "Soest",
+        "CountryName": "Germany",
+        "RegionIsoCode": "NW",
+        "MetroCode": null,
+        "CountryIsoCode": "DE",
+        "RegionName": "North Rhine-Westphalia"
+      },
+      "Right": {
+        "Timestamp": "2016-06-27T21:30:50.804+00:00",
+        "Value": {
+          "Dimensions": "Germany",
+          "Aggregations": "2016-06-27T21:30:50.804+00:00"
+        }
+      }
+    }
+  }
+]

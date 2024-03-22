@@ -1,0 +1,744 @@
+﻿[
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": null,
+      "Aggregations": "2016-06-27T21:31:02.498+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Albania",
+      "Aggregations": "2016-06-27T05:48:27.163+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Algeria",
+      "Aggregations": "2016-06-27T20:06:51.963+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Angola",
+      "Aggregations": "2016-06-27T19:53:05.429+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Argentina",
+      "Aggregations": "2016-06-27T21:30:00.395+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Armenia",
+      "Aggregations": "2016-06-27T21:18:21.654+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Australia",
+      "Aggregations": "2016-06-27T20:07:10.031+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Austria",
+      "Aggregations": "2016-06-27T20:59:03.558+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Azerbaijan",
+      "Aggregations": "2016-06-27T15:56:00.487+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Bangladesh",
+      "Aggregations": "2016-06-27T15:19:23.414+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Belarus",
+      "Aggregations": "2016-06-27T21:25:45.298+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Belgium",
+      "Aggregations": "2016-06-27T15:46:12.158+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Bolivia",
+      "Aggregations": "2016-06-27T13:12:03.226+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Bosnia and Herzegovina",
+      "Aggregations": "2016-06-27T15:00:12.544+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Brazil",
+      "Aggregations": "2016-06-27T21:09:14.712+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Bulgaria",
+      "Aggregations": "2016-06-27T19:51:04.015+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Canada",
+      "Aggregations": "2016-06-27T21:22:18.356+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Chile",
+      "Aggregations": "2016-06-27T20:53:31.885+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "China",
+      "Aggregations": "2016-06-27T15:01:59.753+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Colombia",
+      "Aggregations": "2016-06-27T21:30:13.03+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Costa Rica",
+      "Aggregations": "2016-06-27T11:28:05.291+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Croatia",
+      "Aggregations": "2016-06-27T18:47:06.996+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Cyprus",
+      "Aggregations": "2016-06-27T06:19:32.759+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Czech Republic",
+      "Aggregations": "2016-06-27T21:25:07.599+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Denmark",
+      "Aggregations": "2016-06-27T19:12:37.213+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Ecuador",
+      "Aggregations": "2016-06-27T15:44:34.543+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Egypt",
+      "Aggregations": "2016-06-27T19:20:39.348+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "El Salvador",
+      "Aggregations": "2016-06-27T19:03:24.437+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Estonia",
+      "Aggregations": "2016-06-27T15:30:49.973+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Finland",
+      "Aggregations": "2016-06-27T19:49:05.749+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "France",
+      "Aggregations": "2016-06-27T21:25:33.786+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Georgia",
+      "Aggregations": "2016-06-27T00:14:33.567+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Germany",
+      "Aggregations": "2016-06-27T21:30:50.804+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Greece",
+      "Aggregations": "2016-06-27T20:48:32.642+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Guatemala",
+      "Aggregations": "2016-06-27T19:51:58.133+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Hashemite Kingdom of Jordan",
+      "Aggregations": "2016-06-27T20:00:08.096+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Hong Kong",
+      "Aggregations": "2016-06-27T19:33:35.118+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Hungary",
+      "Aggregations": "2016-06-27T20:50:43.699+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Iceland",
+      "Aggregations": "2016-06-27T09:15:32.909+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "India",
+      "Aggregations": "2016-06-27T21:26:52.539+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Indonesia",
+      "Aggregations": "2016-06-27T16:47:14.35+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Iran",
+      "Aggregations": "2016-06-27T18:05:21.881+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Ireland",
+      "Aggregations": "2016-06-27T19:03:48.437+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Isle of Man",
+      "Aggregations": "2016-06-27T21:07:18.052+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Israel",
+      "Aggregations": "2016-06-27T21:23:48.577+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Italy",
+      "Aggregations": "2016-06-27T21:27:43.154+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Japan",
+      "Aggregations": "2016-06-27T21:18:20.677+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Kazakhstan",
+      "Aggregations": "2016-06-27T17:25:56.951+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Kenya",
+      "Aggregations": "2016-06-27T05:22:07.917+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Kuwait",
+      "Aggregations": "2016-06-27T17:16:53.61+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Latvia",
+      "Aggregations": "2016-06-27T18:37:25.749+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Lebanon",
+      "Aggregations": "2016-06-27T18:53:25.928+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Libya",
+      "Aggregations": "2016-06-27T09:34:57.852+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Luxembourg",
+      "Aggregations": "2016-06-27T17:52:47.8+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Macao",
+      "Aggregations": "2016-06-27T14:15:37.708+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Malaysia",
+      "Aggregations": "2016-06-27T19:00:24.92+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Malta",
+      "Aggregations": "2016-06-27T20:48:23.149+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Mexico",
+      "Aggregations": "2016-06-27T21:00:34.327+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Mongolia",
+      "Aggregations": "2016-06-27T12:28:45.427+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Morocco",
+      "Aggregations": "2016-06-27T21:30:31.015+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Namibia",
+      "Aggregations": "2016-06-27T17:06:45.423+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Nepal",
+      "Aggregations": "2016-06-27T16:07:00.746+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Netherlands",
+      "Aggregations": "2016-06-27T20:24:20.377+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "New Zealand",
+      "Aggregations": "2016-06-27T09:34:10.538+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Nicaragua",
+      "Aggregations": "2016-06-27T17:52:57.233+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Nigeria",
+      "Aggregations": "2016-06-27T21:25:49.176+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Norway",
+      "Aggregations": "2016-06-27T19:44:06.772+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Pakistan",
+      "Aggregations": "2016-06-27T20:43:51.967+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Panama",
+      "Aggregations": "2016-06-27T18:30:33.457+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Paraguay",
+      "Aggregations": "2016-06-27T00:49:58.225+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Peru",
+      "Aggregations": "2016-06-27T20:32:11.401+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Philippines",
+      "Aggregations": "2016-06-27T20:34:38.748+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Poland",
+      "Aggregations": "2016-06-27T21:09:15.152+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Portugal",
+      "Aggregations": "2016-06-27T20:42:47.762+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Puerto Rico",
+      "Aggregations": "2016-06-27T20:55:33.212+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Qatar",
+      "Aggregations": "2016-06-27T08:11:23.867+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Republic of Korea",
+      "Aggregations": "2016-06-27T20:49:56.906+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Republic of Lithuania",
+      "Aggregations": "2016-06-27T19:03:48.701+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Republic of Moldova",
+      "Aggregations": "2016-06-27T19:22:36.109+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Romania",
+      "Aggregations": "2016-06-27T17:09:03.157+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Russia",
+      "Aggregations": "2016-06-27T21:03:52.32+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Saudi Arabia",
+      "Aggregations": "2016-06-27T19:00:58.825+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Serbia",
+      "Aggregations": "2016-06-27T20:13:27.778+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Singapore",
+      "Aggregations": "2016-06-27T14:17:05.262+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Slovak Republic",
+      "Aggregations": "2016-06-27T18:31:00.05+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Slovenia",
+      "Aggregations": "2016-06-27T10:25:48.275+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "South Africa",
+      "Aggregations": "2016-06-27T11:46:21.221+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Spain",
+      "Aggregations": "2016-06-27T21:21:59.366+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Sri Lanka",
+      "Aggregations": "2016-06-27T17:12:49.49+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Suriname",
+      "Aggregations": "2016-06-27T20:19:29.91+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Sweden",
+      "Aggregations": "2016-06-27T20:52:59.449+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Switzerland",
+      "Aggregations": "2016-06-27T20:31:39.265+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Taiwan",
+      "Aggregations": "2016-06-27T21:13:30.471+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Tajikistan",
+      "Aggregations": "2016-06-27T11:43:41.895+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Tanzania",
+      "Aggregations": "2016-06-27T20:06:00.659+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Thailand",
+      "Aggregations": "2016-06-27T10:38:22.675+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Tunisia",
+      "Aggregations": "2016-06-27T11:51:38.658+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Turkey",
+      "Aggregations": "2016-06-27T19:39:01.223+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Ukraine",
+      "Aggregations": "2016-06-27T19:22:18.958+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "United Arab Emirates",
+      "Aggregations": "2016-06-27T08:39:04.059+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "United Kingdom",
+      "Aggregations": "2016-06-27T21:17:58.234+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "United States",
+      "Aggregations": "2016-06-27T21:23:20.497+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Uruguay",
+      "Aggregations": "2016-06-27T20:50:58.181+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Uzbekistan",
+      "Aggregations": "2016-06-27T04:38:03.516+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Venezuela",
+      "Aggregations": "2016-06-27T21:22:00.254+00:00"
+    }
+  },
+  {
+    "Timestamp": "2016-06-27T00:00:00+00:00",
+    "Value": {
+      "Dimensions": "Vietnam",
+      "Aggregations": "2016-06-27T19:58:52.548+00:00"
+    }
+  }
+]

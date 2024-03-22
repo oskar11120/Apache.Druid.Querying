@@ -72,26 +72,56 @@ internal class QueryShould_ReturnRightData
         await VerifyMatch(wrapped, query, string.Empty);
     }
 
-    private record Country(string Code, string FullName);
-    [Test]
-    [Ignore(
-        "Joining inline data sources does not seem to work, even though druid docs suggest it should: " +
-        "(https://druid.apache.org/docs/latest/querying/datasource#join).")]
-    public async Task Join()
+    public enum JoinTestCase
     {
-        var inline = Wikipedia
-            .Inline(new Country[]
-            {
-                new("US", "United States")
-            });
-        var join = Wikipedia
-            .Edits
-            .LeftJoin(inline, data => $"{data.Left.CountryIsoCode} == {data.Right.Code}");
-        var query = new Query<LeftJoinResult<Edit, Country>>
+        LatestEditTimestampsPerCountry,
+        LatestEditsPerCountry,
+        Both
+    }
+    private record Country(string Code, string FullName);
+    [TestCase(JoinTestCase.LatestEditTimestampsPerCountry)]
+    [TestCase(JoinTestCase.LatestEditsPerCountry)]
+    [TestCase(JoinTestCase.Both)]
+    public async Task Join(JoinTestCase @case)
+    {
+        var latestEditTimestampsPerCountry_query = new Query<Edit>
+            .GroupBy<string>
+            .WithNoVirtualColumns
+            .WithAggregations<DateTimeOffset>()
+            .DefaultInterval()
+            .Granularity(Granularity.Day)
+            .Dimensions(type => type.Default(data => data.CountryName))
+            .Aggregations(type => type.Last(data => data.Timestamp));
+        var latestEditTimestampsPerCountry_dataSource = Wikipedia.Edits.WrapOverQuery(latestEditTimestampsPerCountry_query);
+        var lastestEditsPerCountry_dataSource = Wikipedia.Edits.InnerJoin(
+            latestEditTimestampsPerCountry_dataSource,
+            data => $"{data.Left.CountryName} == {data.Right.Value.Dimensions} && {data.Left.Timestamp} == {data.Right.Value.Aggregations}");
+        var edits_query = new Query<InnerJoinData<Edit, WithTimestamp<Dimensions_Aggregations<string, DateTimeOffset>>>>
             .Scan()
-            .Interval(TestData.Interval)
-            .Limit(100);
-        await VerifyMatch(join, query);
+            .DefaultInterval();
+        await (@case switch
+        {
+            JoinTestCase.LatestEditTimestampsPerCountry => VerifyMatch(Wikipedia.Edits, latestEditTimestampsPerCountry_query, @case.ToString()),
+            JoinTestCase.LatestEditsPerCountry => VerifyMatch(lastestEditsPerCountry_dataSource, edits_query, @case.ToString()),
+            JoinTestCase.Both => VerifyBoth(),
+            _ => throw new NotSupportedException()
+        });
+
+        async Task VerifyBoth()
+        {
+            var fromEdits = await lastestEditsPerCountry_dataSource
+                .ExecuteQuery(edits_query)
+                .Select(result => result.Value.Right.Value)
+                .OrderBy(result => result.Aggregations)
+                .ToArrayAsync();
+            var fromTimestamps = await Wikipedia.Edits
+                .ExecuteQuery(latestEditTimestampsPerCountry_query)
+                .Select(result => result.Value)
+                .Where(result => result.Dimensions is not null)
+                .OrderBy(result => result.Aggregations)
+                .ToArrayAsync();
+            fromEdits.Should().BeEquivalentTo(fromTimestamps);
+        }
     }
 
     [Test]
@@ -247,7 +277,7 @@ internal class QueryShould_ReturnRightData
                     type.Default(data => data.Robot),
                     type.Default(data => data.IsNew)))
                 .Aggregations(type => type.Count());
-            if(i is 1)
+            if (i is 1)
                 await VerifyMatch(dataSource, two);
         }
 

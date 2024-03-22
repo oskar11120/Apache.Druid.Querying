@@ -133,7 +133,7 @@ namespace Apache.Druid.Querying
             where TContext : new()
         {
             var queryForRemaining = new Mutable<IQueryWithSource<TSource>> { Value = query };
-            var atomicity = SectionAtomicity.IProvider.Builder.CreateCombined(query.SectionAtomicity, sectionAtomicity);
+            var atomicity = SectionAtomicity.IProvider.Builder.Combined(query.SectionAtomicity, sectionAtomicity);
             var deserializer = query;
             var truncatedResultHandler = query;
             byte[]? buffer = null;
@@ -211,7 +211,7 @@ namespace Apache.Druid.Querying
                 ["type"] = "query",
                 ["query"] = MapQueryToJson(query)
             },
-            columnNameMappings,
+            columnNameMappings.Add<TResult>(),
             query.SectionAtomicity);
 
         public DataSource<InnerJoinData<TSource, TRight>> InnerJoin<TRight>(
@@ -244,7 +244,9 @@ namespace Apache.Druid.Querying
                     [nameof(joinType)] = joinType
                 },
                 mappings,
-                SectionAtomicity.IProvider.Builder.CreateCombined(sectionAtomicity, right.sectionAtomicity));
+                SectionAtomicity.IProvider.Builder.Combined(
+                    sectionAtomicity, 
+                    right.sectionAtomicity?.Updated(atomicity => atomicity.WithColumnNameIfAtomic(rightPrefix + atomicity.ColumnNameIfAtomic))));
         }
 
         public DataSource<Union<TSource, TSecond>> Union<TSecond>(DataSource<TSecond> second)
@@ -260,7 +262,7 @@ namespace Apache.Druid.Querying
                     }
                 },
                 columnNameMappings.Combine(second.columnNameMappings),
-                SectionAtomicity.IProvider.Builder.CreateCombined(sectionAtomicity, second.sectionAtomicity));
+                SectionAtomicity.IProvider.Builder.Combined(sectionAtomicity, second.sectionAtomicity));
 
         public DataSource<Union<TSource, TSecond, TThird>> Union<TSecond, TThird>(DataSource<TSecond> second, DataSource<TThird> third)
             => new(
@@ -276,7 +278,7 @@ namespace Apache.Druid.Querying
                     }
                 },
                 columnNameMappings.Combine(second.columnNameMappings).Combine(third.columnNameMappings),
-                SectionAtomicity.IProvider.Builder.CreateCombined(sectionAtomicity, second.sectionAtomicity, third.sectionAtomicity));
+                SectionAtomicity.IProvider.Builder.Combined(sectionAtomicity, second.sectionAtomicity, third.sectionAtomicity));
 
         internal string? JsonRepresentationDebugView => GetJsonRepresentation()?.ToJsonString(options.Serializer);
     }

@@ -7,6 +7,9 @@ namespace Apache.Druid.Querying.Internal.Sections
 {
     public sealed record SectionAtomicity(bool Atomic, string ColumnNameIfAtomic, byte[] ColumnNameIfAtomicUtf8)
     {
+        public SectionAtomicity WithColumnNameIfAtomic(string columnName)
+            => new(Atomic, columnName, Encoding.UTF8.GetBytes(columnName));
+
         public interface IProvider
         {
             SectionAtomicity? TryGet<TSection>();
@@ -29,7 +32,11 @@ namespace Apache.Druid.Querying.Internal.Sections
                     return result;
                 }
 
-                public static Builder CreateCombined(Builder? first, Builder? second, Builder? third = null)
+                public Builder Updated(Func<SectionAtomicity, SectionAtomicity> update)
+                    => new(state
+                    .ToDictionary(pair => pair.Key, pair => update(pair.Value)));
+
+                public static Builder Combined(Builder? first, Builder? second, Builder? third = null)
                 {
                     var states = new
                     {

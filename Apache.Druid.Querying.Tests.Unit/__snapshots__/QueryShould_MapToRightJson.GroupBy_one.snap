@@ -8,7 +8,7 @@
     {
       "type": "expression",
       "name": "VirtualColumns",
-      "expression": "__time"
+      "expression": "\u0022__time\u0022"
     }
   ],
   "dimensions": [

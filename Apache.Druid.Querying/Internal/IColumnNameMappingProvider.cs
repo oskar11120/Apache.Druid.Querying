@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualBasic;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace Apache.Druid.Querying.Internal
 
             public ImmutableDictionary<Type, ImmutableArray<PropertyColumnNameMapping>> All { get; private set; }
 
-            public ImmutableBuilder(ImmutableDictionary<Type, ImmutableArray<PropertyColumnNameMapping>>? all = null)
+            private ImmutableBuilder(ImmutableDictionary<Type, ImmutableArray<PropertyColumnNameMapping>>? all = null)
                 => All = all ?? ImmutableDictionary<Type, ImmutableArray<PropertyColumnNameMapping>>.Empty;
 
             public IReadOnlyList<PropertyColumnNameMapping> Get<TModel>() => Get(typeof(TModel));
@@ -37,7 +38,43 @@ namespace Apache.Druid.Querying.Internal
 
             public ImmutableBuilder Add<TModel>()
             {
+                var @new = Create(typeof(TModel));
+                return new(All.AddRange(@new));
+            }
+
+            public ImmutableBuilder Update<TModel>(Func<PropertyColumnNameMapping, PropertyColumnNameMapping> update)
+            {
                 var type = typeof(TModel);
+                if (!All.TryGetValue(type, out var existing))
+                {
+                    return new(All);
+                }
+
+                var result = type
+                    .GetGenericArguments()
+                    .Append(type)
+                    .Aggregate(All, (all, type) =>
+                    {
+                        if (!all.TryGetValue(type, out var forType))
+                            forType = ImmutableArray<PropertyColumnNameMapping>.Empty;
+                        var @new = forType.Select(update).ToImmutableArray();
+                        return all.Remove(type).Add(type, @new);
+                    });
+                return new(result);
+            }
+
+            public ImmutableBuilder Combine(ImmutableBuilder other)
+                => new(All.AddRange(other.All));
+
+            private ImmutableDictionary<Type, ImmutableArray<PropertyColumnNameMapping>> Create(Type type)
+            {
+                var empty = ImmutableDictionary<Type, ImmutableArray<PropertyColumnNameMapping>>.Empty;
+                if (All.TryGetValue(type, out var result))
+                    return empty.Add(type, result);
+
+                if (type.Namespace?.StartsWith("System", StringComparison.InvariantCulture) is true)
+                    return empty;
+
                 var convention = type
                     .GetCustomAttribute<DataSourceColumnNamingConvention>()
                     ?? DataSourceColumnNamingConvention.None.Singleton;
@@ -48,12 +85,11 @@ namespace Apache.Druid.Querying.Internal
                 var normal = type
                     .GetProperties()
                     .Select(property => (property, name: property.Name));
-                var result = normal
+                result = normal
                     .Concat(@explicitlyDeclared)
                     .Select(pair => new PropertyColumnNameMapping(
                         pair.name,
                         pair.property.GetCustomAttribute<DataSourceColumnAttribute>(true)?.Name ?? convention.Apply(pair.name)))
-                    .Where(mapping => mapping.Property != mapping.ColumnName)
                     .Distinct()
                     .ToImmutableArray();
                 var mappedIntoMultipleColumns = result
@@ -61,32 +97,22 @@ namespace Apache.Druid.Querying.Internal
                     .Select(group => (count: group.Count(), property: group.Key, mappings: group.AsEnumerable()))
                     .Where(count => count.count > 1);
                 if (mappedIntoMultipleColumns.Any())
-                    throw new InvalidOperationException($"At least one property of {typeof(TModel)} has been mapped into multiple various columns.")
+                    throw new InvalidOperationException($"At least one property of {type} has been mapped into multiple various columns.")
                     { Data = { [nameof(mappedIntoMultipleColumns)] = mappedIntoMultipleColumns } };
-                return new(All = All.Add(type, result));
+
+                var cululative = ImmutableArray<PropertyColumnNameMapping>.Empty;
+                var arguments = type.GetGenericArguments();
+                var agumentResults = arguments.Aggregate(empty, (result, type) => empty.AddRange(Create(type)));
+                result = arguments.Length is 0 ?
+                    result :
+                    result
+                        .Concat(arguments.SelectMany(type => 
+                            agumentResults.TryGetValue(type, out var argumentResult) ?
+                               argumentResult :
+                               ImmutableArray<PropertyColumnNameMapping>.Empty))
+                        .ToImmutableArray();
+                return agumentResults.Add(type, result);
             }
-
-            public ImmutableBuilder Update<TModel>(Func<PropertyColumnNameMapping, PropertyColumnNameMapping> update)
-            {
-                var type = typeof(TModel);
-                if (!All.TryGetValue(type, out var existing))
-                {
-                    throw new InvalidOperationException($"No mapping for type {type} exist.");
-                }
-
-                var @new = type
-                    .GetProperties()
-                    .Where(property => !existing.Any(mapping => mapping.Property == property.Name))
-                    .Select(property => new PropertyColumnNameMapping(property.Name, property.Name))
-                    .Concat(existing)
-                    .Select(update)
-                    .ToImmutableArray();
-                var result = All.Remove(type);
-                return new(All = result.Add(type, @new));
-            }
-
-            public ImmutableBuilder Combine(ImmutableBuilder other)
-                => new(All.AddRange(other.All));
         }
     }
 }

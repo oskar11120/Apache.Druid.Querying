@@ -3,6 +3,7 @@ using Apache.Druid.Querying.Internal.Sections;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -21,6 +22,7 @@ namespace Apache.Druid.Querying.Internal
         public ref struct DeserializerContext
         {
             private static readonly ConcurrentDictionary<Type, object?> deserializers = new();
+            private static readonly ConcurrentDictionary<Type, bool> hasAnyColumnNamesVaryingFromPropertyNames = new();
 
             private readonly ReadOnlySpan<byte> json;
             private readonly JsonSerializerOptions serializerOptions;
@@ -44,7 +46,7 @@ namespace Apache.Druid.Querying.Internal
                 if (GetDeserializer<TElementOrElementPart>() is Deserializer<TElementOrElementPart> existing)
                     return existing(ref this);
 
-                if (columnNameMappings.Get<TElementOrElementPart>() is var mappings and { Count: > 0 })
+                if (GetMappingsIfAnyColumnNamesVaryingFromPropertyNames<TElementOrElementPart>() is var mappings and { Count: > 0 })
                     return DeserializeApplyMappings<TElementOrElementPart>(mappings);
 
                 if (atomicity.TryGet<TElementOrElementPart>() is SectionAtomicity { Atomic: true, ColumnNameIfAtomicUtf8: var atomicColumnName })
@@ -97,6 +99,18 @@ namespace Apache.Druid.Querying.Internal
                     as Deserializer<TElement>;
                 deserializers.TryAdd(elementType, @new);
                 return @new;
+            }
+
+            private readonly IReadOnlyList<PropertyColumnNameMapping> GetMappingsIfAnyColumnNamesVaryingFromPropertyNames<TElement>()
+            {
+                if (!hasAnyColumnNamesVaryingFromPropertyNames.TryGetValue(typeof(TElement), out var result)) 
+                {
+                    result = columnNameMappings.Get<TElement>() is var mappings and { Count: > 0 }
+                        && mappings.Any(mapping => mapping.Property != mapping.ColumnName);
+                    hasAnyColumnNamesVaryingFromPropertyNames.TryAdd(typeof(TElement), result);
+                }
+
+                return result ? columnNameMappings.Get<TElement>() : Array.Empty<PropertyColumnNameMapping>();
             }
         }
     }

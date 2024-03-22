@@ -13,7 +13,7 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
             string Map(Expression<QueryElementFactory<QueryShould_MapToRightJson.IotMeasurement>.DruidExpression> factory)
                 => DruidExpression.Map(factory, columnNameMap).Expression;
             var result = Map(message => $"{message.SignalName} == 42");
-            result.Should().Be("signal == 42");
+            result.Should().Be("\"signal\" == 42");
         }
     }
 }
