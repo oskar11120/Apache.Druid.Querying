@@ -18,6 +18,21 @@ namespace Apache.Druid.Querying.Tests.Unit
             Snapshot.Match(json, new SnapshotNameExtension(snapshotNameExtension));
         }
 
+        [TestCase(0)]
+        [TestCase(1)]
+        public void TernaryOperatorsInExpressions(int value)
+        {
+            Func<bool> valueGreaterThanZero = () => value > 0;
+            var query = new Query<IotMeasurement>
+                .TimeSeries
+                .WithNoVirtualColumns
+                .WithAggregations<double>
+                .WithPostAggregations<int>()
+                .Aggregations(type => value > 0 ? type.Max(data => data.Value) : type.Min(data => data.Value))
+                .PostAggregations(type => valueGreaterThanZero() ? type.Constant(1) : type.Constant(0));
+            AssertMatch(query, string.Empty);
+        }
+
         [Test]
         public void Granularity_()
         {

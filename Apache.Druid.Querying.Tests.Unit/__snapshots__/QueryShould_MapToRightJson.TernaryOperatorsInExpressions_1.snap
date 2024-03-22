@@ -1,0 +1,17 @@
+﻿{
+  "queryType": "timeseries",
+  "aggregations": [
+    {
+      "type": "doubleMax",
+      "name": "Aggregations",
+      "fieldName": "value"
+    }
+  ],
+  "postAggregations": [
+    {
+      "type": "constant",
+      "name": "PostAggregations",
+      "value": 1
+    }
+  ]
+}

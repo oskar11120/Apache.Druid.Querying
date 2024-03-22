@@ -90,9 +90,10 @@ namespace Apache.Druid.Querying.Internal.Sections
             Type argumentsType,
             Type sectionType)
         {
-            InvalidOperationException Invalid(string? details = null) => new(
-                $"Invalid expression: {querySectionFactory}" +
-                details is null ? "" : "\n" + details);
+            InvalidOperationException Invalid(string? details = null, Exception? inner = null) => new(
+                $"Invalid expression: {querySectionFactory}." +
+                details is null ? "" : "\n" + details,
+                inner);
             InvalidOperationException ExpectedToBe(Expression expected, string toBe)
                 => Invalid($"Expected {expected} to be {toBe}.");
 
@@ -158,8 +159,26 @@ namespace Apache.Druid.Querying.Internal.Sections
                     yield break;
                 }
 
+                if (sectionFactoryBody is ConditionalExpression ternary)
+                {
+                    bool value;
+                    try
+                    {
+                        value = (bool)ternary.Test.GetValue()!;
+                    }
+                    catch (Exception exception)
+                    {
+                        throw Invalid($"Could not evaluate condition of ternary expression: {ternary}", exception);
+                    }
+
+                    var chosen = value ? ternary.IfTrue : ternary.IfFalse;
+                    foreach (var item in Execute__(chosen))
+                        yield return item;
+                    yield break;
+                }
+
                 InvalidOperationException Unexpected()
-                    => ExpectedToBe(sectionFactoryBody, $"a constructor or an initializer of {sectionType}.");
+                    => ExpectedToBe(sectionFactoryBody, $"a constructor or an initializer of {sectionType}");
                 var init = sectionFactoryBody as MemberInitExpression;
                 var @new = init is null ?
                     sectionFactoryBody as NewExpression ?? throw Unexpected() :
