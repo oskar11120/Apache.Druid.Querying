@@ -7,8 +7,6 @@ namespace Apache.Druid.Querying.Internal
 {
     internal static class DruidExpression
     {
-        private const char columnPrefixSuffix = '"';
-
         public static MapResult Map(LambdaExpression factory, IColumnNameMappingProvider columnNameMappings)
             => Map(factory.Body, columnNameMappings);
 
@@ -58,7 +56,8 @@ namespace Apache.Druid.Querying.Internal
                     throw Invalid(exception.Message, exception);
                 }
 
-                var @string = columnPrefixSuffix + columnNameMappings.GetColumnName(member.SelectedFromType, member.Name) + columnPrefixSuffix;
+                const char prefixSuffix = '"';
+                var @string = prefixSuffix + columnNameMappings.GetColumnName(member.SelectedFromType, member.Name) + prefixSuffix;
                 paramStrings[i] = @string;
             }
 
