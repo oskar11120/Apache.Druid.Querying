@@ -18,17 +18,27 @@ namespace Apache.Druid.Querying.Tests.Unit
             Snapshot.Match(json, new SnapshotNameExtension(snapshotNameExtension));
         }
 
+        private sealed record FilteredAggregations(double First);
         [Test]
         public void FilteredAggregation()
         {
-            var query = new Query<IotMeasurement>
+            //var first = new Query<IotMeasurement>
+            //    .TimeSeries
+            //    .WithNoVirtualColumns
+            //    .WithAggregations<double>()
+            //    .Aggregations(type => type.Filtered(
+            //        filterType => filterType.Selector(data => data.Value, 1),
+            //        type.First(data => data.Value)));
+            //AssertMatch(first);
+
+            var second = new Query<IotMeasurement>
                 .TimeSeries
                 .WithNoVirtualColumns
-                .WithAggregations<double>()
-                .Aggregations(type => type.Filtered(
+                .WithAggregations<FilteredAggregations>()
+                .Aggregations(type => new(type.Filtered(
                     filterType => filterType.Selector(data => data.Value, 1),
-                    type.First(data => data.Value)));
-            AssertMatch(query, string.Empty);
+                    type.First(data => data.Value))));
+            AssertMatch(second);
         }
 
         [Test]

@@ -15,7 +15,7 @@ namespace Apache.Druid.Querying.Internal.Sections
             IColumnNameMappingProvider columnNameMappings,
             Options options)
         {
-            void MapCallParam(ElementFactoryCall.Parameter.Any param, JsonObject result)
+            void MapCallParam(ElementFactoryCall.Parameter.Any param, string? callResultMemberName, JsonObject result)
                 => param.Switch(
                 result,
                 (selector, result) => result.Add(selector.Name, columnNameMappings.GetColumnName(selector.SelectedFromType, selector.SelectedName)),
@@ -29,7 +29,9 @@ namespace Apache.Druid.Querying.Internal.Sections
                         scalar.Name,
                         JsonSerializer.SerializeToNode(scalar.Value, scalar.Type, serializerOptions));
                 },
-                (nested, result) => result.Add(nested.Name, nested.Single ? MapCall(nested.Calls.Single(), false) : Map(nested.Calls, true)),
+                (nested, result) => result.Add(nested.Name, nested.Single ? 
+                    MapCall(nested.Calls.Single(), mapSectionColumnName: true, callResultMemberName) : 
+                    Map(nested.Calls, forceSingle: false, mapSectionColumnName: false, callResultMemberName)),
                 (expression, result) =>
                 {
                     if (expression.Value is null)
@@ -47,7 +49,7 @@ namespace Apache.Druid.Querying.Internal.Sections
                     result.Add(filterFactory.Name, JsonSerializer.SerializeToNode(filter, serializerOptions));
                 });
 
-            JsonObject MapCall(ElementFactoryCall call, bool nested)
+            JsonObject MapCall(ElementFactoryCall call, bool mapSectionColumnName, string? parentResultMemberName)
             {
                 var (member, method, @params) = call;
                 var result = new JsonObject
@@ -55,25 +57,26 @@ namespace Apache.Druid.Querying.Internal.Sections
                     { "type", options!.MapType?.Invoke(call) ?? method.ToCamelCase() }
                 };
 
-                if (!nested)
-                    result.Add(options.SectionColumnNameKey, atomicity.Atomic ? atomicity.ColumnNameIfAtomic : member);
+                var resultMemberName = atomicity.Atomic ? atomicity.ColumnNameIfAtomic : (member ?? parentResultMemberName);
+                if (mapSectionColumnName)
+                    result.Add(options.SectionColumnNameKey, resultMemberName);
                 foreach (var param in @params)
-                    MapCallParam(param, result);
+                    MapCallParam(param, resultMemberName, result);
                 return result;
             }
 
-            JsonNode Map(IReadOnlyCollection<ElementFactoryCall> calls, bool nested)
+            JsonNode Map(IReadOnlyCollection<ElementFactoryCall> calls, bool forceSingle, bool mapSectionColumnName, string? parentResultMemberName)
             {
                 static bool IsNone(ElementFactoryCall call) =>
                     call.ResultMemberName is null &&
                     call.MethodName is "None" &&
                     call.Parameters.Count is 0;
 
-                if (!nested && options.ForceSingle)
+                if (forceSingle)
                 {
                     calls = calls.Where(call => !IsNone(call)).ToArray();
                     return calls.Count is 1 ?
-                        MapCall(calls.Single(), nested) :
+                        MapCall(calls.Single(), mapSectionColumnName, parentResultMemberName) :
                         throw new InvalidOperationException($"Expected single {nameof(ElementFactoryCall)} but got {calls.Count}.")
                         { Data = { [nameof(calls)] = calls } };
                 }
@@ -81,11 +84,11 @@ namespace Apache.Druid.Querying.Internal.Sections
                 var array = new JsonArray();
                 foreach (var call in calls)
                     if (!IsNone(call))
-                        array.Add(MapCall(call, nested));
+                        array.Add(MapCall(call, mapSectionColumnName, parentResultMemberName));
                 return array;
             }
 
-            return Map(calls, false);
+            return Map(calls, options.ForceSingle, mapSectionColumnName: true, parentResultMemberName: null);
         }
 
         public sealed record Options(
