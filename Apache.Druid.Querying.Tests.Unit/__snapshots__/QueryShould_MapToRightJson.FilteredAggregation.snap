@@ -11,8 +11,8 @@
       },
       "aggregator": {
         "type": "doubleFirst",
-        "fieldName": "value",
-        "name": "aggregator"
+        "name": "Aggregations",
+        "fieldName": "value"
       }
     }
   ]
