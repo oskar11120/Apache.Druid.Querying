@@ -1,0 +1,18 @@
+﻿{
+  "queryType": "timeseries",
+  "aggregations": [
+    {
+      "type": "filtered",
+      "name": "Aggregations",
+      "filter": {
+        "value": 1,
+        "dimension": "value",
+        "type": "selector"
+      },
+      "aggregator": {
+        "type": "doubleFirst",
+        "fieldName": "value"
+      }
+    }
+  ]
+}

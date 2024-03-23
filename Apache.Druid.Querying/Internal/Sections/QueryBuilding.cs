@@ -36,7 +36,7 @@ namespace Apache.Druid.Querying.Internal.Sections
             var atomicity = query.SectionAtomicity.Add<TSection>(calls, atomicSectionColumnName);
             return query.AddOrUpdateSection(
                 atomicSectionColumnName,
-                (options, columnNames) => SectionFactoryJsonMapper.Map(
+                (options, columnNames) => SectionFactoryJsonMapper.Map<TArguments>(
                      calls, atomicity, options, columnNames, mapperOptions ?? SectionFactoryJsonMapper.Options.Default),
                 convertKeyToCamelCase);
         }

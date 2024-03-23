@@ -19,6 +19,19 @@ namespace Apache.Druid.Querying.Tests.Unit
         }
 
         [Test]
+        public void FilteredAggregation()
+        {
+            var query = new Query<IotMeasurement>
+                .TimeSeries
+                .WithNoVirtualColumns
+                .WithAggregations<double>()
+                .Aggregations(type => type.Filtered(
+                    filterType => filterType.Selector(data => data.Value, 1),
+                    type.First(data => data.Value)));
+            AssertMatch(query, string.Empty);
+        }
+
+        [Test]
         public void NoneElementType()
         {
             static Query<IotMeasurement>.GroupBy<double>.WithVirtualColumns<int>.WithAggregations<string>.WithPostAggregations<long> Query() 

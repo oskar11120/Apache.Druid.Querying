@@ -25,7 +25,7 @@ namespace Apache.Druid.Querying
 
             private string GetColumnName(Expression selectorBody)
             {
-                var (_, name, type) = SelectedProperty.Get(selectorBody); 
+                var (_, name, type) = SelectedProperty.Get(selectorBody);
                 return columnNames.GetColumnName(type, name);
             }
 
@@ -217,8 +217,8 @@ namespace Apache.Druid.Querying
                 SimpleDataType dataType);
 
             TColumn First<TColumn, TTimeColumn>(
-               ColumnSelector<TColumn> fieldName,
-               ColumnSelector<TTimeColumn> timeColumn);
+                ColumnSelector<TColumn> fieldName,
+                ColumnSelector<TTimeColumn> timeColumn);
             TColumn Last<TColumn, TTimeColumn>(
                 ColumnSelector<TColumn> fieldName,
                 ColumnSelector<TTimeColumn> timeColumn);
@@ -236,7 +236,7 @@ namespace Apache.Druid.Querying
                 long maxStringBytes,
                 SimpleDataType dataType);
             string First(
-               ColumnSelector<string> fieldName,
+                ColumnSelector<string> fieldName,
                 long maxStringBytes,
                 SimpleDataType dataType);
             string Last(
@@ -289,6 +289,10 @@ namespace Apache.Druid.Querying
                 bool? shouldAggregateNullInputs,
                 bool? shouldCombineAggregateNullInputs,
                 long? maxSizeBytes);
+
+            TColumn Filtered<TColumn>(
+                Func<QueryElementFactory<TArguments>.Filter, IFilter> filter,
+                TColumn aggregator);
         }
 
         public interface IPostAggregators : IExpression.WithOutputType, INone

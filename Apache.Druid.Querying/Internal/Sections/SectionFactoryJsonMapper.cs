@@ -8,7 +8,7 @@ namespace Apache.Druid.Querying.Internal.Sections
 {
     internal class SectionFactoryJsonMapper
     {
-        public static JsonNode Map(
+        public static JsonNode Map<TArguments>(
             IReadOnlyList<ElementFactoryCall> calls,
             SectionAtomicity atomicity,
             JsonSerializerOptions serializerOptions,
@@ -29,7 +29,7 @@ namespace Apache.Druid.Querying.Internal.Sections
                         scalar.Name,
                         JsonSerializer.SerializeToNode(scalar.Value, scalar.Type, serializerOptions));
                 },
-                (nested, element) => element.Add(nested.Name, Map(nested.Calls, true)),
+                (nested, result) => result.Add(nested.Name, nested.Single ? MapCall(nested.Calls.Single(), true) : Map(nested.Calls, true)),
                 (expression, result) =>
                 {
                     if (expression.Value is null)
@@ -39,6 +39,12 @@ namespace Apache.Druid.Querying.Internal.Sections
                     result.Add(expression.Name, value);
                     if (options.ExpressionColumnNamesKey is string existing)
                         result.Add(existing, JsonSerializer.SerializeToNode(columnNames, serializerOptions));
+                },
+                (filterFactory, result) =>
+                {
+                    var factory = (Func<QueryElementFactory<TArguments>.Filter, IFilter>)filterFactory.Value;
+                    var filter = factory.Invoke(new(columnNameMappings));
+                    result.Add(filterFactory.Name, JsonSerializer.SerializeToNode(filter, serializerOptions));
                 });
 
             JsonObject MapCall(ElementFactoryCall call, bool nested)

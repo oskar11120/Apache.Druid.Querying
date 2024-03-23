@@ -29,20 +29,27 @@ namespace Apache.Druid.Querying.Internal.Sections
 
         public static class Parameter
         {
-            public sealed record Any(ArgumentsMemberSelector? Selector = null, Scalar? Scalar = null, Nested? Nested = null, DruidExpression? Expression = null)
+            public sealed record Any(
+                ArgumentsMemberSelector? Selector = null,
+                Scalar? Scalar = null,
+                Nested? Nested = null,
+                DruidExpression? Expression = null,
+                FilterFactory? FilterFactory = null)
             {
                 public TResult Switch<TResult, TArg>(
                     TArg argument,
                     Func<ArgumentsMemberSelector, TArg, TResult> ifMemberSelector,
                     Func<Scalar, TArg, TResult> ifScalar,
                     Func<Nested, TArg, TResult> ifNested,
-                    Func<DruidExpression, TArg, TResult> ifExpression)
-                    => (Selector, Scalar, Nested, Expression) switch
+                    Func<DruidExpression, TArg, TResult> ifExpression,
+                    Func<FilterFactory, TArg, TResult> ifFilterFactory)
+                    => (Selector, Scalar, Nested, Expression, FilterFactory) switch
                     {
-                        (ArgumentsMemberSelector selector, null, null, null) => ifMemberSelector(selector, argument),
-                        (null, Scalar scalar, null, null) => ifScalar(scalar, argument),
-                        (null, null, Nested nested, null) => ifNested(nested, argument),
-                        (null, null, null, DruidExpression expression) => ifExpression(expression, argument),
+                        (ArgumentsMemberSelector selector, null, null, null, null) => ifMemberSelector(selector, argument),
+                        (null, Scalar scalar, null, null, null) => ifScalar(scalar, argument),
+                        (null, null, Nested nested, null, null) => ifNested(nested, argument),
+                        (null, null, null, DruidExpression expression, null) => ifExpression(expression, argument),
+                        (null, null, null, null, FilterFactory factory) => ifFilterFactory(factory, argument),
                         _ => throw new InvalidOperationException()
                     };
 
@@ -51,8 +58,9 @@ namespace Apache.Druid.Querying.Internal.Sections
                     Action<ArgumentsMemberSelector, TArg> ifMemberSelector,
                     Action<Scalar, TArg> ifScalar,
                     Action<Nested, TArg> ifNested,
-                    Action<DruidExpression, TArg> ifExpression) => Switch(
-                        (argument, ifMemberSelector, ifScalar, ifNested, ifExpression),
+                    Action<DruidExpression, TArg> ifExpression,
+                    Action<FilterFactory, TArg> ifFilterFactory) => Switch(
+                        (argument, ifMemberSelector, ifScalar, ifNested, ifExpression, ifFilterFactory),
                         (selector, arg) =>
                         {
                             arg.ifMemberSelector(selector, arg.argument);
@@ -72,13 +80,19 @@ namespace Apache.Druid.Querying.Internal.Sections
                         {
                             arg.ifExpression(expression, arg.argument);
                             return 0;
+                        },
+                        (filterFactory, arg) =>
+                        {
+                            arg.ifFilterFactory(filterFactory, arg.argument);
+                            return 0;
                         });
             }
 
             public sealed record ArgumentsMemberSelector(Type SelectedType, string SelectedName, string Name, Type SelectedFromType);
             public sealed record Scalar(Type Type, string Name, object? Value);
-            public sealed record Nested(IReadOnlyList<ElementFactoryCall> Calls, string Name);
+            public sealed record Nested(IReadOnlyList<ElementFactoryCall> Calls, string Name, bool Single);
             public sealed record DruidExpression(LambdaExpression? Value, string Name);
+            public sealed record FilterFactory(Delegate Value, string Name);
         }
     }
 
@@ -151,9 +165,15 @@ namespace Apache.Druid.Querying.Internal.Sections
                         if (isDruidExpression)
                             return new(Expression: new(arg as LambdaExpression, paramName));
 
-                        var isNested = paramType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(paramType);
-                        if (isNested)
-                            return new(Nested: new(Execute__(arg).ToList(), paramName));
+                        var isNestedMultiple = paramType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(paramType);
+                        var isNestedSingle = !isNestedMultiple && arg is MethodCallExpression call &&
+                            call.Method.DeclaringType?.IsGenericType is true &&
+                            call.Method.DeclaringType.DeclaringType == typeof(QueryElementFactory<>);
+                        if (isNestedMultiple || isNestedSingle)
+                            return new(Nested: new(Execute__(arg).ToList(), paramName, isNestedSingle));
+
+                        if (arg is LambdaExpression lambda && lambda.ReturnType == typeof(IFilter))
+                            return new(FilterFactory: new(lambda.Compile(), paramName));
 
                         return new(Scalar: new ElementFactoryCall.Parameter.Scalar(paramType, paramName, arg.GetValue()));
                     })
