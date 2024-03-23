@@ -22,14 +22,14 @@ namespace Apache.Druid.Querying.Tests.Unit
         [Test]
         public void FilteredAggregation()
         {
-            //var first = new Query<IotMeasurement>
-            //    .TimeSeries
-            //    .WithNoVirtualColumns
-            //    .WithAggregations<double>()
-            //    .Aggregations(type => type.Filtered(
-            //        filterType => filterType.Selector(data => data.Value, 1),
-            //        type.First(data => data.Value)));
-            //AssertMatch(first);
+            var first = new Query<IotMeasurement>
+                .TimeSeries
+                .WithNoVirtualColumns
+                .WithAggregations<double>()
+                .Aggregations(type => type.Filtered(
+                    filterType => filterType.Selector(data => data.Value, 1),
+                    type.First(data => data.Value)));
+            AssertMatch(first);
 
             var second = new Query<IotMeasurement>
                 .TimeSeries
@@ -41,22 +41,23 @@ namespace Apache.Druid.Querying.Tests.Unit
             AssertMatch(second);
         }
 
+        private sealed record NonePostAggregations(long Value);
         [Test]
         public void NoneElementType()
         {
-            static Query<IotMeasurement>.GroupBy<double>.WithVirtualColumns<int>.WithAggregations<string>.WithPostAggregations<long> Query() 
+            static Query<IotMeasurement>.GroupBy<double>.WithVirtualColumns<int>.WithAggregations<string>.WithPostAggregations<NonePostAggregations> Query() 
                 => new Query<IotMeasurement>
                 .GroupBy<double>
                 .WithVirtualColumns<int>
                 .WithAggregations<string>
-                .WithPostAggregations<long>();
+                .WithPostAggregations<NonePostAggregations>();
             var dimensions = Query().Dimensions(type => type.None<double>());
             AssertMatch(dimensions);
             var virtualColumns = Query().VirtualColumns(type => type.None<int>());
             AssertMatch(virtualColumns);
             var aggregations = Query().Aggregations(type => type.None<string>());
             AssertMatch(aggregations);
-            var postAggregations = Query().PostAggregations(type => type.None<long>());
+            var postAggregations = Query().PostAggregations(type => new(type.None<long>()));
             AssertMatch(postAggregations);
         }
 

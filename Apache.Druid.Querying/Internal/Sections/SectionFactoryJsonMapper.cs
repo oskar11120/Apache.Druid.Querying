@@ -68,8 +68,7 @@ namespace Apache.Druid.Querying.Internal.Sections
             JsonNode Map(IReadOnlyCollection<ElementFactoryCall> calls, bool forceSingle, bool mapSectionColumnName, string? parentResultMemberName)
             {
                 static bool IsNone(ElementFactoryCall call) =>
-                    call.ResultMemberName is null &&
-                    call.MethodName is "None" &&
+                    call.MethodName is nameof(QueryElementFactory<TArguments>.INone.None) &&
                     call.Parameters.Count is 0;
 
                 if (forceSingle)
