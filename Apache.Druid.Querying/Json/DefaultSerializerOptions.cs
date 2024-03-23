@@ -23,7 +23,7 @@ namespace Apache.Druid.Querying.Json
                 new PolymorphicSerializer<ILimitSpec.OrderBy>(),
                 UnixMilisecondsConverter.WithDateTimeOffset,
                 UnixMilisecondsConverter.WithDateTime,
-                AllowBoolFromStringConverter.Singleton
+                BoolStringNumberConverter.Singleton
             }
         };
 
@@ -98,11 +98,11 @@ namespace Apache.Druid.Querying.Json
             }
         }
 
-        public sealed class AllowBoolFromStringConverter : JsonConverter<bool>
+        public sealed class BoolStringNumberConverter : JsonConverter<bool>
         {
-            public static readonly AllowBoolFromStringConverter Singleton = new();
+            public static readonly BoolStringNumberConverter Singleton = new();
 
-            private AllowBoolFromStringConverter()
+            private BoolStringNumberConverter()
             {
             }
 
@@ -113,11 +113,12 @@ namespace Apache.Druid.Querying.Json
                     JsonTokenType.False => false,
                     JsonTokenType.String when reader.ValueTextEquals("true") || reader.ValueTextEquals("True") => true,
                     JsonTokenType.String when reader.ValueTextEquals("false") || reader.ValueTextEquals("False") => false,
+                    JsonTokenType.Number => reader.GetInt32() is 1,
                     _ => throw new JsonException($"Could not deserialize {reader.GetString()} to {typeof(bool)}.")
                 };
 
             public override void Write(Utf8JsonWriter writer, bool value, JsonSerializerOptions options)
-                => writer.WriteBooleanValue(value);
+                => writer.WriteNumberValue(value ? 1 : 0);
         }
     }
 }
