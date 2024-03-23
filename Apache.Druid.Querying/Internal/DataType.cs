@@ -13,7 +13,7 @@ namespace Apache.Druid.Querying.Internal
             R = '>';
         private static readonly Dictionary<Type, SimpleDataType> simpleMap = new[]
         {
-            (new[] { typeof(string), typeof(Guid), typeof(char), typeof(Uri), typeof(Enum) }, SimpleDataType.String),
+            (new[] { typeof(string), typeof(Guid), typeof(char), typeof(Uri), typeof(Enum), typeof(bool) }, SimpleDataType.String),
             (new[] { typeof(double) }, SimpleDataType.Double),
             (new[] { typeof(float) }, SimpleDataType.Float),
             (new[] { typeof(short), typeof(int), typeof(long), typeof(DateTime), typeof(DateTimeOffset) }, SimpleDataType.Long)

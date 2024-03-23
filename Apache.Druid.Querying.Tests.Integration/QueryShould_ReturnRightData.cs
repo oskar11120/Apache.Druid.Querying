@@ -49,7 +49,34 @@ internal class QueryShould_ReturnRightData
         => VerifyMatch(Wikipedia.Edits, query, snapshotNameSuffix);
 
     [Test]
-    public async Task Wrapped()
+    public async Task FilteredAggregation()
+    {
+        static Query<Edit>.TimeSeries.WithNoVirtualColumns.WithAggregations<int> Query() => new Query<Edit>
+            .TimeSeries
+            .WithNoVirtualColumns
+            .WithAggregations<int>()
+            .DefaultInterval()
+            .Granularity(Granularity.Hour);
+        var aggregationFilteredQuery = Query()
+            .Aggregations(type => type.Filtered(
+                filter => filter.And(
+                    filter.Selector(data => data.IsNew, true),
+                    filter.Selector(data => data.IsRobot, true)),
+                type.Count()));
+        await VerifyMatch(aggregationFilteredQuery, string.Empty);
+
+        var normallyFilteredQuery = Query()
+            .Filter(type => type.And(
+                type.Selector(data => data.IsNew, true),
+                type.Selector(data => data.IsRobot, true)))
+            .Aggregations(type => type.Count());
+        var aggregation = await Wikipedia.Edits.ExecuteQuery(aggregationFilteredQuery).ToListAsync();
+        var normal = await Wikipedia.Edits.ExecuteQuery(normallyFilteredQuery).ToListAsync();
+        aggregation.Should().BeEquivalentTo(normal);
+    }
+
+    [Test]
+    public async Task Nested()
     {
         var first = new Query<Edit>
             .TimeSeries

@@ -29,7 +29,19 @@ namespace Apache.Druid.Querying.Internal.Sections
                         scalar.Name,
                         JsonSerializer.SerializeToNode(scalar.Value, scalar.Type, serializerOptions));
                 },
-                (nested, result) => result.Add(nested.Name, nested.Single ? MapCall(nested.Calls.Single(), true) : Map(nested.Calls, true)),
+                (nested, result) => 
+                {
+                    JsonNode json;
+                    if (nested.Single)
+                    {
+                        var json_ = MapCall(nested.Calls.Single(), true);
+                        json_.Add("name", nested.Name);
+                        json = json_;
+                    }
+                    else
+                        json = Map(nested.Calls, true);
+                    result.Add(nested.Name, json);
+                },
                 (expression, result) =>
                 {
                     if (expression.Value is null)
