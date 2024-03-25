@@ -118,7 +118,7 @@ namespace Apache.Druid.Querying.Json
                 };
 
             public override void Write(Utf8JsonWriter writer, bool value, JsonSerializerOptions options)
-                => writer.WriteNumberValue(value ? 1 : 0);
+                => writer.WriteBooleanValue(value);
         }
     }
 }

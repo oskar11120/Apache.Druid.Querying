@@ -288,7 +288,12 @@ namespace Apache.Druid.Querying
                             _ => throw new NotSupportedException(nameof(ArithmeticFunction))
                         }
                     }
-                    : scalar));
+                    : scalar,
+                SkipScalarParameter: static scalar => scalar.Name is "finalizing",
+                MapType: static call => 
+                    call.MethodName is nameof(QueryElementFactory<TArguments>.IPostAggregators.FieldAccess) &&
+                    call.TryGetScalarParameter<bool>() is { Name: "finalizing", Value: true  } ?
+                    "finalizingFieldAccess" : call.MethodName.ToCamelCase()));
 
         private static readonly SectionFactoryJsonMapper.Options dimensionsMapperOptions = new(SectionColumnNameKey: "outputName");
         public static TQuery Dimensions<TArguments, TDimensions, TQuery>(

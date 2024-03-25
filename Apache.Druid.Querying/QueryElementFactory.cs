@@ -259,26 +259,26 @@ namespace Apache.Druid.Querying
                 ColumnSelector<string> fieldName,
                 long maxStringBytes);
 
-            TColumn Expression<TColumn>(
-                TColumn initialValue,
+            TColumn Expression<TColumn, TInitialValue>(
+                TInitialValue initialValue,
                 DruidExpression fold);
-            TColumn Expression<TColumn>(
-                TColumn initialValue,
+            TColumn Expression<TColumn, TInitialValue>(
+                TInitialValue initialValue,
                 DruidExpression fold,
                 DruidExpression combine);
-            TColumn Expression<TColumn>(
-                TColumn initialValue,
+            TColumn Expression<TColumn, TInitialValue>(
+                TInitialValue initialValue,
                 DruidExpression fold,
                 DruidExpression combine,
                 DruidExpression compare);
-            TColumn Expression<TColumn>(
-                TColumn initialValue,
+            TColumn Expression<TColumn, TInitialValue>(
+                TInitialValue initialValue,
                 DruidExpression fold,
                 DruidExpression combine,
                 DruidExpression compare,
                 DruidExpression finalize);
-            TColumn Expression<TColumn>(
-                TColumn initialValue,
+            TColumn Expression<TColumn, TInitialValue>(
+                TInitialValue initialValue,
                 string? accumulatorIdentifier,
                 DruidExpression fold,
                 DruidExpression? combine,
