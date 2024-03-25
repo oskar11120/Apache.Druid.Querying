@@ -74,14 +74,14 @@ namespace Apache.Druid.Querying.Internal.Elements
 
         public sealed class Interval : Filter
         {
-            public Interval(string dimension, IEnumerable<string> intervals)
+            public Interval(string dimension, IEnumerable<Querying.Interval> intervals)
             {
                 Dimension = dimension;
                 Intervals = intervals;
             }
 
             public string Dimension { get; }
-            public IEnumerable<string> Intervals { get; }
+            public IEnumerable<Querying.Interval> Intervals { get; }
         }
 
         public sealed class Expression_ : Filter

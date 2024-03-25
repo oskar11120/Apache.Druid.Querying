@@ -5,6 +5,8 @@ using System.Text.Json.Serialization;
 using System.Buffers;
 using System.Buffers.Text;
 using Apache.Druid.Querying.Internal.Json;
+using System.Globalization;
+using System.Text;
 
 namespace Apache.Druid.Querying.Json
 {
@@ -23,7 +25,8 @@ namespace Apache.Druid.Querying.Json
                 new PolymorphicSerializer<ILimitSpec.OrderBy>(),
                 UnixMilisecondsConverter.WithDateTimeOffset,
                 UnixMilisecondsConverter.WithDateTime,
-                BoolStringNumberConverter.Singleton
+                BoolStringNumberConverter.Singleton,
+                IntervalConverter.Singleton
             }
         };
 
@@ -119,6 +122,49 @@ namespace Apache.Druid.Querying.Json
 
             public override void Write(Utf8JsonWriter writer, bool value, JsonSerializerOptions options)
                 => writer.WriteBooleanValue(value);
+        }
+
+        public sealed class IntervalConverter : JsonConverter<Interval>
+        {
+            public static readonly IntervalConverter Singleton = new();
+            private static readonly string separator = "/";
+            private static readonly byte[] separatorBytes = Encoding.UTF8.GetBytes(separator);
+
+            private IntervalConverter()
+            {                
+            }
+
+            public override Interval? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                static InvalidOperationException Invalid(ReadOnlySpan<byte> value, Exception? inner = null) 
+                    => new($"Invalid interval {Encoding.UTF8.GetString(value)}.", inner);
+                ReadOnlySpan<byte> value = reader.HasValueSequence ?
+                     reader.ValueSequence.ToArray() :
+                     reader.ValueSpan;
+                var separatorPosition = value.IndexOf(separatorBytes);
+                if (separatorPosition is -1)
+                    throw Invalid(value);
+
+                try
+                {
+                    var left = value[..separatorPosition];
+                    var right = value[separatorPosition..];
+                    return new(
+                        JsonSerializer.Deserialize<DateTimeOffset>(left),
+                        JsonSerializer.Deserialize<DateTimeOffset>(right));
+                }
+                catch(Exception exception)
+                {
+                    throw Invalid(value, exception);
+                }
+            }
+
+            public override void Write(Utf8JsonWriter writer, Interval value, JsonSerializerOptions options)
+            {
+                static string ToIsoString(DateTimeOffset t) => t.ToString("o", CultureInfo.InvariantCulture);
+                var @string = $"{ToIsoString(value.From)}/{ToIsoString(value.To)}";
+                writer.WriteStringValue(@string);
+            }
         }
     }
 }

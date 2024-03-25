@@ -319,7 +319,7 @@ namespace Apache.Druid.Querying
             where TQuery : IQueryWith.Intervals
         {
             query.Intervals = intervals;
-            query.AddOrUpdateSection(nameof(intervals), intervals.Select(IntervalExtensions.Map));
+            query.AddOrUpdateSection(nameof(intervals), intervals);
             return query;
         }
 

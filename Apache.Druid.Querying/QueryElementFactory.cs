@@ -72,7 +72,7 @@ namespace Apache.Druid.Querying
             public IFilter Selector<TColumn>(Expression<ColumnSelector<TColumn>> dimension, TColumn value)
                 => new Filter<TColumn>.Selector(GetColumnName(dimension), value);
             public IFilter Interval<TColumn>(Expression<ColumnSelector<TColumn>> dimension, params Interval[] intervals)
-                => new Filter_.Interval(GetColumnName(dimension), intervals.Select(IntervalExtensions.Map));
+                => new Filter_.Interval(GetColumnName(dimension), intervals);
             public IFilter Expression(Expression<DruidExpression> expression)
                 => new Filter_.Expression_(Internal.DruidExpression.Map(expression, columnNames).Expression);
             public IFilter Bound<TColumn>(
