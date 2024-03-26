@@ -166,9 +166,10 @@ namespace Apache.Druid.Querying
         {
             internal IReadOnlyCollection<Interval>? Intervals { get; set; }
 
-            internal IReadOnlyCollection<Interval> GetIntervals()
+            IReadOnlyCollection<Interval> GetIntervals()
                 => Intervals is null or { Count: 0 } ?
-                    throw new InvalidOperationException($"Mssing required query section: {nameof(Intervals)}.") :
+                    throw new InvalidOperationException($"Mssing required query section: {nameof(Intervals)}.")
+                    { Data = { ["query"] = this } } :
                     Intervals;
         }
 
@@ -184,9 +185,12 @@ namespace Apache.Druid.Querying
         {
             internal int Offset { get; set; }
             internal int Limit { get; set; }
+
+            int GetOffset() => Offset;
+            int GetLimit() => Limit;
         }
 
-        public interface Threshold  : IQuery
+        public interface Threshold : IQuery
         {
         }
 
@@ -198,7 +202,7 @@ namespace Apache.Druid.Querying
         public interface LimitSpec<TArguments, TSelf> : IQuery<TSelf>
             where TSelf : IQuery<TSelf>
         {
-        } 
+        }
 
         public interface Having<TArguments, TSelf> : IQuery<TSelf>
             where TSelf : IQuery<TSelf>
@@ -290,9 +294,9 @@ namespace Apache.Druid.Querying
                     }
                     : scalar,
                 SkipScalarParameter: static scalar => scalar.Name is "finalizing",
-                MapType: static call => 
+                MapType: static call =>
                     call.MethodName is nameof(QueryElementFactory<TArguments>.IPostAggregators.FieldAccess) &&
-                    call.TryGetScalarParameter<bool>() is { Name: "finalizing", Value: true  } ?
+                    call.TryGetScalarParameter<bool>() is { Name: "finalizing", Value: true } ?
                     "finalizingFieldAccess" : call.MethodName.ToCamelCase()));
 
         private static readonly SectionFactoryJsonMapper.Options dimensionsMapperOptions = new(SectionColumnNameKey: "outputName");
@@ -423,7 +427,7 @@ namespace Apache.Druid.Querying
         }
 
         public static TQuery Metric<TArguments, TQuery>(
-            this IQueryWith.Metric<TArguments, TQuery> query, 
+            this IQueryWith.Metric<TArguments, TQuery> query,
             Func<QueryElementFactory<TArguments>.MetricSpec, IMetric> factory)
             where TQuery : IQuery<TQuery>
             => query.AddOrUpdateSection(nameof(Metric), columnNames => factory(new(columnNames)));

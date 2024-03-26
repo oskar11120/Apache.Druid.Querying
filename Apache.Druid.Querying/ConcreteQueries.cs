@@ -261,8 +261,8 @@ namespace Apache.Druid.Querying
             IQuery<SegmentMetadata>,
             IQueryWith.Intervals,
             IQueryWith.Context<Context, SegmentMetadata>,
-            IQueryWithSource<TSource>.AndResult<Querying.SegmentMetadata>.AndDeserializationAndTruncatedResultHandling<None>,
-            QueryResultDeserializer.Array<Querying.SegmentMetadata>
+            QueryResultDeserializer.Array<Querying.SegmentMetadata>,
+            TruncatedQueryResultHandler<TSource>.SegmentMetadata
         {
             private static readonly IReadOnlyDictionary<Querying.SegmentMetadata.AnalysisType, string> analysisTypeStrings = Enum
                 .GetValues<Querying.SegmentMetadata.AnalysisType>()
@@ -276,14 +276,6 @@ namespace Apache.Druid.Querying
                 => AnalysisTypes(types.AsEnumerable());
             public SegmentMetadata AggregatorMergeStrategy(Querying.SegmentMetadata.AggregatorMergeStrategy strategy)
                 => @base.AddOrUpdateSection(nameof(AggregatorMergeStrategy), strategy);
-
-            IAsyncEnumerable<Querying.SegmentMetadata> IQueryWithSource<TSource>
-                .AndResult<Querying.SegmentMetadata>.AndDeserializationAndTruncatedResultHandling<None>.OnTruncatedResultsSetQueryForRemaining(
-                IAsyncEnumerable<Querying.SegmentMetadata> results, None context, Mutable<IQueryWithSource<TSource>> setter, CancellationToken token)
-            {
-                // TODO
-                return results;
-            }
         }
 
         public class DataSourceMetadata :

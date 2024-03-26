@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using Apache.Druid.Querying.Internal;
+using FluentAssertions;
 using Scan = Apache.Druid.Querying.Internal.TruncatedQueryResultHandler<Apache.Druid.Querying.None>
     .Scan<Apache.Druid.Querying.ScanResult<Apache.Druid.Querying.None>>;
 using TimeSeries = Apache.Druid.Querying.Internal.TruncatedQueryResultHandler<Apache.Druid.Querying.None>
@@ -124,6 +125,34 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
             await Execute(14 + 13 - 1 + 10 - 2, 14, skipFirstResults: 2, truncate: false);
             latest.Timestamp.Should().Be(t0.AddHours(23));
             setter.Value.Should().BeNull();
+        }
+
+        [Test]
+        public async Task SegmentMetadata()
+        {
+            static SegmentMetadata New(string id)
+                => new(id, default!, default, default, default, default, default, default, default);
+            var query = new Query<None>.SegmentMetadata() as TruncatedQueryResultHandler<None>.SegmentMetadata;
+            var context = new HashSet<string>();
+            var setter = new Mutable<IQueryWithSource<None>>();
+            async Task Execute(bool truncate, int[] sourceIds, int[] expectedReturnedIds) 
+            {
+                var data = MaybeTruncate(sourceIds.Select(id => New(id.ToString())), truncate);
+                var results = await query
+                    .OnTruncatedResultsSetQueryForRemaining(data, context, setter, CancellationToken.None)
+                    .ToListAsync();
+                var resultIds = results
+                    .Select(result => int.Parse(result.Id));
+                resultIds
+                    .Should()
+                    .BeEquivalentTo(expectedReturnedIds);
+                setter.Value.Should().Be(truncate ? query : null);
+                setter.Value = null;
+            }
+
+            await Execute(true, new[] { 1, 2, 3 }, new[] { 1, 2, 3 });
+            await Execute(true, new[] { 3, 1, 2, 5, 4 }, new[] { 5, 4 });
+            await Execute(false, new[] { 6, 3, 1, 2, 5, 4 }, new[] { 6 });
         }
     }
 }

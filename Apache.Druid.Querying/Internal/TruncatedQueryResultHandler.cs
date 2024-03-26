@@ -195,9 +195,32 @@ public static class TruncatedQueryResultHandler<TSource>
                 yield return result;
             }
 
-            if (!truncated || latestResult.Count >= Limit)
+            if (!truncated || (Limit is not 0 && latestResult.Count >= Limit))
                 yield break;
-            setter.Value = Copy(this).Offset(latestResult.Count).Limit(Limit - latestResult.Count);
+            var newQuery = Copy(this).Offset(latestResult.Count);
+            if (Limit is not 0)
+                newQuery = newQuery.Limit(Limit - latestResult.Count);
+            setter.Value = newQuery;
+        }
+    }
+
+    public interface SegmentMetadata :
+        IQueryWithSource<TSource>.AndResult<Querying.SegmentMetadata>.AndDeserializationAndTruncatedResultHandling<HashSet<string>>
+    {
+        async IAsyncEnumerable<Querying.SegmentMetadata> AndDeserializationAndTruncatedResultHandling<HashSet<string>>.OnTruncatedResultsSetQueryForRemaining(
+            IAsyncEnumerable<Querying.SegmentMetadata> results,
+            HashSet<string> returnedSegmentIds,
+            Mutable<IQueryWithSource<TSource>> setter,
+            [EnumeratorCancellation] CancellationToken token)
+        {
+            var truncated = false;
+            results = results.Catch<Querying.SegmentMetadata, TruncatedResultsException>(_ => truncated = true, token);
+            await foreach (var result in results)
+                if (returnedSegmentIds.Add(result.Id))
+                    yield return result;
+
+            if (truncated)
+                setter.Value = this;
         }
     }
 }
