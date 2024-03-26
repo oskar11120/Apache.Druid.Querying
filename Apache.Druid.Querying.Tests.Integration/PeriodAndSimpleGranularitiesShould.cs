@@ -13,12 +13,12 @@ internal class PeriodAndSimpleGranularitiesShould
 
     private static readonly object[] testCases = new[] { utc, "Europe/Warsaw" }
         .Cartesian(
-            Enum.GetValues<Granularity>().Where(granularity => granularity is > Granularity.Hour),
+            Enum.GetValues<SimpleGranularity>().Where(granularity => granularity is > SimpleGranularity.Hour),
             (timeZone, granularity) => new object[] { granularity, timeZone })
         .ToArray();
 
     [TestCaseSource(nameof(testCases))]
-    public async Task BeConsistent(Granularity granularity, string timeZone)
+    public async Task BeConsistent(SimpleGranularity granularity, string timeZone)
     {
         var snapshotName = Snapshot.FullName();
         snapshotName = new(snapshotName.Filename.Replace("/", ""), snapshotName.FolderPath);

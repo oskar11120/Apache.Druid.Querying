@@ -56,7 +56,7 @@ internal class QueryShould_ReturnRightData
             .WithNoVirtualColumns
             .WithAggregations<int>()
             .DefaultInterval()
-            .Granularity(Granularity.Hour);
+            .Granularity(SimpleGranularity.Hour);
         var aggregationFilteredQuery = Query()
             .Aggregations(type => type.Filtered(
                 filter => filter.And(
@@ -86,7 +86,7 @@ internal class QueryShould_ReturnRightData
                 type.Count(),
                 type.Sum(edit => edit.Added)))
             .DefaultInterval()
-            .Granularity(Granularity.FifteenMinutes)
+            .Granularity(SimpleGranularity.FifteenMinutes)
             .Context(new() { SkipEmptyBuckets = true });
         var wrapped = Wikipedia
             .Edits
@@ -116,7 +116,7 @@ internal class QueryShould_ReturnRightData
             .WithNoVirtualColumns
             .WithAggregations<DateTimeOffset>()
             .DefaultInterval()
-            .Granularity(Granularity.Day)
+            .Granularity(SimpleGranularity.Day)
             .Dimensions(type => type.Default(data => data.CountryName))
             .Aggregations(type => type.Last(data => data.Timestamp));
         var latestEditTimestampsPerCountry_dataSource = Wikipedia.Edits.ToQueryDataSource(latestEditTimestampsPerCountry_query);
@@ -214,7 +214,7 @@ internal class QueryShould_ReturnRightData
             .DefaultInterval()
             .Dimensions(type => type.Default(edit => edit.CountryName))
             .Aggregations(type => type.Count())
-            .Granularity(Granularity.EightHours);
+            .Granularity(SimpleGranularity.EightHours);
 
         var countsPerCountryOrderedByCount = countsPerCountry
             .LimitSpec(limit: 100, offset: 1, columns => columns.OrderBy(data => data.Aggregations, OrderDirection.Descending, SortingOrder.Numeric));
@@ -237,7 +237,7 @@ internal class QueryShould_ReturnRightData
             .Aggregations(type => type.Count())
             .Metric(type => type.Numeric(data => data.Aggregations))
             .DefaultInterval()
-            .Granularity(Granularity.Hour);
+            .Granularity(SimpleGranularity.Hour);
         await VerifyMatch(countsPerPage);
 
         var usAnonymousCountsPerPage = countsPerPage
@@ -267,12 +267,12 @@ internal class QueryShould_ReturnRightData
                 type.FieldAccess(aggregations => aggregations.Count))))
             .Filter(type => type.Selector(edit => edit.CountryIsoCode, "US"))
             .DefaultInterval()
-            .Granularity(Granularity.Hour)
+            .Granularity(SimpleGranularity.Hour)
             .Context(new QueryContext.TimeSeries() { SkipEmptyBuckets = true });
         await VerifyMatch(lineStatisticsPerHour);
 
         var inEuWarsawTime = lineStatisticsPerHour
-            .Granularity(Granularity.Hour, "Europe/Warsaw");
+            .Granularity(SimpleGranularity.Hour, "Europe/Warsaw");
         await VerifyMatch(inEuWarsawTime);
     }
 
@@ -299,7 +299,7 @@ internal class QueryShould_ReturnRightData
                 .WithNoVirtualColumns
                 .WithAggregations<int>()
                 .DefaultInterval()
-                .Granularity(Granularity.Hour)
+                .Granularity(SimpleGranularity.Hour)
                 .Dimensions(type => new(
                     type.Default(data => data.Robot),
                     type.Default(data => data.IsNew)))

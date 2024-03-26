@@ -2,7 +2,7 @@
   "queryType": "timeseries",
   "granularity": {
     "type": "duration",
-    "duration": "01:00:00",
-    "origin": "\u00222000-01-02T01:01:00\u002B00:00\u0022"
+    "duration": 3600000,
+    "origin": "2000-01-02T01:01:00\u002B00:00"
   }
 }

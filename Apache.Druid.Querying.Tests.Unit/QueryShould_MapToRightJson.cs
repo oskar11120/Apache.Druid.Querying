@@ -96,16 +96,16 @@ namespace Apache.Druid.Querying.Tests.Unit
         {
             var query = new Query<IotMeasurement>.TimeSeries();
 
-            var zero = query.Granularity(Granularity.Second);
+            var zero = query.Granularity(SimpleGranularity.Second);
             AssertMatch(zero);
 
-            var one = query.Granularity(Granularity.None, "utc");
+            var one = query.Granularity(SimpleGranularity.None, "utc");
             AssertMatch(one);
 
-            var two = query.Granularity(Granularity.Minute, "utc");
+            var two = query.Granularity(SimpleGranularity.Minute, "utc");
             AssertMatch(two);
 
-            var three = query.Granularity(Granularity.Hour, "utc", t);
+            var three = query.Granularity(SimpleGranularity.Hour, "utc", t);
             AssertMatch(three);
 
             var four = query.Granularity(TimeSpan.FromHours(1));
@@ -148,7 +148,7 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .WithNoVirtualColumns
                 .WithAggregations<Aggregations>()
                 .Interval(new(t, t))
-                .Granularity(Granularity.Minute)
+                .Granularity(SimpleGranularity.Minute)
                 .Dimensions(type => new
                 (
                     type.Default(message => message.IotObjectId),
@@ -175,7 +175,7 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .WithVirtualColumns<DateTimeOffset>
                 .WithAggregations<Aggregations>()
                 .Interval(new(t, t))
-                .Granularity(Granularity.Minute)
+                .Granularity(SimpleGranularity.Minute)
                 .VirtualColumns(type => type.Expression<DateTimeOffset>(message => $"{message.Timestamp}"))
                 .Dimensions(type => new
                 (
@@ -209,7 +209,7 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .Interval(new(t, t))
                 .Dimension(type => type.Default(message => message.IotObjectId))
                 .Threshold(5)
-                .Granularity(Granularity.Minute)
+                .Granularity(SimpleGranularity.Minute)
                 .Filter(type => type.Or(
                     type.Null(message => message.Value),
                     type.Equals(
@@ -238,7 +238,7 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .Dimension(type => type.Default(
                     message => message.Source.IotObjectId))
                 .Threshold(5)
-                .Granularity(Granularity.Minute)
+                .Granularity(SimpleGranularity.Minute)
                 .Aggregations(type => new(
                     type.Max(data => data.Source.Timestamp),
                     type.Last(data => data.Source.Value)
@@ -257,7 +257,7 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .Dimension(type => new(type.Default(
                     message => message.IotObjectId)))
                 .Threshold(5)
-                .Granularity(Granularity.Minute)
+                .Granularity(SimpleGranularity.Minute)
                 .Filter(type => type.Or(
                     type.Null(message => message.Value),
                     type.Equals(
@@ -289,7 +289,7 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .Dimension(type => new(
                     type.Default(message => message.Source.IotObjectId)))
                 .Threshold(5)
-                .Granularity(Granularity.Minute)
+                .Granularity(SimpleGranularity.Minute)
                 .Aggregations(type => new(
                     type.Max(data => data.Source.Timestamp),
                     type.Last(data => data.Source.Value)
@@ -313,7 +313,7 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .WithAggregations<double>()
                 .Interval(new(t, t))
                 .Order(OrderDirection.Ascending)
-                .Granularity(Granularity.Minute)
+                .Granularity(SimpleGranularity.Minute)
                 .Filter(type => type.Or(
                     type.Null(message => message.Value),
                     type.Equals(
@@ -328,7 +328,7 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .WithAggregations<Aggregations>()
                 .Interval(new(t, t))
                 .Order(OrderDirection.Ascending)
-                .Granularity(Granularity.Minute)
+                .Granularity(SimpleGranularity.Minute)
                 .VirtualColumns(type => new(type.Expression<DateTimeOffset>(_ => "__time")))
                 .Filter(type => type.Or(
                     type.Null(pair => pair.VirtualColumns.TReal),
@@ -348,7 +348,7 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .WithPostAggregations<PostAggregations>()
                 .Interval(new(t, t))
                 .Order(OrderDirection.Ascending)
-                .Granularity(Granularity.Minute)
+                .Granularity(SimpleGranularity.Minute)
                 .Filter(type => type.Or(
                     type.Null(message => message.Value),
                     type.Equals(
@@ -373,7 +373,7 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .WithPostAggregations<PostAggregations>()
                 .Interval(new(t, t))
                 .Order(OrderDirection.Ascending)
-                .Granularity(Granularity.Minute)
+                .Granularity(SimpleGranularity.Minute)
                 .VirtualColumns(type => new(type.Expression<DateTimeOffset>(_ => "__time")))
                 .Filter(type => type.Or(
                     type.Null(pair => pair.VirtualColumns.TReal),

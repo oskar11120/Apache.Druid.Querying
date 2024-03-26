@@ -6,7 +6,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Text.RegularExpressions;
 
 namespace Apache.Druid.Querying
 {
@@ -18,7 +17,7 @@ namespace Apache.Druid.Querying
         Descending
     }
 
-    public enum Granularity
+    public enum SimpleGranularity
     {
         None,
         Second,
@@ -36,6 +35,68 @@ namespace Apache.Druid.Querying
         Quarter,
         Year,
         All
+    }
+
+    public sealed class Granularity
+    {
+        public Granularity(SimpleGranularity? simple, TimeSpan? duration, string? period, string? timeZone, DateTimeOffset? origin)
+        {
+            Simple = simple;
+            Duration = duration;
+            Period = period;
+            TimeZone = timeZone;
+            Origin = origin;
+            EnsureValid();
+        }
+
+        public static Granularity NewSimple(SimpleGranularity simple, string? timeZone = null, DateTimeOffset? origin = null)
+            => new(simple, null, null, timeZone, origin);
+        public static Granularity NewDuration(TimeSpan duration, DateTimeOffset? origin = null)
+            => new(null, duration, null, null, origin);
+        public static Granularity NewPeriod(string period, string? timeZone = null, DateTimeOffset? origin = null)
+            => new(null, null, period, timeZone, origin);
+
+        public SimpleGranularity? Simple { get; }
+        public TimeSpan? Duration { get; }
+        public string? Period { get; }
+        public string? TimeZone { get; }
+        public DateTimeOffset? Origin { get; }
+
+        public TResult Switch<TArguments, TResult>(
+            TArguments arguments,
+            Func<SimpleGranularity, Granularity, TArguments, TResult> ifSimple,
+            Func<TimeSpan, Granularity, TArguments, TResult> ifDuration,
+            Func<string, Granularity, TArguments, TResult> ifPeriod)
+            => (Simple, Duration, Period) switch
+            {
+                (SimpleGranularity simple, _, _) => ifSimple(simple, this, arguments),
+                (_, TimeSpan duration, _) => ifDuration(duration, this, arguments),
+                (_, _, string period) => ifPeriod(period, this, arguments),
+                _ => throw new NotSupportedException()
+            };
+
+        public TResult Switch<TResult>(
+            Func<SimpleGranularity, Granularity, TResult> ifSimple,
+            Func<TimeSpan, Granularity, TResult> ifDuration,
+            Func<string, Granularity, TResult> ifPeriod)
+            => Switch(
+                (ifSimple, ifDuration, ifPeriod),
+                static (simple, granularity, args) => args.ifSimple(simple, granularity),
+                static (duration, granularity, args) => args.ifDuration(duration, granularity),
+                static (period, granularity, args) => args.ifPeriod(period, granularity));
+
+        private void EnsureValid()
+        {
+            InvalidOperationException Invalid(string message) => new(message) { Data = { [nameof(Granularity)] = this } };
+            var sum =
+                Convert.ToInt32(Simple is not null) +
+                Convert.ToInt32(Duration is not null) +
+                Convert.ToInt32(Period is not null);
+            if (sum is not 1)
+                throw Invalid($"{nameof(Granularity)} has to be either {nameof(Simple)}, {nameof(Duration)} or {nameof(Period)}.");
+            if (Duration is not null && TimeZone is not null)
+                throw Invalid($"{nameof(Duration)} granularity does not support {nameof(TimeZone)}s.");
+        }
     }
 
     public enum SimpleDataType
@@ -344,64 +405,24 @@ namespace Apache.Druid.Querying
             where TContext : Context
             => query.AddOrUpdateSection(nameof(context), context);
 
-        private static string? MapOrigin(DateTimeOffset? origin)
-            => origin is null ? null : JsonSerializer.Serialize(origin);
-        private static string ToSnake(this string @string)
-            => Regex.Replace(Regex.Replace(@string, "(.)([A-Z][a-z]+)", "$1_$2"), "([a-z0-9])([A-Z])", "$1_$2").ToLower();
-        private static readonly Dictionary<Granularity, string> granularityToStringMap = Enum
-            .GetValues<Granularity>()
-            .ToDictionary(granularity => granularity, granularity => granularity.ToString().TrimEnd('s').ToSnake());
         public static TQuery Granularity<TQuery>(this TQuery query, Granularity granularity)
             where TQuery : IQueryWith.Granularity
         {
-            query.AddOrUpdateSection(nameof(granularity), granularityToStringMap[granularity]);
+            query.AddOrUpdateSection(nameof(Granularity), granularity);
             return query;
         }
+
+        public static TQuery Granularity<TQuery>(this TQuery query, SimpleGranularity simple, string? timeZone = null, DateTimeOffset? origin = null)
+            where TQuery : IQueryWith.Granularity
+            => query.Granularity(Querying.Granularity.NewSimple(simple, timeZone, origin));
 
         public static TQuery Granularity<TQuery>(this TQuery query, TimeSpan duration, DateTimeOffset? origin = null)
             where TQuery : IQueryWith.Granularity
-        {
-            query.AddOrUpdateSection(nameof(Granularity), new { type = nameof(duration), duration, origin = MapOrigin(origin) });
-            return query;
-        }
+            => query.Granularity(Querying.Granularity.NewDuration(duration, origin));
 
         public static TQuery Granularity<TQuery>(this TQuery query, string period, string? timeZone = null, DateTimeOffset? origin = null)
            where TQuery : IQueryWith.Granularity
-        {
-            query.AddOrUpdateSection(nameof(Granularity), new { type = nameof(period), period, timeZone, origin = MapOrigin(origin) });
-            return query;
-        }
-
-        private static readonly Dictionary<Granularity, string> granularityToPeriodMap = new()
-        {
-            [Querying.Granularity.Second] = "PT1S",
-            [Querying.Granularity.Minute] = "PT1M",
-            [Querying.Granularity.FiveMinutes] = "PT5M",
-            [Querying.Granularity.TenMinutes] = "PT10M",
-            [Querying.Granularity.FifteenMinutes] = "PT15M",
-            [Querying.Granularity.ThirtyMinutes] = "PT30M",
-            [Querying.Granularity.Hour] = "PT1H",
-            [Querying.Granularity.SixHours] = "PT6H",
-            [Querying.Granularity.EightHours] = "PT8H",
-            [Querying.Granularity.Day] = "P1D",
-            [Querying.Granularity.Week] = "P1W",
-            [Querying.Granularity.Month] = "P1M",
-            [Querying.Granularity.Quarter] = "P3M",
-            [Querying.Granularity.Year] = "P1Y"
-        };
-        public static TQuery Granularity<TQuery>(this TQuery query, Granularity granularity, string timeZone, DateTimeOffset? origin = null)
-            where TQuery : IQueryWith.Granularity
-        {
-            if (granularity is Querying.Granularity.All or Querying.Granularity.None)
-            {
-                query.Granularity(granularity);
-                return query;
-            }
-
-            var period = granularityToPeriodMap[granularity];
-            query.Granularity(period, timeZone, origin);
-            return query;
-        }
+            => query.Granularity(Querying.Granularity.NewPeriod(period, timeZone, origin));
 
         public static TQuery Offset<TQuery>(this TQuery query, int offset)
             where TQuery : IQueryWith.OffsetAndLimit

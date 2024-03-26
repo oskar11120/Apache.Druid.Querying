@@ -10,7 +10,7 @@ public sealed record SegmentMetadata(
     Interval[]? Intervals,
     SegmentMetdataTimestampSpec? TimestampSpec,
     Dictionary<string, SegmentMetadata.Aggregator>? Aggregators,
-    System.Text.Json.JsonElement? QueryGranularity, // TODO parse to concrete type
+    Granularity? QueryGranularity,
     bool? Rollup)
 {
     public sealed record Column(

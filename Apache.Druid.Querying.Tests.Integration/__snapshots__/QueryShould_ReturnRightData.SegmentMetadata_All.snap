@@ -282,7 +282,11 @@
     },
     "Aggregators": {},
     "QueryGranularity": {
-      "ValueKind": "Object"
+      "Simple": "None",
+      "Duration": null,
+      "Period": null,
+      "TimeZone": null,
+      "Origin": null
     },
     "Rollup": false
   }

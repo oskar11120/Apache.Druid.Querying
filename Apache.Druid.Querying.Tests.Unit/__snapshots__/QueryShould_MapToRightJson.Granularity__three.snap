@@ -4,6 +4,6 @@
     "type": "period",
     "period": "PT1H",
     "timeZone": "utc",
-    "origin": "\u00222000-01-02T01:01:00\u002B00:00\u0022"
+    "origin": "2000-01-02T01:01:00\u002B00:00"
   }
 }
