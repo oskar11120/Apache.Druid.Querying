@@ -51,9 +51,8 @@
       "fn": "\u002B",
       "fields": [
         {
-          "type": "fieldAccess",
-          "fieldName": "LastValue",
-          "finalizing": true
+          "type": "finalizingFieldAccess",
+          "fieldName": "LastValue"
         }
       ]
     }

@@ -140,7 +140,7 @@ namespace Apache.Druid.Querying
             var context = new TContext();
             async IAsyncEnumerable<TResult> Deserialize(Stream utf8Json, [EnumeratorCancellation] CancellationToken token)
             {
-                buffer ??= ArrayPool<byte>.Shared.Rent(JsonStreamReader.Size);
+                buffer ??= ArrayPool<byte>.Shared.Rent(options.Serializer.DefaultBufferSize);
                 var read = await utf8Json.ReadAsync(buffer, token);
                 var results = deserializer
                     .Deserialize(new(new(utf8Json, buffer, read), options.Serializer, atomicity, columnNameMappings), token)

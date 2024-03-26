@@ -311,6 +311,24 @@ internal class QueryShould_ReturnRightData
         await Test(Wikipedia.Edits);
     }
 
+    [Test]
+    public async Task SegmentMetadata_All()
+    {
+        var query = new Query<Edit>
+            .SegmentMetadata()
+            .DefaultInterval()
+            .Merge(false)
+            .AnalysisTypes(Enum.GetValues<SegmentMetadata.AnalysisType>());
+        await VerifyMatch(Wikipedia.Edits, query, string.Empty);
+    }
+
+    [Test]
+    public async Task SegmentMetadata_Minimal()
+    {
+        var query = new Query<Edit>.SegmentMetadata();
+        await VerifyMatch(Wikipedia.Edits, query, string.Empty);
+    }
+
     interface IIotMeasurement
     {
         Guid ObjectId { get; }

@@ -75,8 +75,7 @@ public static class TruncatedQueryResultHandler<TSource>
 
     public interface TimeSeries<TResult> :
         IQueryWithSource<TSource>.AndResult<WithTimestamp<TResult>>.AndDeserializationAndTruncatedResultHandling<TimeSeries<TResult>.LatestReturned>,
-        IQueryWith.Intervals,
-        IQueryWith.Order
+        IQueryWith.Intervals
     {
         public sealed class LatestReturned
         {

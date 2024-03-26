@@ -131,12 +131,12 @@ namespace Apache.Druid.Querying.Json
             private static readonly byte[] separatorBytes = Encoding.UTF8.GetBytes(separator);
 
             private IntervalConverter()
-            {                
+            {
             }
 
             public override Interval? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
-                static InvalidOperationException Invalid(ReadOnlySpan<byte> value, Exception? inner = null) 
+                static InvalidOperationException Invalid(ReadOnlySpan<byte> value, Exception? inner = null)
                     => new($"Invalid interval {Encoding.UTF8.GetString(value)}.", inner);
                 ReadOnlySpan<byte> value = reader.HasValueSequence ?
                      reader.ValueSequence.ToArray() :
@@ -147,13 +147,15 @@ namespace Apache.Druid.Querying.Json
 
                 try
                 {
-                    var left = value[..separatorPosition];
-                    var right = value[separatorPosition..];
-                    return new(
-                        JsonSerializer.Deserialize<DateTimeOffset>(left),
-                        JsonSerializer.Deserialize<DateTimeOffset>(right));
+                    var bLeft = value[..separatorPosition];
+                    var bRight = value[(separatorPosition + separatorBytes.Length)..];
+                    var sLeft = Encoding.UTF8.GetString(bLeft);
+                    var sRight = Encoding.UTF8.GetString(bRight);
+                    var tLeft = DateTimeOffset.Parse(sLeft, CultureInfo.InvariantCulture);
+                    var tRight = DateTimeOffset.Parse(sRight, CultureInfo.InvariantCulture);
+                    return new(tLeft, tRight);
                 }
-                catch(Exception exception)
+                catch (Exception exception)
                 {
                     throw Invalid(value, exception);
                 }

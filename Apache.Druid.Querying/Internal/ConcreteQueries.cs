@@ -18,6 +18,10 @@ namespace Apache.Druid.Querying.Internal
                 => array.Deserialize(context, token);
         }
 
+        public interface Array<TElement> : IArray<TElement, Element<TElement>> 
+        {
+        }
+
         public class WithTimestamp<TValue, TValueMapper>
             : TwoPropertyObject<DateTimeOffset, TValue, TValueMapper, WithTimestamp<TValue>>
             where TValueMapper : IQueryResultDeserializer<TValue>, new()

@@ -40,7 +40,7 @@ internal sealed class JsonStreamReader
         TokenType = reader.TokenType;
     }
 
-    public ReadOnlySpan<byte> GetSpan() => _bytesConsumed > 0 || _readCount < Size ? _buffer.AsSpan()[(int)_bytesConsumed.._readCount] : _buffer;
+    public ReadOnlySpan<byte> GetSpan() => _bytesConsumed > 0 || _readCount < BufferSize ? _buffer.AsSpan()[(int)_bytesConsumed.._readCount] : _buffer;
 
     public Utf8JsonReader GetReader() => new(GetSpan(), false, _readerState);
 
@@ -48,14 +48,14 @@ internal sealed class JsonStreamReader
 
     public int Depth => _depth;
 
-    public static int Size => 4 * 1024;
+    public int BufferSize => _buffer.Length;
 
     public async Task AdvanceAsync(CancellationToken token)
     {
         // Save off existing text
         int leftoverLength = FlipBuffer();
-        if (leftoverLength <= 0 && _readCount != Size)
-            throw new InvalidOperationException($"Buffer full. Content: \n{DebugView}");
+        if (leftoverLength == BufferSize)
+            throw new InvalidOperationException($"Buffer full. Content: \n{DebugView}.");
 
         // Read from stream to fill remainder of buffer
         int read = await _stream.ReadAsync(_buffer.AsMemory()[leftoverLength..], token);

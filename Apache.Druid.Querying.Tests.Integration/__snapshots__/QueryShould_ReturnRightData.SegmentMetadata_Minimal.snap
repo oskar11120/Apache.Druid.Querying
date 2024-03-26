@@ -1,0 +1,283 @@
+﻿[
+  {
+    "Id": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Columns": {
+      "__time": {
+        "TypeSignature": "LONG",
+        "Type": "LONG",
+        "HasMultipleValues": false,
+        "HasNulls": false,
+        "Size": 0,
+        "MinValue": null,
+        "MaxValue": null,
+        "Cardinality": null,
+        "ErrorMessage": null
+      },
+      "isRobot": {
+        "TypeSignature": "STRING",
+        "Type": "STRING",
+        "HasMultipleValues": false,
+        "HasNulls": false,
+        "Size": 0,
+        "MinValue": "false",
+        "MaxValue": "true",
+        "Cardinality": 2,
+        "ErrorMessage": null
+      },
+      "channel": {
+        "TypeSignature": "STRING",
+        "Type": "STRING",
+        "HasMultipleValues": false,
+        "HasNulls": false,
+        "Size": 0,
+        "MinValue": "#ar.wikipedia",
+        "MaxValue": "#zh.wikipedia",
+        "Cardinality": 51,
+        "ErrorMessage": null
+      },
+      "flags": {
+        "TypeSignature": "STRING",
+        "Type": "STRING",
+        "HasMultipleValues": false,
+        "HasNulls": false,
+        "Size": 0,
+        "MinValue": "",
+        "MaxValue": "NB",
+        "Cardinality": 10,
+        "ErrorMessage": null
+      },
+      "isUnpatrolled": {
+        "TypeSignature": "STRING",
+        "Type": "STRING",
+        "HasMultipleValues": false,
+        "HasNulls": false,
+        "Size": 0,
+        "MinValue": "false",
+        "MaxValue": "true",
+        "Cardinality": 2,
+        "ErrorMessage": null
+      },
+      "page": {
+        "TypeSignature": "STRING",
+        "Type": "STRING",
+        "HasMultipleValues": false,
+        "HasNulls": false,
+        "Size": 0,
+        "MinValue": "'t Suydevelt",
+        "MaxValue": "황소자리 세타",
+        "Cardinality": 22383,
+        "ErrorMessage": null
+      },
+      "diffUrl": {
+        "TypeSignature": "STRING",
+        "Type": "STRING",
+        "HasMultipleValues": false,
+        "HasNulls": false,
+        "Size": 0,
+        "MinValue": "https://ar.wikipedia.org/w/index.php?diff=20310994&oldid=20310977",
+        "MaxValue": "https://zh.wikipedia.org/w/index.php?title=Topic:T6oo8x0xa2kghw9d&action=history",
+        "Cardinality": 24433,
+        "ErrorMessage": null
+      },
+      "added": {
+        "TypeSignature": "LONG",
+        "Type": "LONG",
+        "HasMultipleValues": false,
+        "HasNulls": false,
+        "Size": 0,
+        "MinValue": null,
+        "MaxValue": null,
+        "Cardinality": null,
+        "ErrorMessage": null
+      },
+      "comment": {
+        "TypeSignature": "STRING",
+        "Type": "STRING",
+        "HasMultipleValues": false,
+        "HasNulls": false,
+        "Size": 0,
+        "MinValue": "!vote Keep",
+        "MaxValue": "（简体中文）. 引文格式1维护：未识别语文类型 (link)其他特色條目：綏遠抗戰 － 巴伐利亚级战列舰 － 第一代纳尔逊子爵霍雷肖·纳尔逊 特色列表：印度尼西亚总理列表 － 苏联最高领导人列",
+        "Cardinality": 13865,
+        "ErrorMessage": null
+      },
+      "commentLength": {
+        "TypeSignature": "LONG",
+        "Type": "LONG",
+        "HasMultipleValues": false,
+        "HasNulls": false,
+        "Size": 0,
+        "MinValue": null,
+        "MaxValue": null,
+        "Cardinality": null,
+        "ErrorMessage": null
+      },
+      "isNew": {
+        "TypeSignature": "STRING",
+        "Type": "STRING",
+        "HasMultipleValues": false,
+        "HasNulls": false,
+        "Size": 0,
+        "MinValue": "false",
+        "MaxValue": "true",
+        "Cardinality": 2,
+        "ErrorMessage": null
+      },
+      "isMinor": {
+        "TypeSignature": "STRING",
+        "Type": "STRING",
+        "HasMultipleValues": false,
+        "HasNulls": false,
+        "Size": 0,
+        "MinValue": "false",
+        "MaxValue": "true",
+        "Cardinality": 2,
+        "ErrorMessage": null
+      },
+      "delta": {
+        "TypeSignature": "LONG",
+        "Type": "LONG",
+        "HasMultipleValues": false,
+        "HasNulls": false,
+        "Size": 0,
+        "MinValue": null,
+        "MaxValue": null,
+        "Cardinality": null,
+        "ErrorMessage": null
+      },
+      "isAnonymous": {
+        "TypeSignature": "STRING",
+        "Type": "STRING",
+        "HasMultipleValues": false,
+        "HasNulls": false,
+        "Size": 0,
+        "MinValue": "false",
+        "MaxValue": "true",
+        "Cardinality": 2,
+        "ErrorMessage": null
+      },
+      "user": {
+        "TypeSignature": "STRING",
+        "Type": "STRING",
+        "HasMultipleValues": false,
+        "HasNulls": false,
+        "Size": 0,
+        "MinValue": "*feridiák",
+        "MaxValue": "ＫｏＺ",
+        "Cardinality": 7862,
+        "ErrorMessage": null
+      },
+      "deltaBucket": {
+        "TypeSignature": "LONG",
+        "Type": "LONG",
+        "HasMultipleValues": false,
+        "HasNulls": false,
+        "Size": 0,
+        "MinValue": null,
+        "MaxValue": null,
+        "Cardinality": null,
+        "ErrorMessage": null
+      },
+      "deleted": {
+        "TypeSignature": "LONG",
+        "Type": "LONG",
+        "HasMultipleValues": false,
+        "HasNulls": false,
+        "Size": 0,
+        "MinValue": null,
+        "MaxValue": null,
+        "Cardinality": null,
+        "ErrorMessage": null
+      },
+      "namespace": {
+        "TypeSignature": "STRING",
+        "Type": "STRING",
+        "HasMultipleValues": false,
+        "HasNulls": false,
+        "Size": 0,
+        "MinValue": "Aide",
+        "MaxValue": "틀토론",
+        "Cardinality": 235,
+        "ErrorMessage": null
+      },
+      "cityName": {
+        "TypeSignature": "STRING",
+        "Type": "STRING",
+        "HasMultipleValues": false,
+        "HasNulls": true,
+        "Size": 0,
+        "MinValue": null,
+        "MaxValue": "Zurich",
+        "Cardinality": 836,
+        "ErrorMessage": null
+      },
+      "countryName": {
+        "TypeSignature": "STRING",
+        "Type": "STRING",
+        "HasMultipleValues": false,
+        "HasNulls": true,
+        "Size": 0,
+        "MinValue": null,
+        "MaxValue": "Vietnam",
+        "Cardinality": 106,
+        "ErrorMessage": null
+      },
+      "regionIsoCode": {
+        "TypeSignature": "STRING",
+        "Type": "STRING",
+        "HasMultipleValues": false,
+        "HasNulls": true,
+        "Size": 0,
+        "MinValue": null,
+        "MaxValue": "ZP",
+        "Cardinality": 354,
+        "ErrorMessage": null
+      },
+      "metroCode": {
+        "TypeSignature": "STRING",
+        "Type": "STRING",
+        "HasMultipleValues": false,
+        "HasNulls": true,
+        "Size": 0,
+        "MinValue": null,
+        "MaxValue": "866",
+        "Cardinality": 92,
+        "ErrorMessage": null
+      },
+      "countryIsoCode": {
+        "TypeSignature": "STRING",
+        "Type": "STRING",
+        "HasMultipleValues": false,
+        "HasNulls": true,
+        "Size": 0,
+        "MinValue": null,
+        "MaxValue": "ZA",
+        "Cardinality": 106,
+        "ErrorMessage": null
+      },
+      "regionName": {
+        "TypeSignature": "STRING",
+        "Type": "STRING",
+        "HasMultipleValues": false,
+        "HasNulls": true,
+        "Size": 0,
+        "MinValue": null,
+        "MaxValue": "Świętokrzyskie",
+        "Cardinality": 470,
+        "ErrorMessage": null
+      }
+    },
+    "NumRows": 24433,
+    "Size": 0,
+    "Intervals": [
+      {
+        "From": "2016-06-27T00:00:00+00:00",
+        "To": "2016-06-28T00:00:00+00:00"
+      }
+    ],
+    "TimestampSpec": null,
+    "Aggregators": null,
+    "QueryGranularity": null,
+    "Rollup": null
+  }
+]

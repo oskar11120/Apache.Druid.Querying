@@ -1,6 +1,9 @@
 ﻿using Apache.Druid.Querying.Internal;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace Apache.Druid.Querying
 {
@@ -15,7 +18,7 @@ namespace Apache.Druid.Querying
     {
         private static readonly byte[] timeColumnUtf8Bytes = Encoding.UTF8.GetBytes("__time");
 
-        internal static readonly QueryResultElement.Deserializer<WithTimestamp<TValue>> Deserializer = 
+        internal static readonly QueryResultElement.Deserializer<WithTimestamp<TValue>> Deserializer =
             (ref QueryResultElement.DeserializerContext context)
                 => new(
                     context.DeserializeProperty<DateTimeOffset>(timeColumnUtf8Bytes),
@@ -253,7 +256,37 @@ namespace Apache.Druid.Querying
         {
         }
 
-        public class DataSourceMetadata : 
+        public class SegmentMetadata :
+            QueryBase,
+            IQuery<SegmentMetadata>,
+            IQueryWith.Intervals,
+            IQueryWith.Context<Context, SegmentMetadata>,
+            IQueryWithSource<TSource>.AndResult<Querying.SegmentMetadata>.AndDeserializationAndTruncatedResultHandling<None>,
+            QueryResultDeserializer.Array<Querying.SegmentMetadata>
+        {
+            private static readonly IReadOnlyDictionary<Querying.SegmentMetadata.AnalysisType, string> analysisTypeStrings = Enum
+                .GetValues<Querying.SegmentMetadata.AnalysisType>()
+                .ToDictionary(type => type, type => type.ToString().ToCamelCase());
+            private IQuery<SegmentMetadata> @base => this;
+
+            public SegmentMetadata Merge(bool merge) => @base.AddOrUpdateSection(nameof(Merge), merge);
+            public SegmentMetadata AnalysisTypes(IEnumerable<Querying.SegmentMetadata.AnalysisType> types)
+                => @base.AddOrUpdateSection(nameof(AnalysisTypes), types.Select(type => analysisTypeStrings[type]));
+            public SegmentMetadata AnalysisTypes(params Querying.SegmentMetadata.AnalysisType[] types)
+                => AnalysisTypes(types.AsEnumerable());
+            public SegmentMetadata AggregatorMergeStrategy(Querying.SegmentMetadata.AggregatorMergeStrategy strategy)
+                => @base.AddOrUpdateSection(nameof(AggregatorMergeStrategy), strategy);
+
+            IAsyncEnumerable<Querying.SegmentMetadata> IQueryWithSource<TSource>
+                .AndResult<Querying.SegmentMetadata>.AndDeserializationAndTruncatedResultHandling<None>.OnTruncatedResultsSetQueryForRemaining(
+                IAsyncEnumerable<Querying.SegmentMetadata> results, None context, Mutable<IQueryWithSource<TSource>> setter, CancellationToken token)
+            {
+                // TODO
+                return results;
+            }
+        }
+
+        public class DataSourceMetadata :
             QueryBase,
             IQueryWith.Context<Context, DataSourceMetadata>,
             QueryResultDeserializer.ArrayOfObjectsWithTimestamp<Querying.DataSourceMetadata>,
