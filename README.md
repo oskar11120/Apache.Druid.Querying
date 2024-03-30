@@ -62,6 +62,7 @@ Currently available query types:
 - TopN
 - GroupBy
 - Scan (currently missing option to specifiy a subset of columns)
+- SegmentMetadata
 - DataSourceMetadata
 
 ```cs
