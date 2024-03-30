@@ -9,7 +9,6 @@ using System.Collections.Generic;
 
 namespace Apache.Druid.Querying.Internal;
 
-
 public delegate JsonNode? QuerySectionToJson<TSection>(TSection Section, JsonSerializerOptions serializerOptions, IColumnNameMappingProvider columnNames);
 public sealed record QuerySectionState<TSection>(string Key, TSection Section, QuerySectionToJson<TSection>? SectionToJson = null);
 

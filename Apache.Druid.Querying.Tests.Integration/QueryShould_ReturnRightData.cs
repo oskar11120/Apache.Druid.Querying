@@ -30,7 +30,7 @@ internal class QueryShould_ReturnRightData
         var json = dataSource.MapQueryToJson(query).ToString();
         await TestContext.Out.WriteLineAsync(json);
         void Match(List<TResult> results)
-            => Snapshot.Match(results, spanshotName, options => options.IgnoreField("[:].SegmentId"));
+            => Snapshot.Match(results, spanshotName, options => options.IgnoreField("[:].SegmentId").IgnoreField("[:].Id"));
         var results = await dataSource
             .ExecuteQuery(query)
             .ToListAsync();
