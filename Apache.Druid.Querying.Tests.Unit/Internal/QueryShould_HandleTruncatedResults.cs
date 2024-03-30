@@ -38,12 +38,17 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
             await Execute(0, 500);
             latest.Count.Should().Be(500);
             var withOffsetAndLimit = setter.Value as IQueryWith.OffsetAndLimit;
-            withOffsetAndLimit.Should().BeEquivalentTo(new { Offset = 500, Limit = 500 });
+            void ShouldBeEquivalentTo(int offset, int limit)
+            {
+                withOffsetAndLimit!.Offset.Should().Be(offset);
+                withOffsetAndLimit.Limit.Should().Be(limit);
+            }
+            ShouldBeEquivalentTo(offset: 500, limit: 500);
 
             await Execute(500, 200);
             latest.Count.Should().Be(700);
             withOffsetAndLimit = setter.Value as IQueryWith.OffsetAndLimit;
-            withOffsetAndLimit.Should().BeEquivalentTo(new { Offset = 700, Limit = 300 });
+            ShouldBeEquivalentTo(offset: 700, limit: 300);
 
             setter.Value = null;
             await Execute(700, 300, truncate: false);
@@ -54,7 +59,7 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
         [Test]
         public async Task TimeSeries()
         {
-            var t0 = DateTime.Today;
+            var t0 = (DateTimeOffset)DateTime.Today;
             var intervals = new Interval[] { new(t0, t0.AddDays(2)), new(t0.AddDays(3), t0.AddDays(4)) };
             var query = new Query<None>.TimeSeries().Intervals(intervals) as TimeSeries;
             var latest = new TimeSeries.LatestReturned();
@@ -63,10 +68,12 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
             async Task Execute(IEnumerable<int> source, bool skipFirstResult = false, bool truncate = true)
             {
                 var results = source
-                    .Select(i => new WithTimestamp<None>(t0 + i * deltaT, default));
-                (await query
+                    .Select(i => new WithTimestamp<None>(t0 + i * deltaT, default))
+                    .ToArray();
+                var returned = await query
                     .OnTruncatedResultsSetQueryForRemaining(MaybeTruncate(results, truncate), latest, setter, default)
-                    .ToListAsync())
+                    .ToListAsync();
+                returned
                     .Should()
                     .BeEquivalentTo(skipFirstResult ? results.Skip(1) : results);
             }

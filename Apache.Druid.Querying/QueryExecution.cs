@@ -35,7 +35,7 @@ namespace Apache.Druid.Querying
         internal IAsyncEnumerable<TResult> Deserialize(QueryResultDeserializerContext context, CancellationToken token);
     }
 
-    public interface IQueryWithSource<TSource> : IQuery, IQueryWithSectionFactoryExpressions
+    public interface IQueryWithSource<TSource> : IQueryWithInternal.SectionFactoryExpression_Atomicity
     {
         public interface AndResult<TResult> : IQueryWithSource<TSource>
         {

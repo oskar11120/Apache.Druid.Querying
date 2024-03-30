@@ -1,5 +1,4 @@
-﻿using Apache.Druid.Querying.Internal.Sections;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -7,7 +6,7 @@ using System.Threading;
 
 namespace Apache.Druid.Querying.Internal;
 
-public interface IDimensionsProvider<TResult, TDimensions>
+public interface IDimensionsProvider<in TResult, out TDimensions>
 {
     internal TDimensions GetDimensions(TResult result);
 }
@@ -29,53 +28,28 @@ public static class DimensionsProvider<TDimensions>
 
 public static class TruncatedQueryResultHandler<TSource>
 {
-    private class Copy_<TQuery> : IQueryWithSource<TSource> where TQuery : IQueryWithSource<TSource>
-    {
-        public Copy_(TQuery @base)
-        {
-            State = @base.GetState().ToDictionary(pair => pair.Key, pair => pair.Value);
-            SectionAtomicity = @base.SectionAtomicity;
-        }
-
-        public Dictionary<string, QuerySectionValueFactory> State { get; }
-        public SectionAtomicity.IProvider.Builder SectionAtomicity { get; }
-    }
-
-    private sealed class Copy_WithIntervals<TQuery> : Copy_<TQuery>, IQueryWith.Intervals
-        where TQuery : IQueryWithSource<TSource>, IQueryWith.Intervals
-    {
-        public Copy_WithIntervals(TQuery @base) : base(@base)
-        {
-            Intervals = @base.Intervals;
-        }
-
-        public IReadOnlyCollection<Interval>? Intervals { get; set; }
-    }
-
-    private static Copy_WithIntervals<TQuery> Copy<TQuery>(TQuery query)
-        where TQuery : IQueryWithSource<TSource>, IQueryWith.Intervals
-        => new(query);
-
-    private static Copy_WithIntervals<TQuery> Copy<TQuery>(TQuery query, DateTimeOffset withIntervalsStartingFrom)
-        where TQuery : IQueryWithSource<TSource>, IQueryWith.Intervals
+    private static TQuery WithIntervalsStartingFrom<TQuery>(TQuery query, DateTimeOffset from)
+        where TQuery : IQueryWith.Intervals
     {
         var newIntervals = query
-            .GetIntervals()
+            .Intervals
             .Select(interval =>
             {
-                if (interval.To <= withIntervalsStartingFrom)
+                if (interval.To <= from)
                     return null;
-                return interval.From <= withIntervalsStartingFrom && interval.To > withIntervalsStartingFrom ?
-                    interval with { From = withIntervalsStartingFrom } : interval;
+                return interval.From <= from && interval.To > from ?
+                    interval with { From = from } : interval;
             })
             .Where(inteval => inteval is not null)
             .ToArray();
-        return Copy(query).Intervals(newIntervals!);
+        var result = query.Copy().Intervals(newIntervals!);
+        return result;
     }
 
     public interface TimeSeries<TResult> :
         IQueryWithSource<TSource>.AndResult<WithTimestamp<TResult>>.AndDeserializationAndTruncatedResultHandling<TimeSeries<TResult>.LatestReturned>,
-        IQueryWith.Intervals
+        IQueryWith.Intervals,
+        ICloneableQuery<IQueryWithSource<TSource>>
     {
         public sealed class LatestReturned
         {
@@ -101,7 +75,7 @@ public static class TruncatedQueryResultHandler<TSource>
 
             if (!truncated)
                 yield break;
-            setter.Value = latestReturned.Timestamp is DateTimeOffset existing ? Copy(this, existing) : this;
+            setter.Value = latestReturned.Timestamp is DateTimeOffset existing ? WithIntervalsStartingFrom(this, existing) : this;
         }
     }
 
@@ -148,7 +122,7 @@ public static class TruncatedQueryResultHandler<TSource>
 
             if (!truncated)
                 yield break;
-            setter.Value = latestReturned.Timestamp is DateTimeOffset existing ? Copy(this, existing) : this;
+            setter.Value = latestReturned.Timestamp is DateTimeOffset existing ? WithIntervalsStartingFrom(this, existing) : this;
         }
     }
 
@@ -157,25 +131,6 @@ public static class TruncatedQueryResultHandler<TSource>
         IQueryWithSource<TSource>.AndResult<TResult>.AndDeserializationAndTruncatedResultHandling<Scan<TResult>.LatestResult>,
         IQueryWith.OffsetAndLimit
     {
-        private sealed class Copy__<TQuery> : Copy_<TQuery>, IQueryWith.OffsetAndLimit where TQuery :
-            IQueryWithSource<TSource>,
-            IQueryWith.OffsetAndLimit
-        {
-            public Copy__(TQuery @base) : base(@base)
-            {
-                Offset = @base.Offset;
-                Limit = @base.Limit;
-            }
-
-            public int Offset { get; set; }
-            public int Limit { get; set; }
-        }
-
-        private static Copy__<TQuery> Copy<TQuery>(TQuery query) where TQuery :
-            IQueryWithSource<TSource>,
-            IQueryWith.OffsetAndLimit
-             => new(query);
-
         public sealed class LatestResult
         {
             public int Count;
@@ -195,11 +150,11 @@ public static class TruncatedQueryResultHandler<TSource>
                 yield return result;
             }
 
-            if (!truncated || (Limit is not 0 && latestResult.Count >= Limit))
+            if (!truncated || (Limit is not null && latestResult.Count >= Limit))
                 yield break;
-            var newQuery = Copy(this).Offset(latestResult.Count);
-            if (Limit is not 0)
-                newQuery = newQuery.Limit(Limit - latestResult.Count);
+            var newQuery = this.Copy().Offset(latestResult.Count);
+            if (Limit is not null)
+                newQuery = newQuery.Limit(Limit.Value - latestResult.Count);
             setter.Value = newQuery;
         }
     }

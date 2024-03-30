@@ -1,11 +1,12 @@
-﻿using Apache.Druid.Querying.Internal;
+﻿using static Apache.Druid.Querying.Internal.IQueryWithInternal;
+using Apache.Druid.Querying.Internal;
 using Apache.Druid.Querying.Internal.Sections;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text.Json;
-using System.Text.Json.Nodes;
+using System.Collections.Concurrent;
+using System.Reflection;
 
 namespace Apache.Druid.Querying
 {
@@ -125,153 +126,126 @@ namespace Apache.Druid.Querying
         Strlen
     }
 
-    internal delegate JsonNode QuerySectionValueFactory(JsonSerializerOptions serializerOptions, IColumnNameMappingProvider columnNames);
-
-    public interface IQuery
+    public interface ICloneableQuery<out TSelf> 
     {
-        private protected Dictionary<string, QuerySectionValueFactory> State { get; }
-        internal IReadOnlyDictionary<string, QuerySectionValueFactory> GetState() => State;
 
-        internal void AddOrUpdateSection(string key, QuerySectionValueFactory valueFactory, bool convertKeyToCamelCase = true)
-        {
-            key = convertKeyToCamelCase ? key.ToCamelCase() : key;
-            State.Remove(key);
-            State.Add(key, valueFactory);
-        }
-
-        internal void AddOrUpdateSection<TValue>(string key, Func<IColumnNameMappingProvider, TValue> getValue, bool convertKeyToCamelCase = true)
-            => AddOrUpdateSection(key, (options, columnNames) => JsonSerializer.SerializeToNode(getValue(columnNames), options)!, convertKeyToCamelCase);
-
-        internal void AddOrUpdateSection<TValue>(string key, TValue value, bool convertKeyToCamelCase = true)
-            => AddOrUpdateSection(key, _ => value, convertKeyToCamelCase);
     }
 
-    public interface IQuery<TSelf> : IQuery where TSelf : IQuery<TSelf>
+    public interface IQuery<TSelf> where TSelf : IQuery<TSelf>
     {
-        public TSelf Unwrapped => (TSelf)this;
-        private IQuery Base => this;
-
-        internal new TSelf AddOrUpdateSection(string key, QuerySectionValueFactory valueFactory, bool convertKeyToCamelCase = true)
-        {
-            Base.AddOrUpdateSection(key, valueFactory, convertKeyToCamelCase);
-            return Unwrapped;
-        }
-
-        internal new TSelf AddOrUpdateSection<TValue>(string key, Func<IColumnNameMappingProvider, TValue> getValue, bool convertKeyToCamelCase = true)
-        {
-            Base.AddOrUpdateSection(key, getValue, convertKeyToCamelCase);
-            return Unwrapped;
-        }
-
-        internal new TSelf AddOrUpdateSection<TValue>(string key, TValue value, bool convertKeyToCamelCase = true)
-        {
-            Base.AddOrUpdateSection(key, value, convertKeyToCamelCase);
-            return Unwrapped;
-        }
+        public TSelf Self => (TSelf)this;
     }
 
     public static class IQueryWith
     {
-        public static class Marker
+        public interface State
         {
-            public sealed record VirtualColumns;
-            public sealed record Aggregations;
-            public sealed record PostAggregations;
-            public sealed record Dimension;
-            public sealed record Dimensions;
         }
 
         public interface VirtualColumns<TArguments, TVirtualColumns, TSelf> :
-            IQueryWithSectionFactoryExpressions<TArguments, TSelf, Marker.VirtualColumns>
-            where TSelf : IQuery<TSelf>
-        {
-        }
-
-        public interface Aggregations<TArguments, TAggregations, TSelf> :
-            IQueryWithSectionFactoryExpressions<TArguments, TSelf, Marker.Aggregations>
-            where TSelf : IQuery<TSelf>
-        {
-        }
-
-        public interface PostAggregations<TArguments, TPostAggregations, TSelf>
-            : IQueryWithSectionFactoryExpressions<TArguments, TSelf, Marker.PostAggregations>
-            where TSelf : IQuery<TSelf>
-        {
-        }
-
-        public interface Dimesion<TArguments, TDimension, TSelf> :
-            IQueryWithSectionFactoryExpressions<TArguments, TSelf, Marker.Dimension>
-            where TSelf : IQuery<TSelf>
-        {
-        }
-
-        public interface Dimesions<TArguments, TDimensions, TSelf> :
-            IQueryWithSectionFactoryExpressions<TArguments, TSelf, Marker.Dimensions>
-            where TSelf : IQuery<TSelf>
-        {
-        }
-
-        public interface Filter<TArguments, TSelf> :
+            SectionFactoryExpression<TArguments, TVirtualColumns, Marker.VirtualColumns>,
             IQuery<TSelf>
             where TSelf : IQuery<TSelf>
         {
         }
 
-        public interface Context<TContext, TSelf> : IQuery<TSelf>
+        public interface Aggregations<TArguments, TAggregations, TSelf> :
+            SectionFactoryExpression<TArguments, TAggregations, Marker.Aggregations>,
+            IQuery<TSelf>
+            where TSelf : IQuery<TSelf>
+        {
+        }
+
+        public interface PostAggregations<TArguments, TPostAggregations, TSelf> :
+            SectionFactoryExpression<TArguments, TPostAggregations, Marker.PostAggregations>,
+            IQuery<TSelf>
+            where TSelf : IQuery<TSelf>
+        {
+        }
+
+        public interface Dimesion<TArguments, TDimension, TSelf> :
+            SectionFactoryExpression<TArguments, TDimension, Marker.Dimension>,
+            IQuery<TSelf>
+            where TSelf : IQuery<TSelf>
+        {
+        }
+
+        public interface Dimesions<TArguments, TDimensions, TSelf> :
+            SectionFactoryExpression<TArguments, TDimensions, Marker.Dimensions>,
+            IQuery<TSelf>
+            where TSelf : IQuery<TSelf>
+        {
+        }
+
+        public interface Filter<TArguments, TSelf> :
+            IQuery<TSelf>, SectionFactory<IFilter>
+            where TSelf : IQuery<TSelf>
+        {
+        }
+
+        public interface Context<TContext, TSelf> : IQuery<TSelf>, Section<TContext>
             where TSelf : IQuery<TSelf>
             where TContext : Context
         {
+            TContext? Context => State?.Section;
         }
 
-        public interface Intervals : IQuery
+        public interface Intervals : Section<IReadOnlyCollection<Interval>>
         {
-            internal IReadOnlyCollection<Interval>? Intervals { get; set; }
-
-            IReadOnlyCollection<Interval> GetIntervals()
-                => Intervals is null or { Count: 0 } ?
-                    throw new InvalidOperationException($"Mssing required query section: {nameof(Intervals)}.")
-                    { Data = { ["query"] = this } } :
-                    Intervals;
+            IReadOnlyCollection<Interval> Intervals => Require();
         }
 
-        public interface Order : IQuery
+        public interface Order : Section<OrderDirection>
+        {
+            OrderDirection Order => State?.Section ?? OrderDirection.Ascending;
+        }
+
+        public interface Granularity : Section<Querying.Granularity>
+        {
+            Querying.Granularity Granularity => Require();
+        }
+
+        public interface Offset : Section<Offset.InternalState>
+        {
+            public sealed record InternalState(int Offset);
+            int Offset => State?.Section?.Offset ?? 0;
+        }
+
+        public interface Limit : Section<Limit.InternalState>
+        {
+            public sealed record InternalState(int? Limit);
+            int? Limit => State?.Section?.Limit;
+        }
+
+        public interface OffsetAndLimit : Offset, Limit
         {
         }
 
-        public interface Granularity : IQuery
+        public interface Threshold : Section<Threshold.InternalState>
         {
+            public sealed record InternalState(int Threshold);
+            int? Threshold => State?.Section?.Threshold;
         }
 
-        public interface OffsetAndLimit : IQuery
-        {
-            internal int Offset { get; set; }
-            internal int Limit { get; set; }
-
-            int GetOffset() => Offset;
-            int GetLimit() => Limit;
-        }
-
-        public interface Threshold : IQuery
-        {
-        }
-
-        public interface Metric<TArguments, TSelf> : IQuery<TSelf>
+        public interface Metric<TArguments, TSelf> : IQuery<TSelf>, SectionFactory<IMetric>
             where TSelf : IQuery<TSelf>
         {
         }
 
-        public interface LimitSpec<TArguments, TSelf> : IQuery<TSelf>
+        public interface LimitSpec<TArguments, TSelf> : IQuery<TSelf>, SectionFactory<ILimitSpec>
             where TSelf : IQuery<TSelf>
         {
         }
 
-        public interface Having<TArguments, TSelf> : IQuery<TSelf>
+        public interface Having<TArguments, TSelf> : IQuery<TSelf>, SectionFactory<IHaving>
             where TSelf : IQuery<TSelf>
         {
         }
 
-        public interface BatchSize : IQuery
+        public interface BatchSize : Section<BatchSize.InternalState>
         {
+            public sealed record InternalState(int BatchSize);
+            int? BatchSize => State?.Section?.BatchSize;
         }
     }
 
@@ -298,17 +272,46 @@ namespace Apache.Druid.Querying
 
     public static class QueryExtensions
     {
+        private delegate void CopyDelegate(IQueryWith.State From, IQueryWith.State To);
+        private static readonly ConcurrentDictionary<Type, CopyDelegate> copyCache = new();
+        
+        // TODO Optimize
+        public static TQuery Copy<TQuery>(this TQuery query)where TQuery : IQueryWith.State
+        {
+            if (!copyCache.TryGetValue(typeof(TQuery), out var copy))
+            {
+                var copyFromMethods = query
+                    .GetStateInterfaces()
+                    .Select(@state => state.GetMethod(nameof(State<None>.CopyFrom), BindingFlags.NonPublic | BindingFlags.Instance))
+                    .ToArray();
+                copy = (from, to) => 
+                {
+                    foreach (var method in copyFromMethods)
+                        method!.Invoke(to, new[] { from });
+                };
+                copyCache.TryAdd(typeof(TQuery), copy);
+            }
+
+            var @new = (TQuery)Activator.CreateInstance(query.GetType())!;
+            copy(query, @new);
+            return @new;
+        }
+
         public static TQuery VirtualColumns<TArguments, TVirtualColumns, TQuery>(
             this IQueryWith.VirtualColumns<TArguments, TVirtualColumns, TQuery> query,
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IVirtualColumns, TVirtualColumns>> factory)
             where TQuery : IQuery<TQuery>
-            => query.AddOrUpdateSectionWithSectionFactory(nameof(VirtualColumns), factory);
+        {
+            query.SetState(nameof(VirtualColumns), factory);
+            return query.Self;
+        }
 
         public static TQuery Aggregations<TArguments, TAggregations, TQuery>(
             this IQueryWith.Aggregations<TArguments, TAggregations, TQuery> query,
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IAggregations, TAggregations>> factory)
             where TQuery : IQuery<TQuery>
-            => query.AddOrUpdateSectionWithSectionFactory(nameof(Aggregations), factory, new(
+        {
+            query.SetState(nameof(Aggregations), factory, new(
                 MapType: static call =>
                 {
                     return call.MethodName switch
@@ -332,12 +335,15 @@ namespace Apache.Druid.Querying
                 },
                 SkipScalarParameter: static scalar => scalar.Type == typeof(SimpleDataType),
                 ExpressionColumnNamesKey: "fields"));
+            return query.Self;
+        }
 
         public static TQuery PostAggregations<TArguments, TPostAggregations, TQuery>(
             this IQueryWith.PostAggregations<TArguments, TPostAggregations, TQuery> query,
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IPostAggregators, TPostAggregations>> factory)
             where TQuery : IQuery<TQuery>
-            => query.AddOrUpdateSectionWithSectionFactory(nameof(PostAggregations), factory, new(
+        {
+            query.SetState(nameof(PostAggregations), factory, new(
                 ReplaceScalarParameter: static scalar => scalar.Type == typeof(ArithmeticFunction) ?
                     scalar with
                     {
@@ -359,32 +365,41 @@ namespace Apache.Druid.Querying
                     call.MethodName is nameof(QueryElementFactory<TArguments>.IPostAggregators.FieldAccess) &&
                     call.TryGetScalarParameter<bool>() is { Name: "finalizing", Value: true } ?
                     "finalizingFieldAccess" : call.MethodName.ToCamelCase()));
+            return query.Self;
+        }
 
         private static readonly SectionFactoryJsonMapper.Options dimensionsMapperOptions = new(SectionColumnNameKey: "outputName");
         public static TQuery Dimensions<TArguments, TDimensions, TQuery>(
             this IQueryWith.Dimesions<TArguments, TDimensions, TQuery> query,
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IDimensions, TDimensions>> factory)
             where TQuery : IQuery<TQuery>
-            => query.AddOrUpdateSectionWithSectionFactory(nameof(Dimensions), factory, dimensionsMapperOptions);
+        {
+            query.SetState(nameof(Dimensions), factory, dimensionsMapperOptions);
+            return query.Self;
+        }
 
         private static readonly SectionFactoryJsonMapper.Options dimensionMapperOptions = dimensionsMapperOptions with { ForceSingle = true };
         public static TQuery Dimension<TArguments, TDimension, TQuery>(
             this IQueryWith.Dimesion<TArguments, TDimension, TQuery> query,
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IDimensions, TDimension>> factory)
             where TQuery : IQuery<TQuery>
-            => query.AddOrUpdateSectionWithSectionFactory(nameof(Dimension), factory, dimensionMapperOptions);
+        {
+            query.SetState(nameof(Dimension), factory, dimensionMapperOptions);
+            return query.Self;
+        }
 
-        public static TQuery Filter<TArguments, TQuery>(this IQueryWith.Filter<TArguments, TQuery> query, Func<QueryElementFactory<TArguments>.Filter, IFilter> factory)
+        public static TQuery Filter<TArguments, TQuery>(
+            this IQueryWith.Filter<TArguments, TQuery> query, Func<QueryElementFactory<TArguments>.Filter, IFilter> factory)
             where TQuery : IQuery<TQuery>
-            => query.AddOrUpdateSection(
-                nameof(Filter),
-                columnNames => factory(new(columnNames)));
+        {
+            query.SetState(nameof(Filter), columnNames => factory(new(columnNames)));
+            return query.Self;
+        }
 
         public static TQuery Intervals<TQuery>(this TQuery query, IReadOnlyCollection<Interval> intervals)
             where TQuery : IQueryWith.Intervals
         {
-            query.Intervals = intervals;
-            query.AddOrUpdateSection(nameof(intervals), intervals);
+            query.SetState(nameof(Intervals), intervals);
             return query;
         }
 
@@ -395,20 +410,22 @@ namespace Apache.Druid.Querying
         public static TQuery Order<TQuery>(this TQuery query, OrderDirection order)
             where TQuery : IQueryWith.Order
         {
-            var descending = order is OrderDirection.Descending;
-            query.AddOrUpdateSection(nameof(descending), descending);
+            query.SetState("descending", order, section => section is OrderDirection.Descending);
             return query;
         }
 
         public static TQuery Context<TQuery, TContext>(this IQueryWith.Context<TContext, TQuery> query, TContext context)
             where TQuery : IQuery<TQuery>
             where TContext : Context
-            => query.AddOrUpdateSection(nameof(context), context);
+        {
+            query.SetState(nameof(context), context);
+            return query.Self;
+        }
 
         public static TQuery Granularity<TQuery>(this TQuery query, Granularity granularity)
             where TQuery : IQueryWith.Granularity
         {
-            query.AddOrUpdateSection(nameof(Granularity), granularity);
+            query.SetState(nameof(Granularity), granularity);
             return query;
         }
 
@@ -425,25 +442,23 @@ namespace Apache.Druid.Querying
             => query.Granularity(Querying.Granularity.NewPeriod(period, timeZone, origin));
 
         public static TQuery Offset<TQuery>(this TQuery query, int offset)
-            where TQuery : IQueryWith.OffsetAndLimit
+            where TQuery : IQueryWith.Offset
         {
-            query.Offset = offset;
-            query.AddOrUpdateSection(nameof(offset), offset);
+            query.SetState(nameof(Offset), new(offset), section => section.Offset);
             return query;
         }
 
         public static TQuery Limit<TQuery>(this TQuery query, int limit)
-            where TQuery : IQueryWith.OffsetAndLimit
+            where TQuery : IQueryWith.Limit
         {
-            query.Limit = limit;
-            query.AddOrUpdateSection(nameof(limit), limit);
+            query.SetState(nameof(Limit), new(limit), section => section.Limit);
             return query;
         }
 
         public static TQuery Threshold<TQuery>(this TQuery query, int threshold)
             where TQuery : IQueryWith.Threshold
         {
-            query.AddOrUpdateSection(nameof(threshold), threshold);
+            query.SetState(nameof(threshold), new(threshold), section => section.Threshold);
             return query;
         }
 
@@ -451,7 +466,10 @@ namespace Apache.Druid.Querying
             this IQueryWith.Metric<TArguments, TQuery> query,
             Func<QueryElementFactory<TArguments>.MetricSpec, IMetric> factory)
             where TQuery : IQuery<TQuery>
-            => query.AddOrUpdateSection(nameof(Metric), columnNames => factory(new(columnNames)));
+        {
+            query.SetState(nameof(Metric), columnNames => factory(new(columnNames)));
+            return query.Self;
+        }
 
         public static TQuery LimitSpec<TArguments, TQuery>(
             this IQueryWith.LimitSpec<TArguments, TQuery> query,
@@ -459,7 +477,10 @@ namespace Apache.Druid.Querying
             int? offset = null,
             Func<QueryElementFactory<TArguments>.OrderByColumnSpec, IEnumerable<ILimitSpec.OrderBy>>? columns = null)
             where TQuery : IQuery<TQuery>
-            => query.AddOrUpdateSection(nameof(LimitSpec), columnNames => new Internal.Elements.LimitSpec(limit, offset, columns?.Invoke(new(columnNames))));
+        {
+            query.SetState(nameof(LimitSpec), columnNames => new Internal.Elements.LimitSpec(limit, offset, columns?.Invoke(new(columnNames))));
+            return query.Self;
+        }
 
         public static TQuery LimitSpec<TArguments, TQuery>(
             this IQueryWith.LimitSpec<TArguments, TQuery> query,
@@ -480,18 +501,24 @@ namespace Apache.Druid.Querying
             this IQueryWith.Having<TArguments, TQuery> query,
             Func<QueryElementFactory<TArguments>.Having, IHaving> factory)
             where TQuery : IQuery<TQuery>
-            => query.AddOrUpdateSection(nameof(Having), columnNames => factory(new(columnNames)));
+        {
+            query.SetState(nameof(Having), columnNames => factory(new(columnNames)));
+            return query.Self;
+        }
 
         public static TQuery HavingFilter<TArguments, TQuery>(
             this IQueryWith.Having<TArguments, TQuery> query,
             Func<QueryElementFactory<TArguments>.Filter, IFilter> factory)
             where TQuery : IQuery<TQuery>
-            => query.AddOrUpdateSection(nameof(Having), columnNames => new QueryElementFactory<TArguments>.Having(columnNames).Filter(factory));
+        {
+            query.SetState(nameof(Having), columnNames => new QueryElementFactory<TArguments>.Having(columnNames).Filter(factory));
+            return query.Self;
+        }
 
         public static TQuery BatchSize<TQuery>(this TQuery query, int batchSize)
-            where TQuery : IQueryWith.OffsetAndLimit
+            where TQuery : IQueryWith.BatchSize
         {
-            query.AddOrUpdateSection(nameof(batchSize), batchSize);
+            query.SetState(nameof(batchSize), new(batchSize), section => section.BatchSize);
             return query;
         }
     }

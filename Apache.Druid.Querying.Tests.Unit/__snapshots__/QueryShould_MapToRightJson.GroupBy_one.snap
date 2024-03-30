@@ -3,7 +3,6 @@
   "intervals": [
     "2000-01-02T01:01:00.0000000\u002B00:00/2000-01-02T01:01:00.0000000\u002B00:00"
   ],
-  "granularity": "minute",
   "virtualColumns": [
     {
       "type": "expression",
@@ -35,6 +34,7 @@
       "fieldName": "value"
     }
   ],
+  "granularity": "minute",
   "limitSpec": {
     "limit": 5000,
     "columns": [

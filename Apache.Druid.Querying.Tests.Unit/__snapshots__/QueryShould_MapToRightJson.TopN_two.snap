@@ -8,23 +8,6 @@
     "outputName": "IotObjectId",
     "dimension": "iotObjectId"
   },
-  "threshold": 5,
-  "granularity": "minute",
-  "filter": {
-    "fields": [
-      {
-        "column": "value",
-        "type": "null"
-      },
-      {
-        "matchValue": "e3af0803-3fc1-407c-9071-29c5f1cdc8d2",
-        "matchValueType": "String",
-        "column": "iotObjectId",
-        "type": "equals"
-      }
-    ],
-    "type": "or"
-  },
   "aggregations": [
     {
       "type": "longMax",
@@ -50,10 +33,27 @@
       ]
     }
   ],
+  "granularity": "minute",
+  "filter": {
+    "fields": [
+      {
+        "column": "value",
+        "type": "null"
+      },
+      {
+        "matchValue": "e3af0803-3fc1-407c-9071-29c5f1cdc8d2",
+        "matchValueType": "String",
+        "column": "iotObjectId",
+        "type": "equals"
+      }
+    ],
+    "type": "or"
+  },
   "metric": {
     "metric": "PostAggregations",
     "type": "numeric"
   },
+  "threshold": 5,
   "context": {
     "minTopNThreshold": 5
   }

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
+using System.Text.Json;
 
 namespace Apache.Druid.Querying
 {
@@ -256,26 +256,31 @@ namespace Apache.Druid.Querying
         {
         }
 
-        public class SegmentMetadata :
-            QueryBase,
-            IQuery<SegmentMetadata>,
-            IQueryWith.Intervals,
-            IQueryWith.Context<Context, SegmentMetadata>,
-            QueryResultDeserializer.Array<Querying.SegmentMetadata>,
-            TruncatedQueryResultHandler<TSource>.SegmentMetadata
+        public class SegmentMetadata : QueryBase<TSource>.SegmentMetadata
         {
-            private static readonly IReadOnlyDictionary<Querying.SegmentMetadata.AnalysisType, string> analysisTypeStrings = Enum
-                .GetValues<Querying.SegmentMetadata.AnalysisType>()
-                .ToDictionary(type => type, type => type.ToString().ToCamelCase());
-            private IQuery<SegmentMetadata> @base => this;
+            public SegmentMetadata Merge(bool merge)
+            {
+                MergeSection.SetState(nameof(Merge), new(merge), state => state.Merge);
+                return this;
+            }
 
-            public SegmentMetadata Merge(bool merge) => @base.AddOrUpdateSection(nameof(Merge), merge);
-            public SegmentMetadata AnalysisTypes(IEnumerable<Querying.SegmentMetadata.AnalysisType> types)
-                => @base.AddOrUpdateSection(nameof(AnalysisTypes), types.Select(type => analysisTypeStrings[type]));
+            public SegmentMetadata AnalysisTypes(IReadOnlyCollection<Querying.SegmentMetadata.AnalysisType> types)
+            {
+                AnalysisTypesSection.SetState(
+                    nameof(AnalysisTypes),
+                    types,
+                    (types, options) => JsonSerializer.SerializeToNode(types.Select(type => AnalysisTypeStrings[type]), options));
+                return this;
+            }
+
             public SegmentMetadata AnalysisTypes(params Querying.SegmentMetadata.AnalysisType[] types)
-                => AnalysisTypes(types.AsEnumerable());
+                => AnalysisTypes(types as IReadOnlyCollection<Querying.SegmentMetadata.AnalysisType>);
+
             public SegmentMetadata AggregatorMergeStrategy(Querying.SegmentMetadata.AggregatorMergeStrategy strategy)
-                => @base.AddOrUpdateSection(nameof(AggregatorMergeStrategy), strategy);
+            {
+                MergeStrategySection.SetState(nameof(AggregatorMergeStrategy), strategy);
+                return this;
+            }
         }
 
         public class DataSourceMetadata :
@@ -284,6 +289,7 @@ namespace Apache.Druid.Querying
             QueryResultDeserializer.ArrayOfObjectsWithTimestamp<Querying.DataSourceMetadata>,
             TruncatedQueryResultHandler<TSource>.TimeSeries<Querying.DataSourceMetadata>
         {
+            QuerySectionState<Context>? IQueryWithInternal.State<QuerySectionState<Context>>.State { get; set; }
         }
     }
 }

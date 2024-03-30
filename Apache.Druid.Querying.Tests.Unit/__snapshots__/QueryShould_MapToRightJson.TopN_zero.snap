@@ -8,7 +8,18 @@
     "outputName": "Dimension",
     "dimension": "iotObjectId"
   },
-  "threshold": 5,
+  "aggregations": [
+    {
+      "type": "longMax",
+      "name": "TMax",
+      "fieldName": "__time"
+    },
+    {
+      "type": "doubleLast",
+      "name": "LastValue",
+      "fieldName": "value"
+    }
+  ],
   "granularity": "minute",
   "filter": {
     "fields": [
@@ -25,22 +36,11 @@
     ],
     "type": "or"
   },
-  "aggregations": [
-    {
-      "type": "longMax",
-      "name": "TMax",
-      "fieldName": "__time"
-    },
-    {
-      "type": "doubleLast",
-      "name": "LastValue",
-      "fieldName": "value"
-    }
-  ],
   "metric": {
     "metric": "LastValue",
     "type": "numeric"
   },
+  "threshold": 5,
   "context": {
     "minTopNThreshold": 5
   }
