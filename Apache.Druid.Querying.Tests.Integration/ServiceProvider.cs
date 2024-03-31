@@ -14,7 +14,7 @@ namespace Apache.Druid.Querying.Tests.Integration
             .AddDataSourceProvider<WikipediaDataSourceProvider>(DruidSetup.RouterUri)
             .ConfigureClient(clientBuilder => clientBuilder
                 .AddTransientHttpErrorPolicy(policy => policy
-                    .WaitAndRetryAsync(20, _ => TimeSpan.FromSeconds(1))))
+                    .WaitAndRetryAsync(25, _ => TimeSpan.FromSeconds(1))))
             .Services
             .AddHttpClient()
             .BuildServiceProvider();
@@ -31,7 +31,7 @@ namespace Apache.Druid.Querying.Tests.Integration
         [OneTimeTearDown]
         protected static void TearDown()
         {
-            // Not disposed so to keep them running in between test runs.
+            // Dispose if to be recreated on each test run.
             containers = null;
 
             containers?.Dispose();

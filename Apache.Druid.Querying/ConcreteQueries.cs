@@ -284,7 +284,7 @@ namespace Apache.Druid.Querying
                                     ?? throw new InvalidOperationException(
                                         $"Property: {sourceProperty.SelectedFromType}.{sourceProperty.Name} does not " +
                                         $"correspond to any {typeof(TSource)} data source column.");
-                                yield return (columnProperty, mapping); ;
+                                yield return (columnProperty, mapping);
                             }
                         }
                         SelectedProperties.SetState(
@@ -294,9 +294,12 @@ namespace Apache.Druid.Querying
                                 var columnNames = Get(columnNameMappings).Select(pair => pair.SourceMapping.ColumnName);
                                 return JsonSerializer.SerializeToNode(columnNames, serializerOptions);
                             });
-                        MappingChanges.Set<TColumns>(mappings => Get(mappings)
-                            .Select(pair => pair.SourceMapping with { Property = pair.ColumnProperty })
-                            .ToImmutableArray());
+                        MappingChanges.Set<TColumns>(mappings => 
+                        {
+                            var columnMappings = Get(mappings)
+                                .Select(pair => pair.SourceMapping with { Property = pair.ColumnProperty });
+                            return columnMappings.ToImmutableArray();
+                        });
                         return this;
                     }
                     catch (Exception inner)
