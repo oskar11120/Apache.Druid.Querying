@@ -1,0 +1,38 @@
+﻿[
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T00:02:59.759+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Deaton-Flanigen Productions",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727144420&oldid=727144324"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T00:03:27.265+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Sticky Fingers",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727144475&oldid=726755003"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T00:09:05.633+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Big Brother 17 (U.S.)",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727145106&oldid=727101422"
+    }
+  }
+]

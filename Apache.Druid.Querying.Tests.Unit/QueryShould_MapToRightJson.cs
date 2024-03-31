@@ -124,6 +124,7 @@ namespace Apache.Druid.Querying.Tests.Unit
             AssertMatch(eight);
         }
 
+        private record IotMeasurementTimestamps(DateTimeOffset Normal, DateTimeOffset Processed);
         [Test]
         public void Scan()
         {
@@ -138,6 +139,20 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .Interval(new(t, t))
                 .Order(OrderDirection.Ascending);
             AssertMatch(zero);
+
+            var one = new Query<IotMeasurement>
+                .Scan
+                .WithColumns<IotMeasurementTimestamps>()
+                .Limit(10000)
+                .BatchSize(2000)
+                .Offset(4000)
+                .Filter(type => type.Range(
+                    columns => columns.Value,
+                    lower: 100))
+                .Interval(new(t, t))
+                .Order(OrderDirection.Ascending)
+                .Columns(measurement => new IotMeasurementTimestamps(measurement.Timestamp, measurement.ProcessedTimestamp));
+            AssertMatch(one);
         }
 
         [Test]

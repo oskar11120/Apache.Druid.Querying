@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using Ductus.FluentDocker.Common;
+using FluentAssertions;
 using Snapshooter;
 using Snapshooter.NUnit;
 using System.Globalization;
@@ -191,8 +192,24 @@ internal class QueryShould_ReturnRightData
             .Be(new InlineData("zero", 1));
     }
 
-    [Test]
-    public async Task Scan()
+    public enum ScanTestCase
+    {
+        First3Us,
+        First3UsSubset,
+        First3UsSubsetConsistency
+    }
+    private record EditScanColumns(
+        DateTimeOffset Time,
+        bool Robot,
+        string Channel,
+        string Flags,
+        bool Unpatrolled,
+        string PageId,
+        string Diff);
+    [TestCase(ScanTestCase.First3Us)]
+    [TestCase(ScanTestCase.First3UsSubset)]
+    [TestCase(ScanTestCase.First3UsSubsetConsistency)]
+    public async Task Scan(ScanTestCase @case)
     {
         var first3Us = new Query<Edit>
             .Scan()
@@ -201,7 +218,52 @@ internal class QueryShould_ReturnRightData
                 edit => edit.CountryIsoCode,
                 "US"))
             .Limit(3);
-        await VerifyMatch(first3Us);
+        var subset = new Query<Edit>
+            .Scan
+            .WithColumns<EditScanColumns>()
+            .DefaultInterval()
+            .Filter(type => type.Selector(
+                edit => edit.CountryIsoCode,
+                "US"))
+            .Limit(3)
+            .Columns(edit => new(
+                edit.Timestamp,
+                edit.IsRobot,
+                edit.Channel,
+                edit.Flags,
+                edit.IsUnpatrolled,
+                edit.Page,
+                edit.DiffUri));
+        async Task VerifyConsistency()
+        {
+            var first = await Wikipedia
+                .Edits
+                .ExecuteQuery(first3Us)
+                .Select(result => result.Value)
+                .Select(edit => new EditScanColumns(
+                    edit.Timestamp,
+                    edit.IsRobot,
+                    edit.Channel,
+                    edit.Flags,
+                    edit.IsUnpatrolled,
+                    edit.Page,
+                    edit.DiffUri))
+                .ToListAsync();
+            var second = await Wikipedia
+                .Edits
+                .ExecuteQuery(subset)
+                .Select(result => result.Value)
+                .ToListAsync();
+            first.Should().BeEquivalentTo(second);
+        }
+        var task = @case switch
+        {
+            ScanTestCase.First3Us => VerifyMatch(first3Us, string.Empty),
+            ScanTestCase.First3UsSubset => VerifyMatch(subset, string.Empty),
+            ScanTestCase.First3UsSubsetConsistency => VerifyConsistency(),
+            _ => throw new NotSupportedException()
+        };
+        await task;
     }
 
     [Test]

@@ -257,7 +257,7 @@ namespace Apache.Druid.Querying
         public class Scan : QueryBase<TSource, TSource, Scan>.Scan<TSource>
         {
             public class WithColumns<TColumns> :
-                QueryBase<TSource, TSource, Scan>.Scan<TColumns>,
+                QueryBase<TSource, TSource, WithColumns<TColumns>>.Scan<TColumns>,
                 IQueryWithInternal.PropertyColumnNameMappingChanges,
                 IQueryWithInternal.SectionFactory<SelectedProperty[]>
             {
@@ -269,6 +269,7 @@ namespace Apache.Druid.Querying
                     try
                     {
                         var propertyMappings = mapSourceToColumns
+                            .Body
                             .UnwrapUnary()
                             .GetPropertyAssignments(default(None), (_, error) => new InvalidOperationException(error))
                             .Select(pair => (ColumnProperty: pair.PropertyName, SourceProperty: SelectedProperty.Get(pair.AssignedValue)))
