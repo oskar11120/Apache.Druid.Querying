@@ -14,7 +14,7 @@ namespace Apache.Druid.Querying.Internal
             string GetColumnName(Type modelType, string propertyName);
         }
 
-        internal sealed class ImmutableBuilder : IProvider
+        public sealed class ImmutableBuilder : IProvider
         {
             public static ImmutableBuilder Create<TFirstModel>()
                 => new ImmutableBuilder().Add<TFirstModel>();

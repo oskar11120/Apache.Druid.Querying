@@ -6,6 +6,7 @@ using Apache.Druid.Querying.Internal.Sections;
 using System.Linq.Expressions;
 using System.Linq;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Apache.Druid.Querying.Internal;
 
@@ -15,6 +16,7 @@ public sealed record QuerySectionState<TSection>(string Key, TSection Section, Q
 
 public delegate JsonNode? GetQuerySectionJson(JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames);
 public sealed record QuerySectionFactoryState<TMarker>(string Key, GetQuerySectionJson GetJson);
+public delegate PropertyColumnNameMapping.ImmutableBuilder ApplyPropertyColumnNameMappingChanges(PropertyColumnNameMapping.ImmutableBuilder existing);
 
 public static class IQueryWithInternal
 {
@@ -110,7 +112,7 @@ public static class IQueryWithInternal
 
     public interface MutableSectionAtomicity : SectionAtomicity
     {
-        internal new Sections.SectionAtomicity.ImmutableBuilder SectionAtomicity { get => State ??= new(); set => State = value; }
+        protected internal new Sections.SectionAtomicity.ImmutableBuilder SectionAtomicity { get => State ??= new(); set => State = value; }
     }
 
     public interface SectionFactoryExpressionStates : State<Dictionary<string, GetQuerySectionJson>>
@@ -156,6 +158,27 @@ public static class IQueryWithInternal
             SectionAtomicity = SectionAtomicity.Add<TSection>(calls, key, out var atomicity);
             SetState(key, (serializerOptions, columnNames) => SectionFactoryJsonMapper.Map<TArguments>(
                 calls, atomicity, serializerOptions, columnNames, mapperOptions ?? SectionFactoryJsonMapper.Options.Default));
+        }
+    }
+
+    public interface PropertyColumnNameMappingChanges : State<ImmutableDictionary<Type, ApplyPropertyColumnNameMappingChanges>>
+    {
+        void State<ImmutableDictionary<Type, ApplyPropertyColumnNameMappingChanges>>.AddToJson(
+            JsonObject json, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames)
+        {
+        }
+
+        internal sealed ApplyPropertyColumnNameMappingChanges ApplyPropertyColumnNameMappingChanges =>
+            existing => State is null ?
+                existing :
+                State
+                    .Values
+                    .Aggregate(existing, (all, applyNew) => applyNew(all));
+
+        protected internal sealed void Set<TMarker>(ApplyPropertyColumnNameMappingChanges mappings)
+        {
+            State ??= ImmutableDictionary<Type, ApplyPropertyColumnNameMappingChanges>.Empty;
+            State = State.SetItem(typeof(TMarker), mappings);
         }
     }
 }

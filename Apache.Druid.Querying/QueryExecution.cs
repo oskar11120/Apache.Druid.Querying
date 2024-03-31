@@ -35,7 +35,7 @@ namespace Apache.Druid.Querying
         internal IAsyncEnumerable<TResult> Deserialize(QueryResultDeserializerContext context, CancellationToken token);
     }
 
-    public interface IQueryWithSource<TSource> : IQueryWithInternal.SectionAtomicity
+    public interface IQueryWithSource<TSource> : IQueryWithInternal.SectionAtomicity, IQueryWithInternal.PropertyColumnNameMappingChanges
     {
         public interface AndResult<TResult> : IQueryWithSource<TSource>
         {
@@ -121,7 +121,8 @@ namespace Apache.Druid.Querying
 
         public JsonObject MapQueryToJson(IQueryWithSource<TSource> query)
         {
-            var result = query.MapToJson(options.Serializer, columnNameMappings);
+            var mappings = query.ApplyPropertyColumnNameMappingChanges(columnNameMappings);
+            var result = query.MapToJson(options.Serializer, mappings);
             result.Add("dataSource", GetJsonRepresentation());
             return result;
         }
@@ -134,6 +135,7 @@ namespace Apache.Druid.Querying
         {
             var queryForRemaining = new Mutable<IQueryWithSource<TSource>> { Value = query };
             var atomicity = SectionAtomicity.ImmutableBuilder.Combine(query.SectionAtomicity, sectionAtomicity);
+            var mappings = query.ApplyPropertyColumnNameMappingChanges(columnNameMappings);
             var deserializer = query;
             var truncatedResultHandler = query;
             byte[]? buffer = null;
@@ -143,7 +145,7 @@ namespace Apache.Druid.Querying
                 buffer ??= ArrayPool<byte>.Shared.Rent(options.Serializer.DefaultBufferSize);
                 var read = await utf8Json.ReadAsync(buffer, token);
                 var results = deserializer
-                    .Deserialize(new(new(utf8Json, buffer, read), options.Serializer, atomicity, columnNameMappings), token)
+                    .Deserialize(new(new(utf8Json, buffer, read), options.Serializer, atomicity, mappings), token)
                     .Catch<TResult, UnexpectedEndOfStreamException>(exception => throw new TruncatedResultsException(inner: exception), token);
                 queryForRemaining.Value = null;
                 if (onTruncatedResultsQueryRemaining)

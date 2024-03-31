@@ -1,6 +1,7 @@
 ﻿using Apache.Druid.Querying.Internal.Sections;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 
@@ -87,7 +88,8 @@ namespace Apache.Druid.Querying.Internal
         IQueryWithInternal.Section<QueryBase.InternalState>,
         IQueryWith.Intervals,
         IQueryWithInternal.MutableSectionAtomicity,
-        IQueryWithInternal.SectionFactoryExpressionStates
+        IQueryWithInternal.SectionFactoryExpressionStates,
+        IQueryWithInternal.PropertyColumnNameMappingChanges
     {
         public sealed record InternalState(string Type);
         public QueryBase(string? type = null)
@@ -98,6 +100,7 @@ namespace Apache.Druid.Querying.Internal
         SectionAtomicity.ImmutableBuilder? IQueryWithInternal.State<SectionAtomicity.ImmutableBuilder>.State { get; set; }
         Dictionary<string, GetQuerySectionJson>? IQueryWithInternal.State<Dictionary<string, GetQuerySectionJson>>.State { get; set; }
         QuerySectionState<IReadOnlyCollection<Interval>>? IQueryWithInternal.State<QuerySectionState<IReadOnlyCollection<Interval>>>.State { get; set; }
+        ImmutableDictionary<Type, ApplyPropertyColumnNameMappingChanges>? IQueryWithInternal.State<ImmutableDictionary<Type, ApplyPropertyColumnNameMappingChanges>>.State { get; set; }
     }
 
     public static class QueryBase<TSource, TArguments, TSelf> where TSelf : IQuery<TSelf>
