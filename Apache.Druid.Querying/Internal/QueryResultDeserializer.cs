@@ -26,13 +26,13 @@ namespace Apache.Druid.Querying.Internal
 
             private readonly ReadOnlySpan<byte> json;
             private readonly JsonSerializerOptions serializerOptions;
-            private readonly IColumnNameMappingProvider columnNameMappings;
+            private readonly PropertyColumnNameMapping.IProvider columnNameMappings;
             private readonly SectionAtomicity.IProvider atomicity;
 
             public DeserializerContext(
                 ReadOnlySpan<byte> json,
                 JsonSerializerOptions serializerOptions,
-                IColumnNameMappingProvider columnNameMappings,
+                PropertyColumnNameMapping.IProvider columnNameMappings,
                 SectionAtomicity.IProvider atomicity)
             {
                 this.json = json;

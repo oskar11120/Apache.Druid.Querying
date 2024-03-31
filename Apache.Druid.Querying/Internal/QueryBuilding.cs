@@ -9,10 +9,11 @@ using System.Collections.Generic;
 
 namespace Apache.Druid.Querying.Internal;
 
-public delegate JsonNode? QuerySectionToJson<TSection>(TSection Section, JsonSerializerOptions serializerOptions, IColumnNameMappingProvider columnNames);
+public delegate JsonNode? QuerySectionToJson<TSection>(
+    TSection Section, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames);
 public sealed record QuerySectionState<TSection>(string Key, TSection Section, QuerySectionToJson<TSection>? SectionToJson = null);
 
-public delegate JsonNode? GetQuerySectionJson(JsonSerializerOptions serializerOptions, IColumnNameMappingProvider columnNames);
+public delegate JsonNode? GetQuerySectionJson(JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames);
 public sealed record QuerySectionFactoryState<TMarker>(string Key, GetQuerySectionJson GetJson);
 
 public static class IQueryWithInternal
@@ -29,7 +30,7 @@ public static class IQueryWithInternal
     public interface State<TState> : State
     {
         protected internal TState? State { get; set; }
-        internal void AddToJson(JsonObject json, JsonSerializerOptions serializerOptions, IColumnNameMappingProvider columnNames);
+        internal void AddToJson(JsonObject json, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames);
         internal void CopyFrom(State<TState> other) => State = other.State;
     }
 
@@ -48,7 +49,7 @@ public static class IQueryWithInternal
             };
 
         void State<QuerySectionState<TSection>>.AddToJson(
-            JsonObject json, JsonSerializerOptions serializerOptions, IColumnNameMappingProvider columnNames)
+            JsonObject json, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames)
         {
             if (State is null)
                 return;
@@ -72,7 +73,7 @@ public static class IQueryWithInternal
     }
 
     private static void AddStateToJson(
-        string key, GetQuerySectionJson getJson, JsonObject json, JsonSerializerOptions serializerOptions, IColumnNameMappingProvider columnNames)
+        string key, GetQuerySectionJson getJson, JsonObject json, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames)
     {
         var sectionJson = getJson(serializerOptions, columnNames);
         if (sectionJson is not null)
@@ -82,7 +83,7 @@ public static class IQueryWithInternal
     public interface SectionFactory<TSection> : State<QuerySectionFactoryState<TSection>>
     {
         void State<QuerySectionFactoryState<TSection>>.AddToJson(
-            JsonObject json, JsonSerializerOptions serializerOptions, IColumnNameMappingProvider columnNames)
+            JsonObject json, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames)
         {
             if (State is null)
                 return;
@@ -93,7 +94,7 @@ public static class IQueryWithInternal
         internal void SetState(string key, GetQuerySectionJson getJson)
             => State = new(key, getJson);
 
-        internal void SetState(string key, Func<IColumnNameMappingProvider, TSection> factory)
+        internal void SetState(string key, Func<PropertyColumnNameMapping.IProvider, TSection> factory)
             => SetState(key, (serializeOptions, columnNames) => JsonSerializer.SerializeToNode(factory(columnNames), serializeOptions));
     }
 
@@ -102,7 +103,7 @@ public static class IQueryWithInternal
         internal Sections.SectionAtomicity.ImmutableBuilder SectionAtomicity { get => State ??= new(); }
 
         void State<Sections.SectionAtomicity.ImmutableBuilder>.AddToJson(
-            JsonObject json, JsonSerializerOptions serializerOptions, IColumnNameMappingProvider columnNames)
+            JsonObject json, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames)
         {
         }
     }
@@ -122,7 +123,7 @@ public static class IQueryWithInternal
         }
 
         void State<Dictionary<string, GetQuerySectionJson>>.AddToJson(
-            JsonObject json, JsonSerializerOptions serializerOptions, IColumnNameMappingProvider columnNames)
+            JsonObject json, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames)
         {
             if (State is null)
                 return;

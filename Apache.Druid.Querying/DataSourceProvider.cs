@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using MappingBuilders = Apache.Druid.Querying.Internal.IColumnNameMappingProvider.ImmutableBuilder;
+using MappingBuilders = Apache.Druid.Querying.Internal.PropertyColumnNameMapping.ImmutableBuilder;
 
 namespace Apache.Druid.Querying
 {

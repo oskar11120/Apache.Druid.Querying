@@ -7,10 +7,10 @@ namespace Apache.Druid.Querying.Internal
 {
     internal static class DruidExpression
     {
-        public static MapResult Map(LambdaExpression factory, IColumnNameMappingProvider columnNameMappings)
+        public static MapResult Map(LambdaExpression factory, PropertyColumnNameMapping.IProvider columnNameMappings)
             => Map(factory.Body, columnNameMappings);
 
-        private static MapResult Map(Expression expression, IColumnNameMappingProvider columnNameMappings)
+        private static MapResult Map(Expression expression, PropertyColumnNameMapping.IProvider columnNameMappings)
         {
             InvalidOperationException Invalid(string reason, Exception? inner = null)
                 => new($"Invalid Druid expression: {expression}. {reason}.", inner);

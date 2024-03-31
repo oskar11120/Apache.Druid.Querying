@@ -6,14 +6,15 @@ using System.Reflection;
 
 namespace Apache.Druid.Querying.Internal
 {
-    public sealed record PropertyColumnNameMapping(string Property, string ColumnName);
-
-    public interface IColumnNameMappingProvider
+    public sealed record PropertyColumnNameMapping(string Property, string ColumnName) 
     {
-        IReadOnlyList<PropertyColumnNameMapping> Get<TModel>();
-        string GetColumnName(Type modelType, string propertyName);
+        public interface IProvider
+        {
+            IReadOnlyList<PropertyColumnNameMapping> Get<TModel>();
+            string GetColumnName(Type modelType, string propertyName);           
+        }
 
-        internal sealed class ImmutableBuilder : IColumnNameMappingProvider
+        internal sealed class ImmutableBuilder : IProvider
         {
             public static ImmutableBuilder Create<TFirstModel>()
                 => new ImmutableBuilder().Add<TFirstModel>();
@@ -105,7 +106,7 @@ namespace Apache.Druid.Querying.Internal
                 result = arguments.Length is 0 ?
                     result :
                     result
-                        .Concat(arguments.SelectMany(type => 
+                        .Concat(arguments.SelectMany(type =>
                             agumentResults.TryGetValue(type, out var argumentResult) ?
                                argumentResult :
                                ImmutableArray<PropertyColumnNameMapping>.Empty))

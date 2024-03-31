@@ -23,7 +23,7 @@ namespace Apache.Druid.Querying
         JsonStreamReader Json,
         JsonSerializerOptions Options,
         SectionAtomicity.IProvider Atomicity,
-        IColumnNameMappingProvider ColumnNameMappings);
+        PropertyColumnNameMapping.IProvider ColumnNameMappings);
 
     internal sealed class Mutable<TValue>
     {
@@ -99,7 +99,7 @@ namespace Apache.Druid.Querying
     {
         private static readonly StringWithQualityHeaderValue gzip = new("gzip");
 
-        private readonly IColumnNameMappingProvider.ImmutableBuilder columnNameMappings;
+        private readonly PropertyColumnNameMapping.ImmutableBuilder columnNameMappings;
         private readonly SectionAtomicity.ImmutableBuilder? sectionAtomicity;
         private readonly Func<DataSourceOptions> getOptions;
         private JsonSerializerOptions? serializerOptionsWithFormatting;
@@ -108,7 +108,7 @@ namespace Apache.Druid.Querying
         internal DataSource(
             Func<DataSourceOptions> getOptions,
             DataSourceJsonProvider getJsonRepresentation,
-            IColumnNameMappingProvider.ImmutableBuilder columnNameMappings,
+            PropertyColumnNameMapping.ImmutableBuilder columnNameMappings,
             SectionAtomicity.ImmutableBuilder? sectionAtomicity = null)
         {
             this.getOptions = getOptions;

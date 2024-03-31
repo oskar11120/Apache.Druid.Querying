@@ -16,7 +16,7 @@ namespace Apache.Druid.Querying.Json
         internal static JsonObject MapToJson(
             this IQueryWith.State query,
             JsonSerializerOptions serializerOptions,
-            IColumnNameMappingProvider columNames)
+            PropertyColumnNameMapping.IProvider columNames)
         {
             if (!cache.TryGetValue(query.GetType(), out var methods))
                 methods = query
@@ -36,6 +36,6 @@ namespace Apache.Druid.Querying.Json
             => MapToJson(
                 query,
                 serializerOptions ?? defaultSerializerOptions,
-                IColumnNameMappingProvider.ImmutableBuilder.Create<TSource>());
+                PropertyColumnNameMapping.ImmutableBuilder.Create<TSource>());
     }
 }

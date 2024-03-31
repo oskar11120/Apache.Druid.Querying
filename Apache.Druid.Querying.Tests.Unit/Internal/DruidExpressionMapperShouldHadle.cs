@@ -6,8 +6,8 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
 {
     internal class DruidExpressionMapperShouldHadle
     {
-        private static readonly IColumnNameMappingProvider.ImmutableBuilder columnMappings
-            = IColumnNameMappingProvider.ImmutableBuilder.Create<QueryShould_MapToRightJson.IotMeasurement>();
+        private static readonly PropertyColumnNameMapping.ImmutableBuilder columnMappings
+            = PropertyColumnNameMapping.ImmutableBuilder.Create<QueryShould_MapToRightJson.IotMeasurement>();
         private static string Map(Expression<QueryElementFactory<QueryShould_MapToRightJson.IotMeasurement>.DruidExpression> factory)
             => DruidExpression.Map(factory, columnMappings).Expression;
 
