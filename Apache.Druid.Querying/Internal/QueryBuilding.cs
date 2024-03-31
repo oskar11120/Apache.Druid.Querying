@@ -97,17 +97,22 @@ public static class IQueryWithInternal
             => SetState(key, (serializeOptions, columnNames) => JsonSerializer.SerializeToNode(factory(columnNames), serializeOptions));
     }
 
-    public interface SectionFactoryExpression_Atomicity : State<SectionAtomicity.IProvider.ImmutableBuilder>
+    public interface SectionAtomicity : State<Sections.SectionAtomicity.ImmutableBuilder>
     {
-        internal SectionAtomicity.IProvider.ImmutableBuilder SectionAtomicity { get => State ??= new(); set => State = value; }
+        internal Sections.SectionAtomicity.ImmutableBuilder SectionAtomicity { get => State ??= new(); }
 
-        void State<SectionAtomicity.IProvider.ImmutableBuilder>.AddToJson(
+        void State<Sections.SectionAtomicity.ImmutableBuilder>.AddToJson(
             JsonObject json, JsonSerializerOptions serializerOptions, IColumnNameMappingProvider columnNames)
         {
         }
     }
 
-    public interface SectionFactoryExpression_States : State<Dictionary<string, GetQuerySectionJson>>
+    public interface MutableSectionAtomicity : SectionAtomicity
+    {
+        internal new Sections.SectionAtomicity.ImmutableBuilder SectionAtomicity { get => State ??= new(); set => State = value; }
+    }
+
+    public interface SectionFactoryExpressionStates : State<Dictionary<string, GetQuerySectionJson>>
     {
         private protected void SetState(string key, GetQuerySectionJson getJson)
         {
@@ -132,8 +137,8 @@ public static class IQueryWithInternal
     }
 
     public interface SectionFactoryExpression<TArguments, TSection, TMarker> :
-        SectionFactoryExpression_Atomicity,
-        SectionFactoryExpression_States
+        MutableSectionAtomicity,
+        SectionFactoryExpressionStates
     {
         internal void SetState<TElementFactory>(
             string key,
