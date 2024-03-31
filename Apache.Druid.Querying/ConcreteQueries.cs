@@ -25,7 +25,7 @@ namespace Apache.Druid.Querying
                     context.Deserialize<TValue>());
     }
 
-    public interface IQueryDataWithDimensions<TDimensions>
+    public interface IQueryDataWithDimensions<out TDimensions>
     {
         TDimensions Dimensions { get; }
     }
