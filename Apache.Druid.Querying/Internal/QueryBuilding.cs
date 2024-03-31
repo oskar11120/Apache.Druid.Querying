@@ -97,12 +97,11 @@ public static class IQueryWithInternal
             => SetState(key, (serializeOptions, columnNames) => JsonSerializer.SerializeToNode(factory(columnNames), serializeOptions));
     }
 
-    public interface SectionFactoryExpression_Atomicity : State<SectionAtomicity.IProvider.Builder>
+    public interface SectionFactoryExpression_Atomicity : State<SectionAtomicity.IProvider.ImmutableBuilder>
     {
-        internal SectionAtomicity.IProvider.Builder SectionAtomicity
-            => State ??= new();
+        internal SectionAtomicity.IProvider.ImmutableBuilder SectionAtomicity { get => State ??= new(); set => State = value; }
 
-        void State<SectionAtomicity.IProvider.Builder>.AddToJson(
+        void State<SectionAtomicity.IProvider.ImmutableBuilder>.AddToJson(
             JsonObject json, JsonSerializerOptions serializerOptions, IColumnNameMappingProvider columnNames)
         {
         }
@@ -148,7 +147,7 @@ public static class IQueryWithInternal
                     typeof(TArguments),
                     typeof(TSection))
                 .ToList();
-            var atomicity = SectionAtomicity.Add<TSection>(calls, key);
+            SectionAtomicity = SectionAtomicity.Add<TSection>(calls, key, out var atomicity);
             SetState(key, (serializerOptions, columnNames) => SectionFactoryJsonMapper.Map<TArguments>(
                 calls, atomicity, serializerOptions, columnNames, mapperOptions ?? SectionFactoryJsonMapper.Options.Default));
         }

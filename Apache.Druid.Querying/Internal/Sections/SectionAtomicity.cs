@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 
@@ -14,29 +15,28 @@ namespace Apache.Druid.Querying.Internal.Sections
         {
             SectionAtomicity? TryGet<TSection>();
 
-            public sealed class Builder : IProvider
+            public sealed class ImmutableBuilder : IProvider
             {
-                private static readonly Dictionary<Type, SectionAtomicity> empty = new();
-                private readonly Dictionary<Type, SectionAtomicity> state;
+                private static readonly ImmutableDictionary<Type, SectionAtomicity> empty = ImmutableDictionary<Type, SectionAtomicity>.Empty;
+                private readonly ImmutableDictionary<Type, SectionAtomicity> state;
 
-                public Builder(Dictionary<Type, SectionAtomicity>? state = null)
-                    => this.state = state ?? new();
+                public ImmutableBuilder(ImmutableDictionary<Type, SectionAtomicity>? state = null)
+                    => this.state = state ?? empty;
 
                 public SectionAtomicity? TryGet<TSection>() => state.GetValueOrDefault(typeof(TSection));
 
-                internal SectionAtomicity Add<TSection>(IReadOnlyList<ElementFactoryCall> calls, string columnNameIfAtomic)
+                internal ImmutableBuilder Add<TSection>(IReadOnlyList<ElementFactoryCall> calls, string columnNameIfAtomic, out SectionAtomicity added)
                 {
                     var atomic = calls.Count is 1 && calls[0].ResultMemberName is null;
-                    var result = new SectionAtomicity(atomic, columnNameIfAtomic, Encoding.UTF8.GetBytes(columnNameIfAtomic));
-                    state.Add(typeof(TSection), result);
-                    return result;
+                    added = new(atomic, columnNameIfAtomic, Encoding.UTF8.GetBytes(columnNameIfAtomic));
+                    return new(state.Add(typeof(TSection), added));
                 }
 
-                public Builder Updated(Func<SectionAtomicity, SectionAtomicity> update)
+                public ImmutableBuilder Update(Func<SectionAtomicity, SectionAtomicity> update)
                     => new(state
-                    .ToDictionary(pair => pair.Key, pair => update(pair.Value)));
+                    .ToImmutableDictionary(pair => pair.Key, pair => update(pair.Value)));
 
-                public static Builder Combined(Builder? first, Builder? second, Builder? third = null)
+                public static ImmutableBuilder Combine(ImmutableBuilder? first, ImmutableBuilder? second, ImmutableBuilder? third = null)
                 {
                     var states = new
                     {
@@ -49,11 +49,11 @@ namespace Apache.Druid.Querying.Internal.Sections
                     if (length is 0)
                         return new();
 
-                    var result = new Dictionary<Type, SectionAtomicity>();
+                    var builder = ImmutableDictionary.CreateBuilder<Type, SectionAtomicity>();
                     var all = states.First.Concat(states.Second).Concat(states.Third);
                     foreach (var (type, atomicity) in all)
-                        result.TryAdd(type, atomicity);
-                    return new(result);
+                        builder.TryAdd(type, atomicity);
+                    return new(builder.ToImmutableDictionary());
                 }
             }
         }

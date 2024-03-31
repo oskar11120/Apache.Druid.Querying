@@ -95,7 +95,7 @@ namespace Apache.Druid.Querying.Internal
             .SetState("queryType", new(type ?? GetType().Name.ToCamelCase()), state => state.Type);
 
         QuerySectionState<InternalState>? IQueryWithInternal.State<QuerySectionState<InternalState>>.State { get; set; }
-        SectionAtomicity.IProvider.Builder? IQueryWithInternal.State<SectionAtomicity.IProvider.Builder>.State { get; set; }
+        SectionAtomicity.IProvider.ImmutableBuilder? IQueryWithInternal.State<SectionAtomicity.IProvider.ImmutableBuilder>.State { get; set; }
         Dictionary<string, GetQuerySectionJson>? IQueryWithInternal.State<Dictionary<string, GetQuerySectionJson>>.State { get; set; }
         QuerySectionState<IReadOnlyCollection<Interval>>? IQueryWithInternal.State<QuerySectionState<IReadOnlyCollection<Interval>>>.State { get; set; }
     }
