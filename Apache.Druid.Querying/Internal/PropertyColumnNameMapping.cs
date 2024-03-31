@@ -6,12 +6,12 @@ using System.Reflection;
 
 namespace Apache.Druid.Querying.Internal
 {
-    public sealed record PropertyColumnNameMapping(string Property, string ColumnName) 
+    public sealed record PropertyColumnNameMapping(string Property, string ColumnName)
     {
         public interface IProvider
         {
             IReadOnlyList<PropertyColumnNameMapping> Get<TModel>();
-            string GetColumnName(Type modelType, string propertyName);           
+            string GetColumnName(Type modelType, string propertyName);
         }
 
         internal sealed class ImmutableBuilder : IProvider
