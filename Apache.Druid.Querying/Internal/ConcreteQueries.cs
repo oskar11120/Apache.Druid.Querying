@@ -281,10 +281,10 @@ namespace Apache.Druid.Querying.Internal
             private protected IQueryWithInternal.Section<IReadOnlyCollection<Querying.SegmentMetadata.AnalysisType>> AnalysisTypesSection => this;
             private protected IQueryWithInternal.Section<Querying.SegmentMetadata.AggregatorMergeStrategy> MergeStrategySection => this;
 
-            QuerySectionState<Context>? IQueryWithInternal.State<QuerySectionState<Context>>.State {get; set; }
-            QuerySectionState<QueryBase<TSource>.SegmentMetadataInternalState>? IQueryWithInternal.State<QuerySectionState<QueryBase<TSource>.SegmentMetadataInternalState>>.State {get; set; }
-            QuerySectionState<IReadOnlyCollection<Querying.SegmentMetadata.AnalysisType>>? IQueryWithInternal.State<QuerySectionState<IReadOnlyCollection<Querying.SegmentMetadata.AnalysisType>>>.State {get; set; }
-            QuerySectionState<Querying.SegmentMetadata.AggregatorMergeStrategy>? IQueryWithInternal.State<QuerySectionState<Querying.SegmentMetadata.AggregatorMergeStrategy>>.State {get; set; }
+            QuerySectionState<Context>? IQueryWithInternal.State<QuerySectionState<Context>>.State { get; set; }
+            QuerySectionState<QueryBase<TSource>.SegmentMetadataInternalState>? IQueryWithInternal.State<QuerySectionState<QueryBase<TSource>.SegmentMetadataInternalState>>.State { get; set; }
+            QuerySectionState<IReadOnlyCollection<Querying.SegmentMetadata.AnalysisType>>? IQueryWithInternal.State<QuerySectionState<IReadOnlyCollection<Querying.SegmentMetadata.AnalysisType>>>.State { get; set; }
+            QuerySectionState<Querying.SegmentMetadata.AggregatorMergeStrategy>? IQueryWithInternal.State<QuerySectionState<Querying.SegmentMetadata.AggregatorMergeStrategy>>.State { get; set; }
         }
     }
 }
