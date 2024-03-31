@@ -37,8 +37,4 @@
     <ProjectReference Include="..\Apache.Druid.Querying\Apache.Druid.Querying.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="__snapshots__\__mismatch__\" />
-  </ItemGroup>
-
 </Project>
