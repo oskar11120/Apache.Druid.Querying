@@ -205,34 +205,9 @@ namespace Apache.Druid.Querying.Internal.Sections
                     yield break;
                 }
 
-                InvalidOperationException Unexpected()
-                    => ExpectedToBe(sectionFactoryBody, $"a constructor or an initializer of {sectionType}");
-                var init = sectionFactoryBody as MemberInitExpression;
-                var @new = init is null ?
-                    sectionFactoryBody as NewExpression ?? throw Unexpected() :
-                    init.NewExpression;
-
-                if (init is not null)
-                {
-                    foreach (var binding in init.Bindings)
-                    {
-                        var assigment = binding as MemberAssignment ?? throw Unexpected();
-                        var name = assigment.Member.Name;
-                        yield return Execute(assigment.Expression, name);
-                    }
-                }
-
-                var propertyNames = @new
-                    .Type
-                    .GetProperties()
-                    .Select(property => property.Name)
-                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
-                foreach (var (argument, parameter) in @new.Arguments.Zip(@new.Constructor?.GetParameters() ?? Array.Empty<ParameterInfo>()))
-                {
-                    if (!propertyNames.TryGetValue(parameter.Name!, out var name))
-                        throw Unexpected();
-                    yield return Execute(argument, name);
-                }
+                var assignments = sectionFactoryBody.GetPropertyAssignments(Invalid, static (invalid, error) => invalid(error));
+                foreach (var (name, assignment) in assignments)
+                    yield return Execute(assignment, name);
             }
 
             return Execute__(querySectionFactory.Body).DistinctBy(call => call.ResultMemberName);

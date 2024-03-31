@@ -175,10 +175,10 @@ public static class IQueryWithInternal
                     .Values
                     .Aggregate(existing, (all, applyNew) => applyNew(all));
 
-        protected internal sealed void Set<TMarker>(ApplyPropertyColumnNameMappingChanges mappings)
+        protected internal sealed void Set<TMarker>(ApplyPropertyColumnNameMappingChanges changes)
         {
             State ??= ImmutableDictionary<Type, ApplyPropertyColumnNameMappingChanges>.Empty;
-            State = State.SetItem(typeof(TMarker), mappings);
+            State = State.SetItem(typeof(TMarker), changes);
         }
     }
 }
