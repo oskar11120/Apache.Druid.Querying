@@ -105,7 +105,7 @@ namespace Apache.Druid.Querying.Internal
 
                 var cululative = ImmutableArray<PropertyColumnNameMapping>.Empty;
                 var arguments = type.GetGenericArguments();
-                var agumentResults = arguments.Aggregate(empty, (result, type) => empty.AddRange(Create(type)));
+                var agumentResults = arguments.Aggregate(empty, (result, type) => result.AddRange(Create(type)));
                 result = arguments.Length is 0 ?
                     result :
                     result
@@ -113,6 +113,7 @@ namespace Apache.Druid.Querying.Internal
                             agumentResults.TryGetValue(type, out var argumentResult) ?
                                argumentResult :
                                ImmutableArray<PropertyColumnNameMapping>.Empty))
+                        .DistinctBy(mapping => mapping.Property)
                         .ToImmutableArray();
                 return agumentResults.Add(type, result);
             }

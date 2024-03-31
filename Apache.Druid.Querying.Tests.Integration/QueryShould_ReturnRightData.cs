@@ -1,8 +1,9 @@
-﻿using Ductus.FluentDocker.Common;
-using FluentAssertions;
+﻿using FluentAssertions;
+using LinqKit;
 using Snapshooter;
 using Snapshooter.NUnit;
 using System.Globalization;
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using static Apache.Druid.Querying.Tests.Integration.ServiceProvider;
 
@@ -17,6 +18,35 @@ internal static class TestData
         where TQuery : IQueryWith.Intervals
         => query
             .Interval(Interval);
+
+    public static Query<TSource>.Scan.WithColumns<SomeEditColumns> SomeColumnsOnly<TSource>(
+        this Query<TSource>.Scan.WithColumns<SomeEditColumns> query,
+        Expression<Func<TSource, Edit>> getEdit)
+        => query.Columns(
+            ((Expression<Func<TSource, SomeEditColumns>>)
+            (source => SomeEditColumns.FromEditExpression.Invoke(getEdit.Invoke(source))))
+            .Expand());
+}
+
+internal record SomeEditColumns(
+    DateTimeOffset Time,
+    bool Robot,
+    string Channel,
+    string Flags,
+    bool Unpatrolled,
+    string PageId,
+    string Diff)
+{
+    public static readonly Expression<Func<Edit, SomeEditColumns>> FromEditExpression = edit => new(
+        edit.Timestamp,
+        edit.IsRobot,
+        edit.Channel,
+        edit.Flags,
+        edit.IsUnpatrolled,
+        edit.Page,
+        edit.DiffUri);
+
+    public static readonly Func<Edit, SomeEditColumns> FromEdit = FromEditExpression.Compile();
 }
 
 internal class QueryShould_ReturnRightData
@@ -104,12 +134,14 @@ internal class QueryShould_ReturnRightData
     {
         LatestEditTimestampsPerCountry,
         LatestEditsPerCountry,
-        Both
+        LatestEditsPerCountry_SomeColumnsOnly,
+        ConsistencyBetweenAll
     }
     private record Country(string Code, string FullName);
     [TestCase(JoinTestCase.LatestEditTimestampsPerCountry)]
     [TestCase(JoinTestCase.LatestEditsPerCountry)]
-    [TestCase(JoinTestCase.Both)]
+    [TestCase(JoinTestCase.LatestEditsPerCountry_SomeColumnsOnly)]
+    [TestCase(JoinTestCase.ConsistencyBetweenAll)]
     public async Task Join(JoinTestCase @case)
     {
         var latestEditTimestampsPerCountry_query = new Query<Edit>
@@ -127,28 +159,45 @@ internal class QueryShould_ReturnRightData
         var edits_query = new Query<InnerJoinData<Edit, WithTimestamp<Dimensions_Aggregations<string, DateTimeOffset>>>>
             .Scan()
             .DefaultInterval();
+        var edits_someColumnsOnly_query = new Query<InnerJoinData<Edit, WithTimestamp<Dimensions_Aggregations<string, DateTimeOffset>>>>
+            .Scan
+            .WithColumns<SomeEditColumns>()
+            .SomeColumnsOnly(data => data.Left)
+            .DefaultInterval();
         await (@case switch
         {
-            JoinTestCase.LatestEditTimestampsPerCountry => VerifyMatch(Wikipedia.Edits, latestEditTimestampsPerCountry_query, @case.ToString()),
-            JoinTestCase.LatestEditsPerCountry => VerifyMatch(lastestEditsPerCountry_dataSource, edits_query, @case.ToString()),
-            JoinTestCase.Both => VerifyBoth(),
+            JoinTestCase.LatestEditTimestampsPerCountry => VerifyMatch(Wikipedia.Edits, latestEditTimestampsPerCountry_query, string.Empty),
+            JoinTestCase.LatestEditsPerCountry => VerifyMatch(lastestEditsPerCountry_dataSource, edits_query, string.Empty),
+            JoinTestCase.LatestEditsPerCountry_SomeColumnsOnly => VerifyMatch(lastestEditsPerCountry_dataSource, edits_someColumnsOnly_query, string.Empty),
+            JoinTestCase.ConsistencyBetweenAll => VerifyConsistency(),
             _ => throw new NotSupportedException()
         });
 
-        async Task VerifyBoth()
+        async Task VerifyConsistency()
         {
-            var fromEdits = await lastestEditsPerCountry_dataSource
+            var edits = await lastestEditsPerCountry_dataSource
                 .ExecuteQuery(edits_query)
-                .Select(result => result.Value.Right.Value)
-                .OrderBy(result => result.Aggregations)
+                .Select(result => result.Value)
+                .OrderBy(data => data.Right.Value.Aggregations)
                 .ToArrayAsync();
-            var fromTimestamps = await Wikipedia.Edits
+
+            var timestamps_fromEdits = edits
+                .Select(data => data.Right.Value);
+            var timestamps = await Wikipedia.Edits
                 .ExecuteQuery(latestEditTimestampsPerCountry_query)
                 .Select(result => result.Value)
                 .Where(result => result.Dimensions is not null)
                 .OrderBy(result => result.Aggregations)
                 .ToArrayAsync();
-            fromEdits.Should().BeEquivalentTo(fromTimestamps);
+            timestamps_fromEdits.Should().BeEquivalentTo(timestamps);
+
+            var someColumns_fromEdits = edits
+                .Select(data => SomeEditColumns.FromEdit(data.Left));
+            var someColumns = await lastestEditsPerCountry_dataSource
+                .ExecuteQuery(edits_someColumnsOnly_query)
+                .Select(result => result.Value)
+                .ToListAsync();
+            someColumns_fromEdits.Should().BeEquivalentTo(someColumns);
         }
     }
 
@@ -195,20 +244,13 @@ internal class QueryShould_ReturnRightData
     public enum ScanTestCase
     {
         First3Us,
-        First3UsSubset,
-        First3UsSubsetConsistency
+        First3Us_SomeColumnsOnly,
+        First3Us_ConsistencyOfBoth
     }
-    private record EditScanColumns(
-        DateTimeOffset Time,
-        bool Robot,
-        string Channel,
-        string Flags,
-        bool Unpatrolled,
-        string PageId,
-        string Diff);
+
     [TestCase(ScanTestCase.First3Us)]
-    [TestCase(ScanTestCase.First3UsSubset)]
-    [TestCase(ScanTestCase.First3UsSubsetConsistency)]
+    [TestCase(ScanTestCase.First3Us_SomeColumnsOnly)]
+    [TestCase(ScanTestCase.First3Us_ConsistencyOfBoth)]
     public async Task Scan(ScanTestCase @case)
     {
         var first3Us = new Query<Edit>
@@ -220,34 +262,20 @@ internal class QueryShould_ReturnRightData
             .Limit(3);
         var subset = new Query<Edit>
             .Scan
-            .WithColumns<EditScanColumns>()
+            .WithColumns<SomeEditColumns>()
             .DefaultInterval()
             .Filter(type => type.Selector(
                 edit => edit.CountryIsoCode,
                 "US"))
             .Limit(3)
-            .Columns(edit => new(
-                edit.Timestamp,
-                edit.IsRobot,
-                edit.Channel,
-                edit.Flags,
-                edit.IsUnpatrolled,
-                edit.Page,
-                edit.DiffUri));
+            .SomeColumnsOnly(edit => edit);
         async Task VerifyConsistency()
         {
             var first = await Wikipedia
                 .Edits
                 .ExecuteQuery(first3Us)
                 .Select(result => result.Value)
-                .Select(edit => new EditScanColumns(
-                    edit.Timestamp,
-                    edit.IsRobot,
-                    edit.Channel,
-                    edit.Flags,
-                    edit.IsUnpatrolled,
-                    edit.Page,
-                    edit.DiffUri))
+                .Select(SomeEditColumns.FromEdit)
                 .ToListAsync();
             var second = await Wikipedia
                 .Edits
@@ -259,8 +287,8 @@ internal class QueryShould_ReturnRightData
         var task = @case switch
         {
             ScanTestCase.First3Us => VerifyMatch(first3Us, string.Empty),
-            ScanTestCase.First3UsSubset => VerifyMatch(subset, string.Empty),
-            ScanTestCase.First3UsSubsetConsistency => VerifyConsistency(),
+            ScanTestCase.First3Us_SomeColumnsOnly => VerifyMatch(subset, string.Empty),
+            ScanTestCase.First3Us_ConsistencyOfBoth => VerifyConsistency(),
             _ => throw new NotSupportedException()
         };
         await task;

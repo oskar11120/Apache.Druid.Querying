@@ -233,7 +233,8 @@ namespace Apache.Druid.Querying
         {
             var mappings = columnNameMappings
                 .Combine(right.columnNameMappings)
-                .Update<TRight>(mapping => mapping with { ColumnName = rightPrefix + mapping.ColumnName });
+                .Update<TRight>(mapping => mapping with { ColumnName = rightPrefix + mapping.ColumnName })
+                .Add<TResult>();
             return new(
                 getOptions,
                 () => new JsonObject

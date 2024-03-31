@@ -1,0 +1,1262 @@
+﻿[
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T00:14:33.567+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "FC Dinamo Tbilisi",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727145538&oldid=727145266"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T00:49:58.225+00:00",
+      "Robot": false,
+      "Channel": "#es.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Arroyos y Esteros",
+      "Diff": "https://es.wikipedia.org/w/index.php?diff=91938009&oldid=91937958"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T04:38:03.516+00:00",
+      "Robot": false,
+      "Channel": "#ru.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Цаллати, Вадим Рамазанович",
+      "Diff": "https://ru.wikipedia.org/w/index.php?diff=79215335&oldid=78948231"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T05:22:07.917+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Ker and Downey Safaris Ltd.",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727173893&oldid=726182206"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T05:48:27.163+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Jarno Trulli",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727176127&oldid=727176048"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T06:19:32.759+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Kang Ye-won",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727178689&oldid=727111785"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T08:11:23.867+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Kuch Rang Pyar Ke Aise Bhi",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727188428&oldid=727187652"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T08:39:04.059+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Khalid ibn al-Walid",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727191354&oldid=726094728"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T09:15:32.909+00:00",
+      "Robot": false,
+      "Channel": "#de.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Berufjörður (Ostisland)",
+      "Diff": "https://de.wikipedia.org/w/index.php?diff=155664778&oldid=144320453"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T09:34:10.538+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Ryan Jimmo",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727196051&oldid=727195852"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T09:34:57.852+00:00",
+      "Robot": false,
+      "Channel": "#ar.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "أبو عبدالله أنس فرج المشرى",
+      "Diff": "https://ar.wikipedia.org/w/index.php?diff=20314702&oldid=20313698"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T10:25:48.275+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Music Bank (TV series)",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727200345&oldid=727200234"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T10:38:22.675+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "2016 Chinese Taipei Open Grand Prix Gold",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727201433&oldid=727201371"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T11:28:05.291+00:00",
+      "Robot": false,
+      "Channel": "#es.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Clima",
+      "Diff": "https://es.wikipedia.org/w/index.php?diff=91943972&oldid=91929168"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T11:43:41.895+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Tajikistan",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727206981&oldid=727206771"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T11:46:21.221+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "List of Naruto characters",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727207221&oldid=727204956"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T11:51:38.658+00:00",
+      "Robot": false,
+      "Channel": "#ar.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "جي تي أي 5",
+      "Diff": "https://ar.wikipedia.org/w/index.php?diff=20315261&oldid=20276236"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T12:28:45.427+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Mongolia national football team",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727210818&oldid=727210324"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T13:12:03.226+00:00",
+      "Robot": false,
+      "Channel": "#es.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Memorama",
+      "Diff": "https://es.wikipedia.org/w/index.php?diff=91944911&oldid=91881929"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T14:15:37.708+00:00",
+      "Robot": false,
+      "Channel": "#zh.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "世界语",
+      "Diff": "https://zh.wikipedia.org/w/index.php?diff=40612221&oldid=40609662"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T14:17:05.262+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Franz Joseph I of Austria",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727221572&oldid=727185599"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T15:00:12.544+00:00",
+      "Robot": false,
+      "Channel": "#sr.wikipedia",
+      "Flags": "!",
+      "Unpatrolled": true,
+      "PageId": "Тениски рекорди и статистике у отвореној ери — мушкарци",
+      "Diff": "https://sr.wikipedia.org/w/index.php?diff=11927067&oldid=11926161&rcid=19253860"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T15:01:59.753+00:00",
+      "Robot": false,
+      "Channel": "#zh.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "副溶血弧菌",
+      "Diff": "https://zh.wikipedia.org/w/index.php?diff=40612691&oldid=38444844"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T15:19:23.414+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Kojagori",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727228719&oldid=727228664"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T15:30:49.973+00:00",
+      "Robot": false,
+      "Channel": "#et.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Biograafiad (Ja)",
+      "Diff": "https://et.wikipedia.org/w/index.php?diff=4444537&oldid=4442148"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T15:44:34.543+00:00",
+      "Robot": false,
+      "Channel": "#es.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Andrés Caicedo",
+      "Diff": "https://es.wikipedia.org/w/index.php?diff=91947281&oldid=91947241"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T15:46:12.158+00:00",
+      "Robot": false,
+      "Channel": "#fr.wikipedia",
+      "Flags": "!",
+      "Unpatrolled": true,
+      "PageId": "Ville de Bruxelles",
+      "Diff": "https://fr.wikipedia.org/w/index.php?diff=127402634&oldid=126979799&rcid=195357973"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T15:56:00.487+00:00",
+      "Robot": false,
+      "Channel": "#ru.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Ханларова, Зейнаб Яхъя кызы",
+      "Diff": "https://ru.wikipedia.org/w/index.php?diff=79226015&oldid=79225974"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T16:07:00.746+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Adam Rose",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727234135&oldid=727212612"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T16:47:14.35+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Two Yoo Project Sugar Man",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727238415&oldid=727238386"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T17:06:45.423+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Afrikaner Weerstandsbeweging",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727241457&oldid=725041801"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T17:09:03.157+00:00",
+      "Robot": false,
+      "Channel": "#es.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Anexo:Episodios de Regular Show",
+      "Diff": "https://es.wikipedia.org/w/index.php?diff=91948709&oldid=91932420"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T17:12:49.49+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Tripiṭaka",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727242247&oldid=727236320"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T17:16:53.61+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Aritz Aduriz",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727242772&oldid=726396516"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T17:25:56.951+00:00",
+      "Robot": false,
+      "Channel": "#ru.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Лайвли, Блейк",
+      "Diff": "https://ru.wikipedia.org/w/index.php?diff=79227777&oldid=79227638"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T17:52:47.8+00:00",
+      "Robot": false,
+      "Channel": "#de.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Warendorfer Bahn",
+      "Diff": "https://de.wikipedia.org/w/index.php?diff=155677684&oldid=152605593"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T17:52:57.233+00:00",
+      "Robot": false,
+      "Channel": "#es.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Pinolillo",
+      "Diff": "https://es.wikipedia.org/w/index.php?diff=91949471&oldid=91330412"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T18:05:21.881+00:00",
+      "Robot": false,
+      "Channel": "#fa.wikipedia",
+      "Flags": "!",
+      "Unpatrolled": true,
+      "PageId": "نخ دندان",
+      "Diff": "https://fa.wikipedia.org/w/index.php?diff=17449981&oldid=17362777&rcid=29849105"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T18:30:33.457+00:00",
+      "Robot": false,
+      "Channel": "#es.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Panamá (ciudad)",
+      "Diff": "https://es.wikipedia.org/w/index.php?diff=91950132&oldid=91336181"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T18:31:00.05+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "List of playing-card nicknames",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727251252&oldid=727251193"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T18:37:25.749+00:00",
+      "Robot": false,
+      "Channel": "#ru.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Дудаев, Джохар Мусаевич",
+      "Diff": "https://ru.wikipedia.org/w/index.php?diff=79229239&oldid=79086844"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T18:47:06.996+00:00",
+      "Robot": false,
+      "Channel": "#hr.wikipedia",
+      "Flags": "!",
+      "Unpatrolled": true,
+      "PageId": "Beyoncé Knowles",
+      "Diff": "https://hr.wikipedia.org/w/index.php?diff=4736179&oldid=4684310&rcid=8140617"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T18:53:25.928+00:00",
+      "Robot": false,
+      "Channel": "#ar.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "حور تعلا",
+      "Diff": "https://ar.wikipedia.org/w/index.php?diff=20316684&oldid=20308944"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T19:00:24.92+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Sledgehammer (disambiguation)",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727254700&oldid=718592253"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T19:00:58.825+00:00",
+      "Robot": false,
+      "Channel": "#ar.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "الأحسبة",
+      "Diff": "https://ar.wikipedia.org/w/index.php?diff=20316695&oldid=20104863"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T19:03:24.437+00:00",
+      "Robot": false,
+      "Channel": "#es.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Selección de fútbol de México",
+      "Diff": "https://es.wikipedia.org/w/index.php?diff=91950806&oldid=91950328"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T19:03:48.437+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "1978 All-Ireland Senior Football Championship",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727255162&oldid=727254882"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T19:03:48.701+00:00",
+      "Robot": false,
+      "Channel": "#lt.wikipedia",
+      "Flags": "!N",
+      "Unpatrolled": true,
+      "PageId": "Valų terjeras",
+      "Diff": "https://lt.wikipedia.org/w/index.php?oldid=5051122&rcid=8555425"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T19:12:37.213+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Randers FC",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727256099&oldid=726856597"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T19:20:39.348+00:00",
+      "Robot": false,
+      "Channel": "#ar.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "النادي الأهلي (مصر)",
+      "Diff": "https://ar.wikipedia.org/w/index.php?diff=20316773&oldid=20316761"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T19:22:18.958+00:00",
+      "Robot": false,
+      "Channel": "#uk.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Чемпіонат Європи з футболу 2016",
+      "Diff": "https://uk.wikipedia.org/w/index.php?diff=18365849&oldid=18365808"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T19:22:36.109+00:00",
+      "Robot": false,
+      "Channel": "#ru.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Коутон, Скотт",
+      "Diff": "https://ru.wikipedia.org/w/index.php?diff=79230091&oldid=78914158"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T19:33:35.118+00:00",
+      "Robot": false,
+      "Channel": "#zh.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "I.O.I",
+      "Diff": "https://zh.wikipedia.org/w/index.php?diff=40614305&oldid=40603072"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T19:39:01.223+00:00",
+      "Robot": false,
+      "Channel": "#tr.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Samsunspor-Trabzonspor rekabeti",
+      "Diff": "https://tr.wikipedia.org/w/index.php?diff=17253615&oldid=17224543"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T19:44:06.772+00:00",
+      "Robot": false,
+      "Channel": "#no.wikipedia",
+      "Flags": "!N",
+      "Unpatrolled": true,
+      "PageId": "Vive Targi Kielce",
+      "Diff": "https://no.wikipedia.org/w/index.php?oldid=16493742&rcid=32433675"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T19:49:05.749+00:00",
+      "Robot": false,
+      "Channel": "#sv.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "James Earl Jones",
+      "Diff": "https://sv.wikipedia.org/w/index.php?diff=36123725&oldid=32400799"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T19:51:04.015+00:00",
+      "Robot": false,
+      "Channel": "#ru.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Варна",
+      "Diff": "https://ru.wikipedia.org/w/index.php?diff=79230605&oldid=79230594"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T19:51:58.133+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Fitbit",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727260698&oldid=727260641"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T19:53:05.429+00:00",
+      "Robot": false,
+      "Channel": "#pt.wikipedia",
+      "Flags": "!",
+      "Unpatrolled": true,
+      "PageId": "Parque nacional",
+      "Diff": "https://pt.wikipedia.org/w/index.php?diff=46019385&oldid=46019384&rcid=67161252"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T19:58:52.548+00:00",
+      "Robot": false,
+      "Channel": "#vi.wikipedia",
+      "Flags": "!",
+      "Unpatrolled": true,
+      "PageId": "Di tích Việt Nam",
+      "Diff": "https://vi.wikipedia.org/w/index.php?diff=23885538&oldid=23885536&rcid=46692177"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T20:00:08.096+00:00",
+      "Robot": false,
+      "Channel": "#ar.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "ويكيبيديا:الميدان/اقتراحات/06/2016",
+      "Diff": "https://ar.wikipedia.org/w/index.php?diff=20317115&oldid=20310899"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T20:06:00.659+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Vanessa Mdee",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727262395&oldid=727261546"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T20:06:51.963+00:00",
+      "Robot": false,
+      "Channel": "#fr.wikipedia",
+      "Flags": "!",
+      "Unpatrolled": true,
+      "PageId": "Liste des personnages de The King of Fighters",
+      "Diff": "https://fr.wikipedia.org/w/index.php?diff=127408933&oldid=119553313&rcid=195612832"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T20:07:10.031+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Nickelodeon Australian Kids' Choice Awards",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727262548&oldid=727262503"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T20:13:27.778+00:00",
+      "Robot": false,
+      "Channel": "#sr.wikipedia",
+      "Flags": "!",
+      "Unpatrolled": true,
+      "PageId": "Списак српских олимпијаца",
+      "Diff": "https://sr.wikipedia.org/w/index.php?diff=11927353&oldid=11927349&rcid=19254996"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T20:19:29.91+00:00",
+      "Robot": false,
+      "Channel": "#nl.wikipedia",
+      "Flags": "!",
+      "Unpatrolled": true,
+      "PageId": "Logopedie",
+      "Diff": "https://nl.wikipedia.org/w/index.php?diff=46996796&oldid=46996777&rcid=82578785"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T20:24:20.377+00:00",
+      "Robot": false,
+      "Channel": "#nl.wikipedia",
+      "Flags": "!",
+      "Unpatrolled": true,
+      "PageId": "Hittegolf",
+      "Diff": "https://nl.wikipedia.org/w/index.php?diff=46996817&oldid=46995387&rcid=82578839"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T20:31:39.265+00:00",
+      "Robot": false,
+      "Channel": "#de.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Bud Spencer",
+      "Diff": "https://de.wikipedia.org/w/index.php?diff=155682435&oldid=155620944"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T20:32:11.401+00:00",
+      "Robot": false,
+      "Channel": "#es.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Anexo:Episodios de Power Rangers: Dino Charge",
+      "Diff": "https://es.wikipedia.org/w/index.php?diff=91952401&oldid=91952018"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T20:34:38.748+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "DLSU Lady Spikers",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727265496&oldid=724912599"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T20:42:47.762+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Sebastião José de Carvalho e Melo, 1st Marquis of Pombal",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727266364&oldid=727263857"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T20:43:51.967+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Haseeb Hassan",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727266485&oldid=727265034"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T20:48:23.149+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Panathinaikos F.C.",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727266979&oldid=727266894"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T20:48:32.642+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Mainstream Top 40",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727266992&oldid=727265834"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T20:49:56.906+00:00",
+      "Robot": false,
+      "Channel": "#ko.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "게이한 전기 철도 이시야마사카모토 선",
+      "Diff": "https://ko.wikipedia.org/w/index.php?diff=16785851&oldid=16785839"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T20:50:43.699+00:00",
+      "Robot": false,
+      "Channel": "#hu.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Brit-sziget",
+      "Diff": "https://hu.wikipedia.org/w/index.php?diff=17663539&oldid=14649969"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T20:50:58.181+00:00",
+      "Robot": false,
+      "Channel": "#es.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Anexo:Episodios de The Thundermans",
+      "Diff": "https://es.wikipedia.org/w/index.php?diff=91952766&oldid=91847134"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T20:52:59.449+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Citroën",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727267493&oldid=727064337"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T20:53:31.885+00:00",
+      "Robot": false,
+      "Channel": "#es.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Ričardas Berankis",
+      "Diff": "https://es.wikipedia.org/w/index.php?diff=91952816&oldid=91091457"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T20:55:33.212+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Lunar Jim",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727267763&oldid=727266563"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T20:59:03.558+00:00",
+      "Robot": false,
+      "Channel": "#de.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Benutzer Diskussion:Doc.Heintz",
+      "Diff": "https://de.wikipedia.org/w/index.php?diff=155683101&oldid=155682961"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:00:34.327+00:00",
+      "Robot": false,
+      "Channel": "#es.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Eurocopa 2016",
+      "Diff": "https://es.wikipedia.org/w/index.php?diff=91952971&oldid=91952966"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:03:52.32+00:00",
+      "Robot": false,
+      "Channel": "#ru.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Панкратова, Анна Михайловна",
+      "Diff": "https://ru.wikipedia.org/w/index.php?diff=79231821&oldid=73168193"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:07:18.052+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Spacecraft propulsion",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727269111&oldid=727266905"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:09:14.712+00:00",
+      "Robot": false,
+      "Channel": "#pt.wikipedia",
+      "Flags": "!",
+      "Unpatrolled": true,
+      "PageId": "Fanfic",
+      "Diff": "https://pt.wikipedia.org/w/index.php?diff=46020107&oldid=46010167&rcid=67162748"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:09:15.152+00:00",
+      "Robot": false,
+      "Channel": "#pl.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Mistrzostwa Europy w Piłce Nożnej 2016",
+      "Diff": "https://pl.wikipedia.org/w/index.php?diff=46209361&oldid=46209320"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:13:30.471+00:00",
+      "Robot": false,
+      "Channel": "#zh.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "無綫劇集台電視劇集列表 (2007年)",
+      "Diff": "https://zh.wikipedia.org/w/index.php?diff=40614612&oldid=36480156"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:17:58.234+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Comparison of Java and C++",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727270390&oldid=725555455"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:18:20.677+00:00",
+      "Robot": false,
+      "Channel": "#ja.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "リュディヴィーヌ・サニエ",
+      "Diff": "https://ja.wikipedia.org/w/index.php?diff=60250835&oldid=56398982"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:18:21.654+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Karmiotissa Pano Polemidion",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727270443&oldid=727270266"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:21:59.366+00:00",
+      "Robot": false,
+      "Channel": "#es.wikipedia",
+      "Flags": "!N",
+      "Unpatrolled": true,
+      "PageId": "Festival RetroMadrid",
+      "Diff": "https://es.wikipedia.org/w/index.php?oldid=91953366&rcid=124524785"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:22:00.254+00:00",
+      "Robot": false,
+      "Channel": "#es.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Instrumentación y control de procesos",
+      "Diff": "https://es.wikipedia.org/w/index.php?diff=91953367&oldid=89218864"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:22:18.356+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "2010 Sylvania 300",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727270998&oldid=727270146"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:23:20.497+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "KeyCreator",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727271150&oldid=727270612"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:23:48.577+00:00",
+      "Robot": false,
+      "Channel": "#he.wikipedia",
+      "Flags": "!",
+      "Unpatrolled": true,
+      "PageId": "אודי דוידי",
+      "Diff": "https://he.wikipedia.org/w/index.php?diff=18871731&oldid=18666905&rcid=25558935"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:25:07.599+00:00",
+      "Robot": false,
+      "Channel": "#cs.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Bud Spencer",
+      "Diff": "https://cs.wikipedia.org/w/index.php?diff=13874832&oldid=13874813"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:25:33.786+00:00",
+      "Robot": false,
+      "Channel": "#fr.wikipedia",
+      "Flags": "!",
+      "Unpatrolled": true,
+      "PageId": "Roger Bacon",
+      "Diff": "https://fr.wikipedia.org/w/index.php?diff=127411023&oldid=127365763&rcid=195616743"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:25:45.298+00:00",
+      "Robot": false,
+      "Channel": "#ru.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Пройас, Алекс",
+      "Diff": "https://ru.wikipedia.org/w/index.php?diff=79232147&oldid=66144077"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:25:49.176+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Herbert Macaulay",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727271472&oldid=724797093"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:26:52.539+00:00",
+      "Robot": false,
+      "Channel": "#en.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Desur",
+      "Diff": "https://en.wikipedia.org/w/index.php?diff=727271656&oldid=727271500"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:27:43.154+00:00",
+      "Robot": false,
+      "Channel": "#it.wikipedia",
+      "Flags": "!",
+      "Unpatrolled": true,
+      "PageId": "Rodrigo José Lima dos Santos",
+      "Diff": "https://it.wikipedia.org/w/index.php?diff=81718710&oldid=80445845&rcid=115319159"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:30:00.395+00:00",
+      "Robot": false,
+      "Channel": "#es.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Martin Ødegaard",
+      "Diff": "https://es.wikipedia.org/w/index.php?diff=91953516&oldid=91939531"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:30:13.03+00:00",
+      "Robot": false,
+      "Channel": "#es.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Anexo Discusión:Emisoras de Bogotá",
+      "Diff": "https://es.wikipedia.org/w/index.php?diff=91953524&oldid=91953508"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:30:31.015+00:00",
+      "Robot": false,
+      "Channel": "#fr.wikipedia",
+      "Flags": "!",
+      "Unpatrolled": true,
+      "PageId": "Moundir et les Apprentis Aventuriers",
+      "Diff": "https://fr.wikipedia.org/w/index.php?diff=127411128&oldid=127410115&rcid=195617183"
+    }
+  },
+  {
+    "SegmentId": "wikipedia_2016-06-27T00:00:00.000Z_2016-06-28T00:00:00.000Z_2024-03-06T22:10:26.236Z",
+    "Value": {
+      "Time": "2016-06-27T21:30:50.804+00:00",
+      "Robot": false,
+      "Channel": "#de.wikipedia",
+      "Flags": "",
+      "Unpatrolled": false,
+      "PageId": "Fußball-Europameisterschaft 2016/England",
+      "Diff": "https://de.wikipedia.org/w/index.php?diff=155683760&oldid=155683358"
+    }
+  }
+]
