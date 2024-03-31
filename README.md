@@ -265,10 +265,11 @@ var second = new Query<Edit>
 ```
 
 ## Query result deserialization
-The library deserializes query results using System.Text.Json. The deserializer has been tweaked in following ways:
+The library serializes queries and deserializes query results using System.Text.Json. The serializer has been tweaked in following ways:
 - applied `System.Text.Json.JsonSerializerDefaults.Web`
 - `DateTime` and `DateTimeOffset` can additionaly be deserialized from unix timestamps
 - `bool` can additionally be deserialized from "true", "false', "True" and "False" string literals in quotes
-- `bool` can additionally be deserialized from numbers, where `1` will get deserialized to `true`, other numbers - to `false`.
+- `bool` can additionally be deserialized from numbers, where `1` will get deserialized to `true`, other numbers - to `false`
+- applied various json converters for types defined in the library.
 
 Get the tweaked serializer options by calling `Apache.Druid.Querying.Json.DefaultSerializerOptions.Create()`.
