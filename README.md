@@ -256,12 +256,12 @@ var first = new Query<Edit>
     .WithNoVirtualColumns
     .WithAggregations<Aggregations>()
     .Aggregations(type => new(
-        type.Sum(data => edit.Added)));
+        type.Sum(edit => edit.Added)));
 var second = new Query<Edit>
     .TimeSeries
     .WithNoVirtualColumns
     .WithAggregations<int>()
-    .Aggregations(type => type.Sum(data => edit.Added));
+    .Aggregations(type => type.Sum(edit => edit.Added));
 ```
 
 ## Query result deserialization
