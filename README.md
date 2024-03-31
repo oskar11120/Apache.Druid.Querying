@@ -61,7 +61,7 @@ Currently available query types:
 - TimeSeries
 - TopN
 - GroupBy
-- Scan (currently missing option to specifiy a subset of columns)
+- Scan
 - SegmentMetadata
 - DataSourceMetadata
 
