@@ -1,7 +1,9 @@
 ﻿using Apache.Druid.Querying.Internal;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Text.Json;
 
@@ -254,6 +256,56 @@ namespace Apache.Druid.Querying
 
         public class Scan : QueryBase<TSource, TSource, Scan>.Scan<TSource>
         {
+            public class WithColumns<TColumns> :
+                QueryBase<TSource, TSource, Scan>.Scan<TColumns>,
+                IQueryWithInternal.PropertyColumnNameMappingChanges,
+                IQueryWithInternal.SectionFactory<SelectedProperty[]>
+            {
+                private IQueryWithInternal.SectionFactory<SelectedProperty[]> SelectedProperties => this;
+                private IQueryWithInternal.PropertyColumnNameMappingChanges MappingChanges => this;
+
+                public WithColumns<TColumns> Columns(Expression<Func<TSource, TColumns>> mapSourceToColumns)
+                {
+                    try
+                    {
+                        var propertyMappings = mapSourceToColumns
+                            .UnwrapUnary()
+                            .GetPropertyAssignments(default(None), (_, error) => new InvalidOperationException(error))
+                            .Select(pair => (ColumnProperty: pair.PropertyName, SourceProperty: SelectedProperty.Get(pair.AssignedValue)))
+                            .ToArray();
+                        IEnumerable<(string ColumnProperty, PropertyColumnNameMapping SourceMapping)> Get(PropertyColumnNameMapping.IProvider mappings)
+                        {
+                            var sourceColumnMappings = mappings.Get<TSource>();
+                            foreach (var (columnProperty, sourceProperty) in propertyMappings)
+                            {
+                                var mapping = sourceColumnMappings
+                                    .SingleOrDefault(column => column.Property == sourceProperty.Name)
+                                    ?? throw new InvalidOperationException(
+                                        $"Property: {sourceProperty.SelectedFromType}.{sourceProperty.Name} does not " +
+                                        $"correspond to any {typeof(TSource)} data source column.");
+                                yield return (columnProperty, mapping); ;
+                            }
+                        }
+                        SelectedProperties.SetState(
+                            "columns",
+                            (serializerOptions, columnNameMappings) =>
+                            {
+                                var columnNames = Get(columnNameMappings).Select(pair => pair.SourceMapping.ColumnName);
+                                return JsonSerializer.SerializeToNode(columnNames, serializerOptions);
+                            });
+                        MappingChanges.Set<TColumns>(mappings => Get(mappings)
+                            .Select(pair => pair.SourceMapping with { Property = pair.ColumnProperty })
+                            .ToImmutableArray());
+                        return this;
+                    }
+                    catch (Exception inner)
+                    {
+                        throw new InvalidOperationException($"Invalid expression: {mapSourceToColumns}. {inner.Message}", inner);
+                    }
+                }
+
+                QuerySectionFactoryState<SelectedProperty[]>? IQueryWithInternal.State<QuerySectionFactoryState<SelectedProperty[]>>.State { get; set; }
+            }
         }
 
         public class SegmentMetadata : QueryBase<TSource>.SegmentMetadata

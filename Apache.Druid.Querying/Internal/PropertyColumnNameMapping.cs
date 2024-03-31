@@ -10,7 +10,7 @@ namespace Apache.Druid.Querying.Internal
     {
         public interface IProvider
         {
-            IReadOnlyList<PropertyColumnNameMapping> Get<TModel>();
+            ImmutableArray<PropertyColumnNameMapping> Get<TModel>();
             string GetColumnName(Type modelType, string propertyName);
         }
 
@@ -24,11 +24,11 @@ namespace Apache.Druid.Querying.Internal
             private ImmutableBuilder(ImmutableDictionary<Type, ImmutableArray<PropertyColumnNameMapping>>? all = null)
                 => All = all ?? ImmutableDictionary<Type, ImmutableArray<PropertyColumnNameMapping>>.Empty;
 
-            public IReadOnlyList<PropertyColumnNameMapping> Get<TModel>() => Get(typeof(TModel));
-            public IReadOnlyList<PropertyColumnNameMapping> Get(Type modelType)
+            public ImmutableArray<PropertyColumnNameMapping> Get<TModel>() => Get(typeof(TModel));
+            public ImmutableArray<PropertyColumnNameMapping> Get(Type modelType)
                 => All.TryGetValue(modelType, out var result) ?
                     result :
-                    Array.Empty<PropertyColumnNameMapping>();
+                    ImmutableArray<PropertyColumnNameMapping>.Empty;
 
             public string GetColumnName(Type modelType, string propertyName)
                 => Get(modelType)
@@ -41,6 +41,9 @@ namespace Apache.Druid.Querying.Internal
                 var @new = Create(typeof(TModel));
                 return new(All.AddRange(@new));
             }
+
+            public ImmutableBuilder Add<TModel>(ImmutableArray<PropertyColumnNameMapping> mappings)
+                => new(All.Add(typeof(TModel), mappings));
 
             public ImmutableBuilder Update<TModel>(Func<PropertyColumnNameMapping, PropertyColumnNameMapping> update)
             {

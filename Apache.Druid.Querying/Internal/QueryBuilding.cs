@@ -152,8 +152,7 @@ public static class IQueryWithInternal
                 .Execute(
                     factory,
                     typeof(TElementFactory),
-                    typeof(TArguments),
-                    typeof(TSection))
+                    typeof(TArguments))
                 .ToList();
             SectionAtomicity = SectionAtomicity.Add<TSection>(calls, key, out var atomicity);
             SetState(key, (serializerOptions, columnNames) => SectionFactoryJsonMapper.Map<TArguments>(
@@ -175,10 +174,10 @@ public static class IQueryWithInternal
                     .Values
                     .Aggregate(existing, (all, applyNew) => applyNew(all));
 
-        protected internal sealed void Set<TMarker>(ApplyPropertyColumnNameMappingChanges changes)
+        protected internal sealed void Set<TModel>(Func<PropertyColumnNameMapping.IProvider, ImmutableArray<PropertyColumnNameMapping>> factory)
         {
             State ??= ImmutableDictionary<Type, ApplyPropertyColumnNameMappingChanges>.Empty;
-            State = State.SetItem(typeof(TMarker), changes);
+            State = State.SetItem(typeof(TModel), mappings => mappings.Add<TModel>(factory(mappings)));
         }
     }
 }

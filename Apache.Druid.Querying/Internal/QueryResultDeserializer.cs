@@ -105,7 +105,7 @@ namespace Apache.Druid.Querying.Internal
             {
                 if (!hasAnyColumnNamesVaryingFromPropertyNames.TryGetValue(typeof(TElement), out var result)) 
                 {
-                    result = columnNameMappings.Get<TElement>() is var mappings and { Count: > 0 }
+                    result = columnNameMappings.Get<TElement>() is var mappings and { Length: > 0 }
                         && mappings.Any(mapping => mapping.Property != mapping.ColumnName);
                     hasAnyColumnNamesVaryingFromPropertyNames.TryAdd(typeof(TElement), result);
                 }

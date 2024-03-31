@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace Apache.Druid.Querying.Internal.Sections
 {
@@ -101,8 +100,7 @@ namespace Apache.Druid.Querying.Internal.Sections
         public static IEnumerable<ElementFactoryCall> Execute(
             LambdaExpression querySectionFactory,
             Type factoryType,
-            Type argumentsType,
-            Type sectionType)
+            Type argumentsType)
         {
             InvalidOperationException Invalid(string? details = null, Exception? inner = null) => new(
                 $"Invalid expression: {querySectionFactory}." +
@@ -206,8 +204,8 @@ namespace Apache.Druid.Querying.Internal.Sections
                 }
 
                 var assignments = sectionFactoryBody.GetPropertyAssignments(Invalid, static (invalid, error) => invalid(error));
-                foreach (var (name, assignment) in assignments)
-                    yield return Execute(assignment, name);
+                foreach (var (name, assigned) in assignments)
+                    yield return Execute(assigned, name);
             }
 
             return Execute__(querySectionFactory.Body).DistinctBy(call => call.ResultMemberName);

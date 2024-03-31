@@ -27,7 +27,7 @@ namespace Apache.Druid.Querying.Internal
             return result ? ternary.IfTrue : ternary.IfFalse;
         }
 
-        public static IEnumerable<(string PropertyName, Expression Assigment)> GetPropertyAssignments<TArgs>(
+        public static IEnumerable<(string PropertyName, Expression AssignedValue)> GetPropertyAssignments<TArgs>(
             this Expression initOrNewExpression,
             TArgs arguments,
             Func<TArgs, string, InvalidOperationException> onUnexpected)
