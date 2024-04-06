@@ -84,19 +84,19 @@ namespace Apache.Druid.Querying.Internal
         }
     }
 
+    public sealed record QueryBaseInternalState(string Type);
     public abstract class QueryBase :
-        IQueryWithInternal.Section<QueryBase.InternalState>,
+        IQueryWithInternal.Section<QueryBaseInternalState>,
         IQueryWith.Intervals,
         IQueryWithInternal.MutableSectionAtomicity,
         IQueryWithInternal.SectionFactoryExpressionStates,
         IQueryWithInternal.PropertyColumnNameMappingChanges
     {
-        public sealed record InternalState(string Type);
         public QueryBase(string? type = null)
-            => (this as IQueryWithInternal.Section<QueryBase.InternalState>)
+            => (this as IQueryWithInternal.Section<QueryBaseInternalState>)
             .SetState("queryType", new(type ?? GetType().Name.ToCamelCase()), state => state.Type);
 
-        QuerySectionState<InternalState>? IQueryWithInternal.State<QuerySectionState<InternalState>>.State { get; set; }
+        QuerySectionState<QueryBaseInternalState>? IQueryWithInternal.State<QuerySectionState<QueryBaseInternalState>>.State { get; set; }
         SectionAtomicity.ImmutableBuilder? IQueryWithInternal.State<SectionAtomicity.ImmutableBuilder>.State { get; set; }
         Dictionary<string, GetQuerySectionJson>? IQueryWithInternal.State<Dictionary<string, GetQuerySectionJson>>.State { get; set; }
         QuerySectionState<IReadOnlyCollection<Interval>>? IQueryWithInternal.State<QuerySectionState<IReadOnlyCollection<Interval>>>.State { get; set; }
