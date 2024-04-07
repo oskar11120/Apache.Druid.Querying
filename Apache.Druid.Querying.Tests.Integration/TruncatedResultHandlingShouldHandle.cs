@@ -65,7 +65,7 @@ internal sealed record PostAggregations(
     double? TwentyThree,
     double? TwentyFour);
 
-internal class Given4MBQuery_TruncatedResultHandlingShouldHandle
+internal class Given5MBQuery_TruncatedResultHandlingShouldHandle
     : TruncatedResultHandlingShouldHandle<WithTimestamp<Aggregations_PostAggregations<Aggregations, PostAggregations>>>
 {
     protected override IQueryWithSource<Edit>.AndResult<WithTimestamp<Aggregations_PostAggregations<Aggregations, PostAggregations>>> Query
@@ -141,14 +141,7 @@ internal abstract class TruncatedResultHandlingShouldHandle<TResult>
     protected virtual bool IsEmpty(TResult result) => false;
 
     [SetUp]
-    public async Task SetUp()
-    {
-        await ToxiProxy.Reset();
-
-        // Workaround to a problem in druid historical where closing tcp connection
-        // often enough results in it crashing with out of memory error.
-        await Task.Delay(TimeSpan.FromSeconds(1));
-    }
+    public Task SetUp() => ToxiProxy.Reset();
 
     private async Task GivenNetworkError_Query_WithNoHandling_ShouldThrow()
     {
