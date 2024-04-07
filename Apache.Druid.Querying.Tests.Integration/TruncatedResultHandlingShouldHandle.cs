@@ -145,6 +145,9 @@ internal abstract class TruncatedResultHandlingShouldHandle<TResult>
     public async Task SetUp()
     {
         await ToxiProxy.Reset();
+
+        // Workaround to a problem in druid historical where closing tcp connection
+        // often enough results in it crashing with out of memory error.
         await Task.Delay(TimeSpan.FromSeconds(1));
     }
 
@@ -196,6 +199,7 @@ internal abstract class TruncatedResultHandlingShouldHandle<TResult>
         };
         await ToxiProxy.AddAsync(rateLimit);
 
+        // Workaround to Toxiproxy not having a way to do a tcp reset in the middle of sending http response.
         async Task KeepResettingForHalfASecond()
         {
             await Task.Delay(TimeSpan.FromSeconds(2));
