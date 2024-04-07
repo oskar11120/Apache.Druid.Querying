@@ -65,7 +65,6 @@ internal sealed record PostAggregations(
     double? TwentyThree,
     double? TwentyFour);
 
-// At 4MB Druid starts using using Transfer Encding: chunked.
 internal class Given4MBQuery_TruncatedResultHandlingShouldHandle
     : TruncatedResultHandlingShouldHandle<WithTimestamp<Aggregations_PostAggregations<Aggregations, PostAggregations>>>
 {
@@ -103,32 +102,32 @@ internal class Given4MBQuery_TruncatedResultHandlingShouldHandle
             type.First(edit => edit.RegionName),
             type.Count()))
         .PostAggregations(type => new PostAggregations(
-            type.Expression<double>(data => $"{data.Added}+0.2333321321321", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.3333321321321", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.4333321321321", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.5333321321321", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.6333321321321", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.7333321321321", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.8333321321321", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.9333321321321", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.11333321312312", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.12333321312312", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.13333321312312", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.14333321312312", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.15333321312312", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.16333321312312", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.17333321312312", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.18333321312312", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.19333321312312", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.21333321312312", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.21333321312312", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.23333321312312", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.2333321321312", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.3333321321312", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.4333321321312", SimpleDataType.Double),
-            type.Expression<double>(data => $"{data.Added}+0.5333321321312", SimpleDataType.Double)))
+            type.Expression<double>(data => $"{data.Added}*0.2333321321321", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.3333321321321", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.4333321321321", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.5333321321321", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.6333321321321", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.7333321321321", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.8333321321321", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.9333321321321", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.11333321312312", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.12333321312312", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.13333321312312", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.14333321312312", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.15333321312312", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.16333321312312", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.17333321312312", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.18333321312312", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.19333321312312", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.21333321312312", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.21333321312312", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.23333321312312", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.2333321321312", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.3333321321312", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.4333321321312", SimpleDataType.Double),
+            type.Expression<double>(data => $"{data.Added}*0.5333321321312", SimpleDataType.Double)))
         .Granularity(SimpleGranularity.Second)
-        .Context(new QueryContext.TimeSeries { PopulateCache = false, PopulateResultLevelCache = false, UseCache = false, UseResultLevelCache = false, MaxQueuedBytes = 10000000 });
+        .Context(new QueryContext.TimeSeries { PopulateCache = false, PopulateResultLevelCache = false, UseCache = false, UseResultLevelCache = false });
 
 
     protected override bool IsEmpty(WithTimestamp<Aggregations_PostAggregations<Aggregations, PostAggregations>> result)
@@ -151,24 +150,28 @@ internal abstract class TruncatedResultHandlingShouldHandle<TResult>
         await Task.Delay(TimeSpan.FromSeconds(1));
     }
 
-    private Task GivenNetworkError_Query_WithNoHandling_ShouldThrow()
-        => Wikipedia_UnderToxiproxy
-        .Edits
-        .Awaiting(edits => edits.ExecuteQuery(Query, onTruncatedResultsQueryRemaining: false).ToArrayAsync())
-        .Should()
-        .ThrowAsync<IOException>()
-        .WithMessage("The response ended prematurely*");
+    private async Task GivenNetworkError_Query_WithNoHandling_ShouldThrow()
+    {
+        await Wikipedia_UnderToxiproxy
+            .Edits
+            .Awaiting(edits => edits.ExecuteQuery(Query, onTruncatedResultsQueryRemaining: false).ToArrayAsync())
+            .Should()
+            .ThrowAsync<IOException>()
+            .WithMessage("The response ended prematurely*");
+    }
 
     private async Task ResultsWithHandling_AndNetworkErrors_ShouldBeTheSameAs_ResultsWithNoHandling_AndNoNetworkErrors()
     {
-        var withHandling = Wikipedia_UnderToxiproxy.Edits.ExecuteQuery(Query);
-        var withNoHandling = Wikipedia.Edits.ExecuteQuery(Query);
-        await foreach (var (one, other) in withHandling.Zip(withNoHandling))
-        {
-            if (IsEmpty(one) && IsEmpty(other))
-                return;
+        IAsyncEnumerable<TResult> ExecuteQueryGetNonEmptyResults(WikipediaDataSourceProvider wikipedia)
+            => wikipedia
+            .Edits
+            .ExecuteQuery(Query)
+            .Where(result => !IsEmpty(result));
+        var withHandling = ExecuteQueryGetNonEmptyResults(Wikipedia_UnderToxiproxy);
+        var withNoHandling = ExecuteQueryGetNonEmptyResults(Wikipedia);
+        var zipped = withHandling.Zip(withNoHandling);
+        await foreach (var (one, other) in zipped)
             one.Should().BeEquivalentTo(other);
-        }
     }
 
     [Test]
@@ -202,7 +205,7 @@ internal abstract class TruncatedResultHandlingShouldHandle<TResult>
         // Workaround to Toxiproxy not having a way to do a tcp reset in the middle of sending http response.
         async Task KeepResettingForHalfASecond()
         {
-            await Task.Delay(TimeSpan.FromSeconds(2));
+            await Task.Delay(TimeSpan.FromSeconds(1));
             reset = await ToxiProxy.AddAsync(reset);
             await Task.Delay(TimeSpan.FromSeconds(0.5));
             await ToxiProxy.RemoveToxicAsync(reset.Name);
