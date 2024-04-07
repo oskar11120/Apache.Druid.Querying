@@ -2,6 +2,8 @@
 using Apache.Druid.Querying.Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
+using System.Net.Http.Json;
+using System.Text.Json.Nodes;
 
 namespace Apache.Druid.Querying.Tests.Integration;
 
@@ -62,118 +64,119 @@ internal class ServiceProvider
 
     private static async Task IngestWikipediaEdits()
     {
-        //using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(5));
-        //var ingestedDataSources = await Wikipedia
-        //    .Edits
-        //    .ExecuteQuery(new Query<Edit>.DataSourceMetadata(), token: timeout.Token)
-        //    .ToArrayAsync(timeout.Token);
-        //if (ingestedDataSources.Any())
-        //{
-        //    return;
-        //}
+        var clientFactory = Services.GetRequiredService<IHttpClientFactory>();
+        using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+        var ingestedDataSources = await Wikipedia
+            .Edits
+            .ExecuteQuery(new Query<Edit>.DataSourceMetadata(), token: timeout.Token)
+            .ToArrayAsync(timeout.Token);
+        if (ingestedDataSources.Any())
+        {
+            return;
+        }
 
-        //var spec = """
-        //{
-        //  "type": "index_parallel",
-        //  "spec": {
-        //    "ioConfig": {
-        //      "type": "index_parallel",
-        //      "inputSource": {
-        //        "type": "http",
-        //        "uris": [
-        //          "https://druid.apache.org/data/wikipedia.json.gz"
-        //        ]
-        //      },
-        //      "inputFormat": {
-        //        "type": "json"
-        //      }
-        //    },
-        //    "dataSchema": {
-        //      "granularitySpec": {
-        //        "segmentGranularity": "day",
-        //        "queryGranularity": "none",
-        //        "rollup": false
-        //      },
-        //      "dataSource": "wikipedia",
-        //      "timestampSpec": {
-        //        "column": "timestamp",
-        //        "format": "iso"
-        //      },
-        //      "dimensionsSpec": {
-        //        "dimensions": [
-        //          "isRobot",
-        //          "channel",
-        //          "flags",
-        //          "isUnpatrolled",
-        //          "page",
-        //          "diffUrl",
-        //          {
-        //            "type": "long",
-        //            "name": "added"
-        //          },
-        //          "comment",
-        //          {
-        //            "type": "long",
-        //            "name": "commentLength"
-        //          },
-        //          "isNew",
-        //          "isMinor",
-        //          {
-        //            "type": "long",
-        //            "name": "delta"
-        //          },
-        //          "isAnonymous",
-        //          "user",
-        //          {
-        //            "type": "long",
-        //            "name": "deltaBucket"
-        //          },
-        //          {
-        //            "type": "long",
-        //            "name": "deleted"
-        //          },
-        //          "namespace",
-        //          "cityName",
-        //          "countryName",
-        //          "regionIsoCode",
-        //          "metroCode",
-        //          "countryIsoCode",
-        //          "regionName"
-        //        ]
-        //      }
-        //    },
-        //    "tuningConfig": {
-        //      "type": "index_parallel",
-        //      "partitionsSpec": {
-        //        "type": "dynamic"
-        //      }
-        //    }
-        //  }
-        //}
-        //""";
-        //var tasksUri = TestEnvironment.DruidRouterUri + "druid/indexer/v1/task";
-        //using var client = clientFactory.CreateClient();
-        //using var response = await client.PostAsJsonAsync(tasksUri, JsonNode.Parse(spec), timeout.Token);
-        //var test = await response.Content.ReadAsStringAsync();
-        //response.EnsureSuccessStatusCode();
-        //var task = (await response.Content.ReadFromJsonAsync<JsonObject>())!["task"]!.GetValue<string>();
-        //TestContext.WriteLine($"Ingesting wikipedia edits ({task}).");
-        //const string running = "RUNNING";
-        //const string success = "SUCCESS";
-        //var status = running;
-        //while (status == running)
-        //{
-        //    await Task.Delay(TimeSpan.FromSeconds(1), timeout.Token);
-        //    var getStatusResult = await client.GetFromJsonAsync<JsonObject>(tasksUri + $"/{task}/{nameof(status)}", timeout.Token);
-        //    status = getStatusResult![nameof(status)]![nameof(status)]!.GetValue<string>();
-        //    TestContext.WriteLine(status);
-        //}
+        var spec = """
+        {
+          "type": "index_parallel",
+          "spec": {
+            "ioConfig": {
+              "type": "index_parallel",
+              "inputSource": {
+                "type": "http",
+                "uris": [
+                  "https://druid.apache.org/data/wikipedia.json.gz"
+                ]
+              },
+              "inputFormat": {
+                "type": "json"
+              }
+            },
+            "dataSchema": {
+              "granularitySpec": {
+                "segmentGranularity": "day",
+                "queryGranularity": "none",
+                "rollup": false
+              },
+              "dataSource": "wikipedia",
+              "timestampSpec": {
+                "column": "timestamp",
+                "format": "iso"
+              },
+              "dimensionsSpec": {
+                "dimensions": [
+                  "isRobot",
+                  "channel",
+                  "flags",
+                  "isUnpatrolled",
+                  "page",
+                  "diffUrl",
+                  {
+                    "type": "long",
+                    "name": "added"
+                  },
+                  "comment",
+                  {
+                    "type": "long",
+                    "name": "commentLength"
+                  },
+                  "isNew",
+                  "isMinor",
+                  {
+                    "type": "long",
+                    "name": "delta"
+                  },
+                  "isAnonymous",
+                  "user",
+                  {
+                    "type": "long",
+                    "name": "deltaBucket"
+                  },
+                  {
+                    "type": "long",
+                    "name": "deleted"
+                  },
+                  "namespace",
+                  "cityName",
+                  "countryName",
+                  "regionIsoCode",
+                  "metroCode",
+                  "countryIsoCode",
+                  "regionName"
+                ]
+              }
+            },
+            "tuningConfig": {
+              "type": "index_parallel",
+              "partitionsSpec": {
+                "type": "dynamic"
+              }
+            }
+          }
+        }
+        """;
+        var tasksUri = TestEnvironment.DruidRouterUri + "druid/indexer/v1/task";
+        using var client = clientFactory.CreateClient();
+        using var response = await client.PostAsJsonAsync(tasksUri, JsonNode.Parse(spec), timeout.Token);
+        var test = await response.Content.ReadAsStringAsync();
+        response.EnsureSuccessStatusCode();
+        var task = (await response.Content.ReadFromJsonAsync<JsonObject>())!["task"]!.GetValue<string>();
+        TestContext.WriteLine($"Ingesting wikipedia edits ({task}).");
+        const string running = "RUNNING";
+        const string success = "SUCCESS";
+        var status = running;
+        while (status == running)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(1), timeout.Token);
+            var getStatusResult = await client.GetFromJsonAsync<JsonObject>(tasksUri + $"/{task}/{nameof(status)}", timeout.Token);
+            status = getStatusResult![nameof(status)]![nameof(status)]!.GetValue<string>();
+            TestContext.WriteLine(status);
+        }
 
-        //if (status != success)
-        //    throw new HttpRequestException("Failed to ingest wikipedia edits.");
+        if (status != success)
+            throw new HttpRequestException("Failed to ingest wikipedia edits.");
 
-        //// Workaround to Druid returning incomplete data right after ingestion.
-        //await Task.Delay(TimeSpan.FromSeconds(5));
+        // Workaround to Druid returning incomplete data right after ingestion.
+        await Task.Delay(TimeSpan.FromSeconds(5));
     }
 
     private static async Task<ToxiProxy_> SetUpToxiproxyForWikipedia()
