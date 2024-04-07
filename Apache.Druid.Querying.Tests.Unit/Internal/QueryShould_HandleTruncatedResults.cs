@@ -1,4 +1,5 @@
 ﻿using Apache.Druid.Querying.Internal;
+using Apache.Druid.Querying.Json;
 using FluentAssertions;
 using Scan = Apache.Druid.Querying.Internal.TruncatedQueryResultHandler<Apache.Druid.Querying.None>
     .Scan<Apache.Druid.Querying.ScanResult<Apache.Druid.Querying.None>>;
@@ -14,7 +15,7 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
         private static IAsyncEnumerable<T> MaybeTruncate<T>(
             IEnumerable<T> source, bool truncate)
             => source
-                .Concat(truncate ? EnumerableEx.Throw<T>(new TruncatedResultsException()) : Enumerable.Empty<T>())
+                .Concat(truncate ? EnumerableEx.Throw<T>(new UnexpectedEndOfJsonStreamException()) : Enumerable.Empty<T>())
                 .ToAsyncEnumerable();
 
         [Test]

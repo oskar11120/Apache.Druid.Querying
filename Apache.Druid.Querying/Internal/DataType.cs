@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 
@@ -28,10 +29,12 @@ namespace Apache.Druid.Querying.Internal
             return result.ToString();
         }
 
-        public static SimpleDataType GetSimple(Type type) 
-            => TryGetSimple(type, out var simple) ?
+        public static SimpleDataType GetSimple(Type type)
+            => IsNullable(type, out var argumentType) ?
+            GetSimple(argumentType) :
+            TryGetSimple(type, out var simple) ?
                 simple :
-                throw new InvalidOperationException($"No matching {nameof(SimpleDataType)} {nameof(DataType)} exists for {nameof(type)}.");
+                throw new InvalidOperationException($"No matching {nameof(SimpleDataType)} {nameof(DataType)} exists for {nameof(type)} {type}.");
 
         private static void Set(Type type, StringBuilder result)
         {
@@ -69,13 +72,13 @@ namespace Apache.Druid.Querying.Internal
 
         private static bool TrySetNullable(Type type, StringBuilder result)
         {
-            var isNullable = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
-            if (!isNullable)
-                return false;
+            if (IsNullable(type, out var argumentType))
+            {
+                Set(argumentType, result);
+                return true;
+            }
 
-            var argumentType = type.GetGenericArguments().Single();
-            Set(argumentType, result);
-            return true;
+            return false;
         }
 
         private static bool TrySetArray(Type type, StringBuilder result)
@@ -98,6 +101,18 @@ namespace Apache.Druid.Querying.Internal
 
             result.Append("Complex").Append(L).Append("json").Append(R);
             return true;
+        }
+
+        private static bool IsNullable(Type type, [MaybeNullWhen(false)] out Type argumentType)
+        {
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                argumentType = type.GetGenericArguments()[0];
+                return true;
+            }
+
+            argumentType = null;
+            return false;
         }
     }
 }

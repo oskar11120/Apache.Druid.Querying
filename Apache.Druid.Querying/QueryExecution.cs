@@ -27,7 +27,12 @@ namespace Apache.Druid.Querying
 
     internal sealed class Mutable<TValue>
     {
-        public TValue? Value { get; set; }
+        public TValue? Value;
+    }
+
+    internal sealed class TruncatedQueryResultHandlerContext
+    {
+        public object? Value;
     }
 
     public interface IQueryResultDeserializer<TResult>
@@ -37,21 +42,10 @@ namespace Apache.Druid.Querying
 
     public interface IQueryWithSource<TSource> : IQueryWithInternal.SectionAtomicity, IQueryWithInternal.PropertyColumnNameMappingChanges
     {
-        public interface AndResult<TResult> : IQueryWithSource<TSource>
+        public interface AndResult<TResult> : IQueryWithSource<TSource>, IQueryResultDeserializer<TResult>
         {
-            public interface AndDeserializationAndTruncatedResultHandling<TContext> : AndResult<TResult>, IQueryResultDeserializer<TResult>
-                where TContext : new()
-            {
-                internal IAsyncEnumerable<TResult> OnTruncatedResultsSetQueryForRemaining(
-                    IAsyncEnumerable<TResult> results, TContext context, Mutable<IQueryWithSource<TSource>> setter, CancellationToken token);
-            }
-        }
-    }
-
-    public class TruncatedResultsException : Exception
-    {
-        public TruncatedResultsException(string? message = null, Exception? inner = null) : base(message ?? "Druid query returned truncated results.", inner)
-        {
+            internal IAsyncEnumerable<TResult> OnTruncatedResultsSetQueryForRemaining(
+                IAsyncEnumerable<TResult> results, TruncatedQueryResultHandlerContext context, Mutable<IQueryWithSource<TSource>> setter, CancellationToken token);
         }
     }
 
@@ -127,11 +121,10 @@ namespace Apache.Druid.Querying
             return result;
         }
 
-        public async IAsyncEnumerable<TResult> ExecuteQuery<TResult, TContext>(
-            IQueryWithSource<TSource>.AndResult<TResult>.AndDeserializationAndTruncatedResultHandling<TContext> query,
+        public async IAsyncEnumerable<TResult> ExecuteQuery<TResult>(
+            IQueryWithSource<TSource>.AndResult<TResult> query,
             bool onTruncatedResultsQueryRemaining = true,
             [EnumeratorCancellation] CancellationToken token = default)
-            where TContext : new()
         {
             var queryForRemaining = new Mutable<IQueryWithSource<TSource>> { Value = query };
             var atomicity = SectionAtomicity.ImmutableBuilder.Combine(query.SectionAtomicity, sectionAtomicity);
@@ -139,14 +132,13 @@ namespace Apache.Druid.Querying
             var deserializer = query;
             var truncatedResultHandler = query;
             byte[]? buffer = null;
-            var context = new TContext();
+            var context = new TruncatedQueryResultHandlerContext();
             async IAsyncEnumerable<TResult> Deserialize(Stream utf8Json, [EnumeratorCancellation] CancellationToken token)
             {
                 buffer ??= ArrayPool<byte>.Shared.Rent(options.Serializer.DefaultBufferSize);
                 var read = await utf8Json.ReadAsync(buffer, token);
                 var results = deserializer
-                    .Deserialize(new(new(utf8Json, buffer, read), options.Serializer, atomicity, mappings), token)
-                    .Catch<TResult, UnexpectedEndOfStreamException>(exception => throw new TruncatedResultsException(inner: exception), token);
+                    .Deserialize(new(new(utf8Json, buffer, read), options.Serializer, atomicity, mappings), token);
                 queryForRemaining.Value = null;
                 if (onTruncatedResultsQueryRemaining)
                     results = truncatedResultHandler.OnTruncatedResultsSetQueryForRemaining(results, context, queryForRemaining, token);

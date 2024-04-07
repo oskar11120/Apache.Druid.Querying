@@ -45,7 +45,7 @@ namespace Apache.Druid.Querying.Tests.Integration
         bool IEditBooleans.Robot { get => IsRobot; }
     }
 
-    internal sealed class WikipediaDataSourceProvider : DataSourceProvider
+    internal class WikipediaDataSourceProvider : DataSourceProvider
     {
         public WikipediaDataSourceProvider()
         {

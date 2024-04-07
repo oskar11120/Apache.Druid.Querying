@@ -94,7 +94,7 @@ namespace Apache.Druid.Querying.Json
                 {
                     JsonTokenType.String => reader.GetValue<T>(),
                     JsonTokenType.Number => convert(reader.GetInt64()),
-                    _ => throw new NotSupportedException()
+                    _ => throw new JsonException($"Could not convert {reader.GetString()} to {typeof(T)}.")
                 };
 
             public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)

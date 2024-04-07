@@ -26,6 +26,7 @@ volumes:
   coordinator_var: {}
   router_var: {}
   druid_shared: {}
+  toxiproxy_var: {}
 
 
 services:
@@ -132,3 +133,14 @@ services:
       - router
     env_file:
       - environment
+
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:2.9.0
+    container_name: toxiproxy
+    volumes:
+      - toxiproxy_var:/opt/toxiproxy
+    depends_on:
+      - router
+    ports: 
+      - "8474:8474"
+      - "50000:50000"

@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Apache.Druid.Querying.Json;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -28,6 +30,34 @@ public static class DimensionsProvider<TDimensions>
 
 public static class TruncatedQueryResultHandler<TSource>
 {
+    private static async IAsyncEnumerable<TItem> OnTruncatedResultsInvoke<TItem>(
+        IAsyncEnumerable<TItem> results, Action action, [EnumeratorCancellation] CancellationToken token)
+    {
+        var enumerator = results.GetAsyncEnumerator(token);
+        while (true)
+        {
+            TItem item;
+            try
+            {
+                if (!await enumerator.MoveNextAsync())
+                    break;
+                item = enumerator.Current;
+            }
+            catch (IOException io) when (io.Message.StartsWith("The response ended prematurely", StringComparison.Ordinal))
+            {
+                action();
+                break;
+            }
+            catch (UnexpectedEndOfJsonStreamException)
+            {
+                action();
+                break;
+            }
+
+            yield return item;
+        }
+    }
+
     private static TQuery WithIntervalsStartingFrom<TQuery>(TQuery query, DateTimeOffset from)
         where TQuery : IQueryWith.Intervals
     {
@@ -46,8 +76,25 @@ public static class TruncatedQueryResultHandler<TSource>
         return result;
     }
 
+    public interface Base<TResult, TContext> : IQueryWithSource<TSource>.AndResult<TResult>
+        where TContext : new()
+    {
+        IAsyncEnumerable<TResult> AndResult<TResult>.OnTruncatedResultsSetQueryForRemaining(
+            IAsyncEnumerable<TResult> results,
+            TruncatedQueryResultHandlerContext context,
+            Mutable<IQueryWithSource<TSource>> setter,
+            CancellationToken token)
+        {
+            context.Value ??= new TContext();
+            return OnTruncatedResultsSetQueryForRemaining(results, (TContext)context.Value, setter, token);
+        }
+
+        internal IAsyncEnumerable<TResult> OnTruncatedResultsSetQueryForRemaining(
+            IAsyncEnumerable<TResult> results, TContext context, Mutable<IQueryWithSource<TSource>> setter, CancellationToken token);
+    }
+
     public interface TimeSeries<TResult> :
-        IQueryWithSource<TSource>.AndResult<WithTimestamp<TResult>>.AndDeserializationAndTruncatedResultHandling<TimeSeries<TResult>.LatestReturned>,
+        Base<WithTimestamp<TResult>, TimeSeries<TResult>.LatestReturned>,
         IQueryWith.Intervals,
         ICloneableQuery<IQueryWithSource<TSource>>
     {
@@ -56,14 +103,14 @@ public static class TruncatedQueryResultHandler<TSource>
             public DateTimeOffset? Timestamp;
         }
 
-        async IAsyncEnumerable<WithTimestamp<TResult>> AndDeserializationAndTruncatedResultHandling<LatestReturned>.OnTruncatedResultsSetQueryForRemaining(
+        async IAsyncEnumerable<WithTimestamp<TResult>> Base<WithTimestamp<TResult>, TimeSeries<TResult>.LatestReturned>.OnTruncatedResultsSetQueryForRemaining(
             IAsyncEnumerable<WithTimestamp<TResult>> results,
             LatestReturned latestReturned,
             Mutable<IQueryWithSource<TSource>> setter,
             [EnumeratorCancellation] CancellationToken token)
         {
             var truncated = false;
-            results = results.Catch<WithTimestamp<TResult>, TruncatedResultsException>(_ => truncated = true, token);
+            results = OnTruncatedResultsInvoke(results, () => truncated = true, token);
             await foreach (var result in results)
             {
                 if (latestReturned.Timestamp != result.Timestamp)
@@ -80,7 +127,7 @@ public static class TruncatedQueryResultHandler<TSource>
     }
 
     public interface TopN_GroupBy<TResult, TDimensions, TDimensionsProvider> :
-        IQueryWithSource<TSource>.AndResult<WithTimestamp<TResult>>.AndDeserializationAndTruncatedResultHandling<TopN_GroupBy<TResult, TDimensions, TDimensionsProvider>.LatestReturned>,
+        Base<WithTimestamp<TResult>, TopN_GroupBy<TResult, TDimensions, TDimensionsProvider>.LatestReturned>,
         IQueryWith.Intervals
         where TDimensions : IEquatable<TDimensions>
         where TDimensionsProvider : IDimensionsProvider<TResult, TDimensions>, new()
@@ -93,14 +140,14 @@ public static class TruncatedQueryResultHandler<TSource>
 
         private static readonly TDimensionsProvider provider = new();
 
-        async IAsyncEnumerable<WithTimestamp<TResult>> AndDeserializationAndTruncatedResultHandling<LatestReturned>.OnTruncatedResultsSetQueryForRemaining(
+        async IAsyncEnumerable<WithTimestamp<TResult>> Base<WithTimestamp<TResult>, LatestReturned>.OnTruncatedResultsSetQueryForRemaining(
             IAsyncEnumerable<WithTimestamp<TResult>> results,
             LatestReturned latestReturned,
             Mutable<IQueryWithSource<TSource>> setter,
             [EnumeratorCancellation] CancellationToken token)
         {
             var truncated = false;
-            results = results.Catch<WithTimestamp<TResult>, TruncatedResultsException>(_ => truncated = true, token);
+            results = OnTruncatedResultsInvoke(results, () => truncated = true, token);
             var timestampChangedAtLeastOnce = false;
             await foreach (var result in results)
             {
@@ -128,7 +175,7 @@ public static class TruncatedQueryResultHandler<TSource>
 
     // TODO Try to optimize by using intervals if query is ordered.
     public interface Scan<TResult> :
-        IQueryWithSource<TSource>.AndResult<TResult>.AndDeserializationAndTruncatedResultHandling<Scan<TResult>.LatestResult>,
+        Base<TResult, Scan<TResult>.LatestResult>,
         IQueryWith.OffsetAndLimit
     {
         public sealed class LatestResult
@@ -136,14 +183,14 @@ public static class TruncatedQueryResultHandler<TSource>
             public int Count;
         }
 
-        async IAsyncEnumerable<TResult> AndDeserializationAndTruncatedResultHandling<LatestResult>.OnTruncatedResultsSetQueryForRemaining(
+        async IAsyncEnumerable<TResult> Base<TResult, Scan<TResult>.LatestResult>.OnTruncatedResultsSetQueryForRemaining(
             IAsyncEnumerable<TResult> results,
             LatestResult latestResult,
             Mutable<IQueryWithSource<TSource>> setter,
             [EnumeratorCancellation] CancellationToken token)
         {
             var truncated = false;
-            results = results.Catch<TResult, TruncatedResultsException>(_ => truncated = true, token);
+            results = OnTruncatedResultsInvoke(results, () => truncated = true, token);
             await foreach (var result in results)
             {
                 latestResult.Count++;
@@ -159,17 +206,16 @@ public static class TruncatedQueryResultHandler<TSource>
         }
     }
 
-    public interface SegmentMetadata :
-        IQueryWithSource<TSource>.AndResult<Querying.SegmentMetadata>.AndDeserializationAndTruncatedResultHandling<HashSet<string>>
+    public interface SegmentMetadata : Base<Querying.SegmentMetadata, HashSet<string>>
     {
-        async IAsyncEnumerable<Querying.SegmentMetadata> AndDeserializationAndTruncatedResultHandling<HashSet<string>>.OnTruncatedResultsSetQueryForRemaining(
+        async IAsyncEnumerable<Querying.SegmentMetadata> Base<Querying.SegmentMetadata, HashSet<string>>.OnTruncatedResultsSetQueryForRemaining(
             IAsyncEnumerable<Querying.SegmentMetadata> results,
             HashSet<string> returnedSegmentIds,
             Mutable<IQueryWithSource<TSource>> setter,
             [EnumeratorCancellation] CancellationToken token)
         {
             var truncated = false;
-            results = results.Catch<Querying.SegmentMetadata, TruncatedResultsException>(_ => truncated = true, token);
+            results = OnTruncatedResultsInvoke(results, () => truncated = true, token);
             await foreach (var result in results)
                 if (returnedSegmentIds.Add(result.Id))
                     yield return result;

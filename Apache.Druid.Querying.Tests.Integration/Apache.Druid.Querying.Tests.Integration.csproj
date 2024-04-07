@@ -32,6 +32,7 @@
     <PackageReference Include="Snapshooter.NUnit" Version="0.14.1" />
     <PackageReference Include="System.Interactive.Async" Version="6.0.1" />
     <PackageReference Include="System.Text.Json" Version="8.0.3" />
+    <PackageReference Include="ToxiproxyNetCore" Version="1.0.35" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,10 +44,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Setup\druid-docker-compose.yml">
+    <None Update="TestEnvironment\druid-docker-compose.yml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Setup\environment">
+    <None Update="TestEnvironment\environment">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
