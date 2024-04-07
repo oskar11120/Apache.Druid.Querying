@@ -10,7 +10,7 @@ internal class Given2MBQuery_TruncatedResultHandlingShouldHandle : TruncatedResu
         => new Query<Edit>
         .Scan()
         .Interval(new(DateTimeOffset.MinValue, DateTimeOffset.MaxValue))
-        .Context(new QueryContext.Scan { PopulateCache = false, PopulateResultLevelCache = false });
+        .Context(new QueryContext.Scan { PopulateCache = false, PopulateResultLevelCache = false, UseCache = false, UseResultLevelCache = false, MaxQueuedBytes = 10000000 });
 }
 
 internal sealed record Aggregations(
@@ -142,7 +142,11 @@ internal abstract class TruncatedResultHandlingShouldHandle<TResult>
     protected virtual bool IsEmpty(TResult result) => false;
 
     [SetUp]
-    public Task SetUp() => ToxiProxy.Reset();
+    public async Task SetUp()
+    {
+        await ToxiProxy.Reset();
+        await Task.Delay(TimeSpan.FromSeconds(1));
+    }
 
     private Task GivenNetworkError_Query_WithNoHandling_ShouldThrow()
         => Wikipedia_UnderToxiproxy
@@ -177,15 +181,13 @@ internal abstract class TruncatedResultHandlingShouldHandle<TResult>
         await ResultsWithHandling_AndNetworkErrors_ShouldBeTheSameAs_ResultsWithNoHandling_AndNoNetworkErrors();
     }
 
-    // In case of 4MB query, TcpRst running running after TcpFin causes druid historical to crash with out of memory error.
-    // Likely bug in druid.
-    [Test, Order(0)]
+    [Test]
     public async Task TcpRst()
     {
         var rateLimit = new BandwidthToxic
         {
             Stream = ToxicDirection.DownStream,
-            Attributes = new() { Rate = 1024 / 10 } // 0.1 MB/s
+            Attributes = new() { Rate = 1024 / 2 } // 0.5 MB/s
         };
         var reset = new ResetPeerToxic
         {
@@ -203,20 +205,20 @@ internal abstract class TruncatedResultHandlingShouldHandle<TResult>
         }
         var resetTask = KeepResettingForHalfASecond();
         await GivenNetworkError_Query_WithNoHandling_ShouldThrow();
-        //await resetTask;
-        //_ = KeepResettingForHalfASecond();
-        //await ResultsWithHandling_AndNetworkErrors_ShouldBeTheSameAs_ResultsWithNoHandling_AndNoNetworkErrors();
+        await resetTask;
+        _ = KeepResettingForHalfASecond();
+        await ResultsWithHandling_AndNetworkErrors_ShouldBeTheSameAs_ResultsWithNoHandling_AndNoNetworkErrors();
     }
-}
 
-internal sealed class ResetPeerToxic : ToxicBase
-{
-    public sealed class ToxicAttributes
+    private sealed class ResetPeerToxic : ToxicBase
     {
-        public int Timeout { get; set; }
+        public sealed class ToxicAttributes
+        {
+            public int Timeout { get; set; }
+        }
+
+        public ToxicAttributes? Attributes { get; set; }
+
+        public override string Type => "reset_peer";
     }
-
-    public ToxicAttributes? Attributes { get; set; }
-
-    public override string Type => "reset_peer";
 }
