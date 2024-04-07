@@ -1,4 +1,4 @@
-# [Apache Druid](http://druid.io/) client library/micro-orm for dotnet 6+ inspired by [EF Core](https://learn.microsoft.com/pl-pl/ef/core/).
+# [Apache Druid](http://druid.io/) client library/orm for dotnet 6+ inspired by [EF Core](https://learn.microsoft.com/pl-pl/ef/core/).
 
 https://www.nuget.org/packages/Apache.Druid.Querying
 
@@ -9,7 +9,7 @@ The method `Table` additionally requires generic parameter `TSource` depicting a
 
 By default `TSource` property names map 1-to-1 into `Druid` data source column names. This can be overriden in two ways:
 - By decorating `TSource` with `Apache.Druid.Querying.DataSourceNamingConvention` attribute. The convention will applied to all `TSource`'s property names.
-- By decorating `TSource`'s properties with `Apache.Druid.Querying.DataSourceColumn` attribute. The string parameter passed to the attrubute will become the data source column name. As most `Druid` data source contain column `__time` for convenience there exists attribute `Apache.Druid.Querying.DataSourceTimeColumn` equivalent to `Apache.Druid.Querying.DataSourceColumn("__time")`.
+- By decorating `TSource`'s properties with `Apache.Druid.Querying.DataSourceColumn` attribute. The string parameter passed to the attrubute will become the data source column name. As most `Druid` data sources contain column `__time` for convenience there exists attribute `Apache.Druid.Querying.DataSourceTimeColumn` equivalent to `Apache.Druid.Querying.DataSourceColumn("__time")`.
 
 ```cs
     [DataSourceColumnNamingConvention.CamelCase]
@@ -55,9 +55,11 @@ Then connect up your data source provider to a depency injection framework of yo
 - [Microsoft.Extensions.DependencyInjection](Apache.Druid.Querying.Microsoft.Extensions.DependencyInjection/README.md)
 
 ## Querying
-Choose query type and models representing query's data using nested types of `Apache.Druid.Querying.Query<TSource>`. Create a query by instantiating chosen nested type. Set query data by calling the instance methods. The methods often accept `Expression<Delegate>`, using which given an object representing input data available at that point in a query and an object representing all possible operations on that input data, you create an object representing results of your chosen operations. To get an idea on what's possible it's best to look into project's tests. The queries have been designed so as much information as possible is available complie time. Wherever possible, the query results have been "flattened" so they are streamed to consumers as soon as possible.
+Choose query type and models representing query's data using nested types of `Apache.Druid.Querying.Query<TSource>`. Create a query by instantiating chosen nested type. Set query data by calling the instance methods. The methods often accept `Expression<Delegate>`, using which given an object representing input data available at that point in a query and an object representing all possible operations on that input data, you create an object representing results of your chosen operations. To get an idea on what's possible it's best to look into project's tests.
 
-Currently available query types:
+Get query json representation (to be sent to druid upon query execution) by calling `Apache.Druid.Querying.DataSource<TSource>.MapQueryToJson`. Execute query by calling `Apache.Druid.Querying.DataSource<TSource>.ExecuteQuery`.
+
+Available query types:
 - TimeSeries
 - TopN
 - GroupBy
@@ -234,14 +236,6 @@ In case `SimpleDataType` has not been specified, the library will infer it from 
 </tbody>
 </table>
 
-## Druid expressions
-The library accepts [Druid expressions](https://druid.apache.org/docs/latest/querying/math-expr) in form of a delegate where given object representing data available at that point in a query you are supposed to return an [interpolated string using $](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/tokens/interpolated) where each string's parameter is either:
-
-- a property of object representing data, which will get mapped to approporiate column
-- a constant, which will get converted to a string.
-
-Passing any other parameters will result in an `InvalidOperationException` being thrown upon execution of the query.
-
 ## Refering to objects representing data
 You can refer objects representing your query data in two way:
 - by its properties, resulting in library mapping them to Druid columns
@@ -264,12 +258,78 @@ var second = new Query<Edit>
     .Aggregations(type => type.Sum(edit => edit.Added));
 ```
 
+## Ternary expressions and type.None
+`Expression<Delegate>` query paramers in your queries might contain [ternary expressions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/conditional-operator). Upon query execution (or mapping of a query to json) any ternary expressions will have their conditions evaluated and then will get replated with the result expressions matching the condition values.
+
+```cs
+var value = 1;
+Func<bool> valueGreaterThanZero = () => value > 0;
+var okTernaryExpressions = new Query<IotMeasurement>
+    .TimeSeries
+    .WithNoVirtualColumns
+    .WithAggregations<AggregationsFromTernary>
+    .WithPostAggregations<int>()
+    .Aggregations(type => new(
+        value > 0 ? type.Max(data => data.Value) : type.Min(data => data.Value),
+        type.Last(data => valueGreaterThanZero() ? data.Timestamp : data.ProcessedTimestamp),
+        value > 0 ? 
+            (value == 1 ?
+                type.First(data => data.Value) :
+                type.Last(data => data.Value)) :
+            type.Min(data => data.Value),
+        type.Last(data => valueGreaterThanZero() ? 
+            (valueGreaterThanZero() ? data.Timestamp : data.ProcessedTimestamp) :
+            data.ProcessedTimestamp)))
+    .PostAggregations(type => valueGreaterThanZero() ? type.Constant(1) : type.Constant(0));
+```
+
+Objects representing all possible operations on input data contain method `None`, calling which is equivalent to calling no method at all.
+
+```cs
+bool includeCount = true;
+var conditionalCount = new Query<Edit>
+    .TimeSeries
+    .WithNoVirtualColumns
+    .WithAggregations<int>()
+    .Aggregations(type => includeCount ? type.Count() : type.None<int>());
+```
+
+## Druid expressions
+The library accepts [Druid expressions](https://druid.apache.org/docs/latest/querying/math-expr) in form of a delegate where given object representing data available at that point in a query you are supposed to return an [interpolated string using $](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/tokens/interpolated) where each string's parameter is either:
+
+- a property of object representing data, which will get mapped to approporiate column
+- a constant, which will get converted to a string.
+
+Passing any other parameters will result in an `InvalidOperationException` being thrown upon execution of the query.
+
+```cs
+var okExpressions = new Query<Edit>
+    .TimeSeries
+    .WithVirtualColumns<int>()
+    .VirtualColumns(type => type.Expression<int>(edit => "1"))
+    .VirtualColumns(type => type.Expression<int>(edit => $"{edit.Added} * 2"))
+    .VirtualColumns(type => type.Expression<int>(edit =>
+        $"{edit.Added} * 2" +
+        $"- {edit.Deleted}"));
+```
+
 ## Query result deserialization
-The library serializes queries and deserializes query results using System.Text.Json. The serializer has been tweaked in following ways:
+The library serializes queries and deserializes query results using System.Text.Json. The serializer has been altered in following ways:
 - applied `System.Text.Json.JsonSerializerDefaults.Web`
 - `DateTime` and `DateTimeOffset` can additionaly be deserialized from unix timestamps
 - `bool` can additionally be deserialized from "true", "false', "True" and "False" string literals in quotes
 - `bool` can additionally be deserialized from numbers, where `1` will get deserialized to `true`, other numbers - to `false`
 - applied various json converters for types defined in the library.
 
-Get the tweaked serializer options by calling `Apache.Druid.Querying.Json.DefaultSerializerOptions.Create()`.
+Get the default altered serializer options by calling `Apache.Druid.Querying.Json.DefaultSerializerOptions.Create()`.
+
+Wherever possible, the query results have been "flattened" so they are streamed to consumers as soon as possible.
+
+## Truncated query result handling
+Apache Druid returns query results in form of http/1.1 responses with content-endcoding: chunked. Because of that there's a chance of query results getting truncated, resulting in consumers getting only part of them. `Apache.Druid.Querying.DataSource<TSource>.ExecuteQuery` accepts parameter `onTruncatedResultsQueryForRemaining`, which if set to `true` (the default) will result in the library requesting the rest of the results in most of such cases, specifally:
+1. Tcp connections closing or resetting before having streamed whole the response content.
+2. Http responses completing successfully, but containing incomplete json.
+
+In practice, the only unhandled case is when results are truncated due to [Apache Druid timeout feature](https://druid.apache.org/docs/latest/querying/query-context/#general-parameters). The way it works is whenever the timeout is reached, related http response completes successfully, with a complete json missing some of the results. [There is an (unfortunately stale) pull request changing the behaviour to follow case 1. from the previous paragraph](https://druid.apache.org/docs/latest/querying/query-context/#general-parameters). I consider this a bug in Druid itself. Till addressed by the Druid team, I recommend not to use Druid timeouts at all. Instead, if needed, apply timeouts through an http proxy or using cancellation tokens passed to `Apache.Druid.Querying.DataSource<TSource>.ExecuteQuery`.
+
+Truncated result handling applies only in cases of truncated results, meaning http responses where at least response headers have successfully been read and so is not a retry policy. If needed, set up a retry policy yourself, using extensibility points provided by your chosen dependency injection library.
