@@ -3,13 +3,13 @@
 https://www.nuget.org/packages/Apache.Druid.Querying
 
 ## Setup
-To make your Druid data sources available for querying create a class deriving from `Apache.Druid.Querying.DataSourceProvider`. The class represents collection of data sources available for querying similarily to how `EfCore`'s `DbContext` represents collection of database tables. The class contains methods `Table`, `Lookup` and `Inline` which you can use to create instances of `Apache.Druid.Querying.DataSource` (similar to `EfCore`'s `DbSet`) which in turn turn can be used of querying. The instances are thread safe and so can be used for executing multiple queries at the same time. Some of the `DataSource` creating methods require parameter `id` which corresponds to id of related `Druid` data source.
+To make your Druid data sources available for querying create a class deriving from `Apache.Druid.Querying.DataSourceProvider`. The class represents collection of data sources available for querying similarly to how `EfCore`'s `DbContext` represents collection of database tables. The class contains methods `Table`, `Lookup` and `Inline` which you can use to create instances of `Apache.Druid.Querying.DataSource` (similar to `EfCore`'s `DbSet`) which in turn can be used of querying. The instances are thread-safe and so can be used for executing multiple queries at the same time. Some of the `DataSource` creating methods require parameter `id` which corresponds to id of related `Druid` data source.
 
-The method `Table` additionally requires generic parameter `TSource` depicting a row of your table data, similarily to how `EfCore`'s `Entities` depict database rows. The type's public properties correspond to the data source columns.
+The method `Table` additionally requires generic parameter `TSource` depicting a row of your table data, similarly to how `EfCore`'s `Entities` depict database rows. The type's public properties correspond to the data source columns.
 
-By default `TSource` property names map 1-to-1 into `Druid` data source column names. This can be overriden in two ways:
+By default `TSource` property names map 1-to-1 into `Druid` data source column names. This can be overridden in two ways:
 - By decorating `TSource` with `Apache.Druid.Querying.DataSourceNamingConvention` attribute. The convention will applied to all `TSource`'s property names.
-- By decorating `TSource`'s properties with `Apache.Druid.Querying.DataSourceColumn` attribute. The string parameter passed to the attrubute will become the data source column name. As most `Druid` data sources contain column `__time` for convenience there exists attribute `Apache.Druid.Querying.DataSourceTimeColumn` equivalent to `Apache.Druid.Querying.DataSourceColumn("__time")`.
+- By decorating `TSource`'s properties with `Apache.Druid.Querying.DataSourceColumn` attribute. The string parameter passed to the attribute will become the data source column name. As most `Druid` data sources contain column `__time` for convenience there exists attribute `Apache.Druid.Querying.DataSourceTimeColumn` equivalent to `Apache.Druid.Querying.DataSourceColumn("__time")`.
 
 ```cs
     [DataSourceColumnNamingConvention.CamelCase]
@@ -51,7 +51,7 @@ By default `TSource` property names map 1-to-1 into `Druid` data source column n
     }
 ```
 
-Then connect up your data source provider to a depency injection framework of your choice:
+Then connect up your data source provider to a dependency injection framework of your choice:
 - [Microsoft.Extensions.DependencyInjection](Apache.Druid.Querying.Microsoft.Extensions.DependencyInjection/README.md)
 
 ## Querying
@@ -239,7 +239,7 @@ In case `SimpleDataType` has not been specified, the library will infer it from 
 ## Refering to objects representing data
 You can refer objects representing your query data in two way:
 - by its properties, resulting in library mapping them to Druid columns
-- by it as a whole, resulting in library mapping whole the object to a column.
+- by it as a whole, resulting in library mapping the whole object to a column.
 
 This means the following queries will give you equivalent results.
 
@@ -259,7 +259,7 @@ var second = new Query<Edit>
 ```
 
 ## Ternary expressions and type.None
-`Expression<Delegate>` query paramers in your queries might contain [ternary expressions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/conditional-operator). Upon query execution (or mapping of a query to json) any ternary expressions will have their conditions evaluated and then will get replated with the result expressions matching the condition values.
+`Expression<Delegate>` query paramers in your queries may contain [ternary expressions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/conditional-operator). Upon query execution (or mapping of a query to json) any ternary expressions will have their conditions evaluated and then will get replated with the result expressions matching the condition values.
 
 ```cs
 var value = 1;
@@ -297,7 +297,7 @@ var conditionalCount = new Query<Edit>
 ## Druid expressions
 The library accepts [Druid expressions](https://druid.apache.org/docs/latest/querying/math-expr) in form of a delegate where given object representing data available at that point in a query you are supposed to return an [interpolated string using $](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/tokens/interpolated) where each string's parameter is either:
 
-- a property of object representing data, which will get mapped to approporiate column
+- a property of object representing data, which will get mapped to appropriate column
 - a constant, which will get converted to a string.
 
 Passing any other parameters will result in an `InvalidOperationException` being thrown upon execution of the query.
@@ -316,7 +316,7 @@ var okExpressions = new Query<Edit>
 ## Query result deserialization
 The library serializes queries and deserializes query results using System.Text.Json. The serializer has been altered in following ways:
 - applied `System.Text.Json.JsonSerializerDefaults.Web`
-- `DateTime` and `DateTimeOffset` can additionaly be deserialized from unix timestamps
+- `DateTime` and `DateTimeOffset` can additionally be deserialized from unix timestamps
 - `bool` can additionally be deserialized from "true", "false', "True" and "False" string literals in quotes
 - `bool` can additionally be deserialized from numbers, where `1` will get deserialized to `true`, other numbers - to `false`
 - applied various json converters for types defined in the library.
@@ -326,10 +326,10 @@ Get the default altered serializer options by calling `Apache.Druid.Querying.Jso
 Wherever possible, the query results have been "flattened" so they are streamed to consumers as soon as possible.
 
 ## Truncated query result handling
-Apache Druid returns query results in form of http/1.1 responses with content-endcoding: chunked. Because of that there's a chance of query results getting truncated, resulting in consumers getting only part of them. `Apache.Druid.Querying.DataSource<TSource>.ExecuteQuery` accepts parameter `onTruncatedResultsQueryForRemaining`, which if set to `true` (the default) will result in the library requesting the rest of the results in most of such cases, specifally:
+Apache Druid returns query results in form of http/1.1 responses with content-encoding: chunked. Because of that there's a chance of query results getting truncated, resulting in consumers getting only part of them. `Apache.Druid.Querying.DataSource<TSource>.ExecuteQuery` accepts parameter `onTruncatedResultsQueryForRemaining`, which if set to `true` (the default) will result in the library requesting the rest of the results in most of such cases, specifically:
 1. Tcp connections closing or resetting before having streamed whole the response content.
 2. Http responses completing successfully, but containing incomplete json.
 
-In practice, the only unhandled case is when results are truncated due to [Apache Druid timeout feature](https://druid.apache.org/docs/latest/querying/query-context/#general-parameters). The way it works is whenever the timeout is reached, related http response completes successfully, with a complete json missing some of the results. [There is an (unfortunately stale) pull request changing the behaviour to follow case 1. from the previous paragraph](https://druid.apache.org/docs/latest/querying/query-context/#general-parameters). I consider this a bug in Druid itself. Till addressed by the Druid team, I recommend not to use Druid timeouts at all. Instead, if needed, apply timeouts through an http proxy or using cancellation tokens passed to `Apache.Druid.Querying.DataSource<TSource>.ExecuteQuery`.
+In practice, the only unhandled case is when results are truncated due to [Apache Druid timeout feature](https://druid.apache.org/docs/latest/querying/query-context/#general-parameters). The way it works is when the timeout is reached, related http response completes successfully, with a complete json missing some of the results. [There is an (unfortunately stale) pull request changing the behaviour to follow case 1. from the previous paragraph](https://druid.apache.org/docs/latest/querying/query-context/#general-parameters). I consider this a bug in Druid itself. Until addressed by the Druid team, I recommend not to use Druid timeouts at all. Instead, if needed, apply timeouts through an http proxy or using cancellation tokens passed to `Apache.Druid.Querying.DataSource<TSource>.ExecuteQuery`.
 
 Truncated result handling applies only in cases of truncated results, meaning http responses where at least response headers have successfully been read and so is not a retry policy. If needed, set up a retry policy yourself, using extensibility points provided by your chosen dependency injection library.
