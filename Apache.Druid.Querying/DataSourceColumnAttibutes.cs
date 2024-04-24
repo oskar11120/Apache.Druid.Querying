@@ -4,6 +4,17 @@ using System;
 namespace Apache.Druid.Querying
 {
     [AttributeUsage(AttributeTargets.Property)]
+    public class DataSourceColumnSelectorAttribute : Attribute
+    {
+        public DataSourceColumnSelectorAttribute(string forColumnMatchingProperty)
+        {
+            PropertyName = forColumnMatchingProperty;
+        }
+
+        public string PropertyName { get; }
+    }
+
+    [AttributeUsage(AttributeTargets.Property)]
     public class DataSourceColumnAttribute : Attribute
     {
         public DataSourceColumnAttribute(string name)

@@ -21,7 +21,7 @@ namespace Apache.Druid.Querying
         private static readonly byte[] timeColumnUtf8Bytes = Encoding.UTF8.GetBytes("__time");
 
         internal static readonly QueryResultElement.Deserializer<WithTimestamp<TValue>> Deserializer =
-            (ref QueryResultElement.DeserializerContext context)
+            (in QueryResultElement.DeserializerContext context)
                 => new(
                     context.DeserializeProperty<DateTimeOffset>(timeColumnUtf8Bytes),
                     context.Deserialize<TValue>());
@@ -38,7 +38,7 @@ namespace Apache.Druid.Querying
         TDimension IQueryDataWithDimensions<TDimension>.Dimensions => Dimension;
 
         internal static readonly QueryResultElement.Deserializer<Dimension_Aggregations<TDimension, TAggregations>> Deserializer =
-            (ref QueryResultElement.DeserializerContext context)
+            (in QueryResultElement.DeserializerContext context)
                 => new(
                     context.Deserialize<TDimension>(),
                     context.Deserialize<TAggregations>());
@@ -51,7 +51,7 @@ namespace Apache.Druid.Querying
         TDimension IQueryDataWithDimensions<TDimension>.Dimensions => Dimension;
 
         internal static readonly QueryResultElement.Deserializer<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>> Deserializer =
-            (ref QueryResultElement.DeserializerContext context)
+            (in QueryResultElement.DeserializerContext context)
                => new(
                     context.Deserialize<TDimension>(),
                     context.Deserialize<TAggregations>(),
@@ -61,7 +61,7 @@ namespace Apache.Druid.Querying
     public readonly record struct Aggregations_PostAggregations<TAggregations, TPostAggregations>(TAggregations Aggregations, TPostAggregations PostAggregations)
     {
         internal static readonly QueryResultElement.Deserializer<Aggregations_PostAggregations<TAggregations, TPostAggregations>> Deserializer =
-            (ref QueryResultElement.DeserializerContext context)
+            (in QueryResultElement.DeserializerContext context)
                 => new(
                     context.Deserialize<TAggregations>(),
                     context.Deserialize<TPostAggregations>());
@@ -71,7 +71,7 @@ namespace Apache.Druid.Querying
         : IQueryDataWithDimensions<TDimensions>
     {
         internal static readonly QueryResultElement.Deserializer<Dimensions_Aggregations<TDimensions, TAggregations>> Deserializer =
-            (ref QueryResultElement.DeserializerContext context)
+            (in QueryResultElement.DeserializerContext context)
                => new(
                     context.Deserialize<TDimensions>(),
                     context.Deserialize<TAggregations>());
@@ -82,7 +82,7 @@ namespace Apache.Druid.Querying
          : IQueryDataWithDimensions<TDimensions>
     {
         internal static readonly QueryResultElement.Deserializer<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>> Deserializer =
-          (ref QueryResultElement.DeserializerContext context)
+          (in QueryResultElement.DeserializerContext context)
                => new(
                     context.Deserialize<TDimensions>(),
                     context.Deserialize<TAggregations>(),

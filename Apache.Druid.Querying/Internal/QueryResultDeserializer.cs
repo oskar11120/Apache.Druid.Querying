@@ -11,48 +11,38 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Apache.Druid.Querying.Internal
 {
     internal static class QueryResultElement
     {
-        public delegate TElement Deserializer<TElement>(ref DeserializerContext context);
+        public delegate TElement Deserializer<TElement>(in DeserializerContext context);
 
-        public ref struct DeserializerContext
+        public readonly ref struct DeserializerContext
         {
             private static readonly ConcurrentDictionary<Type, object?> deserializers = new();
-            private static readonly ConcurrentDictionary<Type, bool> hasAnyColumnNamesVaryingFromPropertyNames = new();
 
             private readonly ReadOnlySpan<byte> json;
-            private readonly JsonSerializerOptions serializerOptions;
-            private readonly PropertyColumnNameMapping.IProvider columnNameMappings;
-            private readonly SectionAtomicity.IProvider atomicity;
+            private readonly QueryResultDeserializationContext context;
 
             public DeserializerContext(
                 ReadOnlySpan<byte> json,
-                JsonSerializerOptions serializerOptions,
-                PropertyColumnNameMapping.IProvider columnNameMappings,
-                SectionAtomicity.IProvider atomicity)
+                QueryResultDeserializationContext context)
             {
                 this.json = json;
-                this.serializerOptions = serializerOptions;
-                this.columnNameMappings = columnNameMappings;
-                this.atomicity = atomicity;
+                this.context = context;
             }
 
-            public TElementOrElementPart Deserialize<TElementOrElementPart>()
+            public TElement Deserialize<TElement>()
             {
-                if (GetDeserializer<TElementOrElementPart>() is Deserializer<TElementOrElementPart> existing)
-                    return existing(ref this);
+                if (GetDeserializer<TElement>() is Deserializer<TElement> existing)
+                    return existing(in this);
 
-                if (GetMappingsIfAnyColumnNamesVaryingFromPropertyNames<TElementOrElementPart>() is var mappings and { Count: > 0 })
-                    return DeserializeApplyMappings<TElementOrElementPart>(mappings);
+                if (context.Atomicity.TryGet<TElement>() is SectionAtomicity { Atomic: true, ColumnNameIfAtomicUtf8: var atomicColumnName })
+                    return DeserializeProperty<TElement>(atomicColumnName);
 
-                if (atomicity.TryGet<TElementOrElementPart>() is SectionAtomicity { Atomic: true, ColumnNameIfAtomicUtf8: var atomicColumnName })
-                    return DeserializeProperty<TElementOrElementPart>(atomicColumnName);
-
-                var result = JsonSerializer.Deserialize<TElementOrElementPart>(json, serializerOptions)!;
+                var options = GetSerializerOptions<TElement>();
+                var result = JsonSerializer.Deserialize<TElement>(json, options)!;
                 return result;
             }
 
@@ -70,19 +60,10 @@ namespace Apache.Druid.Querying.Internal
                 }
 
                 var value = json[left..(int)reader.BytesConsumed];
-                return JsonSerializer.Deserialize<TProperty>(value, serializerOptions)!;
+                return JsonSerializer.Deserialize<TProperty>(value, context.Options)!;
             }
 
             private static string ToString(ReadOnlySpan<byte> utf8) => Encoding.UTF8.GetString(utf8);
-
-            private T DeserializeApplyMappings<T>(IReadOnlyList<PropertyColumnNameMapping> mappings)
-            {
-                var json = Deserialize<System.Text.Json.Nodes.JsonObject>();
-                foreach (var (property, column) in mappings)
-                    if (json.Remove(column, out var value))
-                        json[property] = value;
-                return json.Deserialize<T>(serializerOptions)!;
-            }
 
             private static Deserializer<TElement>? GetDeserializer<TElement>()
             {
@@ -101,16 +82,36 @@ namespace Apache.Druid.Querying.Internal
                 return @new;
             }
 
-            private readonly IReadOnlyList<PropertyColumnNameMapping> GetMappingsIfAnyColumnNamesVaryingFromPropertyNames<TElement>()
-            {
-                if (!hasAnyColumnNamesVaryingFromPropertyNames.TryGetValue(typeof(TElement), out var result)) 
+            private readonly JsonSerializerOptions GetSerializerOptions<TElement>()
+                => context.GetOrAddToState(
+                (typeof(JsonSerializerOptions), typeof(TElement)),
+                static context =>
                 {
-                    result = columnNameMappings.Get<TElement>() is var mappings and { Length: > 0 }
-                        && mappings.Any(mapping => mapping.Property != mapping.ColumnName);
-                    hasAnyColumnNamesVaryingFromPropertyNames.TryAdd(typeof(TElement), result);
+                    var mappings = context.ColumnNameMappings.Get<TElement>();
+                    var comparison = context.Options.PropertyNameCaseInsensitive ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+                    var anyVarying = mappings.Any(mapping => !mapping.Property.Equals(mapping.ColumnName, comparison));
+                    return anyVarying ?
+                        new JsonSerializerOptions(context.Options) { PropertyNamingPolicy = new MappingJsonNamingPolicy(mappings) } :
+                        context.Options;
+                });
+
+            private sealed class MappingJsonNamingPolicy : JsonNamingPolicy
+            {
+                private readonly ImmutableArray<PropertyColumnNameMapping> mappings;
+
+                public MappingJsonNamingPolicy(ImmutableArray<PropertyColumnNameMapping> mappings)
+                {
+                    this.mappings = mappings;
                 }
 
-                return result ? columnNameMappings.Get<TElement>() : Array.Empty<PropertyColumnNameMapping>();
+                // No reason to optimize as only called once per each property.
+                public override string ConvertName(string name)
+                {
+                    var match = mappings.FirstOrDefault(mapping => mapping.Property == name);
+                    if (match is null)
+                        return name;
+                    return match.ColumnName;
+                }
             }
         }
     }
@@ -131,7 +132,7 @@ namespace Apache.Druid.Querying.Internal
             }
 
             async IAsyncEnumerable<TResult> IQueryResultDeserializer<TResult>.Deserialize(
-                QueryResultDeserializerContext context, [EnumeratorCancellation] CancellationToken token)
+                QueryResultDeserializationContext context, [EnumeratorCancellation] CancellationToken token)
             {
                 var json = context.Json;
                 var first = await json.ReadToPropertyValueAsync<TFirst>(names.First, token);
@@ -151,7 +152,7 @@ namespace Apache.Druid.Querying.Internal
             where TElementMapper : IQueryResultDeserializer<TElement>, new()
         {
             async IAsyncEnumerable<TElement> IQueryResultDeserializer<TElement>.Deserialize(
-                QueryResultDeserializerContext context, [EnumeratorCancellation] CancellationToken token)
+                QueryResultDeserializationContext context, [EnumeratorCancellation] CancellationToken token)
             {
                 var json = context.Json;
                 async ValueTask<bool> TrySkipEndArray()
@@ -188,7 +189,7 @@ namespace Apache.Druid.Querying.Internal
             private static readonly byte[] comaBytes = Encoding.UTF8.GetBytes(",");
 
             async IAsyncEnumerable<TSelf> IQueryResultDeserializer<TSelf>.Deserialize(
-                QueryResultDeserializerContext context, [EnumeratorCancellation] CancellationToken token)
+                QueryResultDeserializationContext context, [EnumeratorCancellation] CancellationToken token)
             {
                 var (json, options, atomicity, columnNameMappings) = context;
                 async ValueTask<int> ReadThroghWholeAsync(bool updateState = true)
@@ -203,7 +204,7 @@ namespace Apache.Druid.Querying.Internal
                     var span = json.GetSpan()[..read];
                     var startsWithComa = comaBytes.AsSpan().SequenceEqual(span[..comaBytes.Length]);
                     span = startsWithComa ? span[comaBytes.Length..] : span;
-                    var context_ = new QueryResultElement.DeserializerContext(span, options, columnNameMappings, atomicity);
+                    var context_ = new QueryResultElement.DeserializerContext(span, context);
                     try
                     {
                         var result = context_.Deserialize<TSelf>();

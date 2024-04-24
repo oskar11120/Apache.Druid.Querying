@@ -16,7 +16,7 @@ namespace Apache.Druid.Querying.Internal
             private static readonly IQueryResultDeserializer<TElement> array = new Array<TElement, TElementMapper>();
 
             IAsyncEnumerable<TElement> IQueryResultDeserializer<TElement>.Deserialize(
-                QueryResultDeserializerContext context, CancellationToken token)
+                QueryResultDeserializationContext context, CancellationToken token)
                 => array.Deserialize(context, token);
         }
 

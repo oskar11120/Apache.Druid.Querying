@@ -289,6 +289,36 @@ namespace Apache.Druid.Querying
                 bool? shouldAggregateNullInputs,
                 bool? shouldCombineAggregateNullInputs,
                 long? maxSizeBytes);
+            TColumn Expression<TColumn>(
+                TColumn initialValue,
+                DruidExpression fold);
+            TColumn Expression<TColumn>(
+                TColumn initialValue,
+                DruidExpression fold,
+                DruidExpression combine);
+            TColumn Expression<TColumn>(
+                TColumn initialValue,
+                DruidExpression fold,
+                DruidExpression combine,
+                DruidExpression compare);
+            TColumn Expression<TColumn>(
+                TColumn initialValue,
+                DruidExpression fold,
+                DruidExpression combine,
+                DruidExpression compare,
+                DruidExpression finalize);
+            TColumn Expression<TColumn>(
+                TColumn initialValue,
+                string? accumulatorIdentifier,
+                DruidExpression fold,
+                DruidExpression? combine,
+                DruidExpression? compare,
+                DruidExpression? finalize,
+                DruidExpression? initialValueCombine,
+                bool? isNullUnlessAggregated,
+                bool? shouldAggregateNullInputs,
+                bool? shouldCombineAggregateNullInputs,
+                long? maxSizeBytes);
 
             TColumn Filtered<TColumn>(
                 Func<QueryElementFactory<TArguments>.Filter, IFilter> filter,

@@ -19,25 +19,41 @@ using System.Threading;
 
 namespace Apache.Druid.Querying
 {
-    internal sealed record QueryResultDeserializerContext(
+    /// <summary>
+    /// Not safe to reuse. Each IQueryResultDeserializer<TResult>.Deserialize call requires a new instance.
+    /// </summary>
+    internal sealed record QueryResultDeserializationContext(
         JsonStreamReader Json,
         JsonSerializerOptions Options,
         SectionAtomicity.IProvider Atomicity,
-        PropertyColumnNameMapping.IProvider ColumnNameMappings);
+        PropertyColumnNameMapping.IProvider ColumnNameMappings)
+    {
+        private readonly Dictionary<object, object> State = new();
+
+        public T GetOrAddToState<T>(object key, Func<QueryResultDeserializationContext, T> factory)
+            where T : notnull
+        {
+            if (State.TryGetValue(key, out var existing))
+                return (T)existing;
+            var @new = factory(this);
+            State.TryAdd(key, @new);
+            return @new;
+        }
+    }
 
     internal sealed class Mutable<TValue>
     {
         public TValue? Value;
     }
 
-    internal sealed class TruncatedQueryResultHandlerContext
+    internal sealed class TruncatedQueryResultHandlingContext
     {
-        public object? Value;
+        public object? State;
     }
 
     public interface IQueryResultDeserializer<TResult>
     {
-        internal IAsyncEnumerable<TResult> Deserialize(QueryResultDeserializerContext context, CancellationToken token);
+        internal IAsyncEnumerable<TResult> Deserialize(QueryResultDeserializationContext context, CancellationToken token);
     }
 
     public interface IQueryWithSource<TSource> : IQueryWithInternal.SectionAtomicity, IQueryWithInternal.PropertyColumnNameMappingChanges
@@ -45,7 +61,7 @@ namespace Apache.Druid.Querying
         public interface AndResult<TResult> : IQueryWithSource<TSource>, IQueryResultDeserializer<TResult>
         {
             internal IAsyncEnumerable<TResult> OnTruncatedResultsSetQueryForRemaining(
-                IAsyncEnumerable<TResult> results, TruncatedQueryResultHandlerContext context, Mutable<IQueryWithSource<TSource>> setter, CancellationToken token);
+                IAsyncEnumerable<TResult> results, TruncatedQueryResultHandlingContext context, Mutable<IQueryWithSource<TSource>> setter, CancellationToken token);
         }
     }
 
@@ -54,7 +70,7 @@ namespace Apache.Druid.Querying
     public readonly record struct Union<TFirst, TSecond>(TFirst? First, TSecond? Second)
     {
         internal static readonly QueryResultElement.Deserializer<Union<TFirst, TSecond>> Deserializer =
-            (ref QueryResultElement.DeserializerContext context)
+            (in QueryResultElement.DeserializerContext context)
                 => new(
                     context.Deserialize<TFirst>(),
                     context.Deserialize<TSecond>());
@@ -63,7 +79,7 @@ namespace Apache.Druid.Querying
     public readonly record struct Union<TFirst, TSecond, TThird>(TFirst? First, TSecond? Second, TThird? Third)
     {
         internal static readonly QueryResultElement.Deserializer<Union<TFirst, TSecond, TThird>> Deserializer =
-            (ref QueryResultElement.DeserializerContext context)
+            (in QueryResultElement.DeserializerContext context)
                 => new(
                     context.Deserialize<TFirst>(),
                     context.Deserialize<TSecond>(),
@@ -73,7 +89,7 @@ namespace Apache.Druid.Querying
     public readonly record struct InnerJoinData<TLeft, TRight>(TLeft Left, TRight Right)
     {
         internal static readonly QueryResultElement.Deserializer<InnerJoinData<TLeft, TRight>> Deserializer =
-            (ref QueryResultElement.DeserializerContext context)
+            (in QueryResultElement.DeserializerContext context)
                 => new(
                     context.Deserialize<TLeft>(),
                     context.Deserialize<TRight>());
@@ -83,7 +99,7 @@ namespace Apache.Druid.Querying
     public readonly record struct LeftJoinResult<TLeft, TRight>(TLeft Left, TRight? Right)
     {
         internal static readonly QueryResultElement.Deserializer<LeftJoinResult<TLeft, TRight>> Deserializer =
-            (ref QueryResultElement.DeserializerContext context)
+            (in QueryResultElement.DeserializerContext context)
                 => new(
                     context.Deserialize<TLeft>(),
                     context.Deserialize<TRight>());
@@ -132,7 +148,7 @@ namespace Apache.Druid.Querying
             var deserializer = query;
             var truncatedResultHandler = query;
             byte[]? buffer = null;
-            var context = new TruncatedQueryResultHandlerContext();
+            var context = new TruncatedQueryResultHandlingContext();
             async IAsyncEnumerable<TResult> Deserialize(Stream utf8Json, [EnumeratorCancellation] CancellationToken token)
             {
                 buffer ??= ArrayPool<byte>.Shared.Rent(options.Serializer.DefaultBufferSize);
@@ -240,7 +256,7 @@ namespace Apache.Druid.Querying
                 },
                 mappings,
                 SectionAtomicity.ImmutableBuilder.Combine(
-                    sectionAtomicity, 
+                    sectionAtomicity,
                     right.sectionAtomicity?.Update(atomicity => atomicity.WithColumnNameIfAtomic(rightPrefix + atomicity.ColumnNameIfAtomic))));
         }
 

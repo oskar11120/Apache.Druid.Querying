@@ -81,12 +81,12 @@ public static class TruncatedQueryResultHandler<TSource>
     {
         IAsyncEnumerable<TResult> AndResult<TResult>.OnTruncatedResultsSetQueryForRemaining(
             IAsyncEnumerable<TResult> results,
-            TruncatedQueryResultHandlerContext context,
+            TruncatedQueryResultHandlingContext context,
             Mutable<IQueryWithSource<TSource>> setter,
             CancellationToken token)
         {
-            context.Value ??= new TContext();
-            return OnTruncatedResultsSetQueryForRemaining(results, (TContext)context.Value, setter, token);
+            context.State ??= new TContext();
+            return OnTruncatedResultsSetQueryForRemaining(results, (TContext)context.State, setter, token);
         }
 
         internal IAsyncEnumerable<TResult> OnTruncatedResultsSetQueryForRemaining(

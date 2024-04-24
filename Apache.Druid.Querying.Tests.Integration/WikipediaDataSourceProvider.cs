@@ -1,7 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.Json.Serialization;
-
-namespace Apache.Druid.Querying.Tests.Integration
+﻿namespace Apache.Druid.Querying.Tests.Integration
 {
     public interface IEditBooleans
     {
@@ -37,11 +34,7 @@ namespace Apache.Druid.Querying.Tests.Integration
         string? RegionName)
         : IEditBooleans
     {
-        [JsonInclude]
-        [SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "For deseirialization.")]
-        private bool Robot { init => IsRobot = value; }
-
-        [DataSourceColumn("isRobot")]
+        [DataSourceColumnSelector(nameof(IsRobot))]
         bool IEditBooleans.Robot { get => IsRobot; }
     }
 

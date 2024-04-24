@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
@@ -90,11 +89,26 @@ namespace Apache.Druid.Querying.Internal
                     .Select(property => (property, name: property.Name));
                 result = normal
                     .Concat(@explicitlyDeclared)
+                    .Where(pair => pair.property.GetCustomAttribute<DataSourceColumnSelectorAttribute>(true) is null)
                     .Select(pair => new PropertyColumnNameMapping(
                         pair.name,
                         pair.property.GetCustomAttribute<DataSourceColumnAttribute>(true)?.Name ?? convention.Apply(pair.name)))
                     .Distinct()
                     .ToImmutableArray();
+                var fromSelectors = normal
+                    .Concat(@explicitlyDeclared)
+                    .Select(pair =>
+                    {
+                        var property = pair.property.GetCustomAttribute<DataSourceColumnSelectorAttribute>(true)?.PropertyName;
+                        if (property is null)
+                            return null!;
+                        var matchingMapping = result.SingleOrDefault(mappings => mappings.Property == property);
+                        return matchingMapping is null
+                            ? throw new InvalidOperationException($"No property {property} exists in {type}.")
+                            : (matchingMapping with { Property = pair.name });
+                    })
+                    .Where(mapping => mapping is not null);
+                result = fromSelectors.Any() ? result.Concat(fromSelectors).ToImmutableArray() : result;
                 var mappedIntoMultipleColumns = result
                     .GroupBy(mapping => mapping.Property)
                     .Select(group => (count: group.Count(), property: group.Key, mappings: group.AsEnumerable()))
