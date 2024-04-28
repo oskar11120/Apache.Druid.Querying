@@ -260,6 +260,21 @@ namespace Apache.Druid.Querying
                     right.sectionAtomicity?.Update(atomicity => atomicity.WithColumnNameIfAtomic(rightPrefix + atomicity.ColumnNameIfAtomic))));
         }
 
+        public DataSource<TSource> Union(DataSource<TSource> second)
+            => new(
+                getOptions,
+                () => new JsonObject
+                {
+                    ["type"] = "union",
+                    ["dataSources"] = new JsonArray
+                    {
+                        GetJsonRepresentation(),
+                        second.GetJsonRepresentation()
+                    }
+                },
+                columnNameMappings,
+                sectionAtomicity);
+
         public DataSource<Union<TSource, TSecond>> Union<TSecond>(DataSource<TSecond> second)
             => new(
                 getOptions,

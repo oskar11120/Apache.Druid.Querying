@@ -207,13 +207,23 @@ internal class QueryShould_ReturnRightData
     {
         var union = Wikipedia
             .Edits
-            .Union(Wikipedia
-                .Edits);
-        var query = new Query<Union<Edit, Edit>>
+            .Union<Edit>(Wikipedia.Edits);
+        var unionQuery = new Query<Union<Edit, Edit>>
             .Scan()
             .Interval(TestData.Interval)
             .Limit(10);
-        await VerifyMatch(union, query, string.Empty);
+        await VerifyMatch(union, unionQuery, string.Empty);
+
+        var unionResult = await union.ExecuteQuery(unionQuery).Select(result => result.Value.First).ToArrayAsync();
+        var sameSourceUnion = Wikipedia
+            .Edits
+            .Union(Wikipedia.Edits);
+        var sameSourceUnionQuery = new Query<Edit>
+            .Scan()
+            .Interval(TestData.Interval)
+            .Limit(10);
+        var sameSourceUnionResult = await sameSourceUnion.ExecuteQuery(sameSourceUnionQuery).Select(result => result.Value).ToArrayAsync();
+        unionResult.Should().BeEquivalentTo(sameSourceUnionResult, options => options.WithStrictOrdering());
     }
 
     private sealed record InlineData(string Word, [property: DataSourceColumn("Integer")] int Number);
