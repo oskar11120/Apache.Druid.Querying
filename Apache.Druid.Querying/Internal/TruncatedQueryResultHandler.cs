@@ -76,10 +76,10 @@ public static class TruncatedQueryResultHandler<TSource>
         return result;
     }
 
-    public interface Base<TResult, TContext> : IQueryWithSource<TSource>.AndResult<TResult>
+    public interface Base<TResult, TContext> : IQueryWithSourceAndResult<TSource, TResult>
         where TContext : new()
     {
-        IAsyncEnumerable<TResult> AndResult<TResult>.OnTruncatedResultsSetQueryForRemaining(
+        IAsyncEnumerable<TResult> IQueryWithSourceAndResult<TSource, TResult>.OnTruncatedResultsSetQueryForRemaining(
             IAsyncEnumerable<TResult> results,
             TruncatedQueryResultHandlingContext context,
             Mutable<IQueryWithSource<TSource>> setter,
@@ -95,8 +95,7 @@ public static class TruncatedQueryResultHandler<TSource>
 
     public interface TimeSeries<TResult> :
         Base<WithTimestamp<TResult>, TimeSeries<TResult>.LatestReturned>,
-        IQueryWith.Intervals,
-        ICloneableQuery<IQueryWithSource<TSource>>
+        IQueryWith.Intervals
     {
         public sealed class LatestReturned
         {

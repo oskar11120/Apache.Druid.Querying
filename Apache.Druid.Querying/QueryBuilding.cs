@@ -126,11 +126,6 @@ namespace Apache.Druid.Querying
         Strlen
     }
 
-    public interface ICloneableQuery<out TSelf> 
-    {
-
-    }
-
     public interface IQuery<TSelf> where TSelf : IQuery<TSelf>
     {
         public TSelf Self => (TSelf)this;
@@ -274,9 +269,9 @@ namespace Apache.Druid.Querying
     {
         private delegate void CopyDelegate(IQueryWith.State From, IQueryWith.State To);
         private static readonly ConcurrentDictionary<Type, CopyDelegate> copyCache = new();
-        
+
         // TODO Optimize
-        public static TQuery Copy<TQuery>(this TQuery query)where TQuery : IQueryWith.State
+        public static TQuery Copy<TQuery>(this TQuery query) where TQuery : IQueryWith.State
         {
             if (!copyCache.TryGetValue(typeof(TQuery), out var copy))
             {
@@ -284,7 +279,7 @@ namespace Apache.Druid.Querying
                     .GetStateInterfaces()
                     .Select(@state => state.GetMethod(nameof(State<None>.CopyFrom), BindingFlags.NonPublic | BindingFlags.Instance))
                     .ToArray();
-                copy = (from, to) => 
+                copy = (from, to) =>
                 {
                     foreach (var method in copyFromMethods)
                         method!.Invoke(to, new[] { from });

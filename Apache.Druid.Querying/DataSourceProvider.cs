@@ -15,7 +15,7 @@ namespace Apache.Druid.Querying
         DataSourceOptions? IDataSourceInitializer.options { get; set; }
         private DataSourceOptions Options => (this as IDataSourceInitializer).Options;
 
-        public DataSource<TSource> Inline<TSource>(IEnumerable<TSource> rows)
+        public DataSource<TSource> Inline<TSource>(IEnumerable<TSource> rows, OnExecuteQuery? onExecute = null)
         {
             var allMappings = MappingBuilders.Create<TSource>();
             var mappings = allMappings.Get<TSource>();
@@ -44,6 +44,7 @@ namespace Apache.Druid.Querying
             }
 
             return Create<TSource>(
+                onExecute,
                 allMappings,
                 () => new JsonObject
                 {
@@ -53,19 +54,21 @@ namespace Apache.Druid.Querying
                 });
         }
 
-        protected DataSource<TSource> Table<TSource>(string id)
-            => Create<TSource>(MappingBuilders.Create<TSource>(), () => id);
+        protected DataSource<TSource> Table<TSource>(string id, OnExecuteQuery? onExecute = null)
+            => Create<TSource>(onExecute, MappingBuilders.Create<TSource>(), () => id);
 
-        protected DataSource<Lookup<TKey, TValue>> Lookup<TKey, TValue>(string id)
+        protected DataSource<Lookup<TKey, TValue>> Lookup<TKey, TValue>(string id, OnExecuteQuery? onExecute = null)
             => Create<Lookup<TKey, TValue>>(
+                onExecute,
                 MappingBuilders.Create<Lookup<TKey, TValue>>(),
                 () => new JsonObject
                 {
                     ["type"] = "lookup",
                     [nameof(id)] = id
-                });      
+                });
 
-        private DataSource<TSource> Create<TSource>(MappingBuilders mappings, DataSourceJsonProvider createJson)
-            => new(() => Options, createJson, mappings);
+        private DataSource<TSource> Create<TSource>(
+            OnExecuteQuery? onExecute, MappingBuilders mappings, DataSourceJsonProvider createJson)
+            => new(() => Options, onExecute, createJson, mappings, sectionAtomicity: null);
     }
 }

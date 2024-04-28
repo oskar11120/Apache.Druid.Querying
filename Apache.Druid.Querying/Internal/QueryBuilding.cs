@@ -1,5 +1,4 @@
-﻿using static Apache.Druid.Querying.IQueryWith;
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
 using System.Text.Json;
 using System;
 using Apache.Druid.Querying.Internal.Sections;
@@ -29,7 +28,7 @@ public static class IQueryWithInternal
         public sealed record Dimensions;
     }
 
-    public interface State<TState> : State
+    public interface State<TState> : IQueryWith.State
     {
         protected internal TState? State { get; set; }
         internal void AddToJson(JsonObject json, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames);
@@ -45,7 +44,7 @@ public static class IQueryWithInternal
     {
         protected internal TSection Require() => State is not null ?
             State.Section :
-            throw new InvalidOperationException($"Mssing required query section: {nameof(Intervals)}.")
+            throw new InvalidOperationException($"Mssing required query section: {typeof(TSection)}.")
             {
                 Data = { ["query"] = this }
             };
