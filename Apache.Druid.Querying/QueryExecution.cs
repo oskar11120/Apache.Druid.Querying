@@ -95,10 +95,6 @@ namespace Apache.Druid.Querying
         TValue IOptionalQueryData<TValue, TKind>.Value => Value;
     }
 
-    public interface IDataSourceData<out TValue> : IQueryData<TValue, QueryDataKind.Source>
-    {
-    }
-
     public readonly record struct Union<TFirst, TSecond>(TFirst? First, TSecond? Second) :
         IOptionalQueryData<TFirst, QueryDataKind.UnionFirst>,
         IOptionalQueryData<TSecond, QueryDataKind.UnionSecond>

@@ -103,7 +103,7 @@ namespace Apache.Druid.Querying.Internal
         ImmutableDictionary<Type, ApplyPropertyColumnNameMappingChanges>? IQueryWithInternal.State<ImmutableDictionary<Type, ApplyPropertyColumnNameMappingChanges>>.State { get; set; }
     }
 
-    public static class QueryBase<TSource, TArguments, TSelf> where TSelf : IQuery<TSelf>
+    public static class QueryBase<TSource, TArguments, TSelf> where TSelf : IQueryWith.Self<TSelf>
     {
         public abstract class TimeSeries_<TResult> :
             QueryBase,
@@ -269,7 +269,7 @@ namespace Apache.Druid.Querying.Internal
         public sealed record SegmentMetadataInternalState(bool Merge);
         public class SegmentMetadata :
             QueryBase,
-            IQuery<SegmentMetadata>,
+            IQueryWith.Self<SegmentMetadata>,
             IQueryWithInternal.Section<SegmentMetadataInternalState>,
             IQueryWithInternal.Section<IReadOnlyCollection<Querying.SegmentMetadata.AnalysisType>>,
             IQueryWithInternal.Section<Querying.SegmentMetadata.AggregatorMergeStrategy>,
