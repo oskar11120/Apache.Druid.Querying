@@ -45,12 +45,12 @@ namespace Apache.Druid.Querying.Tests.Unit
         [Test]
         public void NoneElementType()
         {
-            static Query<IotMeasurement>.GroupBy<double>.WithVirtualColumns<int>.WithAggregations<string>.WithPostAggregations<NonePostAggregations> Query()
-                => new Query<IotMeasurement>
+            static Query<IotMeasurement>
                 .GroupBy<double>
                 .WithVirtualColumns<int>
                 .WithAggregations<string>
-                .WithPostAggregations<NonePostAggregations>();
+                .WithPostAggregations<NonePostAggregations> Query()
+                => new();
             var dimensions = Query().Dimensions(type => type.None<double>());
             AssertMatch(dimensions);
             var virtualColumns = Query().VirtualColumns(type => type.None<int>());
