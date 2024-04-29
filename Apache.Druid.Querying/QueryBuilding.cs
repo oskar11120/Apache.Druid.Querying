@@ -138,35 +138,35 @@ namespace Apache.Druid.Querying
         }
 
         public interface VirtualColumns<TArguments, TVirtualColumns, TSelf> :
-            SectionFactoryExpression<TArguments, TVirtualColumns, Marker.VirtualColumns>,
+            SectionFactoryExpression<TArguments, TVirtualColumns, SectionKind.VirtualColumns>,
             IQuery<TSelf>
             where TSelf : IQuery<TSelf>
         {
         }
 
         public interface Aggregations<TArguments, TAggregations, TSelf> :
-            SectionFactoryExpression<TArguments, TAggregations, Marker.Aggregations>,
+            SectionFactoryExpression<TArguments, TAggregations, SectionKind.Aggregations>,
             IQuery<TSelf>
             where TSelf : IQuery<TSelf>
         {
         }
 
         public interface PostAggregations<TArguments, TPostAggregations, TSelf> :
-            SectionFactoryExpression<TArguments, TPostAggregations, Marker.PostAggregations>,
+            SectionFactoryExpression<TArguments, TPostAggregations, SectionKind.PostAggregations>,
             IQuery<TSelf>
             where TSelf : IQuery<TSelf>
         {
         }
 
         public interface Dimesion<TArguments, TDimension, TSelf> :
-            SectionFactoryExpression<TArguments, TDimension, Marker.Dimension>,
+            SectionFactoryExpression<TArguments, TDimension, SectionKind.Dimension>,
             IQuery<TSelf>
             where TSelf : IQuery<TSelf>
         {
         }
 
         public interface Dimesions<TArguments, TDimensions, TSelf> :
-            SectionFactoryExpression<TArguments, TDimensions, Marker.Dimensions>,
+            SectionFactoryExpression<TArguments, TDimensions, SectionKind.Dimensions>,
             IQuery<TSelf>
             where TSelf : IQuery<TSelf>
         {

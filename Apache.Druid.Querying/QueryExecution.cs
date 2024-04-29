@@ -70,16 +70,50 @@ namespace Apache.Druid.Querying
 
     public delegate void OnExecuteQuery(IQueryWith.State Query);
 
-    public readonly record struct Union<TFirst, TSecond>(TFirst? First, TSecond? Second)
+    public partial record QueryDataKind
+    {
+        public sealed record Source : QueryDataKind;
+
+        public sealed record UnionFirst : QueryDataKind;
+        public sealed record UnionSecond : QueryDataKind;
+        public sealed record UnionThird : QueryDataKind;
+
+        public sealed record JoinLeft : QueryDataKind;
+        public sealed record JoinRight : QueryDataKind;
+    }
+
+    public interface IOptionalQueryData<out TValue, TKind> where TKind : QueryDataKind
+    {
+        TValue? Value { get; }
+    }
+
+    public interface IQueryData<out TValue, TKind> : IOptionalQueryData<TValue, TKind> where TKind : QueryDataKind
+    {
+        new TValue Value { get; }
+        TValue IOptionalQueryData<TValue, TKind>.Value => Value;
+    }
+
+    public interface IDataSourceData<out TValue> : IQueryData<TValue, QueryDataKind.Source>
+    {
+    }
+
+    public readonly record struct Union<TFirst, TSecond>(TFirst? First, TSecond? Second) :
+        IOptionalQueryData<TFirst, QueryDataKind.UnionFirst>,
+        IOptionalQueryData<TSecond, QueryDataKind.UnionSecond>
     {
         internal static readonly QueryResultElement.Deserializer<Union<TFirst, TSecond>> Deserializer =
             (in QueryResultElement.DeserializerContext context)
                 => new(
                     context.Deserialize<TFirst>(),
                     context.Deserialize<TSecond>());
+        TFirst? IOptionalQueryData<TFirst, QueryDataKind.UnionFirst>.Value => First;
+        TSecond? IOptionalQueryData<TSecond, QueryDataKind.UnionSecond>.Value => Second;
     }
 
-    public readonly record struct Union<TFirst, TSecond, TThird>(TFirst? First, TSecond? Second, TThird? Third)
+    public readonly record struct Union<TFirst, TSecond, TThird>(TFirst? First, TSecond? Second, TThird? Third) :
+        IOptionalQueryData<TFirst, QueryDataKind.UnionFirst>,
+        IOptionalQueryData<TSecond, QueryDataKind.UnionSecond>,
+        IOptionalQueryData<TThird, QueryDataKind.UnionThird>
     {
         internal static readonly QueryResultElement.Deserializer<Union<TFirst, TSecond, TThird>> Deserializer =
             (in QueryResultElement.DeserializerContext context)
@@ -87,25 +121,43 @@ namespace Apache.Druid.Querying
                     context.Deserialize<TFirst>(),
                     context.Deserialize<TSecond>(),
                     context.Deserialize<TThird>());
+        TFirst? IOptionalQueryData<TFirst, QueryDataKind.UnionFirst>.Value => First;
+        TSecond? IOptionalQueryData<TSecond, QueryDataKind.UnionSecond>.Value => Second;
+        TThird? IOptionalQueryData<TThird, QueryDataKind.UnionThird>.Value => Third;
     }
 
-    public readonly record struct InnerJoinData<TLeft, TRight>(TLeft Left, TRight Right)
+    public readonly record struct InnerJoinData<TLeft, TRight>(TLeft Left, TRight Right) :
+        IQueryData<TLeft, QueryDataKind.JoinLeft>,
+        IQueryData<TRight, QueryDataKind.JoinRight>
     {
         internal static readonly QueryResultElement.Deserializer<InnerJoinData<TLeft, TRight>> Deserializer =
             (in QueryResultElement.DeserializerContext context)
                 => new(
                     context.Deserialize<TLeft>(),
                     context.Deserialize<TRight>());
+        TLeft IQueryData<TLeft, QueryDataKind.JoinLeft>.Value => Left;
+        TRight IQueryData<TRight, QueryDataKind.JoinRight>.Value => Right;
     }
 
-    public readonly record struct LeftJoinData<TLeft, TRight>(TLeft Left, TRight Right);
-    public readonly record struct LeftJoinResult<TLeft, TRight>(TLeft Left, TRight? Right)
+    public readonly record struct LeftJoinData<TLeft, TRight>(TLeft Left, TRight Right) :
+        IQueryData<TLeft, QueryDataKind.JoinLeft>,
+        IQueryData<TRight, QueryDataKind.JoinRight>
+    {
+        TLeft IQueryData<TLeft, QueryDataKind.JoinLeft>.Value => Left;
+        TRight IQueryData<TRight, QueryDataKind.JoinRight>.Value => Right;
+    }
+
+    public readonly record struct LeftJoinResult<TLeft, TRight>(TLeft Left, TRight? Right) :
+        IQueryData<TLeft, QueryDataKind.JoinLeft>,
+        IOptionalQueryData<TRight, QueryDataKind.JoinRight>
     {
         internal static readonly QueryResultElement.Deserializer<LeftJoinResult<TLeft, TRight>> Deserializer =
             (in QueryResultElement.DeserializerContext context)
                 => new(
                     context.Deserialize<TLeft>(),
                     context.Deserialize<TRight>());
+        TLeft IQueryData<TLeft, QueryDataKind.JoinLeft>.Value => Left;
+        TRight? IOptionalQueryData<TRight, QueryDataKind.JoinRight>.Value => Right;
     }
 
     public sealed class DataSource<TSource>

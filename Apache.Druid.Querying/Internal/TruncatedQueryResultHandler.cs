@@ -22,9 +22,9 @@ public static class DimensionsProvider<TDimensions>
 
     public sealed class FromResult<TResult>
         : IDimensionsProvider<TResult, TDimensions>
-        where TResult : IQueryDataWithDimensions<TDimensions>
+        where TResult : IQueryData<TDimensions, QueryDataKind.Dimensions>
     {
-        TDimensions IDimensionsProvider<TResult, TDimensions>.GetDimensions(TResult result) => result.Dimensions;
+        TDimensions IDimensionsProvider<TResult, TDimensions>.GetDimensions(TResult result) => result.Value;
     }
 }
 

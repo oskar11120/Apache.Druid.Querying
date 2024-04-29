@@ -13,10 +13,31 @@ namespace Apache.Druid.Querying
     {
     }
 
-    public readonly record struct Source_VirtualColumns<TSource, TVirtualColumns>(TSource Source, TVirtualColumns VirtualColumns);
-    public readonly record struct ScanResult<TValue>(string? SegmentId, TValue Value);
+    public partial record QueryDataKind
+    {
+        public sealed record ScanResultValue : QueryDataKind;
+        public sealed record WithTimestamp : QueryDataKind;
+        public sealed record VirtualColumns : QueryDataKind;
+        public sealed record Dimensions : QueryDataKind;
+        public sealed record Aggregations : QueryDataKind;
+        public sealed record PostAggregations : QueryDataKind;
+    }
+
+    public readonly record struct Source_VirtualColumns<TSource, TVirtualColumns>(TSource Source, TVirtualColumns VirtualColumns) :
+        IQueryData<TSource, QueryDataKind.Source>,
+        IQueryData<TVirtualColumns, QueryDataKind.VirtualColumns>
+    {
+        TSource IQueryData<TSource, QueryDataKind.Source>.Value => Source;
+        TVirtualColumns IQueryData<TVirtualColumns, QueryDataKind.VirtualColumns>.Value => VirtualColumns;
+    }
+
+    public readonly record struct ScanResult<TValue>(string? SegmentId, TValue Value)
+        : IQueryData<TValue, QueryDataKind.ScanResultValue>
+    {
+    }
 
     public readonly record struct WithTimestamp<TValue>(DateTimeOffset Timestamp, TValue Value)
+        : IQueryData<TValue, QueryDataKind.WithTimestamp>
     {
         private static readonly byte[] timeColumnUtf8Bytes = Encoding.UTF8.GetBytes("__time");
 
@@ -27,59 +48,67 @@ namespace Apache.Druid.Querying
                     context.Deserialize<TValue>());
     }
 
-    public interface IQueryDataWithDimensions<out TDimensions>
+    public readonly record struct Dimension_Aggregations<TDimension, TAggregations>(TDimension Dimension, TAggregations Aggregations) : 
+        IQueryData<TDimension, QueryDataKind.Dimensions>,
+        IQueryData<TAggregations, QueryDataKind.Aggregations>
     {
-        TDimensions Dimensions { get; }
-    }
-
-    public readonly record struct Dimension_Aggregations<TDimension, TAggregations>(TDimension Dimension, TAggregations Aggregations)
-        : IQueryDataWithDimensions<TDimension>
-    {
-        TDimension IQueryDataWithDimensions<TDimension>.Dimensions => Dimension;
-
         internal static readonly QueryResultElement.Deserializer<Dimension_Aggregations<TDimension, TAggregations>> Deserializer =
             (in QueryResultElement.DeserializerContext context)
                 => new(
                     context.Deserialize<TDimension>(),
                     context.Deserialize<TAggregations>());
+        TDimension IQueryData<TDimension, QueryDataKind.Dimensions>.Value => Dimension;
+        TAggregations IQueryData<TAggregations, QueryDataKind.Aggregations>.Value => Aggregations;
     }
 
     public readonly record struct Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>(
-        TDimension Dimension, TAggregations Aggregations, TPostAggregations PostAggregations)
-         : IQueryDataWithDimensions<TDimension>
+        TDimension Dimension, TAggregations Aggregations, TPostAggregations PostAggregations) :
+        IQueryData<TDimension, QueryDataKind.Dimensions>,
+        IQueryData<TAggregations, QueryDataKind.Aggregations>,
+        IQueryData<TPostAggregations, QueryDataKind.PostAggregations>
     {
-        TDimension IQueryDataWithDimensions<TDimension>.Dimensions => Dimension;
-
         internal static readonly QueryResultElement.Deserializer<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>> Deserializer =
             (in QueryResultElement.DeserializerContext context)
                => new(
                     context.Deserialize<TDimension>(),
                     context.Deserialize<TAggregations>(),
                     context.Deserialize<TPostAggregations>());
+        TDimension IQueryData<TDimension, QueryDataKind.Dimensions>.Value => Dimension;
+        TAggregations IQueryData<TAggregations, QueryDataKind.Aggregations>.Value => Aggregations;
+        TPostAggregations IQueryData<TPostAggregations, QueryDataKind.PostAggregations>.Value => PostAggregations;
     }
 
-    public readonly record struct Aggregations_PostAggregations<TAggregations, TPostAggregations>(TAggregations Aggregations, TPostAggregations PostAggregations)
+    public readonly record struct Aggregations_PostAggregations<TAggregations, TPostAggregations>(TAggregations Aggregations, TPostAggregations PostAggregations) :
+        IQueryData<TAggregations, QueryDataKind.Aggregations>,
+        IQueryData<TPostAggregations, QueryDataKind.PostAggregations>
     {
         internal static readonly QueryResultElement.Deserializer<Aggregations_PostAggregations<TAggregations, TPostAggregations>> Deserializer =
             (in QueryResultElement.DeserializerContext context)
                 => new(
                     context.Deserialize<TAggregations>(),
                     context.Deserialize<TPostAggregations>());
+        TAggregations IQueryData<TAggregations, QueryDataKind.Aggregations>.Value => Aggregations;
+        TPostAggregations IQueryData<TPostAggregations, QueryDataKind.PostAggregations>.Value => PostAggregations;
     }
 
-    public readonly record struct Dimensions_Aggregations<TDimensions, TAggregations>(TDimensions Dimensions, TAggregations Aggregations)
-        : IQueryDataWithDimensions<TDimensions>
+    public readonly record struct Dimensions_Aggregations<TDimensions, TAggregations>(TDimensions Dimensions, TAggregations Aggregations) :
+        IQueryData<TDimensions, QueryDataKind.Dimensions>,
+        IQueryData<TAggregations, QueryDataKind.Aggregations>
     {
         internal static readonly QueryResultElement.Deserializer<Dimensions_Aggregations<TDimensions, TAggregations>> Deserializer =
             (in QueryResultElement.DeserializerContext context)
                => new(
                     context.Deserialize<TDimensions>(),
                     context.Deserialize<TAggregations>());
+        TDimensions IQueryData<TDimensions, QueryDataKind.Dimensions>.Value => Dimensions;
+        TAggregations IQueryData<TAggregations, QueryDataKind.Aggregations>.Value => Aggregations;
     }
 
     public readonly record struct Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>(
-        TDimensions Dimensions, TAggregations Aggregations, TPostAggregations PostAggregations)
-         : IQueryDataWithDimensions<TDimensions>
+        TDimensions Dimensions, TAggregations Aggregations, TPostAggregations PostAggregations) :
+        IQueryData<TDimensions, QueryDataKind.Dimensions>,
+        IQueryData<TAggregations, QueryDataKind.Aggregations>,
+        IQueryData<TPostAggregations, QueryDataKind.PostAggregations>
     {
         internal static readonly QueryResultElement.Deserializer<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>> Deserializer =
           (in QueryResultElement.DeserializerContext context)
@@ -87,6 +116,9 @@ namespace Apache.Druid.Querying
                     context.Deserialize<TDimensions>(),
                     context.Deserialize<TAggregations>(),
                     context.Deserialize<TPostAggregations>());
+        TDimensions IQueryData<TDimensions, QueryDataKind.Dimensions>.Value => Dimensions;
+        TAggregations IQueryData<TAggregations, QueryDataKind.Aggregations>.Value => Aggregations;
+        TPostAggregations IQueryData<TPostAggregations, QueryDataKind.PostAggregations>.Value => PostAggregations;
     }
 
     public readonly record struct DataSourceMetadata(DateTimeOffset MaxIngestedEventTime);

@@ -19,13 +19,13 @@ public delegate PropertyColumnNameMapping.ImmutableBuilder ApplyPropertyColumnNa
 
 public static class IQueryWithInternal
 {
-    public static class Marker
+    public record SectionKind
     {
-        public sealed record VirtualColumns;
-        public sealed record Aggregations;
-        public sealed record PostAggregations;
-        public sealed record Dimension;
-        public sealed record Dimensions;
+        public sealed record VirtualColumns : SectionKind;
+        public sealed record Aggregations : SectionKind;
+        public sealed record PostAggregations : SectionKind;
+        public sealed record Dimension : SectionKind;
+        public sealed record Dimensions : SectionKind;
     }
 
     public interface State<TState> : IQueryWith.State
@@ -138,9 +138,10 @@ public static class IQueryWithInternal
             => State = other.State is null ? new() : new Dictionary<string, GetQuerySectionJson>(other.State);
     }
 
-    public interface SectionFactoryExpression<TArguments, TSection, TMarker> :
+    public interface SectionFactoryExpression<TArguments, TSection, TSectionKind> :
         MutableSectionAtomicity,
         SectionFactoryExpressionStates
+        where TSectionKind : SectionKind
     {
         internal void SetState<TElementFactory>(
             string key,
