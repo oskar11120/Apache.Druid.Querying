@@ -6,7 +6,7 @@ using Scan = Apache.Druid.Querying.Internal.TruncatedQueryResultHandler<Apache.D
 using TimeSeries = Apache.Druid.Querying.Internal.TruncatedQueryResultHandler<Apache.Druid.Querying.None>
     .TimeSeries<Apache.Druid.Querying.None>;
 using TopN_GroupBy = Apache.Druid.Querying.Internal.TruncatedQueryResultHandler<bool>
-    .TopN_GroupBy<bool, bool, Apache.Druid.Querying.Internal.DimensionsProvider<bool>.Identity>;
+    .TopN_GroupBy<bool, bool>;
 
 namespace Apache.Druid.Querying.Tests.Unit.Internal
 {

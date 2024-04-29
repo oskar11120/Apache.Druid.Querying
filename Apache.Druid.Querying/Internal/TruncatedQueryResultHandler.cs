@@ -15,12 +15,12 @@ public interface IDimensionsProvider<in TResult, out TDimensions>
 
 public static class DimensionsProvider<TDimensions>
 {
-    public sealed class Identity : IDimensionsProvider<TDimensions, TDimensions>
+    public interface Identity : IDimensionsProvider<TDimensions, TDimensions>
     {
         TDimensions IDimensionsProvider<TDimensions, TDimensions>.GetDimensions(TDimensions result) => result;
     }
 
-    public sealed class FromResult<TResult>
+    public interface FromResult<TResult>
         : IDimensionsProvider<TResult, TDimensions>
         where TResult : IQueryData<TDimensions, QueryDataKind.Dimensions>
     {
@@ -125,19 +125,16 @@ public static class TruncatedQueryResultHandler<TSource>
         }
     }
 
-    public interface TopN_GroupBy<TResult, TDimensions, TDimensionsProvider> :
-        Base<WithTimestamp<TResult>, TopN_GroupBy<TResult, TDimensions, TDimensionsProvider>.LatestReturned>,
-        IQueryWith.Intervals
-        where TDimensions : IEquatable<TDimensions>
-        where TDimensionsProvider : IDimensionsProvider<TResult, TDimensions>, new()
+    public interface TopN_GroupBy<TResult, TDimensions> :
+        Base<WithTimestamp<TResult>, TopN_GroupBy<TResult, TDimensions>.LatestReturned>,
+        IQueryWith.Intervals,
+        IDimensionsProvider<TResult, TDimensions>
     {
         public sealed class LatestReturned
         {
             public DateTimeOffset? Timestamp;
             public Queue<TDimensions> Dimensions = new();
         }
-
-        private static readonly TDimensionsProvider provider = new();
 
         async IAsyncEnumerable<WithTimestamp<TResult>> Base<WithTimestamp<TResult>, LatestReturned>.OnTruncatedResultsSetQueryForRemaining(
             IAsyncEnumerable<WithTimestamp<TResult>> results,
@@ -158,7 +155,7 @@ public static class TruncatedQueryResultHandler<TSource>
                     latestReturned.Dimensions.Clear();
                 }
 
-                var resultDimensions = provider.GetDimensions(result.Value);
+                var resultDimensions = GetDimensions(result.Value);
                 if (timestampChangedAtLeastOnce || !latestReturned.Dimensions.Contains(resultDimensions))
                 {
                     latestReturned.Dimensions.Enqueue(resultDimensions);

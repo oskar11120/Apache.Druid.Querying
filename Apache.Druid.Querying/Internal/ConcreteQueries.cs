@@ -141,7 +141,7 @@ namespace Apache.Druid.Querying.Internal
         {
         }
 
-        public abstract class TopN_<TDimension, TMetricArgumentsAndResult, TDimensionProvider> :
+        public abstract class TopN_<TDimension, TMetricArgumentsAndResult> :
             QueryBase,
             IQueryWith.Granularity,
             IQueryWith.Filter<TArguments, TSelf>,
@@ -149,10 +149,7 @@ namespace Apache.Druid.Querying.Internal
             IQueryWith.Metric<TMetricArgumentsAndResult, TSelf>,
             IQueryWith.Threshold,
             IQueryWith.Context<QueryContext.TopN, TSelf>,
-            QueryResultDeserializer.ArrayOfObjectsWithTimestampAndArray<TMetricArgumentsAndResult>,
-            TruncatedQueryResultHandler<TSource>.TopN_GroupBy<TMetricArgumentsAndResult, TDimension, TDimensionProvider>
-            where TDimension : IEquatable<TDimension>
-            where TDimensionProvider : IDimensionsProvider<TMetricArgumentsAndResult, TDimension>, new()
+            QueryResultDeserializer.ArrayOfObjectsWithTimestampAndArray<TMetricArgumentsAndResult>
         {
             public TopN_() : base("topN")
             {
@@ -165,33 +162,31 @@ namespace Apache.Druid.Querying.Internal
             QuerySectionFactoryState<IMetric>? IQueryWithInternal.State<QuerySectionFactoryState<IMetric>>.State { get; set; }
         }
 
-        public abstract class TopN<TDimension> : TopN_<TDimension, TDimension, DimensionsProvider<TDimension>.Identity>
-            where TDimension : IEquatable<TDimension>
+        public abstract class TopN<TDimension> :
+            TopN_<TDimension, TDimension>,
+            DimensionsProvider<TDimension>.Identity,
+            TruncatedQueryResultHandler<TSource>.TopN_GroupBy<TDimension, TDimension>
         {
         }
 
         public abstract class TopN<TDimension, TAggregations> :
-            TopN_<
-                TDimension,
-                Dimension_Aggregations<TDimension, TAggregations>,
-                DimensionsProvider<TDimension>.FromResult<Dimension_Aggregations<TDimension, TAggregations>>>,
+            TopN_<TDimension, Dimension_Aggregations<TDimension, TAggregations>>,
+            DimensionsProvider<TDimension>.FromResult<Dimension_Aggregations<TDimension, TAggregations>>,
+            TruncatedQueryResultHandler<TSource>.TopN_GroupBy<Dimension_Aggregations<TDimension, TAggregations>, TDimension>,
             IQueryWith.Aggregations<TArguments, TAggregations, TSelf>
-            where TDimension : IEquatable<TDimension>
         {
         }
 
         public abstract class TopN<TDimension, TAggregations, TPostAggregations> :
-            TopN_<
-                TDimension,
-                Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>,
-                DimensionsProvider<TDimension>.FromResult<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>>,
+            TopN_<TDimension, Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>,
+            DimensionsProvider<TDimension>.FromResult<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>,
+            TruncatedQueryResultHandler<TSource>.TopN_GroupBy<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>, TDimension>,
             IQueryWith.Aggregations<TArguments, TAggregations, TSelf>,
             IQueryWith.PostAggregations<TAggregations, TPostAggregations, TSelf>
-            where TDimension : IEquatable<TDimension>
         {
         }
 
-        public abstract class GroupBy_<TDimensions, TOrderByAndHavingArgumentsAndResult, TDimensionProvider> :
+        public abstract class GroupBy_<TDimensions, TOrderByAndHavingArgumentsAndResult> :
             QueryBase,
             IQueryWith.Granularity,
             IQueryWith.Filter<TArguments, TSelf>,
@@ -199,10 +194,7 @@ namespace Apache.Druid.Querying.Internal
             IQueryWith.LimitSpec<TOrderByAndHavingArgumentsAndResult, TSelf>,
             IQueryWith.Having<TOrderByAndHavingArgumentsAndResult, TSelf>,
             IQueryWith.Context<QueryContext.GroupBy, TSelf>,
-            QueryResultDeserializer.ArrayOfGroupByResults<TOrderByAndHavingArgumentsAndResult>,
-            TruncatedQueryResultHandler<TSource>.TopN_GroupBy<TOrderByAndHavingArgumentsAndResult, TDimensions, TDimensionProvider>
-            where TDimensions : IEquatable<TDimensions>
-            where TDimensionProvider : IDimensionsProvider<TOrderByAndHavingArgumentsAndResult, TDimensions>, new()
+            QueryResultDeserializer.ArrayOfGroupByResults<TOrderByAndHavingArgumentsAndResult>
         {
             public GroupBy_() : base("groupBy")
             {
@@ -215,26 +207,25 @@ namespace Apache.Druid.Querying.Internal
             QuerySectionFactoryState<IHaving>? IQueryWithInternal.State<QuerySectionFactoryState<IHaving>>.State { get; set; }
         }
 
-        public abstract class GroupBy<TDimensions> : GroupBy_<TDimensions, TDimensions, DimensionsProvider<TDimensions>.Identity>
-            where TDimensions : IEquatable<TDimensions>
+        public abstract class GroupBy<TDimensions> : 
+            GroupBy_<TDimensions, TDimensions>,
+            DimensionsProvider<TDimensions>.Identity,
+            TruncatedQueryResultHandler<TSource>.TopN_GroupBy<TDimensions, TDimensions>
         {
         }
 
         public abstract class GroupBy<TDimensions, TAggregations> :
-            GroupBy_<
-                TDimensions,
-                Dimensions_Aggregations<TDimensions, TAggregations>,
-                DimensionsProvider<TDimensions>.FromResult<Dimensions_Aggregations<TDimensions, TAggregations>>>,
+            GroupBy_<TDimensions, Dimensions_Aggregations<TDimensions, TAggregations>>,
+            DimensionsProvider<TDimensions>.FromResult<Dimensions_Aggregations<TDimensions, TAggregations>>,
+            TruncatedQueryResultHandler<TSource>.TopN_GroupBy<Dimensions_Aggregations<TDimensions, TAggregations>, TDimensions>,
             IQueryWith.Aggregations<TArguments, TAggregations, TSelf>
-            where TDimensions : IEquatable<TDimensions>
         {
         }
 
         public abstract class GroupBy<TDimensions, TAggregations, TPostAggregations> :
-            GroupBy_<
-                TDimensions,
-                Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>,
-                DimensionsProvider<TDimensions>.FromResult<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>>,
+            GroupBy_<TDimensions, Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>,
+            DimensionsProvider<TDimensions>.FromResult<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>,
+            TruncatedQueryResultHandler<TSource>.TopN_GroupBy<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>, TDimensions>,
             IQueryWith.Aggregations<TArguments, TAggregations, TSelf>,
             IQueryWith.PostAggregations<TAggregations, TPostAggregations, TSelf>
             where TDimensions : IEquatable<TDimensions>
