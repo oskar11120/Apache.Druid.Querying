@@ -10,7 +10,7 @@ namespace Apache.Druid.Querying.Tests.Unit
         private static readonly DateTimeOffset t = DateTimeOffset.UnixEpoch.AddYears(30).AddDays(1).AddHours(1).AddMinutes(1);
         private static readonly Guid guid = Guid.Parse("e3af0803-3fc1-407c-9071-29c5f1cdc8d2");
 
-        private static void AssertMatch<TSource>(IQueryWithSource<TSource> query, [CallerArgumentExpression(nameof(query))] string? snapshotNameExtension = null)
+        private static void AssertMatch<TSource>(IQueryWith.Source<TSource> query, [CallerArgumentExpression(nameof(query))] string? snapshotNameExtension = null)
         {
             var json = query
                 .MapToJson()
@@ -45,7 +45,7 @@ namespace Apache.Druid.Querying.Tests.Unit
         [Test]
         public void NoneElementType()
         {
-            static Query<IotMeasurement>.GroupBy<double>.WithVirtualColumns<int>.WithAggregations<string>.WithPostAggregations<NonePostAggregations> Query() 
+            static Query<IotMeasurement>.GroupBy<double>.WithVirtualColumns<int>.WithAggregations<string>.WithPostAggregations<NonePostAggregations> Query()
                 => new Query<IotMeasurement>
                 .GroupBy<double>
                 .WithVirtualColumns<int>
@@ -79,12 +79,12 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .Aggregations(type => new(
                     value > 0 ? type.Max(data => data.Value) : type.Min(data => data.Value),
                     type.Last(data => valueGreaterThanZero() ? data.Timestamp : data.ProcessedTimestamp),
-                    value > 0 ? 
+                    value > 0 ?
                         (value == 1 ?
                             type.First(data => data.Value) :
                             type.Last(data => data.Value)) :
                         type.Min(data => data.Value),
-                    type.Last(data => valueGreaterThanZero() ? 
+                    type.Last(data => valueGreaterThanZero() ?
                         (valueGreaterThanZero() ? data.Timestamp : data.ProcessedTimestamp) :
                         data.ProcessedTimestamp)))
                 .PostAggregations(type => valueGreaterThanZero() ? type.Constant(1) : type.Constant(0));

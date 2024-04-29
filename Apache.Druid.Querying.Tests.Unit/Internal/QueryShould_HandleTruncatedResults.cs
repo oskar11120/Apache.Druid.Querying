@@ -23,7 +23,7 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
         {
             var query = new Query<None>.Scan().Limit(1000) as Scan;
             var latest = new Scan.LatestResult();
-            var setter = new Mutable<IQueryWithSource<None>>();
+            var setter = new Mutable<IQueryWith.Source<None>>();
             async Task Execute(int start, int count, bool truncate = true)
             {
                 var results = Enumerable
@@ -64,7 +64,7 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
             var intervals = new Interval[] { new(t0, t0.AddDays(2)), new(t0.AddDays(3), t0.AddDays(4)) };
             var query = new Query<None>.TimeSeries().Intervals(intervals) as TimeSeries;
             var latest = new TimeSeries.LatestReturned();
-            var setter = new Mutable<IQueryWithSource<None>>();
+            var setter = new Mutable<IQueryWith.Source<None>>();
             var deltaT = TimeSpan.FromHours(1);
             async Task Execute(IEnumerable<int> source, bool skipFirstResult = false, bool truncate = true)
             {
@@ -102,7 +102,7 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
         {
             var t0 = DateTime.Today;
             var latest = new TopN_GroupBy.LatestReturned();
-            var setter = new Mutable<IQueryWithSource<bool>>();
+            var setter = new Mutable<IQueryWith.Source<bool>>();
             var deltaT = TimeSpan.FromHours(1);
             var query = new Query<bool>.TopN<bool>().Interval(new(t0, t0.AddDays(1))) as TopN_GroupBy;
             async Task Execute(int start, int count, int skipFirstResults = 0, bool truncate = true)
@@ -142,7 +142,7 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
                 => new(id, default!, default, default, default, default, default, default, default);
             var query = new Query<None>.SegmentMetadata() as TruncatedQueryResultHandler<None>.SegmentMetadata;
             var context = new HashSet<string>();
-            var setter = new Mutable<IQueryWithSource<None>>();
+            var setter = new Mutable<IQueryWith.Source<None>>();
             async Task Execute(bool truncate, int[] sourceIds, int[] expectedReturnedIds) 
             {
                 var data = MaybeTruncate(sourceIds.Select(id => New(id.ToString())), truncate);

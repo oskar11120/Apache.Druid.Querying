@@ -31,7 +31,7 @@ namespace Apache.Druid.Querying.Json
         }
 
         public static JsonObject MapToJson<TSource>(
-            this IQueryWithSource<TSource> query,
+            this IQueryWith.Source<TSource> query,
             JsonSerializerOptions? serializerOptions = null)
             => MapToJson(
                 query,

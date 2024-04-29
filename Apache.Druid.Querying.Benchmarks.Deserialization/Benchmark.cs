@@ -12,7 +12,7 @@ public class Benchmark
 {
     private static readonly JsonSerializerOptions jsonOptions = DefaultSerializerOptions.Create();
     private static readonly Query<Edit>.Scan query = new();
-    private static readonly IQueryResultDeserializer<ScanResult<Edit>> deserializer = query;
+    private static readonly IQueryWith.Result<ScanResult<Edit>> deserializer = query;
     private static readonly SectionAtomicity.ImmutableBuilder atomicity = (query as IQueryWithInternal.SectionAtomicity).SectionAtomicity;
     private static readonly PropertyColumnNameMapping.ImmutableBuilder mappings = PropertyColumnNameMapping.ImmutableBuilder.Create<Edit>();
     private MemoryStream json = null!;

@@ -14,6 +14,10 @@ using System.Threading.Tasks;
 
 namespace Apache.Druid.Querying.Internal
 {
+    public interface IQueryResultDeserializer<TResult> : IQueryWith.Result<TResult> 
+    {
+    };
+
     internal static class QueryResultElement
     {
         public delegate TElement Deserializer<TElement>(in DeserializerContext context);
@@ -131,7 +135,7 @@ namespace Apache.Druid.Querying.Internal
                 this.create = create;
             }
 
-            async IAsyncEnumerable<TResult> IQueryResultDeserializer<TResult>.Deserialize(
+            async IAsyncEnumerable<TResult> IQueryWith.Result<TResult>.Deserialize(
                 QueryResultDeserializationContext context, [EnumeratorCancellation] CancellationToken token)
             {
                 var json = context.Json;
@@ -151,7 +155,7 @@ namespace Apache.Druid.Querying.Internal
             IQueryResultDeserializer<TElement>
             where TElementMapper : IQueryResultDeserializer<TElement>, new()
         {
-            async IAsyncEnumerable<TElement> IQueryResultDeserializer<TElement>.Deserialize(
+            async IAsyncEnumerable<TElement> IQueryWith.Result<TElement>.Deserialize(
                 QueryResultDeserializationContext context, [EnumeratorCancellation] CancellationToken token)
             {
                 var json = context.Json;
@@ -188,10 +192,10 @@ namespace Apache.Druid.Querying.Internal
         {
             private static readonly byte[] comaBytes = Encoding.UTF8.GetBytes(",");
 
-            async IAsyncEnumerable<TSelf> IQueryResultDeserializer<TSelf>.Deserialize(
+            async IAsyncEnumerable<TSelf> IQueryWith.Result<TSelf>.Deserialize(
                 QueryResultDeserializationContext context, [EnumeratorCancellation] CancellationToken token)
             {
-                var (json, options, atomicity, columnNameMappings) = context;
+                var json = context.Json;
                 async ValueTask<int> ReadThroghWholeAsync(bool updateState = true)
                     => (int)await json.ReadToTokenAsync(
                         JsonTokenType.EndObject,

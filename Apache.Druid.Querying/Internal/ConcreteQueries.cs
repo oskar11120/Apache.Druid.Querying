@@ -10,12 +10,12 @@ namespace Apache.Druid.Querying.Internal
     public static partial class QueryResultDeserializer
     {
         public interface IArray<TElement, TElementMapper> :
-            IQueryResultDeserializer<TElement>
+            IQueryWith.Result<TElement>
             where TElementMapper : IQueryResultDeserializer<TElement>, new()
         {
             private static readonly IQueryResultDeserializer<TElement> array = new Array<TElement, TElementMapper>();
 
-            IAsyncEnumerable<TElement> IQueryResultDeserializer<TElement>.Deserialize(
+            IAsyncEnumerable<TElement> IQueryWith.Result<TElement>.Deserialize(
                 QueryResultDeserializationContext context, CancellationToken token)
                 => array.Deserialize(context, token);
         }

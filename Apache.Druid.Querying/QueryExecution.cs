@@ -51,19 +51,21 @@ namespace Apache.Druid.Querying
         public object? State;
     }
 
-    public interface IQueryResultDeserializer<TResult>
+    public static partial class IQueryWith
     {
-        internal IAsyncEnumerable<TResult> Deserialize(QueryResultDeserializationContext context, CancellationToken token);
-    }
+        public interface Result<TResult>
+        {
+            internal IAsyncEnumerable<TResult> Deserialize(QueryResultDeserializationContext context, CancellationToken token);
+        }
 
-    public interface IQueryWithSource<in TSource> : IQueryWithInternal.SectionAtomicity, IQueryWithInternal.PropertyColumnNameMappingChanges
-    {
-    }
-
-    public interface IQueryWithSourceAndResult<TSource, TResult> : IQueryWithSource<TSource>, IQueryResultDeserializer<TResult>
-    {
-        internal IAsyncEnumerable<TResult> OnTruncatedResultsSetQueryForRemaining(
-            IAsyncEnumerable<TResult> results, TruncatedQueryResultHandlingContext context, Mutable<IQueryWithSource<TSource>> setter, CancellationToken token);
+        public interface Source<TSource> : IQueryWithInternal.SectionAtomicity, IQueryWithInternal.PropertyColumnNameMappingChanges
+        {
+            public interface AndResult<TResult> : Source<TSource>, Result<TResult>
+            {
+                internal IAsyncEnumerable<TResult> OnTruncatedResultsSetQueryForRemaining(
+                    IAsyncEnumerable<TResult> results, TruncatedQueryResultHandlingContext context, Mutable<Source<TSource>> setter, CancellationToken token);
+            }
+        }
     }
 
     public delegate JsonNode? DataSourceJsonProvider();
@@ -187,7 +189,7 @@ namespace Apache.Druid.Querying
 
         public readonly DataSourceJsonProvider GetJsonRepresentation;
 
-        public JsonObject MapQueryToJson(IQueryWithSource<TSource> query)
+        public JsonObject MapQueryToJson(IQueryWith.Source<TSource> query)
         {
             var mappings = query.ApplyPropertyColumnNameMappingChanges(columnNameMappings);
             var result = query.MapToJson(options.Serializer, mappings);
@@ -196,7 +198,7 @@ namespace Apache.Druid.Querying
         }
 
         public async IAsyncEnumerable<TResult> ExecuteQuery<TResult>(
-            IQueryWithSourceAndResult<TSource, TResult> query,
+            IQueryWith.Source<TSource>.AndResult<TResult> query,
             bool onTruncatedResultsQueryRemaining = true,
             [EnumeratorCancellation] CancellationToken token = default)
         {
@@ -206,7 +208,7 @@ namespace Apache.Druid.Querying
                 onExecute(query);
             }
 
-            var queryForRemaining = new Mutable<IQueryWithSource<TSource>> { Value = query };
+            var queryForRemaining = new Mutable<IQueryWith.Source<TSource>> { Value = query };
             var atomicity = SectionAtomicity.ImmutableBuilder.Combine(query.SectionAtomicity, sectionAtomicity);
             var mappings = query.ApplyPropertyColumnNameMappingChanges(columnNameMappings);
             var deserializer = query;
@@ -243,7 +245,7 @@ namespace Apache.Druid.Querying
         }
 
         private async IAsyncEnumerable<TResult> ExecuteQuery<TResult>(
-            IQueryWithSource<TSource> query,
+            IQueryWith.Source<TSource> query,
             Func<Stream, CancellationToken, IAsyncEnumerable<TResult>> deserialize,
             [EnumeratorCancellation] CancellationToken token = default)
         {
@@ -278,7 +280,7 @@ namespace Apache.Druid.Querying
                 yield return result;
         }
 
-        public DataSource<TResult> ToQueryDataSource<TResult>(IQueryWithSourceAndResult<TSource, TResult> query) => new(
+        public DataSource<TResult> ToQueryDataSource<TResult>(IQueryWith.Source<TSource>.AndResult<TResult> query) => new(
             getOptions,
             onExecute,
             () => new JsonObject

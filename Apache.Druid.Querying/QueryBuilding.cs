@@ -131,7 +131,7 @@ namespace Apache.Druid.Querying
         public TSelf Self => (TSelf)this;
     }
 
-    public static class IQueryWith
+    public static partial class IQueryWith
     {
         public interface State
         {

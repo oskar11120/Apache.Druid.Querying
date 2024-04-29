@@ -76,13 +76,13 @@ public static class TruncatedQueryResultHandler<TSource>
         return result;
     }
 
-    public interface Base<TResult, TContext> : IQueryWithSourceAndResult<TSource, TResult>
+    public interface Base<TResult, TContext> : IQueryWith.Source<TSource>.AndResult<TResult>
         where TContext : new()
     {
-        IAsyncEnumerable<TResult> IQueryWithSourceAndResult<TSource, TResult>.OnTruncatedResultsSetQueryForRemaining(
+        IAsyncEnumerable<TResult> AndResult<TResult>.OnTruncatedResultsSetQueryForRemaining(
             IAsyncEnumerable<TResult> results,
             TruncatedQueryResultHandlingContext context,
-            Mutable<IQueryWithSource<TSource>> setter,
+            Mutable<IQueryWith.Source<TSource>> setter,
             CancellationToken token)
         {
             context.State ??= new TContext();
@@ -90,7 +90,7 @@ public static class TruncatedQueryResultHandler<TSource>
         }
 
         internal IAsyncEnumerable<TResult> OnTruncatedResultsSetQueryForRemaining(
-            IAsyncEnumerable<TResult> results, TContext context, Mutable<IQueryWithSource<TSource>> setter, CancellationToken token);
+            IAsyncEnumerable<TResult> results, TContext context, Mutable<IQueryWith.Source<TSource>> setter, CancellationToken token);
     }
 
     public interface TimeSeries<TResult> :
@@ -105,7 +105,7 @@ public static class TruncatedQueryResultHandler<TSource>
         async IAsyncEnumerable<WithTimestamp<TResult>> Base<WithTimestamp<TResult>, TimeSeries<TResult>.LatestReturned>.OnTruncatedResultsSetQueryForRemaining(
             IAsyncEnumerable<WithTimestamp<TResult>> results,
             LatestReturned latestReturned,
-            Mutable<IQueryWithSource<TSource>> setter,
+            Mutable<IQueryWith.Source<TSource>> setter,
             [EnumeratorCancellation] CancellationToken token)
         {
             var truncated = false;
@@ -142,7 +142,7 @@ public static class TruncatedQueryResultHandler<TSource>
         async IAsyncEnumerable<WithTimestamp<TResult>> Base<WithTimestamp<TResult>, LatestReturned>.OnTruncatedResultsSetQueryForRemaining(
             IAsyncEnumerable<WithTimestamp<TResult>> results,
             LatestReturned latestReturned,
-            Mutable<IQueryWithSource<TSource>> setter,
+            Mutable<IQueryWith.Source<TSource>> setter,
             [EnumeratorCancellation] CancellationToken token)
         {
             var truncated = false;
@@ -185,7 +185,7 @@ public static class TruncatedQueryResultHandler<TSource>
         async IAsyncEnumerable<TResult> Base<TResult, Scan<TResult>.LatestResult>.OnTruncatedResultsSetQueryForRemaining(
             IAsyncEnumerable<TResult> results,
             LatestResult latestResult,
-            Mutable<IQueryWithSource<TSource>> setter,
+            Mutable<IQueryWith.Source<TSource>> setter,
             [EnumeratorCancellation] CancellationToken token)
         {
             var truncated = false;
@@ -210,7 +210,7 @@ public static class TruncatedQueryResultHandler<TSource>
         async IAsyncEnumerable<Querying.SegmentMetadata> Base<Querying.SegmentMetadata, HashSet<string>>.OnTruncatedResultsSetQueryForRemaining(
             IAsyncEnumerable<Querying.SegmentMetadata> results,
             HashSet<string> returnedSegmentIds,
-            Mutable<IQueryWithSource<TSource>> setter,
+            Mutable<IQueryWith.Source<TSource>> setter,
             [EnumeratorCancellation] CancellationToken token)
         {
             var truncated = false;
