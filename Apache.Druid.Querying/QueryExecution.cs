@@ -53,24 +53,25 @@ namespace Apache.Druid.Querying
 
     public static partial class IQueryWith
     {
-        public interface Result<TResult>
+        public interface Result<out TResult>
         {
             internal IAsyncEnumerable<TResult> Deserialize(QueryResultDeserializationContext context, CancellationToken token);
         }
 
-        public interface Source<TSource> : IQueryWithInternal.SectionAtomicity, IQueryWithInternal.PropertyColumnNameMappingChanges
+        public interface Source<out TSource> : IQueryWithInternal.SectionAtomicity, IQueryWithInternal.PropertyColumnNameMappingChanges
         {
-            public interface AndResult<TResult> : Source<TSource>, Result<TResult>
-            {
-                internal IAsyncEnumerable<TResult> OnTruncatedResultsSetQueryForRemaining(
-                    IAsyncEnumerable<TResult> results, TruncatedQueryResultHandlingContext context, Mutable<Source<TSource>> setter, CancellationToken token);
-            }
+        }
+
+        public interface SourceAndResult<TSource, TResult> : Source<TSource>, Result<TResult>
+        {
+            internal IAsyncEnumerable<TResult> OnTruncatedResultsSetQueryForRemaining(
+                IAsyncEnumerable<TResult> results, TruncatedQueryResultHandlingContext context, Mutable<Source<TSource>> setter, CancellationToken token);
         }
     }
 
     public delegate JsonNode? DataSourceJsonProvider();
 
-    public delegate void OnExecuteQuery(IQueryWith.State Query);
+    public delegate void OnMapQueryToJson(IQueryWith.State query, JsonObject resultJson);
 
     public partial record QueryDataKind
     {
@@ -84,18 +85,18 @@ namespace Apache.Druid.Querying
         public sealed record JoinRight : QueryDataKind;
     }
 
-    public interface IOptionalQueryData<out TValue, TKind> where TKind : QueryDataKind
+    public interface IOptionalQueryData<out TValue, out TKind> where TKind : QueryDataKind
     {
         TValue? Value { get; }
     }
 
-    public interface IQueryData<out TValue, TKind> : IOptionalQueryData<TValue, TKind> where TKind : QueryDataKind
+    public interface IQueryData<out TValue, out TKind> : IOptionalQueryData<TValue, TKind> where TKind : QueryDataKind
     {
         new TValue Value { get; }
         TValue IOptionalQueryData<TValue, TKind>.Value => Value;
     }
 
-    public readonly record struct Union<TFirst, TSecond>(TFirst? First, TSecond? Second) :
+    public sealed record Union<TFirst, TSecond>(TFirst? First, TSecond? Second) :
         IOptionalQueryData<TFirst, QueryDataKind.UnionFirst>,
         IOptionalQueryData<TSecond, QueryDataKind.UnionSecond>
     {
@@ -108,7 +109,7 @@ namespace Apache.Druid.Querying
         TSecond? IOptionalQueryData<TSecond, QueryDataKind.UnionSecond>.Value => Second;
     }
 
-    public readonly record struct Union<TFirst, TSecond, TThird>(TFirst? First, TSecond? Second, TThird? Third) :
+    public sealed record Union<TFirst, TSecond, TThird>(TFirst? First, TSecond? Second, TThird? Third) :
         IOptionalQueryData<TFirst, QueryDataKind.UnionFirst>,
         IOptionalQueryData<TSecond, QueryDataKind.UnionSecond>,
         IOptionalQueryData<TThird, QueryDataKind.UnionThird>
@@ -124,7 +125,7 @@ namespace Apache.Druid.Querying
         TThird? IOptionalQueryData<TThird, QueryDataKind.UnionThird>.Value => Third;
     }
 
-    public readonly record struct InnerJoinData<TLeft, TRight>(TLeft Left, TRight Right) :
+    public sealed record InnerJoinData<TLeft, TRight>(TLeft Left, TRight Right) :
         IQueryData<TLeft, QueryDataKind.JoinLeft>,
         IQueryData<TRight, QueryDataKind.JoinRight>
     {
@@ -137,7 +138,7 @@ namespace Apache.Druid.Querying
         TRight IQueryData<TRight, QueryDataKind.JoinRight>.Value => Right;
     }
 
-    public readonly record struct LeftJoinData<TLeft, TRight>(TLeft Left, TRight Right) :
+    public sealed record LeftJoinData<TLeft, TRight>(TLeft Left, TRight Right) :
         IQueryData<TLeft, QueryDataKind.JoinLeft>,
         IQueryData<TRight, QueryDataKind.JoinRight>
     {
@@ -145,7 +146,7 @@ namespace Apache.Druid.Querying
         TRight IQueryData<TRight, QueryDataKind.JoinRight>.Value => Right;
     }
 
-    public readonly record struct LeftJoinResult<TLeft, TRight>(TLeft Left, TRight? Right) :
+    public sealed record LeftJoinResult<TLeft, TRight>(TLeft Left, TRight? Right) :
         IQueryData<TLeft, QueryDataKind.JoinLeft>,
         IOptionalQueryData<TRight, QueryDataKind.JoinRight>
     {
@@ -165,19 +166,19 @@ namespace Apache.Druid.Querying
         private readonly PropertyColumnNameMapping.ImmutableBuilder columnNameMappings;
         private readonly SectionAtomicity.ImmutableBuilder? sectionAtomicity;
         private readonly Func<DataSourceOptions> getOptions;
-        private readonly OnExecuteQuery? onExecute;
+        private readonly OnMapQueryToJson onMap;
         private JsonSerializerOptions? serializerOptionsWithFormatting;
         private DataSourceOptions options => getOptions();
 
         internal DataSource(
             Func<DataSourceOptions> getOptions,
-            OnExecuteQuery? onExecute,
+            OnMapQueryToJson onMap,
             DataSourceJsonProvider getJsonRepresentation,
             PropertyColumnNameMapping.ImmutableBuilder columnNameMappings,
             SectionAtomicity.ImmutableBuilder? sectionAtomicity)
         {
             this.getOptions = getOptions;
-            this.onExecute = onExecute;
+            this.onMap = onMap;
             GetJsonRepresentation = getJsonRepresentation;
             this.columnNameMappings = columnNameMappings;
             this.sectionAtomicity = sectionAtomicity;
@@ -190,20 +191,15 @@ namespace Apache.Druid.Querying
             var mappings = query.ApplyPropertyColumnNameMappingChanges(columnNameMappings);
             var result = query.MapToJson(options.Serializer, mappings);
             result.Add("dataSource", GetJsonRepresentation());
+            onMap(query, result);
             return result;
         }
 
         public async IAsyncEnumerable<TResult> ExecuteQuery<TResult>(
-            IQueryWith.Source<TSource>.AndResult<TResult> query,
+            IQueryWith.SourceAndResult<TSource, TResult> query,
             bool onTruncatedResultsQueryRemaining = true,
             [EnumeratorCancellation] CancellationToken token = default)
         {
-            if (onExecute is not null)
-            {
-                query = query.Copy();
-                onExecute(query);
-            }
-
             var queryForRemaining = new Mutable<IQueryWith.Source<TSource>> { Value = query };
             var atomicity = SectionAtomicity.ImmutableBuilder.Combine(query.SectionAtomicity, sectionAtomicity);
             var mappings = query.ApplyPropertyColumnNameMappingChanges(columnNameMappings);
@@ -276,9 +272,9 @@ namespace Apache.Druid.Querying
                 yield return result;
         }
 
-        public DataSource<TResult> ToQueryDataSource<TResult>(IQueryWith.Source<TSource>.AndResult<TResult> query) => new(
+        public DataSource<TResult> ToQueryDataSource<TResult>(IQueryWith.SourceAndResult<TSource, TResult> query) => new(
             getOptions,
-            onExecute,
+            onMap,
             () => new JsonObject
             {
                 ["type"] = "query",
@@ -308,7 +304,7 @@ namespace Apache.Druid.Querying
                 .Add<TResult>();
             return new(
                 getOptions,
-                onExecute,
+                onMap,
                 () => new JsonObject
                 {
                     ["type"] = "join",
@@ -327,7 +323,7 @@ namespace Apache.Druid.Querying
         public DataSource<TSource> Union(DataSource<TSource> second)
             => new(
                 getOptions,
-                onExecute,
+                onMap,
                 () => new JsonObject
                 {
                     ["type"] = "union",
@@ -343,7 +339,7 @@ namespace Apache.Druid.Querying
         public DataSource<Union<TSource, TSecond>> Union<TSecond>(DataSource<TSecond> second)
             => new(
                 getOptions,
-                onExecute,
+                onMap,
                 () => new JsonObject
                 {
                     ["type"] = "union",
@@ -359,7 +355,7 @@ namespace Apache.Druid.Querying
         public DataSource<Union<TSource, TSecond, TThird>> Union<TSecond, TThird>(DataSource<TSecond> second, DataSource<TThird> third)
             => new(
                 getOptions,
-                onExecute,
+                onMap,
                 () => new JsonObject
                 {
                     ["type"] = "union",

@@ -132,54 +132,48 @@ namespace Apache.Druid.Querying
         {
         }
 
-        public interface Self<TSelf> where TSelf : Self<TSelf>
+        public interface Self<out TSelf>
         {
-            public TSelf Self => (TSelf)this;
+            TSelf Self => (TSelf)this;
         }
 
-        public interface VirtualColumns<TArguments, TVirtualColumns, TSelf> :
+        public interface VirtualColumns<out TArguments, TVirtualColumns, out TSelf> :
             SectionFactoryExpression<TArguments, TVirtualColumns, SectionKind.VirtualColumns>,
             Self<TSelf>
-            where TSelf : Self<TSelf>
         {
         }
 
-        public interface Aggregations<TArguments, TAggregations, TSelf> :
+        public interface Aggregations<out TArguments, TAggregations, out TSelf> :
             SectionFactoryExpression<TArguments, TAggregations, SectionKind.Aggregations>,
             Self<TSelf>
-            where TSelf : Self<TSelf>
         {
         }
 
-        public interface PostAggregations<TArguments, TPostAggregations, TSelf> :
+        public interface PostAggregations<out TArguments, TPostAggregations, out TSelf> :
             SectionFactoryExpression<TArguments, TPostAggregations, SectionKind.PostAggregations>,
             Self<TSelf>
-            where TSelf : Self<TSelf>
         {
         }
 
-        public interface Dimesion<TArguments, TDimension, TSelf> :
+        public interface Dimesion<out TArguments, TDimension, out TSelf> :
             SectionFactoryExpression<TArguments, TDimension, SectionKind.Dimension>,
             Self<TSelf>
-            where TSelf : Self<TSelf>
         {
         }
 
-        public interface Dimesions<TArguments, TDimensions, TSelf> :
+        public interface Dimesions<out TArguments, TDimensions, out TSelf> :
             SectionFactoryExpression<TArguments, TDimensions, SectionKind.Dimensions>,
             Self<TSelf>
-            where TSelf : Self<TSelf>
         {
         }
 
-        public interface Filter<TArguments, TSelf> :
-            Self<TSelf>, SectionFactory<IFilter>
-            where TSelf : Self<TSelf>
+        public interface Filter<out TArguments, out TSelf> :
+            SectionFactory<IFilter>,
+            Self<TSelf>
         {
         }
 
-        public interface Context<TContext, TSelf> : Self<TSelf>, Section<TContext>
-            where TSelf : Self<TSelf>
+        public interface Context<TContext, out TSelf> : Self<TSelf>, Section<TContext>
             where TContext : Context
         {
             TContext? Context => State?.Section;
@@ -222,18 +216,15 @@ namespace Apache.Druid.Querying
             int? Threshold => State?.Section?.Threshold;
         }
 
-        public interface Metric<TArguments, TSelf> : Self<TSelf>, SectionFactory<IMetric>
-            where TSelf : Self<TSelf>
+        public interface Metric<out TArguments, out TSelf> : Self<TSelf>, SectionFactory<IMetric>
         {
         }
 
-        public interface LimitSpec<TArguments, TSelf> : Self<TSelf>, SectionFactory<ILimitSpec>
-            where TSelf : Self<TSelf>
+        public interface LimitSpec<out TArguments, out TSelf> : Self<TSelf>, SectionFactory<ILimitSpec>
         {
         }
 
-        public interface Having<TArguments, TSelf> : Self<TSelf>, SectionFactory<IHaving>
-            where TSelf : Self<TSelf>
+        public interface Having<out TArguments, out TSelf> : Self<TSelf>, SectionFactory<IHaving>
         {
         }
 
@@ -263,7 +254,7 @@ namespace Apache.Druid.Querying
         }
     }
 
-    public delegate TSection QuerySectionFactory<TElementFactory, TSection>(TElementFactory factory);
+    public delegate TSection QuerySectionFactory<in TElementFactory, out TSection>(TElementFactory factory);
 
     public static class QueryExtensions
     {
@@ -273,7 +264,8 @@ namespace Apache.Druid.Querying
         // TODO Optimize
         public static TQuery Copy<TQuery>(this TQuery query) where TQuery : IQueryWith.State
         {
-            if (!copyCache.TryGetValue(typeof(TQuery), out var copy))
+            var runtimeType = query.GetType();
+            if (!copyCache.TryGetValue(runtimeType, out var copy))
             {
                 var copyFromMethods = query
                     .GetStateInterfaces()
@@ -284,10 +276,10 @@ namespace Apache.Druid.Querying
                     foreach (var method in copyFromMethods)
                         method!.Invoke(to, new[] { from });
                 };
-                copyCache.TryAdd(typeof(TQuery), copy);
+                copyCache.TryAdd(runtimeType, copy);
             }
 
-            var @new = (TQuery)Activator.CreateInstance(query.GetType())!;
+            var @new = (TQuery)Activator.CreateInstance(runtimeType)!;
             copy(query, @new);
             return @new;
         }
@@ -295,7 +287,6 @@ namespace Apache.Druid.Querying
         public static TQuery VirtualColumns<TArguments, TVirtualColumns, TQuery>(
             this IQueryWith.VirtualColumns<TArguments, TVirtualColumns, TQuery> query,
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IVirtualColumns, TVirtualColumns>> factory)
-            where TQuery : IQueryWith.Self<TQuery>
         {
             query.SetState(nameof(VirtualColumns), factory);
             return query.Self;
@@ -304,29 +295,25 @@ namespace Apache.Druid.Querying
         public static TQuery Aggregations<TArguments, TAggregations, TQuery>(
             this IQueryWith.Aggregations<TArguments, TAggregations, TQuery> query,
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IAggregations, TAggregations>> factory)
-            where TQuery : IQueryWith.Self<TQuery>
         {
             query.SetState(nameof(Aggregations), factory, new(
-                MapType: static call =>
+                MapType: static call => call.MethodName switch
                 {
-                    return call.MethodName switch
-                    {
-                        nameof(QueryElementFactory<TArguments>.IAggregations.Mean) => "doubleMean",
+                    nameof(QueryElementFactory<TArguments>.IAggregations.Mean) => "doubleMean",
 
-                        nameof(QueryElementFactory<TArguments>.IAggregations.Sum) or
-                        nameof(QueryElementFactory<TArguments>.IAggregations.Min) or
-                        nameof(QueryElementFactory<TArguments>.IAggregations.Max) or
-                        nameof(QueryElementFactory<TArguments>.IAggregations.First) or
-                        nameof(QueryElementFactory<TArguments>.IAggregations.Last) or
-                        nameof(QueryElementFactory<TArguments>.IAggregations.Any) =>
-                            (call.TryGetScalarParameter<SimpleDataType>()?.Value?.ToString()
-                            ?? (call.TryGetMemberSelectorParameter("timeColumn") is null ? null : SimpleDataType.String.ToString())
-                            ?? DataType.GetSimple(call.GetMemberSelectorParameter("fieldName").SelectedType).ToString())
-                            .ToCamelCase()
-                            + call.MethodName,
+                    nameof(QueryElementFactory<TArguments>.IAggregations.Sum) or
+                    nameof(QueryElementFactory<TArguments>.IAggregations.Min) or
+                    nameof(QueryElementFactory<TArguments>.IAggregations.Max) or
+                    nameof(QueryElementFactory<TArguments>.IAggregations.First) or
+                    nameof(QueryElementFactory<TArguments>.IAggregations.Last) or
+                    nameof(QueryElementFactory<TArguments>.IAggregations.Any) =>
+                        (call.TryGetScalarParameter<SimpleDataType>()?.Value?.ToString()
+                        ?? (call.TryGetMemberSelectorParameter("timeColumn") is null ? null : SimpleDataType.String.ToString())
+                        ?? DataType.GetSimple(call.GetMemberSelectorParameter("fieldName").SelectedType).ToString())
+                        .ToCamelCase()
+                        + call.MethodName,
 
-                        _ => call.MethodName.ToCamelCase()
-                    };
+                    _ => call.MethodName.ToCamelCase()
                 },
                 SkipScalarParameter: static scalar => scalar.Type == typeof(SimpleDataType),
                 ExpressionColumnNamesKey: "fields"));
@@ -336,7 +323,6 @@ namespace Apache.Druid.Querying
         public static TQuery PostAggregations<TArguments, TPostAggregations, TQuery>(
             this IQueryWith.PostAggregations<TArguments, TPostAggregations, TQuery> query,
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IPostAggregators, TPostAggregations>> factory)
-            where TQuery : IQueryWith.Self<TQuery>
         {
             query.SetState(nameof(PostAggregations), factory, new(
                 ReplaceScalarParameter: static scalar => scalar.Type == typeof(ArithmeticFunction) ?
@@ -367,7 +353,6 @@ namespace Apache.Druid.Querying
         public static TQuery Dimensions<TArguments, TDimensions, TQuery>(
             this IQueryWith.Dimesions<TArguments, TDimensions, TQuery> query,
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IDimensions, TDimensions>> factory)
-            where TQuery : IQueryWith.Self<TQuery>
         {
             query.SetState(nameof(Dimensions), factory, dimensionsMapperOptions);
             return query.Self;
@@ -377,7 +362,6 @@ namespace Apache.Druid.Querying
         public static TQuery Dimension<TArguments, TDimension, TQuery>(
             this IQueryWith.Dimesion<TArguments, TDimension, TQuery> query,
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IDimensions, TDimension>> factory)
-            where TQuery : IQueryWith.Self<TQuery>
         {
             query.SetState(nameof(Dimension), factory, dimensionMapperOptions);
             return query.Self;
@@ -385,7 +369,6 @@ namespace Apache.Druid.Querying
 
         public static TQuery Filter<TArguments, TQuery>(
             this IQueryWith.Filter<TArguments, TQuery> query, Func<QueryElementFactory<TArguments>.Filter, IFilter> factory)
-            where TQuery : IQueryWith.Self<TQuery>
         {
             query.SetState(nameof(Filter), columnNames => factory(new(columnNames)));
             return query.Self;
@@ -410,7 +393,6 @@ namespace Apache.Druid.Querying
         }
 
         public static TQuery Context<TQuery, TContext>(this IQueryWith.Context<TContext, TQuery> query, TContext context)
-            where TQuery : IQueryWith.Self<TQuery>
             where TContext : Context
         {
             query.SetState(nameof(context), context);
@@ -460,7 +442,6 @@ namespace Apache.Druid.Querying
         public static TQuery Metric<TArguments, TQuery>(
             this IQueryWith.Metric<TArguments, TQuery> query,
             Func<QueryElementFactory<TArguments>.MetricSpec, IMetric> factory)
-            where TQuery : IQueryWith.Self<TQuery>
         {
             query.SetState(nameof(Metric), columnNames => factory(new(columnNames)));
             return query.Self;
@@ -471,7 +452,6 @@ namespace Apache.Druid.Querying
             int? limit = null,
             int? offset = null,
             Func<QueryElementFactory<TArguments>.OrderByColumnSpec, IEnumerable<ILimitSpec.OrderBy>>? columns = null)
-            where TQuery : IQueryWith.Self<TQuery>
         {
             query.SetState(nameof(LimitSpec), columnNames => new Internal.Elements.LimitSpec(limit, offset, columns?.Invoke(new(columnNames))));
             return query.Self;
@@ -482,20 +462,17 @@ namespace Apache.Druid.Querying
             int? limit = null,
             int? offset = null,
             Func<QueryElementFactory<TArguments>.OrderByColumnSpec, ILimitSpec.OrderBy>? column = null)
-            where TQuery : IQueryWith.Self<TQuery>
             => query.LimitSpec(limit, offset, column is null ? null : columnNames => new[] { column(columnNames) }.AsEnumerable());
 
         public static TQuery LimitSpec<TArguments, TQuery>(
             this IQueryWith.LimitSpec<TArguments, TQuery> query,
             int? limit = null,
             int? offset = null)
-            where TQuery : IQueryWith.Self<TQuery>
             => query.LimitSpec(limit, offset, (Func<QueryElementFactory<TArguments>.OrderByColumnSpec, ILimitSpec.OrderBy>?)null);
 
         public static TQuery Having<TArguments, TQuery>(
             this IQueryWith.Having<TArguments, TQuery> query,
             Func<QueryElementFactory<TArguments>.Having, IHaving> factory)
-            where TQuery : IQueryWith.Self<TQuery>
         {
             query.SetState(nameof(Having), columnNames => factory(new(columnNames)));
             return query.Self;
@@ -504,7 +481,6 @@ namespace Apache.Druid.Querying
         public static TQuery HavingFilter<TArguments, TQuery>(
             this IQueryWith.Having<TArguments, TQuery> query,
             Func<QueryElementFactory<TArguments>.Filter, IFilter> factory)
-            where TQuery : IQueryWith.Self<TQuery>
         {
             query.SetState(nameof(Having), columnNames => new QueryElementFactory<TArguments>.Having(columnNames).Filter(factory));
             return query.Self;

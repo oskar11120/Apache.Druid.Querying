@@ -76,10 +76,10 @@ public static class TruncatedQueryResultHandler<TSource>
         return result;
     }
 
-    public interface Base<TResult, TContext> : IQueryWith.Source<TSource>.AndResult<TResult>
+    public interface Base<TResult, TContext> : IQueryWith.SourceAndResult<TSource, TResult>
         where TContext : new()
     {
-        IAsyncEnumerable<TResult> AndResult<TResult>.OnTruncatedResultsSetQueryForRemaining(
+        IAsyncEnumerable<TResult> IQueryWith.SourceAndResult<TSource, TResult>.OnTruncatedResultsSetQueryForRemaining(
             IAsyncEnumerable<TResult> results,
             TruncatedQueryResultHandlingContext context,
             Mutable<IQueryWith.Source<TSource>> setter,

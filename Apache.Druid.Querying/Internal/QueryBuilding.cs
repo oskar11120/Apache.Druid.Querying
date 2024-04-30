@@ -138,7 +138,7 @@ public static class IQueryWithInternal
             => State = other.State is null ? new() : new Dictionary<string, GetQuerySectionJson>(other.State);
     }
 
-    public interface SectionFactoryExpression<TArguments, TSection, TSectionKind> :
+    public interface SectionFactoryExpression<out TArguments, TSection, out TSectionKind> :
         MutableSectionAtomicity,
         SectionFactoryExpressionStates
         where TSectionKind : SectionKind

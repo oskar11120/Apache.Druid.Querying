@@ -6,7 +6,7 @@ namespace Apache.Druid.Querying.Tests.Integration;
 
 internal class Given2MBQuery_TruncatedResultHandlingShouldHandle : TruncatedResultHandlingShouldHandle<ScanResult<Edit>>
 {
-    protected override IQueryWith.Source<Edit>.AndResult<ScanResult<Edit>> Query
+    protected override IQueryWith.SourceAndResult<Edit, ScanResult<Edit>> Query
         => new Query<Edit>
         .Scan()
         .Interval(new(DateTimeOffset.MinValue, DateTimeOffset.MaxValue))
@@ -68,7 +68,7 @@ internal sealed record PostAggregations(
 internal class Given5MBQuery_TruncatedResultHandlingShouldHandle
     : TruncatedResultHandlingShouldHandle<WithTimestamp<Aggregations_PostAggregations<Aggregations, PostAggregations>>>
 {
-    protected override IQueryWith.Source<Edit>.AndResult<WithTimestamp<Aggregations_PostAggregations<Aggregations, PostAggregations>>> Query
+    protected override IQueryWith.SourceAndResult<Edit, WithTimestamp<Aggregations_PostAggregations<Aggregations, PostAggregations>>> Query
         => new Query<Edit>
         .TimeSeries
         .WithNoVirtualColumns
@@ -137,7 +137,7 @@ internal class Given5MBQuery_TruncatedResultHandlingShouldHandle
 [NonParallelizable]
 internal abstract class TruncatedResultHandlingShouldHandle<TResult>
 {
-    protected abstract IQueryWith.Source<Edit>.AndResult<TResult> Query { get; }
+    protected abstract IQueryWith.SourceAndResult<Edit, TResult> Query { get; }
     protected virtual bool IsEmpty(TResult result) => false;
 
     [SetUp]

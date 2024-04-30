@@ -59,8 +59,9 @@ internal class QueryShould_ReturnRightData
         where TContext : new()
     {
         var spanshotName = Snapshot.FullName(new SnapshotNameExtension(snapshotNameSuffix));
-        var json = dataSource.MapQueryToJson(query).ToString();
-        await TestContext.Out.WriteLineAsync(json);
+        var json = dataSource.MapQueryToJson(query);
+        json["isSourceEditVerifiedOnMapToJson"]?.GetValue<bool>().Should().BeTrue();
+        await TestContext.Out.WriteLineAsync(json.ToString());
         void Match(List<TResult> results)
             => Snapshot.Match(results, spanshotName, options => options.IgnoreField("[:].SegmentId").IgnoreField("[:].Id"));
         var results = await dataSource

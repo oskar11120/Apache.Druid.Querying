@@ -15,7 +15,7 @@ namespace Apache.Druid.Querying
         DataSourceOptions? IDataSourceInitializer.options { get; set; }
         private DataSourceOptions Options => (this as IDataSourceInitializer).Options;
 
-        public DataSource<TSource> Inline<TSource>(IEnumerable<TSource> rows, OnExecuteQuery? onExecute = null)
+        public DataSource<TSource> Inline<TSource>(IEnumerable<TSource> rows, OnMapQueryToJson? onMap = null)
         {
             var allMappings = MappingBuilders.Create<TSource>();
             var mappings = allMappings.Get<TSource>();
@@ -44,7 +44,7 @@ namespace Apache.Druid.Querying
             }
 
             return Create<TSource>(
-                onExecute,
+                onMap,
                 allMappings,
                 () => new JsonObject
                 {
@@ -54,12 +54,12 @@ namespace Apache.Druid.Querying
                 });
         }
 
-        protected DataSource<TSource> Table<TSource>(string id, OnExecuteQuery? onExecute = null)
-            => Create<TSource>(onExecute, MappingBuilders.Create<TSource>(), () => id);
+        protected DataSource<TSource> Table<TSource>(string id, OnMapQueryToJson? onMap = null)
+            => Create<TSource>(onMap, MappingBuilders.Create<TSource>(), () => id);
 
-        protected DataSource<Lookup<TKey, TValue>> Lookup<TKey, TValue>(string id, OnExecuteQuery? onExecute = null)
+        protected DataSource<Lookup<TKey, TValue>> Lookup<TKey, TValue>(string id, OnMapQueryToJson? onMap = null)
             => Create<Lookup<TKey, TValue>>(
-                onExecute,
+                onMap,
                 MappingBuilders.Create<Lookup<TKey, TValue>>(),
                 () => new JsonObject
                 {
@@ -68,7 +68,7 @@ namespace Apache.Druid.Querying
                 });
 
         private DataSource<TSource> Create<TSource>(
-            OnExecuteQuery? onExecute, MappingBuilders mappings, DataSourceJsonProvider createJson)
-            => new(() => Options, onExecute, createJson, mappings, sectionAtomicity: null);
+            OnMapQueryToJson? onMap, MappingBuilders mappings, DataSourceJsonProvider createJson)
+            => new(() => Options, onMap ??= static (_, _) => { }, createJson, mappings, sectionAtomicity: null);
     }
 }

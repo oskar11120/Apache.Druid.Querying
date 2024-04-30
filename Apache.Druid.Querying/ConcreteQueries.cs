@@ -9,8 +9,9 @@ using System.Text.Json;
 
 namespace Apache.Druid.Querying
 {
-    public readonly struct None
+    public sealed class None
     {
+        public static readonly None Singleton = new();
     }
 
     public partial record QueryDataKind
@@ -23,7 +24,7 @@ namespace Apache.Druid.Querying
         public sealed record PostAggregations : QueryDataKind;
     }
 
-    public readonly record struct Source_VirtualColumns<TSource, TVirtualColumns>(TSource Source, TVirtualColumns VirtualColumns) :
+    public sealed record Source_VirtualColumns<TSource, TVirtualColumns>(TSource Source, TVirtualColumns VirtualColumns) :
         IQueryData<TSource, QueryDataKind.Source>,
         IQueryData<TVirtualColumns, QueryDataKind.VirtualColumns>
     {
@@ -31,12 +32,12 @@ namespace Apache.Druid.Querying
         TVirtualColumns IQueryData<TVirtualColumns, QueryDataKind.VirtualColumns>.Value => VirtualColumns;
     }
 
-    public readonly record struct ScanResult<TValue>(string? SegmentId, TValue Value)
+    public sealed record ScanResult<TValue>(string? SegmentId, TValue Value)
         : IQueryData<TValue, QueryDataKind.ScanResultValue>
     {
     }
 
-    public readonly record struct WithTimestamp<TValue>(DateTimeOffset Timestamp, TValue Value)
+    public sealed record WithTimestamp<TValue>(DateTimeOffset Timestamp, TValue Value)
         : IQueryData<TValue, QueryDataKind.WithTimestamp>
     {
         private static readonly byte[] timeColumnUtf8Bytes = Encoding.UTF8.GetBytes("__time");
@@ -48,7 +49,7 @@ namespace Apache.Druid.Querying
                     context.Deserialize<TValue>());
     }
 
-    public readonly record struct Dimension_Aggregations<TDimension, TAggregations>(TDimension Dimension, TAggregations Aggregations) : 
+    public sealed record Dimension_Aggregations<TDimension, TAggregations>(TDimension Dimension, TAggregations Aggregations) : 
         IQueryData<TDimension, QueryDataKind.Dimensions>,
         IQueryData<TAggregations, QueryDataKind.Aggregations>
     {
@@ -61,7 +62,7 @@ namespace Apache.Druid.Querying
         TAggregations IQueryData<TAggregations, QueryDataKind.Aggregations>.Value => Aggregations;
     }
 
-    public readonly record struct Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>(
+    public sealed record Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>(
         TDimension Dimension, TAggregations Aggregations, TPostAggregations PostAggregations) :
         IQueryData<TDimension, QueryDataKind.Dimensions>,
         IQueryData<TAggregations, QueryDataKind.Aggregations>,
@@ -78,7 +79,7 @@ namespace Apache.Druid.Querying
         TPostAggregations IQueryData<TPostAggregations, QueryDataKind.PostAggregations>.Value => PostAggregations;
     }
 
-    public readonly record struct Aggregations_PostAggregations<TAggregations, TPostAggregations>(TAggregations Aggregations, TPostAggregations PostAggregations) :
+    public sealed record Aggregations_PostAggregations<TAggregations, TPostAggregations>(TAggregations Aggregations, TPostAggregations PostAggregations) :
         IQueryData<TAggregations, QueryDataKind.Aggregations>,
         IQueryData<TPostAggregations, QueryDataKind.PostAggregations>
     {
@@ -91,7 +92,7 @@ namespace Apache.Druid.Querying
         TPostAggregations IQueryData<TPostAggregations, QueryDataKind.PostAggregations>.Value => PostAggregations;
     }
 
-    public readonly record struct Dimensions_Aggregations<TDimensions, TAggregations>(TDimensions Dimensions, TAggregations Aggregations) :
+    public sealed record Dimensions_Aggregations<TDimensions, TAggregations>(TDimensions Dimensions, TAggregations Aggregations) :
         IQueryData<TDimensions, QueryDataKind.Dimensions>,
         IQueryData<TAggregations, QueryDataKind.Aggregations>
     {
@@ -104,7 +105,7 @@ namespace Apache.Druid.Querying
         TAggregations IQueryData<TAggregations, QueryDataKind.Aggregations>.Value => Aggregations;
     }
 
-    public readonly record struct Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>(
+    public sealed record Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>(
         TDimensions Dimensions, TAggregations Aggregations, TPostAggregations PostAggregations) :
         IQueryData<TDimensions, QueryDataKind.Dimensions>,
         IQueryData<TAggregations, QueryDataKind.Aggregations>,
@@ -121,7 +122,7 @@ namespace Apache.Druid.Querying
         TPostAggregations IQueryData<TPostAggregations, QueryDataKind.PostAggregations>.Value => PostAggregations;
     }
 
-    public readonly record struct DataSourceMetadata(DateTimeOffset MaxIngestedEventTime);
+    public sealed record DataSourceMetadata(DateTimeOffset MaxIngestedEventTime);
 
     public static class QueryContext
     {

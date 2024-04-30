@@ -32,17 +32,26 @@
         int? MetroCode,
         string? CountryIsoCode,
         string? RegionName)
-        : IEditBooleans
+        : IEditBooleans, IQueryData<Edit, QueryDataKind.Source>
     {
         [DataSourceColumnSelector(nameof(IsRobot))]
         bool IEditBooleans.Robot { get => IsRobot; }
+        Edit IQueryData<Edit, QueryDataKind.Source>.Value => this;
     }
 
     internal class WikipediaDataSourceProvider : DataSourceProvider
     {
+        private static readonly OnMapQueryToJson EnsureOnEditData = (query, json) =>
+        {
+            if (query is IQueryWith.Source<IOptionalQueryData<Edit, QueryDataKind>> typed) 
+            {
+                json["isSourceEditVerifiedOnMapToJson"] = true;
+            }
+        };
+
         public WikipediaDataSourceProvider()
         {
-            Edits = Table<Edit>("wikipedia");
+            Edits = Table<Edit>("wikipedia", EnsureOnEditData);
         }
 
         public DataSource<Edit> Edits { get; }
