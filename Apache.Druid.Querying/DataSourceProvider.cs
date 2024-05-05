@@ -43,7 +43,7 @@ namespace Apache.Druid.Querying
                 return result;
             }
 
-            return Create<TSource>(
+            return New<TSource>(
                 onMap,
                 allMappings,
                 () => new JsonObject
@@ -55,10 +55,10 @@ namespace Apache.Druid.Querying
         }
 
         protected DataSource<TSource> Table<TSource>(string id, OnMapQueryToJson? onMap = null)
-            => Create<TSource>(onMap, MappingBuilders.Create<TSource>(), () => id);
+            => New<TSource>(onMap, MappingBuilders.Create<TSource>(), () => id);
 
         protected DataSource<Lookup<TKey, TValue>> Lookup<TKey, TValue>(string id, OnMapQueryToJson? onMap = null)
-            => Create<Lookup<TKey, TValue>>(
+            => New<Lookup<TKey, TValue>>(
                 onMap,
                 MappingBuilders.Create<Lookup<TKey, TValue>>(),
                 () => new JsonObject
@@ -67,8 +67,17 @@ namespace Apache.Druid.Querying
                     [nameof(id)] = id
                 });
 
-        private DataSource<TSource> Create<TSource>(
+        private DataSource<TSource> New<TSource>(
             OnMapQueryToJson? onMap, MappingBuilders mappings, DataSourceJsonProvider createJson)
-            => new(() => Options, onMap ??= static (_, _) => { }, createJson, mappings, sectionAtomicity: null);
+        {
+            var @new = new DataSource<TSource>();
+            @new.Initialize(new(
+                new(() => Options),
+                onMap ??= static (_, _) => { },
+                createJson,
+                mappings,
+                SectionAtomicity: null));
+            return @new;
+        }
     }
 }

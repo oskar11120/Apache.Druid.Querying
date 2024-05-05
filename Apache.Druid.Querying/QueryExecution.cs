@@ -159,63 +159,59 @@ namespace Apache.Druid.Querying
         TRight? IOptionalQueryData<TRight, QueryDataKind.JoinRight>.Value => Right;
     }
 
-    public sealed class DataSource<TSource>
+    internal sealed record DataSourceContext(
+        Lazy<DataSourceOptions> Options,
+        OnMapQueryToJson OnMap,
+        DataSourceJsonProvider GetJsonRepresentation,
+        PropertyColumnNameMapping.ImmutableBuilder ColumnNameMappings,
+        SectionAtomicity.ImmutableBuilder? SectionAtomicity)
+    {
+        public JsonSerializerOptions SerializerOptions => Options.Value.Serializer;
+        public Func<HttpClient> HttpClientFactory => Options.Value.HttpClientFactory;
+    };
+
+    public class DataSource<TSource>
     {
         private static readonly StringWithQualityHeaderValue gzip = new("gzip");
 
-        private readonly PropertyColumnNameMapping.ImmutableBuilder columnNameMappings;
-        private readonly SectionAtomicity.ImmutableBuilder? sectionAtomicity;
-        private readonly Func<DataSourceOptions> getOptions;
-        private readonly OnMapQueryToJson onMap;
+        private DataSourceContext? context;
         private JsonSerializerOptions? serializerOptionsWithFormatting;
-        private DataSourceOptions options => getOptions();
+        private DataSourceContext Context => context ??
+            throw new InvalidOperationException($"Attempted to use an uninitialized instance of {GetType()}.");
 
-        internal DataSource(
-            Func<DataSourceOptions> getOptions,
-            OnMapQueryToJson onMap,
-            DataSourceJsonProvider getJsonRepresentation,
-            PropertyColumnNameMapping.ImmutableBuilder columnNameMappings,
-            SectionAtomicity.ImmutableBuilder? sectionAtomicity)
+        internal void Initialize(DataSourceContext context)
+            => this.context = context;
+
+        public virtual JsonObject MapQueryToJson(IQueryWith.Source<TSource> query)
         {
-            this.getOptions = getOptions;
-            this.onMap = onMap;
-            GetJsonRepresentation = getJsonRepresentation;
-            this.columnNameMappings = columnNameMappings;
-            this.sectionAtomicity = sectionAtomicity;
-        }
-
-        public readonly DataSourceJsonProvider GetJsonRepresentation;
-
-        public JsonObject MapQueryToJson(IQueryWith.Source<TSource> query)
-        {
-            var mappings = query.ApplyPropertyColumnNameMappingChanges(columnNameMappings);
-            var result = query.MapToJson(options.Serializer, mappings);
-            result.Add("dataSource", GetJsonRepresentation());
-            onMap(query, result);
+            var mappings = query.ApplyPropertyColumnNameMappingChanges(Context.ColumnNameMappings);
+            var result = query.MapToJson(Context.SerializerOptions, mappings);
+            result.Add("dataSource", Context.GetJsonRepresentation());
+            Context.OnMap(query, result);
             return result;
         }
 
-        public async IAsyncEnumerable<TResult> ExecuteQuery<TResult>(
+        public virtual async IAsyncEnumerable<TResult> ExecuteQuery<TResult>(
             IQueryWith.SourceAndResult<TSource, TResult> query,
             bool onTruncatedResultsQueryRemaining = true,
             [EnumeratorCancellation] CancellationToken token = default)
         {
             var queryForRemaining = new Mutable<IQueryWith.Source<TSource>> { Value = query };
-            var atomicity = SectionAtomicity.ImmutableBuilder.Combine(query.SectionAtomicity, sectionAtomicity);
-            var mappings = query.ApplyPropertyColumnNameMappingChanges(columnNameMappings);
+            var atomicity = SectionAtomicity.ImmutableBuilder.Combine(query.SectionAtomicity, Context.SectionAtomicity);
+            var mappings = query.ApplyPropertyColumnNameMappingChanges(Context.ColumnNameMappings);
             var deserializer = query;
             var truncatedResultHandler = query;
             byte[]? buffer = null;
-            var context = new TruncatedQueryResultHandlingContext();
+            var resultContext = new TruncatedQueryResultHandlingContext();
             async IAsyncEnumerable<TResult> Deserialize(Stream utf8Json, [EnumeratorCancellation] CancellationToken token)
             {
-                buffer ??= ArrayPool<byte>.Shared.Rent(options.Serializer.DefaultBufferSize);
+                buffer ??= ArrayPool<byte>.Shared.Rent(Context.SerializerOptions.DefaultBufferSize);
                 var read = await utf8Json.ReadAsync(buffer, token);
                 var results = deserializer
-                    .Deserialize(new(new(utf8Json, buffer, read), options.Serializer, atomicity, mappings), token);
+                    .Deserialize(new(new(utf8Json, buffer, read), Context.SerializerOptions, atomicity, mappings), token);
                 queryForRemaining.Value = null;
                 if (onTruncatedResultsQueryRemaining)
-                    results = truncatedResultHandler.OnTruncatedResultsSetQueryForRemaining(results, context, queryForRemaining, token);
+                    results = truncatedResultHandler.OnTruncatedResultsSetQueryForRemaining(results, resultContext, queryForRemaining, token);
                 await foreach (var result in results)
                     yield return result;
             }
@@ -242,13 +238,13 @@ namespace Apache.Druid.Querying
             [EnumeratorCancellation] CancellationToken token = default)
         {
             var json = MapQueryToJson(query);
-            using var content = JsonContent.Create(json, options: options.Serializer);
+            using var content = JsonContent.Create(json, options: Context.SerializerOptions);
             using var request = new HttpRequestMessage(HttpMethod.Post, "druid/v2")
             {
                 Content = content,
                 Headers = { AcceptEncoding = { gzip } }
             };
-            using var client = options.HttpClientFactory();
+            using var client = Context.HttpClientFactory();
             using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token);
 
             try
@@ -257,7 +253,7 @@ namespace Apache.Druid.Querying
             }
             catch (HttpRequestException exception)
             {
-                serializerOptionsWithFormatting ??= new(options.Serializer) { WriteIndented = true };
+                serializerOptionsWithFormatting ??= new(Context.SerializerOptions) { WriteIndented = true };
                 var responseContent = await response.Content.ReadAsStringAsync(token);
                 exception.Data.Add("requestContent", JsonSerializer.Serialize(json, serializerOptionsWithFormatting));
                 exception.Data.Add(nameof(responseContent), responseContent);
@@ -272,24 +268,23 @@ namespace Apache.Druid.Querying
                 yield return result;
         }
 
-        public DataSource<TResult> ToQueryDataSource<TResult>(IQueryWith.SourceAndResult<TSource, TResult> query) => new(
-            getOptions,
-            onMap,
-            () => new JsonObject
-            {
-                ["type"] = "query",
-                ["query"] = MapQueryToJson(query)
-            },
-            columnNameMappings.Add<TResult>(),
-            query.SectionAtomicity);
+        public virtual DataSource<TResult> ToQueryDataSource<TResult>(IQueryWith.SourceAndResult<TSource, TResult> query) 
+            => New<TResult>(
+                () => new JsonObject
+                {
+                    ["type"] = "query",
+                    ["query"] = MapQueryToJson(query)
+                },
+                Context.ColumnNameMappings.Add<TResult>(),
+                query.SectionAtomicity);
 
-        public DataSource<InnerJoinData<TSource, TRight>> InnerJoin<TRight>(
+        public virtual DataSource<InnerJoinData<TSource, TRight>> InnerJoin<TRight>(
             DataSource<TRight> right,
             Expression<QueryElementFactory<InnerJoinData<TSource, TRight>>.DruidExpression> condition,
             string rightPrefix = "r.")
             => Join<TRight, InnerJoinData<TSource, TRight>, InnerJoinData<TSource, TRight>>(right, rightPrefix, condition, "INNER");
 
-        public DataSource<LeftJoinResult<TSource, TRight>> LeftJoin<TRight>(
+        public virtual DataSource<LeftJoinResult<TSource, TRight>> LeftJoin<TRight>(
             DataSource<TRight> right,
             Expression<QueryElementFactory<LeftJoinData<TSource, TRight>>.DruidExpression> condition,
             string rightPrefix = "r.")
@@ -298,77 +293,84 @@ namespace Apache.Druid.Querying
         private DataSource<TResult> Join<TRight, TData, TResult>(
             DataSource<TRight> right, string rightPrefix, Expression<QueryElementFactory<TData>.DruidExpression> condition, string joinType)
         {
-            var mappings = columnNameMappings
-                .Combine(right.columnNameMappings)
+            var mappings = Context.ColumnNameMappings
+                .Combine(right.Context.ColumnNameMappings)
                 .Update<TRight>(mapping => mapping with { ColumnName = rightPrefix + mapping.ColumnName })
                 .Add<TResult>();
-            return new(
-                getOptions,
-                onMap,
+            return New<TResult>(
                 () => new JsonObject
                 {
                     ["type"] = "join",
-                    ["left"] = GetJsonRepresentation(),
-                    ["right"] = right.GetJsonRepresentation(),
+                    ["left"] = Context.GetJsonRepresentation(),
+                    ["right"] = right.Context.GetJsonRepresentation(),
                     [nameof(rightPrefix)] = rightPrefix,
                     [nameof(condition)] = DruidExpression.Map(condition, mappings).Expression,
                     [nameof(joinType)] = joinType
                 },
                 mappings,
                 SectionAtomicity.ImmutableBuilder.Combine(
-                    sectionAtomicity,
-                    right.sectionAtomicity?.Update(atomicity => atomicity.WithColumnNameIfAtomic(rightPrefix + atomicity.ColumnNameIfAtomic))));
+                    Context.SectionAtomicity,
+                    right.Context.SectionAtomicity?.Update(atomicity => atomicity.WithColumnNameIfAtomic(rightPrefix + atomicity.ColumnNameIfAtomic))));
         }
 
-        public DataSource<TSource> Union(DataSource<TSource> second)
-            => new(
-                getOptions,
-                onMap,
+        public virtual DataSource<TSource> Union(DataSource<TSource> second)
+            => New<TSource>(
                 () => new JsonObject
                 {
                     ["type"] = "union",
                     ["dataSources"] = new JsonArray
                     {
-                        GetJsonRepresentation(),
-                        second.GetJsonRepresentation()
+                        Context.GetJsonRepresentation(),
+                        second.Context.GetJsonRepresentation()
                     }
                 },
-                columnNameMappings,
-                sectionAtomicity);
+                Context.ColumnNameMappings,
+                Context.SectionAtomicity);
 
-        public DataSource<Union<TSource, TSecond>> Union<TSecond>(DataSource<TSecond> second)
-            => new(
-                getOptions,
-                onMap,
+        public virtual DataSource<Union<TSource, TSecond>> Union<TSecond>(DataSource<TSecond> second)
+            => New<Union<TSource, TSecond>>(
                 () => new JsonObject
                 {
                     ["type"] = "union",
                     ["dataSources"] = new JsonArray
                     {
-                        GetJsonRepresentation(),
-                        second.GetJsonRepresentation()
+                        Context.GetJsonRepresentation(),
+                        second.Context.GetJsonRepresentation()
                     }
                 },
-                columnNameMappings.Combine(second.columnNameMappings),
-                SectionAtomicity.ImmutableBuilder.Combine(sectionAtomicity, second.sectionAtomicity));
+                Context.ColumnNameMappings.Combine(second.Context.ColumnNameMappings),
+                SectionAtomicity.ImmutableBuilder.Combine(Context.SectionAtomicity, second.Context.SectionAtomicity));
 
-        public DataSource<Union<TSource, TSecond, TThird>> Union<TSecond, TThird>(DataSource<TSecond> second, DataSource<TThird> third)
-            => new(
-                getOptions,
-                onMap,
+        public virtual DataSource<Union<TSource, TSecond, TThird>> Union<TSecond, TThird>(DataSource<TSecond> second, DataSource<TThird> third)
+            => New<Union<TSource, TSecond, TThird>>(
                 () => new JsonObject
                 {
                     ["type"] = "union",
                     ["dataSources"] = new JsonArray
                     {
-                        GetJsonRepresentation(),
-                        second.GetJsonRepresentation(),
-                        third.GetJsonRepresentation()
+                        Context.GetJsonRepresentation(),
+                        second.Context.GetJsonRepresentation(),
+                        third.Context.GetJsonRepresentation()
                     }
                 },
-                columnNameMappings.Combine(second.columnNameMappings).Combine(third.columnNameMappings),
-                SectionAtomicity.ImmutableBuilder.Combine(sectionAtomicity, second.sectionAtomicity, third.sectionAtomicity));
+                Context.ColumnNameMappings.Combine(second.Context.ColumnNameMappings).Combine(third.Context.ColumnNameMappings),
+                SectionAtomicity.ImmutableBuilder.Combine(Context.SectionAtomicity, second.Context.SectionAtomicity, third.Context.SectionAtomicity));
 
-        internal string? JsonRepresentationDebugView => GetJsonRepresentation()?.ToJsonString(options.Serializer);
+        internal string? JsonRepresentationDebugView => Context.GetJsonRepresentation()?.ToJsonString(Context.SerializerOptions);
+
+        private DataSource<NewTSource> New<NewTSource>(
+            DataSourceJsonProvider GetJsonRepresentation,
+            PropertyColumnNameMapping.ImmutableBuilder ColumnNameMappings,
+            SectionAtomicity.ImmutableBuilder? SectionAtomicity)
+        {
+            var @new = new DataSource<NewTSource>();
+            @new.Initialize(Context with
+            {
+                GetJsonRepresentation = GetJsonRepresentation,
+                ColumnNameMappings = ColumnNameMappings,
+                SectionAtomicity = SectionAtomicity
+            });
+            return @new;
+        }
     }
 }
