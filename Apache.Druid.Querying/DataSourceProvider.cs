@@ -1,4 +1,5 @@
 ﻿using Apache.Druid.Querying.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -15,7 +16,9 @@ namespace Apache.Druid.Querying
         DataSourceOptions? IDataSourceInitializer.options { get; set; }
         private DataSourceOptions Options => (this as IDataSourceInitializer).Options;
 
-        public virtual DataSource<TSource> Inline<TSource>(IEnumerable<TSource> rows, OnMapQueryToJson? onMap = null)
+        protected virtual DataSource<TSource> Inline<TSource, TDataSource>(
+            IEnumerable<TSource> rows, Func<TDataSource> factory, OnMapQueryToJson? onMap = null)
+            where TDataSource : DataSource<TSource>
         {
             var allMappings = MappingBuilders.Create<TSource>();
             var mappings = allMappings.Get<TSource>();
@@ -43,7 +46,7 @@ namespace Apache.Druid.Querying
                 return result;
             }
 
-            return New<TSource>(
+            return New<TSource, TDataSource>(
                 onMap,
                 allMappings,
                 () => new JsonObject
@@ -51,26 +54,44 @@ namespace Apache.Druid.Querying
                     ["type"] = "inline",
                     ["rows"] = MapAll(),
                     ["columnNames"] = JsonSerializer.SerializeToNode(columnNames, Options.Serializer)
-                });
+                },
+                factory);
         }
 
-        protected virtual DataSource<TSource> Table<TSource>(string id, OnMapQueryToJson? onMap = null)
-            => New<TSource>(onMap, MappingBuilders.Create<TSource>(), () => id);
+        public virtual DataSource<TSource> Inline<TSource>(IEnumerable<TSource> rows, OnMapQueryToJson? onMap = null)
+            => Inline<TSource, DataSource<TSource>>(rows, static () => new(), onMap);
 
-        protected virtual DataSource<Lookup<TKey, TValue>> Lookup<TKey, TValue>(string id, OnMapQueryToJson? onMap = null)
-            => New<Lookup<TKey, TValue>>(
+        protected virtual TDataSource Table<TSource, TDataSource>(string id, Func<TDataSource> factory, OnMapQueryToJson? onMap = null)
+            where TDataSource : DataSource<TSource>
+            => New<TSource, TDataSource>(onMap, MappingBuilders.Create<TSource>(), () => id, factory);
+
+        protected virtual DataSource<TSource> Table<TSource>(string id, OnMapQueryToJson? onMap = null)
+            => Table<TSource, DataSource<TSource>>(id, static () => new(), onMap);
+
+        protected virtual TDataSource Lookup<TKey, TValue, TDataSource>(
+            string id, Func<TDataSource> factory, OnMapQueryToJson? onMap = null)
+            where TDataSource : DataSource<Lookup<TKey, TValue>>
+            => New<Lookup<TKey, TValue>, TDataSource>(
                 onMap,
                 MappingBuilders.Create<Lookup<TKey, TValue>>(),
                 () => new JsonObject
                 {
                     ["type"] = "lookup",
                     [nameof(id)] = id
-                });
+                },
+                factory);
 
-        private DataSource<TSource> New<TSource>(
-            OnMapQueryToJson? onMap, MappingBuilders mappings, DataSourceJsonProvider createJson)
+        protected virtual DataSource<Lookup<TKey, TValue>> Lookup<TKey, TValue>(string id, OnMapQueryToJson? onMap = null)
+            => Lookup<TKey, TValue, DataSource<Lookup<TKey, TValue>>>(id, static () => new(), onMap);
+
+        private TDataSource New<TSource, TDataSource>(
+            OnMapQueryToJson? onMap,
+            MappingBuilders mappings,
+            DataSourceJsonProvider createJson,
+            Func<TDataSource> factory)
+            where TDataSource : DataSource<TSource>
         {
-            var @new = new DataSource<TSource>();
+            var @new = factory();
             @new.Initialize(new(
                 new(() => Options),
                 onMap ??= static (_, _) => { },

@@ -28,7 +28,7 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
             {
                 var results = Enumerable
                     .Range(start, count)
-                    .Select(_ => new ScanResult<None>(null, default));
+                    .Select(_ => new ScanResult<None>(null, None.Singleton));
                 (await query
                     .OnTruncatedResultsSetQueryForRemaining(MaybeTruncate(results, truncate), latest, setter, default)
                     .ToListAsync())
@@ -69,7 +69,7 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
             async Task Execute(IEnumerable<int> source, bool skipFirstResult = false, bool truncate = true)
             {
                 var results = source
-                    .Select(i => new WithTimestamp<None>(t0 + i * deltaT, default))
+                    .Select(i => new WithTimestamp<None>(t0 + i * deltaT, None.Singleton))
                     .ToArray();
                 var returned = await query
                     .OnTruncatedResultsSetQueryForRemaining(MaybeTruncate(results, truncate), latest, setter, default)
