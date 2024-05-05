@@ -7,7 +7,7 @@ using MappingBuilders = Apache.Druid.Querying.Internal.PropertyColumnNameMapping
 
 namespace Apache.Druid.Querying
 {
-    public readonly record struct Lookup<TKey, TValue>(
+    public sealed record Lookup<TKey, TValue>(
         [property: DataSourceColumn("k")] TKey Key, [property: DataSourceColumn("v")] TValue Value);
 
     public abstract class DataSourceProvider : IDataSourceInitializer
@@ -15,7 +15,7 @@ namespace Apache.Druid.Querying
         DataSourceOptions? IDataSourceInitializer.options { get; set; }
         private DataSourceOptions Options => (this as IDataSourceInitializer).Options;
 
-        public DataSource<TSource> Inline<TSource>(IEnumerable<TSource> rows, OnMapQueryToJson? onMap = null)
+        public virtual DataSource<TSource> Inline<TSource>(IEnumerable<TSource> rows, OnMapQueryToJson? onMap = null)
         {
             var allMappings = MappingBuilders.Create<TSource>();
             var mappings = allMappings.Get<TSource>();
@@ -54,10 +54,10 @@ namespace Apache.Druid.Querying
                 });
         }
 
-        protected DataSource<TSource> Table<TSource>(string id, OnMapQueryToJson? onMap = null)
+        protected virtual DataSource<TSource> Table<TSource>(string id, OnMapQueryToJson? onMap = null)
             => New<TSource>(onMap, MappingBuilders.Create<TSource>(), () => id);
 
-        protected DataSource<Lookup<TKey, TValue>> Lookup<TKey, TValue>(string id, OnMapQueryToJson? onMap = null)
+        protected virtual DataSource<Lookup<TKey, TValue>> Lookup<TKey, TValue>(string id, OnMapQueryToJson? onMap = null)
             => New<Lookup<TKey, TValue>>(
                 onMap,
                 MappingBuilders.Create<Lookup<TKey, TValue>>(),
