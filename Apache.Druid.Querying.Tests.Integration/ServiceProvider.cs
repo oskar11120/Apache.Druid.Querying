@@ -29,7 +29,7 @@ internal class ServiceProvider
                 {
                     var message = result.Exception?.ToString() ??
                         result.Result.ToString() + Environment.NewLine + await result.Result.Content.ReadAsStringAsync();
-                    TestContext.WriteLine(message);
+                    TestContext.Out.WriteLine(message);
                 }));
         var collection = new ServiceCollection();
         collection
@@ -160,7 +160,7 @@ internal class ServiceProvider
         var test = await response.Content.ReadAsStringAsync();
         response.EnsureSuccessStatusCode();
         var task = (await response.Content.ReadFromJsonAsync<JsonObject>())!["task"]!.GetValue<string>();
-        TestContext.WriteLine($"Ingesting wikipedia edits ({task}).");
+        TestContext.Out.WriteLine($"Ingesting wikipedia edits ({task}).");
         const string running = "RUNNING";
         const string success = "SUCCESS";
         var status = running;
@@ -169,7 +169,7 @@ internal class ServiceProvider
             await Task.Delay(TimeSpan.FromSeconds(1), timeout.Token);
             var getStatusResult = await client.GetFromJsonAsync<JsonObject>(tasksUri + $"/{task}/{nameof(status)}", timeout.Token);
             status = getStatusResult![nameof(status)]![nameof(status)]!.GetValue<string>();
-            TestContext.WriteLine(status);
+            TestContext.Out.WriteLine(status);
         }
 
         if (status != success)
@@ -205,15 +205,10 @@ internal class ServiceProvider
     {
     }
 
-    private sealed class ToxiproxyClientFactory : Toxiproxy.Net.IHttpClientFactory
+    private sealed class ToxiproxyClientFactory(IHttpClientFactory @base) : Toxiproxy.Net.IHttpClientFactory
     {
         public Uri BaseUrl { get; } = TestEnvironment.ToxiproxyUri;
-        private readonly IHttpClientFactory @base;
-
-        public ToxiproxyClientFactory(IHttpClientFactory @base)
-        {
-            this.@base = @base;
-        }
+        private readonly IHttpClientFactory @base = @base;
 
         public HttpClient Create()
         {

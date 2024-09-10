@@ -107,7 +107,7 @@ namespace Apache.Druid.Querying.Internal
     {
         public abstract class TimeSeries_<TResult> :
             QueryBase,
-            IQueryWith.Order,
+            IQueryWith.DescendingFlag,
             IQueryWith.Granularity,
             IQueryWith.Filter<TArguments, TSelf>,
             IQueryWith.Context<QueryContext.TimeSeries, TSelf>,
@@ -118,7 +118,7 @@ namespace Apache.Druid.Querying.Internal
             {
             }
 
-            QuerySectionState<OrderDirection>? IQueryWithInternal.State<QuerySectionState<OrderDirection>>.State { get; set; }
+            QuerySectionState<IQueryWith.DescendingFlag.InternalState>? IQueryWithInternal.State<QuerySectionState<IQueryWith.DescendingFlag.InternalState>>.State { get; set; }
             QuerySectionState<Granularity>? IQueryWithInternal.State<QuerySectionState<Granularity>>.State { get; set; }
             QuerySectionFactoryState<IFilter>? IQueryWithInternal.State<QuerySectionFactoryState<IFilter>>.State { get; set; }
             QuerySectionState<QueryContext.TimeSeries>? IQueryWithInternal.State<QuerySectionState<QueryContext.TimeSeries>>.State { get; set; }
@@ -246,7 +246,7 @@ namespace Apache.Druid.Querying.Internal
             {
             }
 
-            QuerySectionState<OrderDirection>? IQueryWithInternal.State<QuerySectionState<OrderDirection>>.State { get; set; }
+            QuerySectionState<OrderDirection?>? IQueryWithInternal.State<QuerySectionState<OrderDirection?>>.State { get; set; }
             QuerySectionState<IQueryWith.Limit.InternalState>? IQueryWithInternal.State<QuerySectionState<IQueryWith.Limit.InternalState>>.State { get; set; }
             QuerySectionState<IQueryWith.BatchSize.InternalState>? IQueryWithInternal.State<QuerySectionState<IQueryWith.BatchSize.InternalState>>.State { get; set; }
             QuerySectionFactoryState<IFilter>? IQueryWithInternal.State<QuerySectionFactoryState<IFilter>>.State { get; set; }

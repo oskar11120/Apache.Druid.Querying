@@ -150,7 +150,6 @@ namespace Apache.Druid.Querying.Tests.Unit
                     columns => columns.Value,
                     lower: 100))
                 .Interval(new(t, t))
-                .Order(OrderDirection.Ascending)
                 .Columns(measurement => new IotMeasurementTimestamps(measurement.Timestamp, measurement.ProcessedTimestamp));
             AssertMatch(one);
         }
@@ -327,7 +326,6 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .WithNoVirtualColumns
                 .WithAggregations<double>()
                 .Interval(new(t, t))
-                .Order(OrderDirection.Ascending)
                 .Granularity(SimpleGranularity.Minute)
                 .Filter(type => type.Or(
                     type.Null(message => message.Value),
@@ -342,7 +340,7 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .WithVirtualColumns<VirtualColumns>
                 .WithAggregations<Aggregations>()
                 .Interval(new(t, t))
-                .Order(OrderDirection.Ascending)
+                .Descending(false)
                 .Granularity(SimpleGranularity.Minute)
                 .VirtualColumns(type => new(type.Expression<DateTimeOffset>(_ => "__time")))
                 .Filter(type => type.Or(
@@ -362,7 +360,6 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .WithAggregations<Aggregations>
                 .WithPostAggregations<PostAggregations>()
                 .Interval(new(t, t))
-                .Order(OrderDirection.Ascending)
                 .Granularity(SimpleGranularity.Minute)
                 .Filter(type => type.Or(
                     type.Null(message => message.Value),
@@ -387,7 +384,7 @@ namespace Apache.Druid.Querying.Tests.Unit
                 .WithAggregations<Aggregations>
                 .WithPostAggregations<PostAggregations>()
                 .Interval(new(t, t))
-                .Order(OrderDirection.Ascending)
+                .Descending(false)
                 .Granularity(SimpleGranularity.Minute)
                 .VirtualColumns(type => new(type.Expression<DateTimeOffset>(_ => "__time")))
                 .Filter(type => type.Or(

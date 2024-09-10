@@ -119,7 +119,7 @@ namespace Apache.Druid.Querying
 
             public ILimitSpec.OrderBy OrderBy<TColumn>(
                 Expression<ColumnSelector<TColumn>> dimension,
-                OrderDirection? direction = null,
+                OrderDirection direction = OrderDirection.Ascending,
                 SortingOrder dimensionOrder = SortingOrder.Lexicographic)
                 => new LimitSpec.OrderBy(GetColumnName(dimension), dimensionOrder, direction);
         }

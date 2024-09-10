@@ -28,7 +28,6 @@
       ]
     }
   ],
-  "descending": false,
   "granularity": "minute",
   "filter": {
     "fields": [

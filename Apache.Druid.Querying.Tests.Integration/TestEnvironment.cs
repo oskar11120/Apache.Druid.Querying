@@ -25,22 +25,4 @@ internal static class TestEnvironment
              .Start();
         return containers;
     }
-
-    private sealed class CompositeDiposable : IDisposable
-    {
-        private readonly IDisposable one;
-        private readonly IDisposable other;
-
-        public CompositeDiposable(IDisposable one, IDisposable other)
-        {
-            this.one = one;
-            this.other = other;
-        }
-
-        public void Dispose()
-        {
-            one.Dispose();
-            other.Dispose();
-        }
-    }
 }

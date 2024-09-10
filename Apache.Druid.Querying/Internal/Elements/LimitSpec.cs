@@ -17,7 +17,7 @@ namespace Apache.Druid.Querying.Internal.Elements
 
         public sealed class OrderBy : ILimitSpec.OrderBy
         {
-            public OrderBy(string dimension, SortingOrder dimensionOrder, OrderDirection? direction = null)
+            public OrderBy(string dimension, SortingOrder dimensionOrder, OrderDirection direction)
             {
                 Dimension = dimension;
                 Direction = direction;
@@ -25,7 +25,7 @@ namespace Apache.Druid.Querying.Internal.Elements
             }
 
             public string Dimension { get; }
-            public OrderDirection? Direction { get; }
+            public OrderDirection Direction { get; }
             public SortingOrder DimensionOrder { get; }
         }
     }

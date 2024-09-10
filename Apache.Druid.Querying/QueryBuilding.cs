@@ -184,9 +184,15 @@ namespace Apache.Druid.Querying
             IReadOnlyCollection<Interval> Intervals => Require();
         }
 
-        public interface Order : Section<OrderDirection>
+        public interface DescendingFlag : Section<DescendingFlag.InternalState>
         {
-            OrderDirection Order => State?.Section ?? OrderDirection.Ascending;
+            public sealed record InternalState(bool Descending);
+            bool Descending => State?.Section.Descending ?? false;
+        }
+
+        public interface Order : Section<OrderDirection?>
+        {
+            OrderDirection? Order => State?.Section;
         }
 
         public interface Granularity : Section<Querying.Granularity>
@@ -385,10 +391,17 @@ namespace Apache.Druid.Querying
             where TQuery : IQueryWith.Intervals
             => Intervals(query, new[] { interval });
 
-        public static TQuery Order<TQuery>(this TQuery query, OrderDirection order)
+        public static TQuery Descending<TQuery>(this TQuery query, bool descending)
+            where TQuery : IQueryWith.DescendingFlag
+        {
+            query.SetState(nameof(Descending), new(descending), state => state.Descending);
+            return query;
+        }
+
+        public static TQuery Order<TQuery>(this TQuery query, OrderDirection? order)
             where TQuery : IQueryWith.Order
         {
-            query.SetState("descending", order, section => section is OrderDirection.Descending);
+            query.SetState(nameof(Order), order);
             return query;
         }
 

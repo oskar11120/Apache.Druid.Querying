@@ -32,4 +32,12 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Update="DotNet.ReproducibleBuilds" Version="1.2.4" />
+    <PackageReference Update="MinVer" Version="6.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
 </Project>

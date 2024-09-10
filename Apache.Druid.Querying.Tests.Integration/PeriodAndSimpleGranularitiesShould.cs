@@ -33,7 +33,7 @@ internal class PeriodAndSimpleGranularitiesShould
         var serializerOptions = DefaultSerializerOptions.Create();
         serializerOptions.WriteIndented = true;
         var json = Wikipedia.Edits.MapQueryToJson(query).ToJsonString(serializerOptions);
-        TestContext.WriteLine(json);
+        TestContext.Out.WriteLine(json);
 
         var results = await Wikipedia.Edits.ExecuteQuery(query).ToListAsync();
         Snapshot.Match(results, snapshotName);

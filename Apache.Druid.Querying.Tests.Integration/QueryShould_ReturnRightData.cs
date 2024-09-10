@@ -236,7 +236,7 @@ internal class QueryShould_ReturnRightData
             .Interval(new(default, DateTimeOffset.MaxValue))
             .Filter(type => type.In(
                 data => data.Word,
-                new[] { "zero" }));
+                ["zero"]));
         var inline = Wikipedia
             .Inline(new InlineData[]
             {
@@ -359,7 +359,7 @@ internal class QueryShould_ReturnRightData
             .WithNoVirtualColumns
             .WithAggregations<TimeSeriesAggregations>
             .WithPostAggregations<TimeSeriesPostAggrgations>()
-            .Order(OrderDirection.Descending)
+            .Descending(true)
             .Aggregations(type => new(
                 type.Count(),
                 type.Sum(edit => edit.Added)))

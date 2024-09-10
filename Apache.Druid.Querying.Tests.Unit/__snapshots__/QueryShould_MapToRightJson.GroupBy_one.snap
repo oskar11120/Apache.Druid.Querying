@@ -40,10 +40,12 @@
     "columns": [
       {
         "dimension": "IotObjectId",
+        "direction": "Ascending",
         "dimensionOrder": "Lexicographic"
       },
       {
         "dimension": "LastValue",
+        "direction": "Ascending",
         "dimensionOrder": "Lexicographic"
       }
     ],
