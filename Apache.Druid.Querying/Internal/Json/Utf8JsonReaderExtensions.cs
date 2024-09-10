@@ -41,8 +41,8 @@ namespace Apache.Druid.Querying.Internal.Json
             }
             else if (type == typeof(string))
             {
-                var result = reader.GetString() ?? throw new ArgumentException("BAD JSON");
-                return Unsafe.As<string, TValue>(ref result);
+                var result = reader.GetString();
+                return Unsafe.As<string, TValue>(ref result!);
             }
             else if (type == typeof(DateTimeOffset))
             {

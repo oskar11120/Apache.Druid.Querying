@@ -255,14 +255,16 @@ internal class QueryShould_ReturnRightData
 
     public enum ScanTestCase
     {
-        First3Us,
+        First3Us_AllColumns,
         First3Us_SomeColumnsOnly,
-        First3Us_ConsistencyOfBoth
+        First3Us_ConsistencyIndependentOfSelectedColumns,
+        First3Us_Descending
     }
 
-    [TestCase(ScanTestCase.First3Us)]
+    [TestCase(ScanTestCase.First3Us_AllColumns)]
     [TestCase(ScanTestCase.First3Us_SomeColumnsOnly)]
-    [TestCase(ScanTestCase.First3Us_ConsistencyOfBoth)]
+    [TestCase(ScanTestCase.First3Us_ConsistencyIndependentOfSelectedColumns)]
+    [TestCase(ScanTestCase.First3Us_Descending)]
     public async Task Scan(ScanTestCase @case)
     {
         var first3Us = new Query<Edit>
@@ -272,7 +274,8 @@ internal class QueryShould_ReturnRightData
                 edit => edit.CountryIsoCode,
                 "US"))
             .Limit(3);
-        var subset = new Query<Edit>
+        var descending = first3Us.Copy().Order(OrderDirection.Descending);
+        var someColumnsOnly = new Query<Edit>
             .Scan
             .WithColumns<SomeEditColumns>()
             .DefaultInterval()
@@ -281,7 +284,7 @@ internal class QueryShould_ReturnRightData
                 "US"))
             .Limit(3)
             .SomeColumnsOnly(edit => edit);
-        async Task VerifyConsistency()
+        async Task VerifyColumnsConsistency()
         {
             var first = await Wikipedia
                 .Edits
@@ -291,16 +294,17 @@ internal class QueryShould_ReturnRightData
                 .ToListAsync();
             var second = await Wikipedia
                 .Edits
-                .ExecuteQuery(subset)
+                .ExecuteQuery(someColumnsOnly)
                 .Select(result => result.Value)
                 .ToListAsync();
             first.Should().BeEquivalentTo(second);
         }
         var task = @case switch
         {
-            ScanTestCase.First3Us => VerifyMatch(first3Us, string.Empty),
-            ScanTestCase.First3Us_SomeColumnsOnly => VerifyMatch(subset, string.Empty),
-            ScanTestCase.First3Us_ConsistencyOfBoth => VerifyConsistency(),
+            ScanTestCase.First3Us_AllColumns => VerifyMatch(first3Us, string.Empty),
+            ScanTestCase.First3Us_SomeColumnsOnly => VerifyMatch(someColumnsOnly, string.Empty),
+            ScanTestCase.First3Us_ConsistencyIndependentOfSelectedColumns => VerifyColumnsConsistency(),
+            ScanTestCase.First3Us_Descending => VerifyMatch(descending, string.Empty),
             _ => throw new NotSupportedException()
         };
         await task;
