@@ -307,7 +307,7 @@ namespace Apache.Druid.Querying
                     ["left"] = Context.GetJsonRepresentation(),
                     ["right"] = right.Context.GetJsonRepresentation(),
                     [nameof(rightPrefix)] = rightPrefix,
-                    [nameof(condition)] = DruidExpression.Map(condition, mappings).Expression,
+                    [nameof(condition)] = DruidExpression.Map(condition, mappings, Context.DataSerializerOptions).Expression,
                     [nameof(joinType)] = joinType
                 },
                 mappings,

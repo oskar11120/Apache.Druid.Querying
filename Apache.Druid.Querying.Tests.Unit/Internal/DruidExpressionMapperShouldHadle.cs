@@ -1,4 +1,5 @@
 ﻿using Apache.Druid.Querying.Internal;
+using Apache.Druid.Querying.Json;
 using FluentAssertions;
 using System.Linq.Expressions;
 
@@ -9,7 +10,7 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
         private static readonly PropertyColumnNameMapping.ImmutableBuilder columnMappings
             = PropertyColumnNameMapping.ImmutableBuilder.Create<QueryShould_MapToRightJson.IotMeasurement>();
         private static string Map(Expression<QueryElementFactory<QueryShould_MapToRightJson.IotMeasurement>.DruidExpression> factory)
-            => DruidExpression.Map(factory, columnMappings).Expression;
+            => DruidExpression.Map(factory, columnMappings, DefaultSerializerOptions.Data).Expression;
 
         [Test]
         public void OneParameter()

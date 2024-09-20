@@ -38,7 +38,7 @@ namespace Apache.Druid.Querying.Internal.Sections
                     if (expression.Value is null)
                         return;
 
-                    var (value, columnNames) = DruidExpression.Map(expression.Value, context.ColumnNames);
+                    var (value, columnNames) = DruidExpression.Map(expression.Value, context.ColumnNames, context.DataSerializerOptions);
                     result.Add(expression.Name, value);
                     if (options.ExpressionColumnNamesKey is string existing)
                         result.Add(existing, JsonSerializer.SerializeToNode(columnNames, context.QuerySerializerOptions));

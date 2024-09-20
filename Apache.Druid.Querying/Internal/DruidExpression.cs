@@ -3,15 +3,22 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.Json;
 
 namespace Apache.Druid.Querying.Internal
 {
     internal static class DruidExpression
     {
-        public static MapResult Map(LambdaExpression factory, PropertyColumnNameMapping.IProvider columnNameMappings)
-            => Map(factory.Body, columnNameMappings);
+        public static MapResult Map(
+            LambdaExpression factory, 
+            PropertyColumnNameMapping.IProvider columnNameMappings,
+            JsonSerializerOptions constantSerializerOptions)
+            => Map(factory.Body, columnNameMappings, constantSerializerOptions);
 
-        private static MapResult Map(Expression expression, PropertyColumnNameMapping.IProvider columnNameMappings)
+        private static MapResult Map(
+            Expression expression, 
+            PropertyColumnNameMapping.IProvider columnNameMappings,
+            JsonSerializerOptions constantSerializerOptions)
         {
             InvalidOperationException Invalid(string reason, Exception? inner = null)
                 => new($"Invalid Druid expression: {expression}. {reason}.", inner);
@@ -21,15 +28,14 @@ namespace Apache.Druid.Querying.Internal
                     constant_.Value switch
                     {
                         string text => text,
-                        IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
-                        var any => any?.ToString() ?? string.Empty
-                    }, 
+                        var any => JsonSerializer.Serialize(any, options: constantSerializerOptions)
+                    },
                     Array.Empty<string>());
 
             if (expression is BinaryExpression binary && binary.NodeType is ExpressionType.Add)
             {
-                var left = Map(binary.Left, columnNameMappings);
-                var right = Map(binary.Right, columnNameMappings);
+                var left = Map(binary.Left, columnNameMappings, constantSerializerOptions);
+                var right = Map(binary.Right, columnNameMappings, constantSerializerOptions);
                 return new(left.Expression + right.Expression, left.ColumnNames.Concat(right.ColumnNames).ToArray());
             }
 
