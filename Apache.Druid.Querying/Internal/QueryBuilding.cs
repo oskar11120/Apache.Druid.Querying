@@ -9,13 +9,17 @@ using System.Collections.Immutable;
 
 namespace Apache.Druid.Querying.Internal;
 
-public delegate JsonNode? QuerySectionToJson<TSection>(
-    TSection Section, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames);
+public sealed record QueryToJsonMappingContext(
+    JsonSerializerOptions QuerySerializerOptions,
+    JsonSerializerOptions DataSerializerOptions,
+    PropertyColumnNameMapping.IProvider ColumnNames);
+public delegate JsonNode? QuerySectionToJson<TSection>(TSection Section, QueryToJsonMappingContext context);
 public sealed record QuerySectionState<TSection>(string Key, TSection Section, QuerySectionToJson<TSection>? SectionToJson = null);
 
-public delegate JsonNode? GetQuerySectionJson(JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames);
+public delegate JsonNode? GetQuerySectionJson(QueryToJsonMappingContext context);
 public sealed record QuerySectionFactoryState<TMarker>(string Key, GetQuerySectionJson GetJson);
-public delegate PropertyColumnNameMapping.ImmutableBuilder ApplyPropertyColumnNameMappingChanges(PropertyColumnNameMapping.ImmutableBuilder existing);
+public delegate PropertyColumnNameMapping.ImmutableBuilder ApplyPropertyColumnNameMappingChanges(
+    PropertyColumnNameMapping.ImmutableBuilder existing);
 
 public static class IQueryWithInternal
 {
@@ -36,7 +40,7 @@ public static class IQueryWithInternal
 
     public interface JsonApplicableState<TState> : State<TState>
     {
-        internal void ApplyOnJson(JsonObject json, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames);
+        internal void ApplyOnJson(JsonObject json, QueryToJsonMappingContext context);
     }
 
     public interface Section<TSection> : JsonApplicableState<QuerySectionState<TSection>>
@@ -49,33 +53,30 @@ public static class IQueryWithInternal
             };
 
         void JsonApplicableState<QuerySectionState<TSection>>.ApplyOnJson(
-            JsonObject json, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames)
+            JsonObject json, QueryToJsonMappingContext context)
         {
             if (State is null)
                 return;
 
             var (key, section, mapToJson) = State;
             var sectionJson = mapToJson is null ?
-                JsonSerializer.SerializeToNode(section, serializerOptions) :
-                mapToJson(section, serializerOptions, columnNames);
+                JsonSerializer.SerializeToNode(section, context.QuerySerializerOptions) :
+                mapToJson(section, context);
             if (sectionJson is not null)
                 json[key.ToCamelCase()] = sectionJson;
         }
 
-        internal void SetState(string key, TSection section)
-            => State = new(key, section, null);
+        internal void SetState(string key, TSection section, QuerySectionToJson<TSection>? sectionToJson = null)
+            => State = new(key, section, sectionToJson);
 
         internal void SetState(string key, TSection section, Func<TSection, JsonNode?> sectionToJson)
-            => State = new(key, section, sectionToJson is null ? null : (section, _, _) => sectionToJson(section));
-
-        internal void SetState(string key, TSection section, Func<TSection, JsonSerializerOptions, JsonNode?> sectionToJson)
-            => State = new(key, section, sectionToJson is null ? null : (section, options, _) => sectionToJson(section, options));
+            => State = new(key, section, sectionToJson is null ? null : (section, _) => sectionToJson(section));
     }
 
     private static void AddStateToJson(
-        string key, GetQuerySectionJson getJson, JsonObject json, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames)
+        string key, GetQuerySectionJson getJson, JsonObject json, QueryToJsonMappingContext context)
     {
-        var sectionJson = getJson(serializerOptions, columnNames);
+        var sectionJson = getJson(context);
         if (sectionJson is not null)
             json[key.ToCamelCase()] = sectionJson;
     }
@@ -83,19 +84,19 @@ public static class IQueryWithInternal
     public interface SectionFactory<TSection> : JsonApplicableState<QuerySectionFactoryState<TSection>>
     {
         void JsonApplicableState<QuerySectionFactoryState<TSection>>.ApplyOnJson(
-            JsonObject json, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames)
+            JsonObject json, QueryToJsonMappingContext context)
         {
             if (State is null)
                 return;
 
-            AddStateToJson(State.Key, State.GetJson, json, serializerOptions, columnNames);
+            AddStateToJson(State.Key, State.GetJson, json, context);
         }
 
         internal void SetState(string key, GetQuerySectionJson getJson)
             => State = new(key, getJson);
 
-        internal void SetState(string key, Func<PropertyColumnNameMapping.IProvider, TSection> factory)
-            => SetState(key, (serializeOptions, columnNames) => JsonSerializer.SerializeToNode(factory(columnNames), serializeOptions));
+        internal void SetState(string key, Func<QueryToJsonMappingContext, TSection> factory)
+            => SetState(key, context => JsonSerializer.SerializeToNode(factory(context), context.QuerySerializerOptions));
     }
 
     public interface SectionAtomicity : State<Sections.SectionAtomicity.ImmutableBuilder>
@@ -118,13 +119,13 @@ public static class IQueryWithInternal
         }
 
         void JsonApplicableState<Dictionary<string, GetQuerySectionJson>>.ApplyOnJson(
-            JsonObject json, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames)
+            JsonObject json, QueryToJsonMappingContext context)
         {
             if (State is null)
                 return;
 
             foreach (var (key, state) in State)
-                AddStateToJson(key, state, json, serializerOptions, columnNames);
+                AddStateToJson(key, state, json, context);
         }
 
         void State<Dictionary<string, GetQuerySectionJson>>.CopyFrom(
@@ -149,8 +150,8 @@ public static class IQueryWithInternal
                     typeof(TArguments))
                 .ToList();
             SectionAtomicity = SectionAtomicity.Add<TSection>(calls, key, out var atomicity);
-            SetState(key, (serializerOptions, columnNames) => SectionFactoryJsonMapper.Map<TArguments>(
-                calls, atomicity, serializerOptions, columnNames, mapperOptions ?? SectionFactoryJsonMapper.Options.Default));
+            SetState(key, context => SectionFactoryJsonMapper.Map<TArguments>(
+                calls, atomicity, context, mapperOptions ?? SectionFactoryJsonMapper.Options.Default));
         }
     }
 

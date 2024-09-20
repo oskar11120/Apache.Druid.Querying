@@ -14,8 +14,7 @@ namespace Apache.Druid.Querying.Json
 
         internal static JsonObject MapToJson(
             this IQueryWith.State query,
-            JsonSerializerOptions serializerOptions,
-            PropertyColumnNameMapping.IProvider columNames)
+            QueryToJsonMappingContext context)
         {
             if (!cache.TryGetValue(query.GetType(), out var methods))
                 methods = query
@@ -23,7 +22,7 @@ namespace Apache.Druid.Querying.Json
                     .Select(@interface => @interface.GetMethod(nameof(IQueryWithInternal.JsonApplicableState<None>.ApplyOnJson), BindingFlags.NonPublic | BindingFlags.Instance))
                     .ToArray()!;
             var result = new JsonObject();
-            var parameters = new object[] { result, serializerOptions, columNames };
+            var parameters = new object[] { result, context };
             foreach (var method in methods)
                 method.Invoke(query, parameters);
             if (query is IQueryWith.OnMapToJson onMapToJson && onMapToJson.State is not null)
@@ -36,10 +35,13 @@ namespace Apache.Druid.Querying.Json
 
         public static JsonObject MapToJson<TSource>(
             this IQueryWith.Source<TSource> query,
-            JsonSerializerOptions? serializerOptions = null)
+            JsonSerializerOptions? querySerializerOptions = null,
+            JsonSerializerOptions? dataSerializerOptions = null)
             => MapToJson(
                 query,
-                serializerOptions ?? DefaultSerializerOptions.Query,
-                PropertyColumnNameMapping.ImmutableBuilder.Create<TSource>());
+                new QueryToJsonMappingContext(
+                    querySerializerOptions ?? DefaultSerializerOptions.Query,
+                    dataSerializerOptions ?? DefaultSerializerOptions.Data,
+                    PropertyColumnNameMapping.ImmutableBuilder.Create<TSource>()));
     }
 }

@@ -394,7 +394,7 @@ namespace Apache.Druid.Querying
         public static TQuery Filter<TArguments, TQuery>(
             this IQueryWith.Filter<TArguments, TQuery> query, Func<QueryElementFactory<TArguments>.Filter, IFilter> factory)
         {
-            query.SetState(nameof(Filter), columnNames => factory(new(columnNames)));
+            query.SetState(nameof(Filter), context => factory(new(context.ColumnNames)));
             return query.Self;
         }
 
@@ -474,7 +474,7 @@ namespace Apache.Druid.Querying
             this IQueryWith.Metric<TArguments, TQuery> query,
             Func<QueryElementFactory<TArguments>.MetricSpec, IMetric> factory)
         {
-            query.SetState(nameof(Metric), columnNames => factory(new(columnNames)));
+            query.SetState(nameof(Metric), context => factory(new(context.ColumnNames)));
             return query.Self;
         }
 
@@ -484,7 +484,9 @@ namespace Apache.Druid.Querying
             int? offset = null,
             Func<QueryElementFactory<TArguments>.OrderByColumnSpec, IEnumerable<ILimitSpec.OrderBy>>? columns = null)
         {
-            query.SetState(nameof(LimitSpec), columnNames => new Internal.Elements.LimitSpec(limit, offset, columns?.Invoke(new(columnNames))));
+            query.SetState(
+                nameof(LimitSpec),
+                context => new Internal.Elements.LimitSpec(limit, offset, columns?.Invoke(new(context.ColumnNames))));
             return query.Self;
         }
 
@@ -505,7 +507,7 @@ namespace Apache.Druid.Querying
             this IQueryWith.Having<TArguments, TQuery> query,
             Func<QueryElementFactory<TArguments>.Having, IHaving> factory)
         {
-            query.SetState(nameof(Having), columnNames => factory(new(columnNames)));
+            query.SetState(nameof(Having), context => factory(new(context.ColumnNames)));
             return query.Self;
         }
 
@@ -513,7 +515,7 @@ namespace Apache.Druid.Querying
             this IQueryWith.Having<TArguments, TQuery> query,
             Func<QueryElementFactory<TArguments>.Filter, IFilter> factory)
         {
-            query.SetState(nameof(Having), columnNames => new QueryElementFactory<TArguments>.Having(columnNames).Filter(factory));
+            query.SetState(nameof(Having), context => new QueryElementFactory<TArguments>.Having(context.ColumnNames).Filter(factory));
             return query.Self;
         }
 

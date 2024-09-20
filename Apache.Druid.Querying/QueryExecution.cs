@@ -188,7 +188,8 @@ namespace Apache.Druid.Querying
         public virtual JsonObject MapQueryToJson(IQueryWith.Source<TSource> query)
         {
             var mappings = query.ApplyPropertyColumnNameMappingChanges(Context.ColumnNameMappings);
-            var result = query.MapToJson(Context.QuerySerializerOptions, mappings);
+            var mapContext = new QueryToJsonMappingContext(Context.QuerySerializerOptions, Context.DataSerializerOptions, mappings);
+            var result = query.MapToJson(mapContext);
             result.Add("dataSource", Context.GetJsonRepresentation());
             Context.OnMap(query, result);
             return result;

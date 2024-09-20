@@ -6,25 +6,26 @@ using System.Text.Json.Nodes;
 
 namespace Apache.Druid.Querying.Internal.Sections
 {
-    internal class SectionFactoryJsonMapper
+    internal static class SectionFactoryJsonMapper
     {
         public static JsonNode Map<TArguments>(
             IReadOnlyList<ElementFactoryCall> calls,
             SectionAtomicity atomicity,
-            JsonSerializerOptions serializerOptions,
-            PropertyColumnNameMapping.IProvider columnNameMappings,
+            QueryToJsonMappingContext context,
             Options options)
         {
             void MapCallParam(ElementFactoryCall.Parameter.Any param, string? callResultMemberName, JsonObject result)
                 => param.Switch(
                 result,
-                (selector, result) => result.Add(selector.Name, columnNameMappings.GetColumnName(selector.SelectedFromType, selector.SelectedName)),
+                (selector, result) => result.Add(selector.Name, context.ColumnNames.GetColumnName(selector.SelectedFromType, selector.SelectedName)),
                 (scalar, result) =>
                 {
                     if (options.SkipScalarParameter?.Invoke(scalar) is true)
                         return;
 
                     scalar = options.ReplaceScalarParameter?.Invoke(scalar) ?? scalar;
+                    var serializerOptions = options.SerializeScalarParameterWithDataSerializer?.Invoke(scalar) is true ?
+                        context.DataSerializerOptions : context.QuerySerializerOptions;
                     result.Add(
                         scalar.Name,
                         JsonSerializer.SerializeToNode(scalar.Value, scalar.Type, serializerOptions));
@@ -37,16 +38,16 @@ namespace Apache.Druid.Querying.Internal.Sections
                     if (expression.Value is null)
                         return;
 
-                    var (value, columnNames) = DruidExpression.Map(expression.Value, columnNameMappings);
+                    var (value, columnNames) = DruidExpression.Map(expression.Value, context.ColumnNames);
                     result.Add(expression.Name, value);
                     if (options.ExpressionColumnNamesKey is string existing)
-                        result.Add(existing, JsonSerializer.SerializeToNode(columnNames, serializerOptions));
+                        result.Add(existing, JsonSerializer.SerializeToNode(columnNames, context.QuerySerializerOptions));
                 },
                 (filterFactory, result) =>
                 {
                     var factory = (Func<QueryElementFactory<TArguments>.Filter, IFilter>)filterFactory.Value;
-                    var filter = factory.Invoke(new(columnNameMappings));
-                    result.Add(filterFactory.Name, JsonSerializer.SerializeToNode(filter, serializerOptions));
+                    var filter = factory.Invoke(new(context.ColumnNames));
+                    result.Add(filterFactory.Name, JsonSerializer.SerializeToNode(filter, context.QuerySerializerOptions));
                 });
 
             JsonObject MapCall(ElementFactoryCall call, bool mapSectionColumnName, string? parentResultMemberName)
@@ -94,6 +95,7 @@ namespace Apache.Druid.Querying.Internal.Sections
             Func<ElementFactoryCall, string>? MapType = null,
             Func<ElementFactoryCall.Parameter.Scalar, bool>? SkipScalarParameter = null,
             Func<ElementFactoryCall.Parameter.Scalar, ElementFactoryCall.Parameter.Scalar>? ReplaceScalarParameter = null,
+            Func<ElementFactoryCall.Parameter.Scalar, bool>? SerializeScalarParameterWithDataSerializer = null,
             string SectionColumnNameKey = "name",
             bool ForceSingle = false,
             string? ExpressionColumnNamesKey = null)

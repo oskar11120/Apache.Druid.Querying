@@ -49,7 +49,7 @@ namespace Apache.Druid.Querying
                     context.Deserialize<TValue>());
     }
 
-    public sealed record Dimension_Aggregations<TDimension, TAggregations>(TDimension Dimension, TAggregations Aggregations) : 
+    public sealed record Dimension_Aggregations<TDimension, TAggregations>(TDimension Dimension, TAggregations Aggregations) :
         IQueryData<TDimension, QueryDataKind.Dimensions>,
         IQueryData<TAggregations, QueryDataKind.Aggregations>
     {
@@ -322,12 +322,12 @@ namespace Apache.Druid.Querying
                         }
                         SelectedProperties.SetState(
                             "columns",
-                            (serializerOptions, columnNameMappings) =>
+                            context =>
                             {
-                                var columnNames = Get(columnNameMappings).Select(pair => pair.SourceMapping.ColumnName);
-                                return JsonSerializer.SerializeToNode(columnNames, serializerOptions);
+                                var columnNames = Get(context.ColumnNames).Select(pair => pair.SourceMapping.ColumnName);
+                                return JsonSerializer.SerializeToNode(columnNames, context.QuerySerializerOptions);
                             });
-                        MappingChanges.Set<TColumns>(mappings => 
+                        MappingChanges.Set<TColumns>(mappings =>
                         {
                             var columnMappings = Get(mappings)
                                 .Select(pair => pair.SourceMapping with { Property = pair.ColumnProperty });
@@ -358,7 +358,9 @@ namespace Apache.Druid.Querying
                 AnalysisTypesSection.SetState(
                     nameof(AnalysisTypes),
                     types,
-                    (types, options) => JsonSerializer.SerializeToNode(types.Select(type => AnalysisTypeStrings[type]), options));
+                    (types, context) => JsonSerializer.SerializeToNode(
+                        types.Select(type => AnalysisTypeStrings[type]),
+                        context.QuerySerializerOptions));
                 return this;
             }
 
