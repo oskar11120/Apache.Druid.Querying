@@ -1,5 +1,4 @@
 using Apache.Druid.Querying.Json;
-using FluentAssertions;
 using Snapshooter;
 using Snapshooter.NUnit;
 using System.Runtime.CompilerServices;

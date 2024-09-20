@@ -4,7 +4,10 @@ using System.Text.Json;
 
 namespace Apache.Druid.Querying.DependencyInjection
 {
-    public sealed record DataSourceOptions(JsonSerializerOptions Serializer, Func<HttpClient> HttpClientFactory);
+    public sealed record DataSourceOptions(
+        JsonSerializerOptions QuerySerializer,
+        JsonSerializerOptions DataSerializer,
+        Func<HttpClient> HttpClientFactory);
 
     public interface IDataSourceInitializer
     {

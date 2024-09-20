@@ -7,16 +7,21 @@ namespace Apache.Druid.Querying.Microsoft.Extensions.DependencyInjection
 {
     public class DataSourceProviderBuilder
     {
-        public DataSourceProviderBuilder(IHttpClientBuilder clientBuilder, JsonSerializerOptions serializerOptions)
+        public DataSourceProviderBuilder(
+            IHttpClientBuilder clientBuilder, 
+            JsonSerializerOptions querySerializerOptions,
+            JsonSerializerOptions dataSerializerOptions)
         {
             ClientBuilder = clientBuilder;
-            SerializerOptions = serializerOptions;
+            QuerySerializerOptions = querySerializerOptions;
+            DataSerializerOptions = dataSerializerOptions;
             Services = clientBuilder.Services;
         }
 
         public IServiceCollection Services { get; }
         public IHttpClientBuilder ClientBuilder { get; }
-        public JsonSerializerOptions SerializerOptions { get; }
+        public JsonSerializerOptions QuerySerializerOptions { get; }
+        public JsonSerializerOptions DataSerializerOptions { get; }
 
         public DataSourceProviderBuilder ConfigureClient(Action<IHttpClientBuilder> configure)
         {
@@ -24,9 +29,9 @@ namespace Apache.Druid.Querying.Microsoft.Extensions.DependencyInjection
             return this;
         }
 
-        public DataSourceProviderBuilder ConfigureSerializer(Action<JsonSerializerOptions> configure)
+        public DataSourceProviderBuilder ConfigureQuerySerializer(Action<JsonSerializerOptions> configure)
         {
-            configure(SerializerOptions);
+            configure(QuerySerializerOptions);
             return this;
         }
     }
@@ -40,7 +45,8 @@ namespace Apache.Druid.Querying.Microsoft.Extensions.DependencyInjection
             var clientId = Guid.NewGuid().ToString();
             var clientBuilder = services.AddHttpClient(clientId);
             clientBuilder.ConfigureHttpClient(client => client.BaseAddress = druidRouterUri);
-            var serlializerOptions = DefaultSerializerOptions.Create();
+            var querySerlializerOptions = DefaultSerializerOptions.Create();
+            var dataSerializerOptions = DefaultSerializerOptions.Create();
             services
                 .AddSingleton<IDataSourceInitializer, TProvider>()
                 .AddSingleton(services =>
@@ -53,10 +59,10 @@ namespace Apache.Druid.Querying.Microsoft.Extensions.DependencyInjection
                         match[0] :
                         throw new InvalidOperationException($"{typeof(TProvider)} has been registered multiple times.");
                     var factory = services.GetRequiredService<IHttpClientFactory>();
-                    matchSingle.Initialize(new(serlializerOptions, () => factory.CreateClient(clientId)));
+                    matchSingle.Initialize(new(querySerlializerOptions, dataSerializerOptions, () => factory.CreateClient(clientId)));
                     return (TProvider)matchSingle;
                 });
-            return new(clientBuilder, serlializerOptions);
+            return new(clientBuilder, querySerlializerOptions, dataSerializerOptions);
         }
     }
 }

@@ -164,16 +164,21 @@ namespace Apache.Druid.Querying
         PropertyColumnNameMapping.ImmutableBuilder ColumnNameMappings,
         SectionAtomicity.ImmutableBuilder? SectionAtomicity)
     {
-        public JsonSerializerOptions SerializerOptions => Options.Value.Serializer;
+        public JsonSerializerOptions QuerySerializerOptions => Options.Value.QuerySerializer;
+        public JsonSerializerOptions DataSerializerOptions => Options.Value.DataSerializer;
         public Func<HttpClient> HttpClientFactory => Options.Value.HttpClientFactory;
-    };
+
+        private JsonSerializerOptions? querySerializerOptionsIndented;
+        public JsonSerializerOptions QuerySerializerOptionsIndented => querySerializerOptionsIndented ??= 
+            QuerySerializerOptions.WriteIndented ? QuerySerializerOptions : new (QuerySerializerOptions) { WriteIndented = true };
+    }
 
     public class DataSource<TSource>
     {
         private static readonly StringWithQualityHeaderValue gzip = new("gzip");
 
         private DataSourceContext? context;
-        private JsonSerializerOptions? serializerOptionsWithFormatting;
+
         private DataSourceContext Context => context ??
             throw new InvalidOperationException($"Attempted to use an uninitialized instance of {GetType()}.");
 
@@ -183,7 +188,7 @@ namespace Apache.Druid.Querying
         public virtual JsonObject MapQueryToJson(IQueryWith.Source<TSource> query)
         {
             var mappings = query.ApplyPropertyColumnNameMappingChanges(Context.ColumnNameMappings);
-            var result = query.MapToJson(Context.SerializerOptions, mappings);
+            var result = query.MapToJson(Context.QuerySerializerOptions, mappings);
             result.Add("dataSource", Context.GetJsonRepresentation());
             Context.OnMap(query, result);
             return result;
@@ -203,10 +208,10 @@ namespace Apache.Druid.Querying
             var resultContext = new TruncatedQueryResultHandlingContext();
             async IAsyncEnumerable<TResult> Deserialize(Stream utf8Json, [EnumeratorCancellation] CancellationToken token)
             {
-                buffer ??= ArrayPool<byte>.Shared.Rent(Context.SerializerOptions.DefaultBufferSize);
+                buffer ??= ArrayPool<byte>.Shared.Rent(Context.DataSerializerOptions.DefaultBufferSize);
                 var read = await utf8Json.ReadAsync(buffer, token);
                 var results = deserializer
-                    .Deserialize(new(new(utf8Json, buffer, read), Context.SerializerOptions, atomicity, mappings), token);
+                    .Deserialize(new(new(utf8Json, buffer, read), Context.DataSerializerOptions, atomicity, mappings), token);
                 queryForRemaining.Value = null;
                 if (onTruncatedResultsQueryRemaining)
                     results = truncatedResultHandler.OnTruncatedResultsSetQueryForRemaining(results, resultContext, queryForRemaining, token);
@@ -236,7 +241,7 @@ namespace Apache.Druid.Querying
             [EnumeratorCancellation] CancellationToken token = default)
         {
             var json = MapQueryToJson(query);
-            using var content = JsonContent.Create(json, options: Context.SerializerOptions);
+            using var content = JsonContent.Create(json, options: Context.QuerySerializerOptions);
             using var request = new HttpRequestMessage(HttpMethod.Post, "druid/v2")
             {
                 Content = content,
@@ -251,9 +256,8 @@ namespace Apache.Druid.Querying
             }
             catch (HttpRequestException exception)
             {
-                serializerOptionsWithFormatting ??= new(Context.SerializerOptions) { WriteIndented = true };
                 var responseContent = await response.Content.ReadAsStringAsync(token);
-                exception.Data.Add("requestContent", JsonSerializer.Serialize(json, serializerOptionsWithFormatting));
+                exception.Data.Add("requestContent", JsonSerializer.Serialize(json, Context.QuerySerializerOptionsIndented));
                 exception.Data.Add(nameof(responseContent), responseContent);
                 throw;
             }
@@ -354,7 +358,7 @@ namespace Apache.Druid.Querying
                 Context.ColumnNameMappings.Combine(second.Context.ColumnNameMappings).Combine(third.Context.ColumnNameMappings),
                 SectionAtomicity.ImmutableBuilder.Combine(Context.SectionAtomicity, second.Context.SectionAtomicity, third.Context.SectionAtomicity));
 
-        internal string? JsonRepresentationDebugView => Context.GetJsonRepresentation()?.ToJsonString(Context.SerializerOptions);
+        internal string? JsonRepresentationDebugView => Context.GetJsonRepresentation()?.ToJsonString(Context.QuerySerializerOptions);
 
         private DataSource<NewTSource> New<NewTSource>(
             DataSourceJsonProvider GetJsonRepresentation,

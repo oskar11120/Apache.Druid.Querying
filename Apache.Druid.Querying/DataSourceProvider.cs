@@ -32,7 +32,7 @@ namespace Apache.Druid.Querying
                 foreach (var property in properties)
                 {
                     var value = property.GetValue(element);
-                    result.Add(JsonSerializer.SerializeToNode(value, property.PropertyType, Options.Serializer));
+                    result.Add(JsonSerializer.SerializeToNode(value, property.PropertyType, Options.DataSerializer));
                 }
                 return result;
             }
@@ -53,7 +53,7 @@ namespace Apache.Druid.Querying
                 {
                     ["type"] = "inline",
                     ["rows"] = MapAll(),
-                    ["columnNames"] = JsonSerializer.SerializeToNode(columnNames, Options.Serializer)
+                    ["columnNames"] = JsonSerializer.SerializeToNode(columnNames, Options.QuerySerializer)
                 },
                 factory);
         }
