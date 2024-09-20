@@ -7,9 +7,12 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Collections.Concurrent;
 using System.Reflection;
+using System.Text.Json.Nodes;
 
 namespace Apache.Druid.Querying
 {
+    public delegate void OnMapQueryToJson(IQueryWith.State query, JsonObject resultJson);
+
     public sealed record Interval(DateTimeOffset From, DateTimeOffset To);
 
     public enum OrderDirection
@@ -136,6 +139,8 @@ namespace Apache.Druid.Querying
         {
             TSelf Self => (TSelf)this;
         }
+
+        //public interface OnMapToJson : State<>
 
         public interface VirtualColumns<out TArguments, TVirtualColumns, out TSelf> :
             SectionFactoryExpression<TArguments, TVirtualColumns, SectionKind.VirtualColumns>,
@@ -274,7 +279,7 @@ namespace Apache.Druid.Querying
             if (!copyCache.TryGetValue(runtimeType, out var copy))
             {
                 var copyFromMethods = query
-                    .GetStateInterfaces()
+                    .GetGenericInterfaces(typeof(State<>))
                     .Select(@state => state.GetMethod(nameof(State<None>.CopyFrom), BindingFlags.NonPublic | BindingFlags.Instance))
                     .ToArray();
                 copy = (from, to) =>

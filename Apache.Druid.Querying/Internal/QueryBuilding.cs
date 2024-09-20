@@ -31,16 +31,15 @@ public static class IQueryWithInternal
     public interface State<TState> : IQueryWith.State
     {
         protected internal TState? State { get; set; }
-        internal void AddToJson(JsonObject json, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames);
         internal void CopyFrom(State<TState> other) => State = other.State;
     }
 
-    internal static IEnumerable<Type> GetStateInterfaces(this IQueryWith.State query) => query
-        .GetType()
-        .GetInterfaces()
-        .Where(@interface => @interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(State<>));
+    public interface JsonApplicableState<TState> : State<TState>
+    {
+        internal void ApplyOnJson(JsonObject json, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames);
+    }
 
-    public interface Section<TSection> : State<QuerySectionState<TSection>>
+    public interface Section<TSection> : JsonApplicableState<QuerySectionState<TSection>>
     {
         protected internal TSection Require() => State is not null ?
             State.Section :
@@ -49,7 +48,7 @@ public static class IQueryWithInternal
                 Data = { ["query"] = this }
             };
 
-        void State<QuerySectionState<TSection>>.AddToJson(
+        void JsonApplicableState<QuerySectionState<TSection>>.ApplyOnJson(
             JsonObject json, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames)
         {
             if (State is null)
@@ -81,9 +80,9 @@ public static class IQueryWithInternal
             json[key.ToCamelCase()] = sectionJson;
     }
 
-    public interface SectionFactory<TSection> : State<QuerySectionFactoryState<TSection>>
+    public interface SectionFactory<TSection> : JsonApplicableState<QuerySectionFactoryState<TSection>>
     {
-        void State<QuerySectionFactoryState<TSection>>.AddToJson(
+        void JsonApplicableState<QuerySectionFactoryState<TSection>>.ApplyOnJson(
             JsonObject json, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames)
         {
             if (State is null)
@@ -102,11 +101,6 @@ public static class IQueryWithInternal
     public interface SectionAtomicity : State<Sections.SectionAtomicity.ImmutableBuilder>
     {
         internal Sections.SectionAtomicity.ImmutableBuilder SectionAtomicity { get => State ??= new(); }
-
-        void State<Sections.SectionAtomicity.ImmutableBuilder>.AddToJson(
-            JsonObject json, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames)
-        {
-        }
     }
 
     public interface MutableSectionAtomicity : SectionAtomicity
@@ -114,7 +108,7 @@ public static class IQueryWithInternal
         protected internal new Sections.SectionAtomicity.ImmutableBuilder SectionAtomicity { get => State ??= new(); set => State = value; }
     }
 
-    public interface SectionFactoryExpressionStates : State<Dictionary<string, GetQuerySectionJson>>
+    public interface SectionFactoryExpressionStates : JsonApplicableState<Dictionary<string, GetQuerySectionJson>>
     {
         private protected void SetState(string key, GetQuerySectionJson getJson)
         {
@@ -123,7 +117,7 @@ public static class IQueryWithInternal
             State.Add(key, getJson);
         }
 
-        void State<Dictionary<string, GetQuerySectionJson>>.AddToJson(
+        void JsonApplicableState<Dictionary<string, GetQuerySectionJson>>.ApplyOnJson(
             JsonObject json, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames)
         {
             if (State is null)
@@ -162,11 +156,6 @@ public static class IQueryWithInternal
 
     public interface PropertyColumnNameMappingChanges : State<ImmutableDictionary<Type, ApplyPropertyColumnNameMappingChanges>>
     {
-        void State<ImmutableDictionary<Type, ApplyPropertyColumnNameMappingChanges>>.AddToJson(
-            JsonObject json, JsonSerializerOptions serializerOptions, PropertyColumnNameMapping.IProvider columnNames)
-        {
-        }
-
         internal sealed ApplyPropertyColumnNameMappingChanges ApplyPropertyColumnNameMappingChanges =>
             existing => State is null ?
                 existing :

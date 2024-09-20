@@ -71,8 +71,6 @@ namespace Apache.Druid.Querying
 
     public delegate JsonNode? DataSourceJsonProvider();
 
-    public delegate void OnMapQueryToJson(IQueryWith.State query, JsonObject resultJson);
-
     public partial record QueryDataKind
     {
         public sealed record Source : QueryDataKind;

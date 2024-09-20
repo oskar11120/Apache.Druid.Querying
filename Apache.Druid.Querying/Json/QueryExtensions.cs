@@ -20,9 +20,9 @@ namespace Apache.Druid.Querying.Json
         {
             if (!cache.TryGetValue(query.GetType(), out var methods))
                 methods = query
-                   .GetStateInterfaces()
-                   .Select(@interface => @interface.GetMethod(nameof(IQueryWithInternal.State<None>.AddToJson), BindingFlags.NonPublic | BindingFlags.Instance))
-                   .ToArray()!;
+                    .GetGenericInterfaces(typeof(IQueryWithInternal.JsonApplicableState<>))
+                    .Select(@interface => @interface.GetMethod(nameof(IQueryWithInternal.JsonApplicableState<None>.ApplyOnJson), BindingFlags.NonPublic | BindingFlags.Instance))
+                    .ToArray()!;
             var result = new JsonObject();
             var parameters = new object[] { result, serializerOptions, columNames };
             foreach (var method in methods)
