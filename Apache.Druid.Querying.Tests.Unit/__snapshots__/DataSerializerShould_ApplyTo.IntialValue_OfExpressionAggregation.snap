@@ -1,0 +1,23 @@
+﻿{
+  "queryType": "timeseries",
+  "aggregations": [
+    {
+      "type": "expression",
+      "name": "Time",
+      "initialValue": "2000-01-02T01:01:00\u002B00:00",
+      "fold": "max(\u0022__time\u0022, _acc)",
+      "fields": [
+        "\u0022__time\u0022"
+      ]
+    },
+    {
+      "type": "expression",
+      "name": "Bool",
+      "initialValue": false,
+      "fold": "\u0022Boolean\u0022 \u0026\u0026 _acc",
+      "fields": [
+        "\u0022Boolean\u0022"
+      ]
+    }
+  ]
+}

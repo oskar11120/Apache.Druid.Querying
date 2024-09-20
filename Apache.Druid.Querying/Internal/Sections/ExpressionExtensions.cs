@@ -11,7 +11,7 @@ namespace Apache.Druid.Querying.Internal.Sections
             => expression switch
             {
                 ConstantExpression constant => constant.Value,
-                MemberExpression member => GetValue(member),
+                MemberExpression member when member.Expression is not null => GetValue(member),
                 MethodCallExpression call => GetValue(call),
                 _ => GetValueUsingCompile(expression)
             };
