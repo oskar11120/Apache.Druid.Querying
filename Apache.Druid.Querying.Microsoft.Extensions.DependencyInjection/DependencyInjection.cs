@@ -34,6 +34,12 @@ namespace Apache.Druid.Querying.Microsoft.Extensions.DependencyInjection
             configure(QuerySerializerOptions);
             return this;
         }
+
+        public DataSourceProviderBuilder ConfigureDataSerializer(Action<JsonSerializerOptions> configure)
+        {
+            configure(DataSerializerOptions);
+            return this;
+        }
     }
 
     public static class ServiceCollectionExtensions
