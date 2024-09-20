@@ -46,7 +46,7 @@ namespace Apache.Druid.Querying.Internal.Sections
                 (filterFactory, result) =>
                 {
                     var factory = (Func<QueryElementFactory<TArguments>.Filter, IFilter>)filterFactory.Value;
-                    var filter = factory.Invoke(new(context.ColumnNames));
+                    var filter = factory.Invoke(new(context));
                     result.Add(filterFactory.Name, JsonSerializer.SerializeToNode(filter, context.QuerySerializerOptions));
                 });
 

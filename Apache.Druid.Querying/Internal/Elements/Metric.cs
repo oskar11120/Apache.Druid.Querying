@@ -1,4 +1,6 @@
-﻿namespace Apache.Druid.Querying.Internal.Elements
+﻿using System.Text.Json.Nodes;
+
+namespace Apache.Druid.Querying.Internal.Elements
 {
     internal abstract class Metric : WithType, IMetric
     {
@@ -15,14 +17,14 @@
 
         public sealed class Dimension<TColumn> : Metric
         {
-            public Dimension(SortingOrder ordering, TColumn? previousStop)
+            public Dimension(SortingOrder ordering, JsonNode? previousStop)
             {
                 Ordering = ordering;
                 PreviousStop = previousStop;
             }
 
             public SortingOrder Ordering { get; }
-            public TColumn? PreviousStop { get; }
+            public JsonNode? PreviousStop { get; }
         }
 
         public sealed class Inverted : Metric

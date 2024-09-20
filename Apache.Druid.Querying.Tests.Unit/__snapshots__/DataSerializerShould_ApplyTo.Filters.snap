@@ -1,0 +1,82 @@
+﻿{
+  "queryType": "scan",
+  "filter": {
+    "fields": [
+      {
+        "values": [
+          1,
+          0
+        ],
+        "dimension": "Boolean",
+        "type": "in"
+      },
+      {
+        "values": [
+          946774860000,
+          946774860000
+        ],
+        "dimension": "__time",
+        "type": "in"
+      },
+      {
+        "matchValue": 1,
+        "matchValueType": "String",
+        "column": "Boolean",
+        "type": "equals"
+      },
+      {
+        "matchValue": 946774860000,
+        "matchValueType": "Long",
+        "column": "__time",
+        "type": "equals"
+      },
+      {
+        "lower": 0,
+        "upper": 1,
+        "lowerOpen": false,
+        "upperOpen": false,
+        "matchValueType": "String",
+        "column": "Boolean",
+        "type": "range"
+      },
+      {
+        "lower": 946774860000,
+        "upper": 946774860000,
+        "lowerOpen": false,
+        "upperOpen": false,
+        "matchValueType": "Long",
+        "column": "__time",
+        "type": "range"
+      },
+      {
+        "value": 1,
+        "dimension": "Boolean",
+        "type": "selector"
+      },
+      {
+        "value": 946774860000,
+        "dimension": "__time",
+        "type": "selector"
+      },
+      {
+        "lower": 0,
+        "upper": 1,
+        "lowerStrict": false,
+        "upperStrict": false,
+        "ordering": "Lexicographic",
+        "dimension": "Boolean",
+        "type": "bound"
+      },
+      {
+        "lower": 946774860000,
+        "upper": 946774860000,
+        "lowerStrict": false,
+        "upperStrict": false,
+        "ordering": "Lexicographic",
+        "dimension": "__time",
+        "type": "bound"
+      }
+    ],
+    "type": "and"
+  }
+}

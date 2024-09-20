@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Nodes;
 
 namespace Apache.Druid.Querying.Internal.Elements
 {
@@ -145,22 +146,22 @@ namespace Apache.Druid.Querying.Internal.Elements
 
         public new sealed class Equals : WithMatchValueType
         {
-            public Equals(string column, TColumn matchValue, string matchValueType) : base(column, matchValueType)
+            public Equals(string column, JsonNode matchValue, string matchValueType) : base(column, matchValueType)
             {
                 MatchValue = matchValue;
             }
 
-            public TColumn MatchValue { get; }
+            public JsonNode MatchValue { get; }
         }
 
         public sealed class In : WithDimension
         {
-            public In(string column, IEnumerable<TColumn> values) : base(column)
+            public In(string column, JsonNode values) : base(column)
             {
                 Values = values;
             }
 
-            public IEnumerable<TColumn> Values { get; }
+            public JsonNode Values { get; }
         }
 
         public sealed class Range : WithMatchValueType
@@ -168,8 +169,8 @@ namespace Apache.Druid.Querying.Internal.Elements
             public Range(
                 string column,
                 string matchValueType,
-                TColumn? lower = default,
-                TColumn? upper = default,
+                JsonNode? lower = default,
+                JsonNode? upper = default,
                 bool lowerStrict = false,
                 bool upperStrict = false)
                 : base(column, matchValueType)
@@ -188,28 +189,28 @@ namespace Apache.Druid.Querying.Internal.Elements
                 }
             }
 
-            public TColumn? Lower { get; }
-            public TColumn? Upper { get; }
+            public JsonNode? Lower { get; }
+            public JsonNode? Upper { get; }
             public bool LowerOpen { get; }
             public bool UpperOpen { get; }
         }
 
         public sealed class Selector : WithDimension
         {
-            public Selector(string dimension, TColumn value) : base(dimension)
+            public Selector(string dimension, JsonNode value) : base(dimension)
             {
                 Value = value;
             }
 
-            public TColumn Value { get; }
+            public JsonNode Value { get; }
         }
 
         public sealed class Bound : WithDimension
         {
             public Bound(
                 string dimension,
-                TColumn? lower,
-                TColumn? upper,
+                JsonNode? lower,
+                JsonNode? upper,
                 bool lowerStrict,
                 bool upperStrict,
                 SortingOrder ordering)
@@ -222,8 +223,8 @@ namespace Apache.Druid.Querying.Internal.Elements
                 Ordering = ordering;
             }
 
-            public TColumn? Lower { get; }
-            public TColumn? Upper { get; }
+            public JsonNode? Lower { get; }
+            public JsonNode? Upper { get; }
             public bool LowerStrict { get; }
             public bool UpperStrict { get; }
             public SortingOrder Ordering { get; }

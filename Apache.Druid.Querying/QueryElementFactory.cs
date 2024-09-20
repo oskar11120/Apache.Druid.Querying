@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using Filter_ = Apache.Druid.Querying.Internal.Elements.Filter;
 using Having_ = Apache.Druid.Querying.Internal.Elements.Having;
 
@@ -14,23 +16,26 @@ namespace Apache.Druid.Querying
         public delegate TColumn ColumnSelector<TColumn>(TArguments arguments);
         public delegate string DruidExpression(TArguments arguments);
 
-        public abstract class UsingArgumentColumnNames
+        public class Base
         {
-            protected readonly PropertyColumnNameMapping.IProvider columnNames;
+            protected readonly QueryToJsonMappingContext context;
 
-            protected UsingArgumentColumnNames(PropertyColumnNameMapping.IProvider columnNames)
+            protected Base(QueryToJsonMappingContext context)
             {
-                this.columnNames = columnNames;
+                this.context = context;
             }
 
             private string GetColumnName(Expression selectorBody)
             {
                 var (_, name, type) = SelectedProperty.Get(selectorBody);
-                return columnNames.GetColumnName(type, name);
+                return context.ColumnNames.GetColumnName(type, name);
             }
 
             protected string GetColumnName<TSelector>(Expression<TSelector> selector)
                 => GetColumnName(selector.Body);
+
+            protected JsonNode SerializeAsData<TValue>(TValue value)
+                => JsonSerializer.SerializeToNode(value, context.DataSerializerOptions)!;
         }
 
         // TODO
@@ -40,9 +45,9 @@ namespace Apache.Druid.Querying
         // 3. If parameter is of type TColumn, its value is mapped to JsonValue using DataSerializer.
         // 4. If parameter is of type Expression<ColumnSelector<TColumn>>, its value is mapped to a colum name.
         // Consider writing a general soluction with reflection or source generation.
-        public sealed class Filter : UsingArgumentColumnNames
+        public sealed class Filter : Base
         {
-            public Filter(PropertyColumnNameMapping.IProvider columnNames) : base(columnNames)
+            public Filter(QueryToJsonMappingContext context) : base(context)
             {
             }
 
@@ -55,9 +60,9 @@ namespace Apache.Druid.Querying
             public IFilter Not(IFilter filter) => new Filter_.Not(filter);
             public IFilter Null<TColumn>(Expression<ColumnSelector<TColumn?>> column) => new Filter_.Null(GetColumnName(column));
             public IFilter In<TColumn>(Expression<ColumnSelector<TColumn>> column, IEnumerable<TColumn> values)
-                => new Filter<TColumn>.In(GetColumnName(column), values);
+                => new Filter<TColumn>.In(GetColumnName(column), SerializeAsData(values));
             public IFilter Equals<TColumn>(Expression<ColumnSelector<TColumn>> column, TColumn matchValue, string? matchValueType = null)
-                => new Filter<TColumn>.Equals(GetColumnName(column), matchValue, matchValueType ?? DataType.Get<TColumn>());
+                => new Filter<TColumn>.Equals(GetColumnName(column), SerializeAsData(matchValue), matchValueType ?? DataType.Get<TColumn>());
             public IFilter Range<TColumn>(
                 Expression<ColumnSelector<TColumn>> column,
                 TColumn? lower = default,
@@ -66,7 +71,7 @@ namespace Apache.Druid.Querying
                 bool lowerOpen = false,
                 bool upperOpen = false)
                 where TColumn : struct
-                => new Filter<TColumn?>.Range(GetColumnName(column), matchValueType ?? DataType.Get<TColumn>(), lower, upper, lowerOpen, upperOpen);
+                => new Filter<TColumn?>.Range(GetColumnName(column), matchValueType ?? DataType.Get<TColumn>(), SerializeAsData(lower), SerializeAsData(upper), lowerOpen, upperOpen);
             public IFilter Range<TColumn>(
                 Expression<ColumnSelector<TColumn>> column,
                 TColumn? lower = default,
@@ -75,13 +80,13 @@ namespace Apache.Druid.Querying
                 bool lowerOpen = false,
                 bool upperOpen = false)
                 where TColumn : class
-                => new Filter<TColumn>.Range(GetColumnName(column), matchValueType ?? DataType.Get<TColumn>(), lower, upper, lowerOpen, upperOpen);
+                => new Filter<TColumn>.Range(GetColumnName(column), matchValueType ?? DataType.Get<TColumn>(), SerializeAsData(lower), SerializeAsData(upper), lowerOpen, upperOpen);
             public IFilter Selector<TColumn>(Expression<ColumnSelector<TColumn>> dimension, TColumn value)
-                => new Filter<TColumn>.Selector(GetColumnName(dimension), value);
+                => new Filter<TColumn>.Selector(GetColumnName(dimension), SerializeAsData(value));
             public IFilter Interval<TColumn>(Expression<ColumnSelector<TColumn>> dimension, params Interval[] intervals)
                 => new Filter_.Interval(GetColumnName(dimension), intervals);
             public IFilter Expression(Expression<DruidExpression> expression)
-                => new Filter_.Expression_(Internal.DruidExpression.Map(expression, columnNames).Expression);
+                => new Filter_.Expression_(Internal.DruidExpression.Map(expression, context.ColumnNames).Expression);
             public IFilter Bound<TColumn>(
                 Expression<ColumnSelector<TColumn>> dimension,
                 TColumn? lower = default,
@@ -89,23 +94,23 @@ namespace Apache.Druid.Querying
                 bool lowerStrict = false,
                 bool upperStrict = false,
                 SortingOrder ordering = SortingOrder.Lexicographic)
-                => new Filter<TColumn>.Bound(GetColumnName(dimension), lower, upper, lowerStrict, upperStrict, ordering);
+                => new Filter<TColumn>.Bound(GetColumnName(dimension), SerializeAsData(lower), SerializeAsData(upper), lowerStrict, upperStrict, ordering);
             public IFilter Like<TColumn>(Expression<ColumnSelector<TColumn>> dimension, string pattern, char? escape = null)
                 => new Filter_.Like(GetColumnName(dimension), pattern, escape);
             public IFilter Regex<TColumn>(Expression<ColumnSelector<TColumn>> dimension, string pattern)
                 => new Filter_.Regex(GetColumnName(dimension), pattern);
         }
 
-        public class MetricSpec : UsingArgumentColumnNames
+        public class MetricSpec : Base
         {
-            public MetricSpec(PropertyColumnNameMapping.IProvider columnNames) : base(columnNames)
+            public MetricSpec(QueryToJsonMappingContext context) : base(context)
             {
             }
 
             public IMetric Dimension<TColumn>(
                 TColumn previousStop,
                 SortingOrder ordering = SortingOrder.Lexicographic)
-                => new Metric.Dimension<TColumn>(ordering, previousStop);
+                => new Metric.Dimension<TColumn>(ordering, SerializeAsData(previousStop));
 
             public IMetric Dimension(
                 SortingOrder ordering = SortingOrder.Lexicographic)
@@ -118,9 +123,9 @@ namespace Apache.Druid.Querying
                 => new Metric.Numeric(GetColumnName(metric));
         }
 
-        public class OrderByColumnSpec : UsingArgumentColumnNames
+        public class OrderByColumnSpec : Base
         {
-            public OrderByColumnSpec(PropertyColumnNameMapping.IProvider columnNames) : base(columnNames)
+            public OrderByColumnSpec(QueryToJsonMappingContext context) : base(context)
             {
             }
 
@@ -131,15 +136,15 @@ namespace Apache.Druid.Querying
                 => new LimitSpec.OrderBy(GetColumnName(dimension), dimensionOrder, direction);
         }
 
-        public class Having : UsingArgumentColumnNames
+        public class Having : Base
         {
-            public Having(PropertyColumnNameMapping.IProvider columnNames) : base(columnNames)
+            public Having(QueryToJsonMappingContext context) : base(context)
             {
             }
 
             public IHaving Filter(Func<Filter, IFilter> factory)
             {
-                var filter = factory(new Filter(columnNames));
+                var filter = factory(new Filter(context));
                 return new Having_.Filter_(filter);
             }
         }

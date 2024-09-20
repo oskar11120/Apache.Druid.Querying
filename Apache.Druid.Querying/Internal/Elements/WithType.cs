@@ -6,7 +6,15 @@
 
         public WithType(string? type = null)
         {
-            Type = type ?? GetType().Name.ToLowerInvariant();
+            if (type is null)
+            {
+                var clrType = GetType();
+                type = clrType.Name.ToLowerInvariant();
+                if (type.IndexOf('`') is not -1 and var index)
+                    type = type[..index];
+            }
+
+            Type = type;
         }
     }
 }

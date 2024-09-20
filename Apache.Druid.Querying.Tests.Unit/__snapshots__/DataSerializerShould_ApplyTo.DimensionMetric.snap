@@ -1,0 +1,8 @@
+﻿{
+  "queryType": "topN",
+  "metric": {
+    "ordering": "Lexicographic",
+    "previousStop": 946774860000,
+    "type": "dimension"
+  }
+}

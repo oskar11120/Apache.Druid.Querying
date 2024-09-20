@@ -395,7 +395,7 @@ namespace Apache.Druid.Querying
         public static TQuery Filter<TArguments, TQuery>(
             this IQueryWith.Filter<TArguments, TQuery> query, Func<QueryElementFactory<TArguments>.Filter, IFilter> factory)
         {
-            query.SetState(nameof(Filter), context => factory(new(context.ColumnNames)));
+            query.SetState(nameof(Filter), context => factory(new(context)));
             return query.Self;
         }
 
@@ -475,7 +475,7 @@ namespace Apache.Druid.Querying
             this IQueryWith.Metric<TArguments, TQuery> query,
             Func<QueryElementFactory<TArguments>.MetricSpec, IMetric> factory)
         {
-            query.SetState(nameof(Metric), context => factory(new(context.ColumnNames)));
+            query.SetState(nameof(Metric), context => factory(new(context)));
             return query.Self;
         }
 
@@ -487,7 +487,7 @@ namespace Apache.Druid.Querying
         {
             query.SetState(
                 nameof(LimitSpec),
-                context => new Internal.Elements.LimitSpec(limit, offset, columns?.Invoke(new(context.ColumnNames))));
+                context => new Internal.Elements.LimitSpec(limit, offset, columns?.Invoke(new(context))));
             return query.Self;
         }
 
@@ -508,7 +508,7 @@ namespace Apache.Druid.Querying
             this IQueryWith.Having<TArguments, TQuery> query,
             Func<QueryElementFactory<TArguments>.Having, IHaving> factory)
         {
-            query.SetState(nameof(Having), context => factory(new(context.ColumnNames)));
+            query.SetState(nameof(Having), context => factory(new(context)));
             return query.Self;
         }
 
@@ -516,7 +516,7 @@ namespace Apache.Druid.Querying
             this IQueryWith.Having<TArguments, TQuery> query,
             Func<QueryElementFactory<TArguments>.Filter, IFilter> factory)
         {
-            query.SetState(nameof(Having), context => new QueryElementFactory<TArguments>.Having(context.ColumnNames).Filter(factory));
+            query.SetState(nameof(Having), context => new QueryElementFactory<TArguments>.Having(context).Filter(factory));
             return query.Self;
         }
 
