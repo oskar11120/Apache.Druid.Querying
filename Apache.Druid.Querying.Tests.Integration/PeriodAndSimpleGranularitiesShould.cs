@@ -2,6 +2,7 @@
 using MoreLinq;
 using Snapshooter.NUnit;
 using System.Globalization;
+using System.Text.Json;
 using static Apache.Druid.Querying.Tests.Integration.ServiceProvider;
 
 namespace Apache.Druid.Querying.Tests.Integration;
@@ -30,8 +31,7 @@ internal class PeriodAndSimpleGranularitiesShould
             .Interval(new(T0.AddDays(-10), T0.AddDays(10)))
             .Granularity(granularity, timeZone);
 
-        var serializerOptions = DefaultSerializerOptions.Create();
-        serializerOptions.WriteIndented = true;
+        var serializerOptions = new JsonSerializerOptions(DefaultSerializerOptions.Query) { WriteIndented = true };
         var json = Wikipedia.Edits.MapQueryToJson(query).ToJsonString(serializerOptions);
         TestContext.Out.WriteLine(json);
 

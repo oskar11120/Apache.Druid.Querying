@@ -10,7 +10,7 @@ namespace Apache.Druid.Querying.Benchmarks.Deserialization;
 [MemoryDiagnoser]
 public class Benchmark
 {
-    private static readonly JsonSerializerOptions jsonOptions = DefaultSerializerOptions.Create();
+    private static readonly JsonSerializerOptions jsonOptions = DefaultSerializerOptions.Data;
     private static readonly Query<Edit>.Scan query = new();
     private static readonly IQueryWith.Result<ScanResult<Edit>> deserializer = query;
     private static readonly SectionAtomicity.ImmutableBuilder atomicity = (query as IQueryWithInternal.SectionAtomicity).SectionAtomicity;

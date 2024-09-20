@@ -3,7 +3,6 @@ using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Buffers;
-using System.Buffers.Text;
 using Apache.Druid.Querying.Internal.Json;
 using System.Globalization;
 using System.Text;
@@ -15,7 +14,7 @@ namespace Apache.Druid.Querying.Json
 {
     public static class DefaultSerializerOptions
     {
-        public static JsonSerializerOptions Create() => new(JsonSerializerDefaults.Web)
+        public static readonly JsonSerializerOptions Query = new JsonSerializerOptions(JsonSerializerDefaults.Web)
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             Converters =
@@ -26,13 +25,28 @@ namespace Apache.Druid.Querying.Json
                 new PolymorphicSerializer<IHaving>(),
                 new PolymorphicSerializer<ILimitSpec>(),
                 new PolymorphicSerializer<ILimitSpec.OrderBy>(),
-                UnixMilisecondsConverter.WithDateTimeOffset,
-                UnixMilisecondsConverter.WithDateTime,
-                BoolStringNumberConverter.Singleton,
                 IntervalConverter.Singleton,
                 GranularityConverter.Singleton
             }
-        };
+        }.AsReadOnly();
+
+        public static readonly JsonSerializerOptions Data = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+        {
+            Converters =
+            {
+                UnixMilisecondsPreferringConverter.OfDateTimeOffset,
+                UnixMilisecondsPreferringConverter.OfDateTime,
+                NumberPreferringTextAllowingBoolConverter.Singleton,
+                IntervalConverter.Singleton,
+                GranularityConverter.Singleton
+            }
+        }.AsReadOnly();
+
+        private static JsonSerializerOptions AsReadOnly(this JsonSerializerOptions options)
+        {
+            _ = JsonSerializer.Serialize<object?>(null, options);
+            return options;
+        }
 
         private sealed class PolymorphicSerializer<T> : JsonConverter<T> where T : class
         {
@@ -66,50 +80,49 @@ namespace Apache.Druid.Querying.Json
             }
         }
 
-        private static class UnixMilisecondsConverter
+        public static class UnixMilisecondsPreferringConverter
         {
-            public static readonly UnixMilisecondsConverter<DateTimeOffset> WithDateTimeOffset = new(
+            public static readonly UnixMilisecondsPreferringConverter<DateTimeOffset> OfDateTimeOffset = new(
                 DateTimeOffset.FromUnixTimeMilliseconds,
-                Utf8Formatter.TryFormat);
-            public static readonly UnixMilisecondsConverter<DateTime> WithDateTime = new(
+                static timePoint => timePoint.ToUnixTimeMilliseconds());
+            public static readonly UnixMilisecondsPreferringConverter<DateTime> OfDateTime = new(
                 static miliseconds => DateTimeOffset.FromUnixTimeMilliseconds(miliseconds).UtcDateTime,
-                Utf8Formatter.TryFormat);
+                static timepoint => ((DateTimeOffset)timepoint).ToUnixTimeMilliseconds());
         }
 
-        private sealed class UnixMilisecondsConverter<T> : JsonConverter<T>
+        public sealed class UnixMilisecondsPreferringConverter<T> : JsonConverter<T>
         {
             public delegate bool TryFormatUTf8(T value, Span<byte> destination, out int bytesWritten, StandardFormat format);
 
-            private readonly Func<long, T> convert;
-            private readonly TryFormatUTf8 tryFormat;
+            private readonly Func<long, T> fromMiliseconds;
+            private readonly Func<T, long> toMilisconds;
 
-            public UnixMilisecondsConverter(Func<long, T> convert, TryFormatUTf8 tryFormat)
+            public UnixMilisecondsPreferringConverter(Func<long, T> fromMiliseconds, Func<T, long> toMilisconds)
             {
-                this.convert = convert;
-                this.tryFormat = tryFormat;
+                this.fromMiliseconds = fromMiliseconds;
+                this.toMilisconds = toMilisconds;
             }
 
             public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
                 => reader.TokenType switch
                 {
                     JsonTokenType.String => reader.GetValue<T>(),
-                    JsonTokenType.Number => convert(reader.GetInt64()),
+                    JsonTokenType.Number => fromMiliseconds(reader.GetInt64()),
                     _ => throw new JsonException($"Could not convert {reader.GetString()} to {typeof(T)}.")
                 };
 
             public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
             {
-                Span<byte> utf8Date = stackalloc byte[29];
-                tryFormat(value, utf8Date, out _, new StandardFormat('R'));
-                writer.WriteStringValue(utf8Date);
+                var ms = toMilisconds(value);
+                writer.WriteNumberValue(ms);
             }
         }
 
-        public sealed class BoolStringNumberConverter : JsonConverter<bool>
+        public sealed class NumberPreferringTextAllowingBoolConverter : JsonConverter<bool>
         {
-            public static readonly BoolStringNumberConverter Singleton = new();
+            public static readonly NumberPreferringTextAllowingBoolConverter Singleton = new();
 
-            private BoolStringNumberConverter()
+            private NumberPreferringTextAllowingBoolConverter()
             {
             }
 
@@ -120,12 +133,17 @@ namespace Apache.Druid.Querying.Json
                     JsonTokenType.False => false,
                     JsonTokenType.String when reader.ValueTextEquals("true") || reader.ValueTextEquals("True") => true,
                     JsonTokenType.String when reader.ValueTextEquals("false") || reader.ValueTextEquals("False") => false,
-                    JsonTokenType.Number => reader.GetInt32() is 1,
+                    JsonTokenType.Number => reader.GetInt32() switch
+                    {
+                        1 => true,
+                        0 => false,
+                        var other => throw new JsonException($"Could not deserialize {other} to {typeof(bool)}.")
+                    },
                     _ => throw new JsonException($"Could not deserialize {reader.GetString()} to {typeof(bool)}.")
                 };
 
             public override void Write(Utf8JsonWriter writer, bool value, JsonSerializerOptions options)
-                => writer.WriteBooleanValue(value);
+                => writer.WriteNumberValue(value ? 1 : 0);
         }
 
         public sealed class IntervalConverter : JsonConverter<Interval>
@@ -243,7 +261,7 @@ namespace Apache.Druid.Querying.Json
                 static bool ReadToPropertyValue(ref Utf8JsonReader reader, out Property result)
                 {
                     reader.Read();
-                    if (reader.TokenType is JsonTokenType.EndObject) 
+                    if (reader.TokenType is JsonTokenType.EndObject)
                     {
                         result = default;
                         return false;

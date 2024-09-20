@@ -8,7 +8,7 @@ namespace Apache.Druid.Querying.Microsoft.Extensions.DependencyInjection
     public class DataSourceProviderBuilder
     {
         public DataSourceProviderBuilder(
-            IHttpClientBuilder clientBuilder, 
+            IHttpClientBuilder clientBuilder,
             JsonSerializerOptions querySerializerOptions,
             JsonSerializerOptions dataSerializerOptions)
         {
@@ -51,8 +51,8 @@ namespace Apache.Druid.Querying.Microsoft.Extensions.DependencyInjection
             var clientId = Guid.NewGuid().ToString();
             var clientBuilder = services.AddHttpClient(clientId);
             clientBuilder.ConfigureHttpClient(client => client.BaseAddress = druidRouterUri);
-            var querySerlializerOptions = DefaultSerializerOptions.Create();
-            var dataSerializerOptions = DefaultSerializerOptions.Create();
+            var querySerlializerOptions = new JsonSerializerOptions(DefaultSerializerOptions.Query);
+            var dataSerializerOptions = new JsonSerializerOptions(DefaultSerializerOptions.Data);
             services
                 .AddSingleton<IDataSourceInitializer, TProvider>()
                 .AddSingleton(services =>

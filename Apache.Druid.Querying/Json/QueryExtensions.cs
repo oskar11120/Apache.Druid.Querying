@@ -10,7 +10,6 @@ namespace Apache.Druid.Querying.Json
 {
     public static class QueryExtensions
     {
-        private static readonly JsonSerializerOptions defaultSerializerOptions = DefaultSerializerOptions.Create();
         private static readonly ConcurrentDictionary<Type, MethodInfo[]> cache = new();
 
         internal static JsonObject MapToJson(
@@ -40,7 +39,7 @@ namespace Apache.Druid.Querying.Json
             JsonSerializerOptions? serializerOptions = null)
             => MapToJson(
                 query,
-                serializerOptions ?? defaultSerializerOptions,
+                serializerOptions ?? DefaultSerializerOptions.Query,
                 PropertyColumnNameMapping.ImmutableBuilder.Create<TSource>());
     }
 }

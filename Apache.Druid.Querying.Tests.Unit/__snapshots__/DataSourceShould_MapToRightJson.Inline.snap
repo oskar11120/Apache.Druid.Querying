@@ -1,0 +1,20 @@
+﻿{
+  "queryType": "scan",
+  "dataSource": {
+    "type": "inline",
+    "rows": [
+      [
+        946774860000,
+        946774860000,
+        1,
+        1.5
+      ]
+    ],
+    "columnNames": [
+      "__time",
+      "DateTime",
+      "Boolean",
+      "Number"
+    ]
+  }
+}
