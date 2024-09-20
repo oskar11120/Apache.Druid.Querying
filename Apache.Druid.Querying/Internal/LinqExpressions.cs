@@ -68,15 +68,24 @@ namespace Apache.Druid.Querying.Internal
 
     internal readonly record struct SelectedProperty(Type Type, string Name, Type SelectedFromType)
     {
-        public static SelectedProperty Get(Expression selectorBody)
+        public static bool TryGet(Expression selectorBody, out SelectedProperty result)
         {
             selectorBody = selectorBody.UnwrapUnary();
-            var expression = (MemberExpression)selectorBody;
+            if (selectorBody is not MemberExpression expression || expression.Member is not PropertyInfo property)
+            {
+                result = default;
+                return false;
+            }
+
             var name = expression.Member.Name;
-            var property = expression.Member as PropertyInfo 
-                ?? throw new InvalidOperationException($"{selectorBody} is not a property selector.");
             var selectedFromExpression = expression.Expression?.UnwrapUnary();
-            return new(property.PropertyType, name, selectedFromExpression?.Type ?? property.DeclaringType!);
+            result = new(property.PropertyType, name, selectedFromExpression?.Type ?? property.DeclaringType!);
+            return true;
         }
+
+        public static SelectedProperty Get(Expression selectorBody)
+            => TryGet(selectorBody, out var result) ?
+            result :
+            throw new InvalidOperationException($"{selectorBody} is not a property selector.");
     }
 }

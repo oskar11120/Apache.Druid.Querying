@@ -1,6 +1,9 @@
 ﻿using Apache.Druid.Querying.DependencyInjection;
+using Apache.Druid.Querying.Internal;
 using Apache.Druid.Querying.Json;
+using FluentAssertions;
 using Snapshooter.NUnit;
+using System.Linq.Expressions;
 
 namespace Apache.Druid.Querying.Tests.Unit;
 internal class DataSerializerShould_ApplyTo
@@ -50,7 +53,7 @@ internal class DataSerializerShould_ApplyTo
                 type.Selector(data => data.Timestamp, t),
                 type.Bound(data => data.Boolean, false, true),
                 type.Bound(data => data.Timestamp, t, t)));
-        Verify(query);            
+        Verify(query);
     }
 
     [Test]
@@ -86,5 +89,17 @@ internal class DataSerializerShould_ApplyTo
             .MapQueryToJson(query)
             .ToString();
         Snapshot.Match(json);
+    }
+
+    [Test]
+    public void DruidExpressionConstants()
+    {
+        var text = "text";
+        var number = 1.5;
+        var boolean = true;
+        var columnMappings = PropertyColumnNameMapping.ImmutableBuilder.Create<Data>();
+        Expression<QueryElementFactory<Data>.DruidExpression> factory = data => $"'{text}' {number} {boolean} {t}";
+        var result = DruidExpression.Map(factory, columnMappings, DefaultSerializerOptions.Data).Expression;
+        result.Should().Be("'text' 1.5 1 946774860000");
     }
 }

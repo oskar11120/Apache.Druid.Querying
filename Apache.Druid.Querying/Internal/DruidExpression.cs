@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Apache.Druid.Querying.Internal.Sections;
+using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.Json;
@@ -10,27 +10,25 @@ namespace Apache.Druid.Querying.Internal
     internal static class DruidExpression
     {
         public static MapResult Map(
-            LambdaExpression factory, 
+            LambdaExpression factory,
             PropertyColumnNameMapping.IProvider columnNameMappings,
             JsonSerializerOptions constantSerializerOptions)
             => Map(factory.Body, columnNameMappings, constantSerializerOptions);
 
         private static MapResult Map(
-            Expression expression, 
+            Expression expression,
             PropertyColumnNameMapping.IProvider columnNameMappings,
             JsonSerializerOptions constantSerializerOptions)
         {
             InvalidOperationException Invalid(string reason, Exception? inner = null)
                 => new($"Invalid Druid expression: {expression}. {reason}.", inner);
 
+            string MapValue(object? value) => value is string text ? 
+                text : 
+                JsonSerializer.Serialize(value, options: constantSerializerOptions);
+
             if (expression is ConstantExpression constant_)
-                return new(
-                    constant_.Value switch
-                    {
-                        string text => text,
-                        var any => JsonSerializer.Serialize(any, options: constantSerializerOptions)
-                    },
-                    Array.Empty<string>());
+                return new(MapValue(constant_.Value), Array.Empty<string>());
 
             if (expression is BinaryExpression binary && binary.NodeType is ExpressionType.Add)
             {
@@ -50,25 +48,25 @@ namespace Apache.Druid.Querying.Internal
                 if (param is NewArrayExpression array)
                     return array.Expressions.SelectMany(Map_);
 
-                if(param is ConstantExpression constant)
-                    return new[] { constant.Value?.ToString() ?? string.Empty };
-
                 if (param is ConditionalExpression ternary)
                     return Map_(ternary.EvaluateCondition());
 
-                SelectedProperty member;
+                if (SelectedProperty.TryGet(param, out var property))
+                {
+                    const char prefixSuffix = '"';
+                    var @string = prefixSuffix + columnNameMappings.GetColumnName(property.SelectedFromType, property.Name) + prefixSuffix;
+                    return new[] { @string };
+                }
+
                 try
                 {
-                    member = SelectedProperty.Get(@param);
+                    var value = param.GetValue();
+                    return new[] { MapValue(value) };
                 }
                 catch (Exception exception)
                 {
-                    throw Invalid(exception.Message, exception);
+                    throw Invalid($"Error evaluating expression: {param}.", exception);
                 }
-
-                const char prefixSuffix = '"';
-                var @string = prefixSuffix + columnNameMappings.GetColumnName(member.SelectedFromType, member.Name) + prefixSuffix;
-                return new[] { @string };
             }
 
             var arguments = call.Arguments;
