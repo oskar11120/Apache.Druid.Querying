@@ -22,7 +22,7 @@ internal class DataSerializerShould_ApplyTo
             .WithAggregations<Aggregations>()
             .Aggregations(type => new Aggregations(
                 type.Expression(t, data => $"max({data.Timestamp}, _acc)"),
-                type.Expression(false, data => $"{data.Boolean} && _acc")))
+                type.Expression(true, data => $"{data.Boolean} && _acc")))
             .MapToJson()
             .ToString();
         Snapshot.Match(json);

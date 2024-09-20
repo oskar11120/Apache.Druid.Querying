@@ -340,6 +340,7 @@ namespace Apache.Druid.Querying
                     _ => call.MethodName.ToCamelCase()
                 },
                 SkipScalarParameter: static scalar => scalar.Type == typeof(SimpleDataType),
+                SerializeScalarParameterWithDataSerializer: static scalar => scalar.Name is "initialValue",
                 ExpressionColumnNamesKey: "fields"));
             return query.Self;
         }
