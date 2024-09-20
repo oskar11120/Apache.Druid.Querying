@@ -1,4 +1,5 @@
 using Apache.Druid.Querying.Json;
+using FluentAssertions;
 using Snapshooter;
 using Snapshooter.NUnit;
 using System.Runtime.CompilerServices;
@@ -419,6 +420,20 @@ namespace Apache.Druid.Querying.Tests.Unit
             }
 
             Test<IotMeasurement>();
+        }
+
+        [Test]
+        public void OnMapToJson()
+        {
+            var zero = new Query<IotMeasurement>
+                .Scan()
+                .Interval(new(t, t))
+                .OnMapToJson((_, json) => json.Add("first", 1));
+            var one = zero
+                .Copy()
+                .OnMapToJson((_, json) => json.Add("second", 2));
+            AssertMatch(zero);
+            AssertMatch(one);
         }
 
         interface IIotMeasurement

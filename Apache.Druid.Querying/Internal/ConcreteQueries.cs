@@ -90,7 +90,8 @@ namespace Apache.Druid.Querying.Internal
         IQueryWith.Intervals,
         IQueryWithInternal.MutableSectionAtomicity,
         IQueryWithInternal.SectionFactoryExpressionStates,
-        IQueryWithInternal.PropertyColumnNameMappingChanges
+        IQueryWithInternal.PropertyColumnNameMappingChanges,
+        IQueryWith.OnMapToJson
     {
         public QueryBase(string? type = null)
             => (this as IQueryWithInternal.Section<QueryBaseInternalState>)
@@ -101,6 +102,7 @@ namespace Apache.Druid.Querying.Internal
         Dictionary<string, GetQuerySectionJson>? IQueryWithInternal.State<Dictionary<string, GetQuerySectionJson>>.State { get; set; }
         QuerySectionState<IReadOnlyCollection<Interval>>? IQueryWithInternal.State<QuerySectionState<IReadOnlyCollection<Interval>>>.State { get; set; }
         ImmutableDictionary<Type, ApplyPropertyColumnNameMappingChanges>? IQueryWithInternal.State<ImmutableDictionary<Type, ApplyPropertyColumnNameMappingChanges>>.State { get; set; }
+        List<OnMapQueryToJson>? IQueryWithInternal.State<List<OnMapQueryToJson>>.State { get; set; }
     }
 
     public static class QueryBase<TSource, TArguments, TSelf> where TSelf : IQueryWith.Self<TSelf>

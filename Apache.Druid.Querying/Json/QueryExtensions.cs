@@ -27,6 +27,11 @@ namespace Apache.Druid.Querying.Json
             var parameters = new object[] { result, serializerOptions, columNames };
             foreach (var method in methods)
                 method.Invoke(query, parameters);
+            if (query is IQueryWith.OnMapToJson onMapToJson && onMapToJson.State is not null)
+                foreach (var onMap in onMapToJson.State)
+                {
+                    onMap(query, result);
+                }
             return result;
         }
 

@@ -8,6 +8,7 @@ using System.Linq.Expressions;
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text.Json.Nodes;
+using System.Collections.Immutable;
 
 namespace Apache.Druid.Querying
 {
@@ -140,7 +141,11 @@ namespace Apache.Druid.Querying
             TSelf Self => (TSelf)this;
         }
 
-        //public interface OnMapToJson : State<>
+        public interface OnMapToJson : State<List<OnMapQueryToJson>>
+        {
+            void State<List<OnMapQueryToJson>>.CopyFrom(State<List<OnMapQueryToJson>> other)
+                => State = other.State?.ToList();
+        }
 
         public interface VirtualColumns<out TArguments, TVirtualColumns, out TSelf> :
             SectionFactoryExpression<TArguments, TVirtualColumns, SectionKind.VirtualColumns>,
@@ -293,6 +298,14 @@ namespace Apache.Druid.Querying
             var @new = (TQuery)Activator.CreateInstance(runtimeType)!;
             copy(query, @new);
             return @new;
+        }
+
+        public static TQuery OnMapToJson<TQuery>(this TQuery query, OnMapQueryToJson onMap) 
+            where TQuery : IQueryWith.OnMapToJson
+        {
+            var state = query.State ??= new();
+            query.State.Add(onMap);
+            return query;
         }
 
         public static TQuery VirtualColumns<TArguments, TVirtualColumns, TQuery>(
