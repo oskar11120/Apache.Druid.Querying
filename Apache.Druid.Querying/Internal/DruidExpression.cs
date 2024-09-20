@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -16,7 +17,14 @@ namespace Apache.Druid.Querying.Internal
                 => new($"Invalid Druid expression: {expression}. {reason}.", inner);
 
             if (expression is ConstantExpression constant_)
-                return new(constant_.Value?.ToString() ?? string.Empty, Array.Empty<string>());
+                return new(
+                    constant_.Value switch
+                    {
+                        string text => text,
+                        IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
+                        var any => any?.ToString() ?? string.Empty
+                    }, 
+                    Array.Empty<string>());
 
             if (expression is BinaryExpression binary && binary.NodeType is ExpressionType.Add)
             {
