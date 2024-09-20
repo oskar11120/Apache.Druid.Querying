@@ -196,13 +196,13 @@ namespace Apache.Druid.Querying.Internal
                 QueryResultDeserializationContext context, [EnumeratorCancellation] CancellationToken token)
             {
                 var json = context.Json;
-                async ValueTask<int> ReadThroghWholeAsync(bool updateState = true)
+                async ValueTask<int> ReadThroughWholeAsync(bool updateState = true)
                     => (int)await json.ReadToTokenAsync(
                         JsonTokenType.EndObject,
                         json.Depth + (json.TokenType is JsonTokenType.StartArray ? 1 : 0),
                         token,
                         updateState);
-                var read = await ReadThroghWholeAsync(updateState: false);
+                var read = await ReadThroughWholeAsync(updateState: false);
                 TSelf Map_()
                 {
                     var span = json.GetSpan()[..read];
@@ -222,7 +222,7 @@ namespace Apache.Druid.Querying.Internal
                 }
 
                 yield return Map_();
-                await ReadThroghWholeAsync();
+                await ReadThroughWholeAsync();
             }
         }
     }
