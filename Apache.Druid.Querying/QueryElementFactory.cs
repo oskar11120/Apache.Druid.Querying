@@ -39,7 +39,7 @@ namespace Apache.Druid.Querying
         // 2. Method parameters are mapped to object properties, where parameter names match property names.
         // 3. If parameter is of type TColumn, its value is mapped to JsonValue using DataSerializer.
         // 4. If parameter is of type Expression<ColumnSelector<TColumn>>, its value is mapped to a colum name.
-        // Consider writing a general soluction with refrection or source generation.
+        // Consider writing a general soluction with reflection or source generation.
         public sealed class Filter : UsingArgumentColumnNames
         {
             public Filter(PropertyColumnNameMapping.IProvider columnNames) : base(columnNames)
