@@ -2,7 +2,7 @@
 using Apache.Druid.Querying.Json;
 using FluentAssertions;
 using Scan = Apache.Druid.Querying.Internal.TruncatedQueryResultHandler<Apache.Druid.Querying.None>
-    .Scan<Apache.Druid.Querying.ScanResult<Apache.Druid.Querying.None>>;
+    .Scan<Apache.Druid.Querying.None>;
 using TimeSeries = Apache.Druid.Querying.Internal.TruncatedQueryResultHandler<Apache.Druid.Querying.None>
     .TimeSeries<Apache.Druid.Querying.None>;
 using TopN_GroupBy = Apache.Druid.Querying.Internal.TruncatedQueryResultHandler<bool>
@@ -24,13 +24,14 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
             var query = new Query<None>.Scan().Limit(1000) as Scan;
             var latest = new Scan.LatestResult();
             var setter = new Mutable<IQueryWith.Source<None>>();
+            var mapping = PropertyColumnNameMapping.ImmutableBuilder.Create<None>();
             async Task Execute(int start, int count, bool truncate = true)
             {
                 var results = Enumerable
                     .Range(start, count)
                     .Select(_ => new ScanResult<None>(null, None.Singleton));
                 (await query
-                    .OnTruncatedResultsSetQueryForRemaining(MaybeTruncate(results, truncate), latest, setter, default)
+                    .OnTruncatedResultsSetQueryForRemaining(MaybeTruncate(results, truncate), latest, setter, mapping, default)
                     .ToListAsync())
                     .Should()
                     .BeEquivalentTo(results);
@@ -101,7 +102,8 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
         public async Task TopN_GroupBy()
         {
             var t0 = DateTime.Today;
-            var latest = new TopN_GroupBy.LatestReturned();
+            var latest = new TruncatedQueryResultHandler<bool>
+                .Implementation_WithTimeOrderedResults_AndMultipleResultsPerTimestamp_Context<bool>();
             var setter = new Mutable<IQueryWith.Source<bool>>();
             var deltaT = TimeSpan.FromHours(1);
             var query = new Query<bool>.TopN<bool>().Interval(new(t0, t0.AddDays(1))) as TopN_GroupBy;

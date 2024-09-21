@@ -168,6 +168,7 @@ namespace Apache.Druid.Querying.Internal
             TopN_<TDimension, TDimension>,
             DimensionsProvider<TDimension>.Identity,
             TruncatedQueryResultHandler<TSource>.TopN_GroupBy<TDimension, TDimension>
+            where TDimension : IEquatable<TDimension>
         {
         }
 
@@ -176,6 +177,7 @@ namespace Apache.Druid.Querying.Internal
             DimensionsProvider<TDimension>.FromResult<Dimension_Aggregations<TDimension, TAggregations>>,
             TruncatedQueryResultHandler<TSource>.TopN_GroupBy<Dimension_Aggregations<TDimension, TAggregations>, TDimension>,
             IQueryWith.Aggregations<TArguments, TAggregations, TSelf>
+            where TDimension : IEquatable<TDimension>
         {
         }
 
@@ -185,6 +187,7 @@ namespace Apache.Druid.Querying.Internal
             TruncatedQueryResultHandler<TSource>.TopN_GroupBy<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>, TDimension>,
             IQueryWith.Aggregations<TArguments, TAggregations, TSelf>,
             IQueryWith.PostAggregations<TAggregations, TPostAggregations, TSelf>
+            where TDimension : IEquatable<TDimension>
         {
         }
 
@@ -213,6 +216,7 @@ namespace Apache.Druid.Querying.Internal
             GroupBy_<TDimensions, TDimensions>,
             DimensionsProvider<TDimensions>.Identity,
             TruncatedQueryResultHandler<TSource>.TopN_GroupBy<TDimensions, TDimensions>
+            where TDimensions : IEquatable<TDimensions>
         {
         }
 
@@ -221,6 +225,7 @@ namespace Apache.Druid.Querying.Internal
             DimensionsProvider<TDimensions>.FromResult<Dimensions_Aggregations<TDimensions, TAggregations>>,
             TruncatedQueryResultHandler<TSource>.TopN_GroupBy<Dimensions_Aggregations<TDimensions, TAggregations>, TDimensions>,
             IQueryWith.Aggregations<TArguments, TAggregations, TSelf>
+            where TDimensions : IEquatable<TDimensions>
         {
         }
 
@@ -242,7 +247,7 @@ namespace Apache.Druid.Querying.Internal
             IQueryWith.BatchSize,
             IQueryWith.Context<QueryContext.Scan, TSelf>,
             QueryResultDeserializer.ArrayOfScanResults<TColumns>,
-            TruncatedQueryResultHandler<TSource>.Scan<ScanResult<TColumns>>
+            TruncatedQueryResultHandler<TSource>.Scan<TColumns>
         {
             public Scan() : base("scan")
             {

@@ -49,6 +49,12 @@ namespace Apache.Druid.Querying
     internal sealed class TruncatedQueryResultHandlingContext
     {
         public object? State;
+        public PropertyColumnNameMapping.IProvider ColumnNameMappings;
+
+        public TruncatedQueryResultHandlingContext(PropertyColumnNameMapping.IProvider columnNameMappings)
+        {
+            ColumnNameMappings = columnNameMappings;
+        }
     }
 
     public static partial class IQueryWith
@@ -206,13 +212,14 @@ namespace Apache.Druid.Querying
             var deserializer = query;
             var truncatedResultHandler = query;
             byte[]? buffer = null;
-            var resultContext = new TruncatedQueryResultHandlingContext();
+            var resultContext = new TruncatedQueryResultHandlingContext(mappings);
             async IAsyncEnumerable<TResult> Deserialize(Stream utf8Json, [EnumeratorCancellation] CancellationToken token)
             {
                 buffer ??= ArrayPool<byte>.Shared.Rent(Context.DataSerializerOptions.DefaultBufferSize);
                 var read = await utf8Json.ReadAsync(buffer, token);
+                var streamReader = new JsonStreamReader(utf8Json, buffer, read);
                 var results = deserializer
-                    .Deserialize(new(new(utf8Json, buffer, read), Context.DataSerializerOptions, atomicity, mappings), token);
+                    .Deserialize(new(streamReader, Context.DataSerializerOptions, atomicity, mappings), token);
                 queryForRemaining.Value = null;
                 if (onTruncatedResultsQueryRemaining)
                     results = truncatedResultHandler.OnTruncatedResultsSetQueryForRemaining(results, resultContext, queryForRemaining, token);

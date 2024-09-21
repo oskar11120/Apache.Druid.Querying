@@ -4,12 +4,18 @@ using static Apache.Druid.Querying.Tests.Integration.ServiceProvider;
 
 namespace Apache.Druid.Querying.Tests.Integration;
 
-internal class Given2MBQuery_TruncatedResultHandlingShouldHandle : TruncatedResultHandlingShouldHandle<ScanResult<Edit>>
+[TestFixture(null)]
+[TestFixture(OrderDirection.Ascending)]
+internal class Given2MBScanQuery_TruncatedResultHandlingShouldHandle(OrderDirection? order) 
+    : TruncatedResultHandlingShouldHandle<ScanResult<Edit>>
 {
+    private readonly OrderDirection? order = order;
+
     protected override IQueryWith.SourceAndResult<Edit, ScanResult<Edit>> Query
         => new Query<Edit>
         .Scan()
         .Interval(new(DateTimeOffset.MinValue, DateTimeOffset.MaxValue))
+        .Order(order)
         .Context(new QueryContext.Scan { PopulateCache = false, PopulateResultLevelCache = false, UseCache = false, UseResultLevelCache = false, MaxQueuedBytes = 10000000 });
 }
 
@@ -65,7 +71,7 @@ internal sealed record PostAggregations(
     double? TwentyThree,
     double? TwentyFour);
 
-internal class Given5MBQuery_TruncatedResultHandlingShouldHandle
+internal class Given5MBAggreegationsQuery_TruncatedResultHandlingShouldHandle
     : TruncatedResultHandlingShouldHandle<WithTimestamp<Aggregations_PostAggregations<Aggregations, PostAggregations>>>
 {
     protected override IQueryWith.SourceAndResult<Edit, WithTimestamp<Aggregations_PostAggregations<Aggregations, PostAggregations>>> Query
