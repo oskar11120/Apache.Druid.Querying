@@ -134,7 +134,7 @@ internal class Given5MBQuery_TruncatedResultHandlingShouldHandle
         => result.Value.Aggregations.Timestamp is null;
 }
 
-[NonParallelizable]
+[NonParallelizable, Order(1)]
 internal abstract class TruncatedResultHandlingShouldHandle<TResult>
 {
     protected abstract IQueryWith.SourceAndResult<Edit, TResult> Query { get; }

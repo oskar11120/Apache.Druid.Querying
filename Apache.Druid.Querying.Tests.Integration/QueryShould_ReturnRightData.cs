@@ -50,6 +50,7 @@ internal record SomeEditColumns(
     public static readonly Func<Edit, SomeEditColumns> FromEdit = FromEditExpression.Compile();
 }
 
+[Order(0)]
 internal class QueryShould_ReturnRightData
 {
     private static async Task VerifyMatch<TSource, TResult, TContext>(

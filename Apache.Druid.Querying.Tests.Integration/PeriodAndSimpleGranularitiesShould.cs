@@ -7,6 +7,7 @@ using static Apache.Druid.Querying.Tests.Integration.ServiceProvider;
 
 namespace Apache.Druid.Querying.Tests.Integration;
 
+[Order(0)]
 internal class PeriodAndSimpleGranularitiesShould
 {
     public static readonly DateTimeOffset T0 = DateTimeOffset.Parse("2016-06-27T00:00:00.000Z", CultureInfo.InvariantCulture);
@@ -31,8 +32,7 @@ internal class PeriodAndSimpleGranularitiesShould
             .Interval(new(T0.AddDays(-10), T0.AddDays(10)))
             .Granularity(granularity, timeZone);
 
-        var serializerOptions = new JsonSerializerOptions(DefaultSerializerOptions.Query) { WriteIndented = true };
-        var json = Wikipedia.Edits.MapQueryToJson(query).ToJsonString(serializerOptions);
+        var json = Wikipedia.Edits.MapQueryToJson(query).ToString();
         TestContext.Out.WriteLine(json);
 
         var results = await Wikipedia.Edits.ExecuteQuery(query).ToListAsync();

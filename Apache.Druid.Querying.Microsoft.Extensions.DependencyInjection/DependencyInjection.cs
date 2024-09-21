@@ -51,8 +51,8 @@ namespace Apache.Druid.Querying.Microsoft.Extensions.DependencyInjection
             var clientId = Guid.NewGuid().ToString();
             var clientBuilder = services.AddHttpClient(clientId);
             clientBuilder.ConfigureHttpClient(client => client.BaseAddress = druidRouterUri);
-            var querySerlializerOptions = new JsonSerializerOptions(DefaultSerializerOptions.Query);
-            var dataSerializerOptions = new JsonSerializerOptions(DefaultSerializerOptions.Data);
+            var querySerlializerOptions = DefaultSerializerOptions.Query.Create();
+            var dataSerializerOptions = DefaultSerializerOptions.Data.Create();
             services
                 .AddSingleton<IDataSourceInitializer, TProvider>()
                 .AddSingleton(services =>

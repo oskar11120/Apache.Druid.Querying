@@ -4,14 +4,20 @@ using Apache.Druid.Querying.Json;
 using FluentAssertions;
 using Snapshooter.NUnit;
 using System.Linq.Expressions;
+using System.Text.Json;
 
 namespace Apache.Druid.Querying.Tests.Unit;
 internal class DataSerializerShould_ApplyTo
 {
+    private static readonly JsonSerializerOptions dataSerializerOptions = DefaultSerializerOptions
+        .Data
+        .Create()
+        .SerializeBoolsAsNumbers()
+        .SerializeDateTimeAndDateTimeOffsetAsUnixMiliseconds();
     private static void Verify(IQueryWith.Source<Data> query)
     {
         var json = query
-            .MapToJson()
+            .MapToJson(dataSerializerOptions: dataSerializerOptions)
             .ToString();
         Snapshot.Match(json);
     }
@@ -79,8 +85,8 @@ internal class DataSerializerShould_ApplyTo
     {
         var provider = new InlineDataSourceProvider();
         (provider as IDataSourceInitializer).Initialize(new(
-            DefaultSerializerOptions.Query,
-            DefaultSerializerOptions.Data,
+            DefaultSerializerOptions.Query.ReadOnlySingleton,
+            dataSerializerOptions,
             () => throw new NotSupportedException()));
 
         var query = new Query<Inline_Data>.Scan();
@@ -99,7 +105,7 @@ internal class DataSerializerShould_ApplyTo
         var boolean = true;
         var columnMappings = PropertyColumnNameMapping.ImmutableBuilder.Create<Data>();
         Expression<QueryElementFactory<Data>.DruidExpression> factory = data => $"'{text}' {number} {boolean} {t}";
-        var result = DruidExpression.Map(factory, columnMappings, DefaultSerializerOptions.Data).Expression;
+        var result = DruidExpression.Map(factory, columnMappings, dataSerializerOptions).Expression;
         result.Should().Be("'text' 1.5 1 946774860000");
     }
 }

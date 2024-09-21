@@ -40,8 +40,8 @@ namespace Apache.Druid.Querying.Json
             => MapToJson(
                 query,
                 new QueryToJsonMappingContext(
-                    querySerializerOptions ?? DefaultSerializerOptions.Query,
-                    dataSerializerOptions ?? DefaultSerializerOptions.Data,
+                    querySerializerOptions ?? DefaultSerializerOptions.Query.ReadOnlySingleton,
+                    dataSerializerOptions ?? DefaultSerializerOptions.Data.ReadOnlySingleton,
                     PropertyColumnNameMapping.ImmutableBuilder.Create<TSource>()));
     }
 }
