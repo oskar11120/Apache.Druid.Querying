@@ -264,9 +264,7 @@ public static class TruncatedQueryResultHandler<TSource>
                     this,
                     token);
                 await foreach (var result in results)
-                {
                     yield return result;
-                }
                 yield break;
             }
 
