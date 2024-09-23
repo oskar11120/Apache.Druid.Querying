@@ -346,8 +346,6 @@ namespace Apache.Druid.Querying
                             .Select(pair => new PropertyMapping(pair.PropertyName, SelectedProperty.Get(pair.AssignedValue)))
                             .ToArray();
                         SelectedProperties.State = propertyMappings;
-
-
                         MappingChanges.Set<TColumns>(mappings =>
                         {
                             var columnMappings = Get(mappings, SelectedProperties.State)
@@ -373,18 +371,13 @@ namespace Apache.Druid.Querying
         {
             public SegmentMetadata Merge(bool merge)
             {
-                MergeSection.SetState(nameof(Merge), new(merge), state => state.Merge);
+                MergeSection.State = new(merge);
                 return this;
             }
 
             public SegmentMetadata AnalysisTypes(IReadOnlyCollection<Querying.SegmentMetadata.AnalysisType> types)
             {
-                AnalysisTypesSection.SetState(
-                    nameof(AnalysisTypes),
-                    types,
-                    (types, context) => JsonSerializer.SerializeToNode(
-                        types.Select(type => AnalysisTypeStrings[type]),
-                        context.QuerySerializerOptions));
+                AnalysisTypesSection.State = types;
                 return this;
             }
 
@@ -393,7 +386,7 @@ namespace Apache.Druid.Querying
 
             public SegmentMetadata AggregatorMergeStrategy(Querying.SegmentMetadata.AggregatorMergeStrategy strategy)
             {
-                MergeStrategySection.SetState(nameof(AggregatorMergeStrategy), strategy);
+                MergeStrategySection.State = strategy;
                 return this;
             }
         }
@@ -402,9 +395,9 @@ namespace Apache.Druid.Querying
             QueryBase,
             IQueryWith.Context<Context, DataSourceMetadata>,
             QueryResultDeserializer.ArrayOfObjectsWithTimestamp<Querying.DataSourceMetadata>,
-            TruncatedQueryResultHandler<TSource>.TimeSeries<Querying.DataSourceMetadata>
+            TruncatedQueryResultHandler<TSource>.DataSourceMetadata
         {
-            QuerySectionState<Context>? IQueryWithInternal.State<QuerySectionState<Context>>.State { get; set; }
+            Context? IQueryWithInternal.State<Context>.State { get; set; }
         }
     }
 }
