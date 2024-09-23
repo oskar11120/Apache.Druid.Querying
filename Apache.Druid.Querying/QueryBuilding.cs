@@ -173,20 +173,20 @@ namespace Apache.Druid.Querying
                 => nameof(PostAggregations<TArguments, TPostAggregations, TSelf>);
         }
 
-        public interface Dimesion<out TArguments, TDimension, out TSelf> :
+        public interface Dimension<out TArguments, TDimension, out TSelf> :
             SectionFactoryExpression<TArguments, TDimension, SectionKind.Dimension>,
             Self<TSelf>
         {
             string Section<SectionFactoryExpressionState<SectionKind.Dimension>>.Key
-                => nameof(Dimesion<TArguments, TDimension, TSelf>);
+                => nameof(Dimension<TArguments, TDimension, TSelf>);
         }
 
-        public interface Dimesions<out TArguments, TDimensions, out TSelf> :
+        public interface Dimensions<out TArguments, TDimensions, out TSelf> :
             SectionFactoryExpression<TArguments, TDimensions, SectionKind.Dimensions>,
             Self<TSelf>
         {
             string Section<SectionFactoryExpressionState<SectionKind.Dimensions>>.Key
-                => nameof(Dimesions<TArguments, TDimensions, TSelf>);
+                => nameof(Dimensions<TArguments, TDimensions, TSelf>);
         }
 
         public interface Filter<out TArguments, out TSelf> :
@@ -290,9 +290,11 @@ namespace Apache.Druid.Querying
             string Section<CreateSection<IHaving>>.Key => nameof(Having);
         }
 
-        public interface BatchSize : Section<BatchSize.InternalState>
+        public interface BatchSize : StateMappedToSection<BatchSize.InternalState, int>
         {
             string Section<InternalState>.Key => nameof(BatchSize);
+            int StateMappedToSection<BatchSize.InternalState, int>.ToSection(IQueryWith.BatchSize.InternalState state)
+                => state.BatchSize;
             public sealed record InternalState(int BatchSize);
             int? BatchSize => State?.BatchSize;
         }
@@ -423,7 +425,7 @@ namespace Apache.Druid.Querying
 
         private static readonly SectionFactoryJsonMapper.Options dimensionsMapperOptions = new(SectionColumnNameKey: "outputName");
         public static TQuery Dimensions<TArguments, TDimensions, TQuery>(
-            this IQueryWith.Dimesions<TArguments, TDimensions, TQuery> query,
+            this IQueryWith.Dimensions<TArguments, TDimensions, TQuery> query,
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IDimensions, TDimensions>> factory)
         {
             query.SetState(factory, dimensionsMapperOptions);
@@ -432,7 +434,7 @@ namespace Apache.Druid.Querying
 
         private static readonly SectionFactoryJsonMapper.Options dimensionMapperOptions = dimensionsMapperOptions with { ForceSingle = true };
         public static TQuery Dimension<TArguments, TDimension, TQuery>(
-            this IQueryWith.Dimesion<TArguments, TDimension, TQuery> query,
+            this IQueryWith.Dimension<TArguments, TDimension, TQuery> query,
             Expression<QuerySectionFactory<QueryElementFactory<TArguments>.IDimensions, TDimension>> factory)
         {
             query.SetState(factory, dimensionMapperOptions);

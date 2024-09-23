@@ -3,13 +3,6 @@
   "intervals": [
     "2000-01-02T01:01:00.0000000\u002B00:00/2000-01-02T01:01:00.0000000\u002B00:00"
   ],
-  "aggregations": [
-    {
-      "type": "floatLast",
-      "name": "Aggregations",
-      "fieldName": "value"
-    }
-  ],
   "granularity": "minute",
   "filter": {
     "fields": [
@@ -25,5 +18,12 @@
       }
     ],
     "type": "or"
-  }
+  },
+  "aggregations": [
+    {
+      "type": "floatLast",
+      "name": "Aggregations",
+      "fieldName": "value"
+    }
+  ]
 }
