@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 
 namespace Apache.Druid.Querying.Internal.Sections
 {
-    internal sealed record ElementFactoryCall(
+    public sealed record ElementFactoryCall(
         string? ResultMemberName,
         string MethodName,
         IReadOnlyList<ElementFactoryCall.Parameter.Any> Parameters)

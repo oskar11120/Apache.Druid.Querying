@@ -103,7 +103,7 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
         {
             var t0 = DateTime.Today;
             var latest = new TruncatedQueryResultHandler<bool>
-                .Implementation_WithTimeOrderedResults_AndMultipleResultsPerTimestamp_Context<bool>();
+                .WithOrdered_AndMultiplePerTimestamp_Results_Context<bool>();
             var setter = new Mutable<IQueryWith.Source<bool>>();
             var deltaT = TimeSpan.FromHours(1);
             var query = new Query<bool>.TopN<bool>().Interval(new(t0, t0.AddDays(1))) as TopN_GroupBy;

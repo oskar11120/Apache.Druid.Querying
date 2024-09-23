@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Linq;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using static Apache.Druid.Querying.Internal.IQueryWithInternal;
 
 namespace Apache.Druid.Querying.Internal;
 
@@ -13,11 +14,7 @@ public sealed record QueryToJsonMappingContext(
     JsonSerializerOptions QuerySerializerOptions,
     JsonSerializerOptions DataSerializerOptions,
     PropertyColumnNameMapping.IProvider ColumnNames);
-public delegate JsonNode? QuerySectionToJson<TSection>(TSection Section, QueryToJsonMappingContext context);
-public sealed record QuerySectionState<TSection>(string Key, TSection Section, QuerySectionToJson<TSection>? SectionToJson = null);
 
-public delegate JsonNode? GetQuerySectionJson(QueryToJsonMappingContext context);
-public sealed record QuerySectionFactoryState<TMarker>(string Key, GetQuerySectionJson GetJson);
 public delegate PropertyColumnNameMapping.ImmutableBuilder ApplyPropertyColumnNameMappingChanges(
     PropertyColumnNameMapping.ImmutableBuilder existing);
 
@@ -43,60 +40,52 @@ public static class IQueryWithInternal
         internal void ApplyOnJson(JsonObject json, QueryToJsonMappingContext context);
     }
 
-    public interface Section<TSection> : JsonApplicableState<QuerySectionState<TSection>>
+    public interface Section<TSection> : JsonApplicableState<TSection>
     {
+        private protected abstract string Key { get; }
+
+        private protected virtual JsonNode? ToJson(TSection section, QueryToJsonMappingContext context)
+            => JsonSerializer.SerializeToNode(section, context.QuerySerializerOptions);
+
         protected internal TSection Require() => State is not null ?
-            State.Section :
+            State :
             throw new InvalidOperationException($"Mssing required query section: {typeof(TSection)}.")
             {
                 Data = { ["query"] = this }
             };
 
-        void JsonApplicableState<QuerySectionState<TSection>>.ApplyOnJson(
-            JsonObject json, QueryToJsonMappingContext context)
+        void JsonApplicableState<TSection>.ApplyOnJson(JsonObject json, QueryToJsonMappingContext context)
         {
             if (State is null)
                 return;
 
-            var (key, section, mapToJson) = State;
-            var sectionJson = mapToJson is null ?
-                JsonSerializer.SerializeToNode(section, context.QuerySerializerOptions) :
-                mapToJson(section, context);
+            var sectionJson = ToJson(State, context);
             if (sectionJson is not null)
-                json[key.ToCamelCase()] = sectionJson;
+                json[Key.ToCamelCase()] = sectionJson;
         }
-
-        internal void SetState(string key, TSection section, QuerySectionToJson<TSection>? sectionToJson = null)
-            => State = new(key, section, sectionToJson);
-
-        internal void SetState(string key, TSection section, Func<TSection, JsonNode?> sectionToJson)
-            => State = new(key, section, sectionToJson is null ? null : (section, _) => sectionToJson(section));
     }
 
-    private static void AddStateToJson(
-        string key, GetQuerySectionJson getJson, JsonObject json, QueryToJsonMappingContext context)
+    public delegate TSection CreateSection<TSection>(QueryToJsonMappingContext context);
+    public interface SectionFactory<TSection> : Section<CreateSection<TSection>>
     {
-        var sectionJson = getJson(context);
-        if (sectionJson is not null)
-            json[key.ToCamelCase()] = sectionJson;
-    }
-
-    public interface SectionFactory<TSection> : JsonApplicableState<QuerySectionFactoryState<TSection>>
-    {
-        void JsonApplicableState<QuerySectionFactoryState<TSection>>.ApplyOnJson(
-            JsonObject json, QueryToJsonMappingContext context)
+        JsonNode? Section<CreateSection<TSection>>.ToJson(
+            CreateSection<TSection> factory, QueryToJsonMappingContext context)
         {
-            if (State is null)
-                return;
-
-            AddStateToJson(State.Key, State.GetJson, json, context);
+            var section = factory(context);
+            return JsonSerializer.SerializeToNode(section, context.QuerySerializerOptions);
         }
+    }
 
-        internal void SetState(string key, GetQuerySectionJson getJson)
-            => State = new(key, getJson);
+    public interface StateMappedToSection<TState, TSection> : Section<TState>
+    {
+        private protected virtual TSection ToSection(TState state, QueryToJsonMappingContext context) => ToSection(state);
+        private protected virtual TSection ToSection(TState state) => throw new NotSupportedException();
 
-        internal void SetState(string key, Func<QueryToJsonMappingContext, TSection> factory)
-            => SetState(key, context => JsonSerializer.SerializeToNode(factory(context), context.QuerySerializerOptions));
+        JsonNode? Section<TState>.ToJson(TState state, QueryToJsonMappingContext context)
+        {
+            var section = ToSection(state, context);
+            return JsonSerializer.SerializeToNode(section, context.QuerySerializerOptions);
+        }
     }
 
     public interface SectionAtomicity : State<Sections.SectionAtomicity.ImmutableBuilder>
@@ -109,37 +98,22 @@ public static class IQueryWithInternal
         protected internal new Sections.SectionAtomicity.ImmutableBuilder SectionAtomicity { get => State ??= new(); set => State = value; }
     }
 
-    public interface SectionFactoryExpressionStates : JsonApplicableState<Dictionary<string, GetQuerySectionJson>>
-    {
-        private protected void SetState(string key, GetQuerySectionJson getJson)
-        {
-            State ??= new();
-            State.Remove(key);
-            State.Add(key, getJson);
-        }
-
-        void JsonApplicableState<Dictionary<string, GetQuerySectionJson>>.ApplyOnJson(
-            JsonObject json, QueryToJsonMappingContext context)
-        {
-            if (State is null)
-                return;
-
-            foreach (var (key, state) in State)
-                AddStateToJson(key, state, json, context);
-        }
-
-        void State<Dictionary<string, GetQuerySectionJson>>.CopyFrom(
-            State<Dictionary<string, GetQuerySectionJson>> other)
-            => State = other.State is null ? new() : new Dictionary<string, GetQuerySectionJson>(other.State);
-    }
-
-    public interface SectionFactoryExpression<out TArguments, TSection, out TSectionKind> :
+    public sealed record SectionFactoryExpressionState<TSectionKind>(
+        IReadOnlyList<ElementFactoryCall> Calls, 
+        Sections.SectionAtomicity Atomicity,
+        SectionFactoryJsonMapper.Options? MapperOptions);
+    public interface SectionFactoryExpression<out TArguments, TSection, TSectionKind> :
         MutableSectionAtomicity,
-        SectionFactoryExpressionStates
+        Section<SectionFactoryExpressionState<TSectionKind>>
         where TSectionKind : SectionKind
     {
+        private Section<SectionFactoryExpressionState<TSectionKind>> AsExpression => this;
+
+        JsonNode? Section<SectionFactoryExpressionState<TSectionKind>>.ToJson(SectionFactoryExpressionState<TSectionKind> state, QueryToJsonMappingContext context)
+            => SectionFactoryJsonMapper.Map<TArguments>(
+                state.Calls, state.Atomicity, context, state.MapperOptions ?? SectionFactoryJsonMapper.Options.Default);
+
         internal void SetState<TElementFactory>(
-            string key,
             Expression<QuerySectionFactory<TElementFactory, TSection>> factory,
             SectionFactoryJsonMapper.Options? mapperOptions = null)
         {
@@ -149,9 +123,8 @@ public static class IQueryWithInternal
                     typeof(TElementFactory),
                     typeof(TArguments))
                 .ToList();
-            SectionAtomicity = SectionAtomicity.Add<TSection>(calls, key, out var atomicity);
-            SetState(key, context => SectionFactoryJsonMapper.Map<TArguments>(
-                calls, atomicity, context, mapperOptions ?? SectionFactoryJsonMapper.Options.Default));
+            SectionAtomicity = SectionAtomicity.Add<TSection>(calls, Key, out var atomicity);
+            AsExpression.State = new SectionFactoryExpressionState<TSectionKind>(calls, atomicity, mapperOptions);
         }
     }
 

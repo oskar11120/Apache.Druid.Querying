@@ -84,25 +84,26 @@ namespace Apache.Druid.Querying.Internal
         }
     }
 
-    public sealed record QueryBaseInternalState(string Type);
+    public sealed record QueryTypeInternalState(string Type);
     public abstract class QueryBase :
-        IQueryWithInternal.Section<QueryBaseInternalState>,
+        IQueryWithInternal.StateMappedToSection<QueryTypeInternalState, string>,
         IQueryWith.Intervals,
         IQueryWithInternal.MutableSectionAtomicity,
-        IQueryWithInternal.SectionFactoryExpressionStates,
         IQueryWithInternal.PropertyColumnNameMappingChanges,
         IQueryWith.OnMapToJson
     {
+        string IQueryWithInternal.Section<QueryTypeInternalState>.Key => "queryType";
+        string IQueryWithInternal.StateMappedToSection<QueryTypeInternalState, string>.ToSection(QueryTypeInternalState state)
+            => state.Type;
         public QueryBase(string? type = null)
-            => (this as IQueryWithInternal.Section<QueryBaseInternalState>)
-            .SetState("queryType", new(type ?? GetType().Name.ToCamelCase()), state => state.Type);
+            => (this as IQueryWithInternal.Section<QueryTypeInternalState>)
+            .State = new(type ?? GetType().Name.ToCamelCase());
 
-        QuerySectionState<QueryBaseInternalState>? IQueryWithInternal.State<QuerySectionState<QueryBaseInternalState>>.State { get; set; }
         SectionAtomicity.ImmutableBuilder? IQueryWithInternal.State<SectionAtomicity.ImmutableBuilder>.State { get; set; }
-        Dictionary<string, GetQuerySectionJson>? IQueryWithInternal.State<Dictionary<string, GetQuerySectionJson>>.State { get; set; }
-        QuerySectionState<IReadOnlyCollection<Interval>>? IQueryWithInternal.State<QuerySectionState<IReadOnlyCollection<Interval>>>.State { get; set; }
         ImmutableDictionary<Type, ApplyPropertyColumnNameMappingChanges>? IQueryWithInternal.State<ImmutableDictionary<Type, ApplyPropertyColumnNameMappingChanges>>.State { get; set; }
         List<OnMapQueryToJson>? IQueryWithInternal.State<List<OnMapQueryToJson>>.State { get; set; }
+        QueryTypeInternalState? IQueryWithInternal.State<QueryTypeInternalState>.State { get; set; }
+        IReadOnlyCollection<Interval>? IQueryWithInternal.State<IReadOnlyCollection<Interval>>.State { get; set; }
     }
 
     public static class QueryBase<TSource, TArguments, TSelf> where TSelf : IQueryWith.Self<TSelf>
@@ -111,6 +112,7 @@ namespace Apache.Druid.Querying.Internal
             QueryBase,
             IQueryWith.DescendingFlag,
             IQueryWith.Granularity,
+            IQueryWith.Limit,
             IQueryWith.Filter<TArguments, TSelf>,
             IQueryWith.Context<QueryContext.TimeSeries, TSelf>,
             QueryResultDeserializer.ArrayOfObjectsWithTimestamp<TResult>,
@@ -120,10 +122,11 @@ namespace Apache.Druid.Querying.Internal
             {
             }
 
-            QuerySectionState<IQueryWith.DescendingFlag.InternalState>? IQueryWithInternal.State<QuerySectionState<IQueryWith.DescendingFlag.InternalState>>.State { get; set; }
-            QuerySectionState<Granularity>? IQueryWithInternal.State<QuerySectionState<Granularity>>.State { get; set; }
-            QuerySectionFactoryState<IFilter>? IQueryWithInternal.State<QuerySectionFactoryState<IFilter>>.State { get; set; }
-            QuerySectionState<QueryContext.TimeSeries>? IQueryWithInternal.State<QuerySectionState<QueryContext.TimeSeries>>.State { get; set; }
+            IQueryWith.DescendingFlag.InternalState? IQueryWithInternal.State<IQueryWith.DescendingFlag.InternalState>.State { get; set; }
+            Granularity? IQueryWithInternal.State<Granularity>.State { get; set; }
+            IQueryWithInternal.CreateSection<IFilter>? IQueryWithInternal.State<IQueryWithInternal.CreateSection<IFilter>>.State { get; set; }
+            QueryContext.TimeSeries? IQueryWithInternal.State<QueryContext.TimeSeries>.State { get; set; }
+            IQueryWith.Limit.InternalState? IQueryWithInternal.State<IQueryWith.Limit.InternalState>.State { get; set; }
         }
 
         public abstract class TimeSeries : TimeSeries_<None>
@@ -134,6 +137,7 @@ namespace Apache.Druid.Querying.Internal
             TimeSeries_<TAggregations>,
             IQueryWith.Aggregations<TArguments, TAggregations, TSelf>
         {
+            IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.Aggregations>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.Aggregations>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         }
 
         public abstract class TimeSeries<TAggregations, TPostAggregations> :
@@ -141,6 +145,8 @@ namespace Apache.Druid.Querying.Internal
             IQueryWith.Aggregations<TArguments, TAggregations, TSelf>,
             IQueryWith.PostAggregations<TAggregations, TPostAggregations, TSelf>
         {
+            IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.Aggregations>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.Aggregations>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.PostAggregations>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.PostAggregations>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         }
 
         public abstract class TopN_<TDimension, TMetricArgumentsAndResult> :
@@ -157,17 +163,18 @@ namespace Apache.Druid.Querying.Internal
             {
             }
 
-            QuerySectionState<Granularity>? IQueryWithInternal.State<QuerySectionState<Granularity>>.State { get; set; }
-            QuerySectionFactoryState<IFilter>? IQueryWithInternal.State<QuerySectionFactoryState<IFilter>>.State { get; set; }
-            QuerySectionState<QueryContext.TopN>? IQueryWithInternal.State<QuerySectionState<QueryContext.TopN>>.State { get; set; }
-            QuerySectionState<IQueryWith.Threshold.InternalState>? IQueryWithInternal.State<QuerySectionState<IQueryWith.Threshold.InternalState>>.State { get; set; }
-            QuerySectionFactoryState<IMetric>? IQueryWithInternal.State<QuerySectionFactoryState<IMetric>>.State { get; set; }
+            Granularity? IQueryWithInternal.State<Granularity>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            IQueryWithInternal.CreateSection<IFilter>? IQueryWithInternal.State<IQueryWithInternal.CreateSection<IFilter>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.Dimension>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.Dimension>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            IQueryWithInternal.CreateSection<IMetric>? IQueryWithInternal.State<IQueryWithInternal.CreateSection<IMetric>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            IQueryWith.Threshold.InternalState? IQueryWithInternal.State<IQueryWith.Threshold.InternalState>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            QueryContext.TopN? IQueryWithInternal.State<QueryContext.TopN>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         }
 
         public abstract class TopN<TDimension> :
             TopN_<TDimension, TDimension>,
             DimensionsProvider<TDimension>.Identity,
-            TruncatedQueryResultHandler<TSource>.TopN_GroupBy<TDimension, TDimension>
+            TruncatedQueryResultHandler<TSource>.TopN<TDimension, TDimension>
             where TDimension : IEquatable<TDimension>
         {
         }
@@ -175,20 +182,23 @@ namespace Apache.Druid.Querying.Internal
         public abstract class TopN<TDimension, TAggregations> :
             TopN_<TDimension, Dimension_Aggregations<TDimension, TAggregations>>,
             DimensionsProvider<TDimension>.FromResult<Dimension_Aggregations<TDimension, TAggregations>>,
-            TruncatedQueryResultHandler<TSource>.TopN_GroupBy<Dimension_Aggregations<TDimension, TAggregations>, TDimension>,
+            TruncatedQueryResultHandler<TSource>.TopN<Dimension_Aggregations<TDimension, TAggregations>, TDimension>,
             IQueryWith.Aggregations<TArguments, TAggregations, TSelf>
             where TDimension : IEquatable<TDimension>
         {
+            IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.Aggregations>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.Aggregations>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         }
 
         public abstract class TopN<TDimension, TAggregations, TPostAggregations> :
             TopN_<TDimension, Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>,
             DimensionsProvider<TDimension>.FromResult<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>>,
-            TruncatedQueryResultHandler<TSource>.TopN_GroupBy<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>, TDimension>,
+            TruncatedQueryResultHandler<TSource>.TopN<Dimension_Aggregations_PostAggregations<TDimension, TAggregations, TPostAggregations>, TDimension>,
             IQueryWith.Aggregations<TArguments, TAggregations, TSelf>,
             IQueryWith.PostAggregations<TAggregations, TPostAggregations, TSelf>
             where TDimension : IEquatable<TDimension>
         {
+            IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.Aggregations>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.Aggregations>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.PostAggregations>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.PostAggregations>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         }
 
         public abstract class GroupBy_<TDimensions, TOrderByAndHavingArgumentsAndResult> :
@@ -205,17 +215,18 @@ namespace Apache.Druid.Querying.Internal
             {
             }
 
-            QuerySectionState<Granularity>? IQueryWithInternal.State<QuerySectionState<Granularity>>.State { get; set; }
-            QuerySectionFactoryState<IFilter>? IQueryWithInternal.State<QuerySectionFactoryState<IFilter>>.State { get; set; }
-            QuerySectionState<QueryContext.GroupBy>? IQueryWithInternal.State<QuerySectionState<QueryContext.GroupBy>>.State { get; set; }
-            QuerySectionFactoryState<ILimitSpec>? IQueryWithInternal.State<QuerySectionFactoryState<ILimitSpec>>.State { get; set; }
-            QuerySectionFactoryState<IHaving>? IQueryWithInternal.State<QuerySectionFactoryState<IHaving>>.State { get; set; }
+            Granularity? IQueryWithInternal.State<Granularity>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            IQueryWithInternal.CreateSection<IFilter>? IQueryWithInternal.State<IQueryWithInternal.CreateSection<IFilter>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.Dimensions>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.Dimensions>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            IQueryWith.LimitSpec.InternalState? IQueryWithInternal.State<IQueryWith.LimitSpec.InternalState>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            IQueryWithInternal.CreateSection<IHaving>? IQueryWithInternal.State<IQueryWithInternal.CreateSection<IHaving>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            QueryContext.GroupBy? IQueryWithInternal.State<QueryContext.GroupBy>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         }
 
         public abstract class GroupBy<TDimensions> : 
             GroupBy_<TDimensions, TDimensions>,
             DimensionsProvider<TDimensions>.Identity,
-            TruncatedQueryResultHandler<TSource>.TopN_GroupBy<TDimensions, TDimensions>
+            TruncatedQueryResultHandler<TSource>.GroupBy<TDimensions, TDimensions>
             where TDimensions : IEquatable<TDimensions>
         {
         }
@@ -223,20 +234,23 @@ namespace Apache.Druid.Querying.Internal
         public abstract class GroupBy<TDimensions, TAggregations> :
             GroupBy_<TDimensions, Dimensions_Aggregations<TDimensions, TAggregations>>,
             DimensionsProvider<TDimensions>.FromResult<Dimensions_Aggregations<TDimensions, TAggregations>>,
-            TruncatedQueryResultHandler<TSource>.TopN_GroupBy<Dimensions_Aggregations<TDimensions, TAggregations>, TDimensions>,
+            TruncatedQueryResultHandler<TSource>.GroupBy<Dimensions_Aggregations<TDimensions, TAggregations>, TDimensions>,
             IQueryWith.Aggregations<TArguments, TAggregations, TSelf>
             where TDimensions : IEquatable<TDimensions>
         {
+            IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.Aggregations>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.Aggregations>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         }
 
         public abstract class GroupBy<TDimensions, TAggregations, TPostAggregations> :
             GroupBy_<TDimensions, Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>,
             DimensionsProvider<TDimensions>.FromResult<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>>,
-            TruncatedQueryResultHandler<TSource>.TopN_GroupBy<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>, TDimensions>,
+            TruncatedQueryResultHandler<TSource>.GroupBy<Dimensions_Aggregations_PostAggregations<TDimensions, TAggregations, TPostAggregations>, TDimensions>,
             IQueryWith.Aggregations<TArguments, TAggregations, TSelf>,
             IQueryWith.PostAggregations<TAggregations, TPostAggregations, TSelf>
             where TDimensions : IEquatable<TDimensions>
         {
+            IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.Aggregations>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.Aggregations>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.PostAggregations>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.PostAggregations>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         }
 
         public abstract class Scan<TColumns> :
@@ -253,12 +267,11 @@ namespace Apache.Druid.Querying.Internal
             {
             }
 
-            QuerySectionState<OrderDirection?>? IQueryWithInternal.State<QuerySectionState<OrderDirection?>>.State { get; set; }
-            QuerySectionState<IQueryWith.Limit.InternalState>? IQueryWithInternal.State<QuerySectionState<IQueryWith.Limit.InternalState>>.State { get; set; }
-            QuerySectionState<IQueryWith.BatchSize.InternalState>? IQueryWithInternal.State<QuerySectionState<IQueryWith.BatchSize.InternalState>>.State { get; set; }
-            QuerySectionFactoryState<IFilter>? IQueryWithInternal.State<QuerySectionFactoryState<IFilter>>.State { get; set; }
-            QuerySectionState<QueryContext.Scan>? IQueryWithInternal.State<QuerySectionState<QueryContext.Scan>>.State { get; set; }
-            QuerySectionState<IQueryWith.Offset.InternalState>? IQueryWithInternal.State<QuerySectionState<IQueryWith.Offset.InternalState>>.State { get; set; }
+            OrderDirection? IQueryWithInternal.State<OrderDirection?>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            IQueryWithInternal.CreateSection<IFilter>? IQueryWithInternal.State<IQueryWithInternal.CreateSection<IFilter>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            IQueryWith.Limit.InternalState? IQueryWithInternal.State<IQueryWith.Limit.InternalState>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            IQueryWith.BatchSize.InternalState? IQueryWithInternal.State<IQueryWith.BatchSize.InternalState>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            QueryContext.Scan? IQueryWithInternal.State<QueryContext.Scan>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         }
     }
 

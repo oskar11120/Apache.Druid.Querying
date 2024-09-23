@@ -59,24 +59,6 @@ public static class TruncatedQueryResultHandler<TSource>
         }
     }
 
-    private static TQuery WithIntervalsStartingFrom<TQuery>(TQuery query, DateTimeOffset from)
-        where TQuery : IQueryWith.Intervals
-    {
-        var newIntervals = query
-            .Intervals
-            .Select(interval =>
-            {
-                if (interval.To <= from)
-                    return null;
-                return interval.From <= from && interval.To > from ?
-                    interval with { From = from } : interval;
-            })
-            .Where(inteval => inteval is not null)
-            .ToArray();
-        var result = query.Copy().Intervals(newIntervals!);
-        return result;
-    }
-
     public interface Base<TResult, TContext> :
         IQueryWith.SourceAndResult<TSource, TResult>,
         IQueryWith.Intervals
@@ -105,110 +87,198 @@ public static class TruncatedQueryResultHandler<TSource>
             => throw new NotSupportedException();
     }
 
-    public class Implementation_WithTimeOrderedResults_AndMultipleResultsPerTimestamp_Context<TEquatableResultPart>
+    public interface WithOrdered_MultiplePerTimestamp_Results<TResult, TEquatableResultPart, TContext>
+        : Base<TResult, TContext>
+        where TContext : WithOrdered_MultiplePerTimestamp_Results<TResult, TEquatableResultPart, TContext>.Context, new()
     {
-        public DateTimeOffset? Timestamp;
-        public Queue<TEquatableResultPart> ResultEquatableParts = new();
-    }
-
-    private static async IAsyncEnumerable<TResult> Implementation_WithTimeOrderedResults_AndMultipleResultsPerTimestamp<
-        TResult, TEquatableResultPart, TContext, TQuery>(
-        IAsyncEnumerable<TResult> results,
-        TContext latestReturned,
-        Mutable<IQueryWith.Source<TSource>> setter,
-        Func<TResult, TEquatableResultPart> getEquatablePart,
-        Func<TResult, DateTimeOffset> getTimestamp,
-        TQuery query,
-        [EnumeratorCancellation] CancellationToken token)
-        where TContext : Implementation_WithTimeOrderedResults_AndMultipleResultsPerTimestamp_Context<TEquatableResultPart>
-        where TQuery : IQueryWith.Intervals, IQueryWith.Source<TSource>
-    {
-        var truncated = false;
-        results = OnTruncatedResultsInvoke(results, () => truncated = true, token);
-        var timestampChangedAtLeastOnce = false;
-        await foreach (var result in results)
+        public class Context
         {
-            var resultTimestamp = getTimestamp(result);
-            var timestampChanged = latestReturned.Timestamp != resultTimestamp;
-            timestampChangedAtLeastOnce = timestampChangedAtLeastOnce || timestampChanged;
-            if (timestampChanged)
+            internal DateTimeOffset? Timestamp;
+            internal Queue<TEquatableResultPart> ResultEquatableParts = new();
+            internal virtual void OnReturn(TResult result)
             {
-                latestReturned.Timestamp = resultTimestamp;
-                latestReturned.ResultEquatableParts.Clear();
-            }
-
-            var resultComparablePart = getEquatablePart(result);
-            if (timestampChangedAtLeastOnce || !latestReturned.ResultEquatableParts.Contains(resultComparablePart))
-            {
-                latestReturned.ResultEquatableParts.Enqueue(resultComparablePart);
-                yield return result;
             }
         }
 
-        if (!truncated)
-            yield break;
-        setter.Value = latestReturned.Timestamp is DateTimeOffset existing ? WithIntervalsStartingFrom(query, existing) : query;
-    }
-
-    public interface TimeSeries<TResult> :
-        Base<WithTimestamp<TResult>, TimeSeries<TResult>.LatestReturned>
-    {
-        public sealed class LatestReturned
+        private protected abstract TEquatableResultPart GetEquatablePart(TResult result);
+        private protected abstract DateTimeOffset GetTimestamp(TResult result);
+        private protected abstract OrderDirection Order { get; }
+        private protected virtual void OnTruncatedResults(TContext context)
         {
-            public DateTimeOffset? Timestamp;
         }
 
-        async IAsyncEnumerable<WithTimestamp<TResult>> Base<WithTimestamp<TResult>, LatestReturned>.OnTruncatedResultsSetQueryForRemaining(
-            IAsyncEnumerable<WithTimestamp<TResult>> results,
-            LatestReturned latestReturned,
+        async IAsyncEnumerable<TResult> Base<TResult, TContext>.OnTruncatedResultsSetQueryForRemaining(
+            IAsyncEnumerable<TResult> results,
+            TContext latestReturned,
             Mutable<IQueryWith.Source<TSource>> setter,
             [EnumeratorCancellation] CancellationToken token)
         {
             var truncated = false;
             results = OnTruncatedResultsInvoke(results, () => truncated = true, token);
+            var timestampChangedAtLeastOnce = false;
             await foreach (var result in results)
             {
-                if (latestReturned.Timestamp != result.Timestamp)
+                var resultTimestamp = GetTimestamp(result);
+                var timestampChanged = latestReturned.Timestamp != resultTimestamp;
+                timestampChangedAtLeastOnce = timestampChangedAtLeastOnce || timestampChanged;
+                if (timestampChanged)
                 {
-                    latestReturned.Timestamp = result.Timestamp;
+                    latestReturned.Timestamp = resultTimestamp;
+                    latestReturned.ResultEquatableParts.Clear();
+                }
+
+                var resultComparablePart = GetEquatablePart(result);
+                if (timestampChangedAtLeastOnce || !latestReturned.ResultEquatableParts.Contains(resultComparablePart))
+                {
+                    latestReturned.ResultEquatableParts.Enqueue(resultComparablePart);
+                    latestReturned.OnReturn(result);
                     yield return result;
                 }
             }
-
             if (!truncated)
                 yield break;
-            setter.Value = latestReturned.Timestamp is DateTimeOffset existing ? WithIntervalsStartingFrom(this, existing) : this;
+            if (latestReturned.Timestamp is not DateTimeOffset existing)
+            {
+                setter.Value = this;
+                yield break;
+            }
+
+            var copy = WithIntervalsCut(this, existing, Order);
+            copy.OnTruncatedResults(latestReturned);
+            setter.Value = copy;
+        }
+
+        private static TQuery WithIntervalsCut<TQuery>(
+            TQuery query, DateTimeOffset on, OrderDirection queryOrder)
+            where TQuery : IQueryWith.Intervals
+        {
+            Interval? CutLeft(Interval interval)
+            {
+                if (interval.To <= on)
+                    return null;
+                return interval.From <= on && interval.To > on ?
+                    interval with { From = on } : interval;
+            }
+
+            Interval? CutRight(Interval interval)
+            {
+                if (interval.From >= on)
+                    return null;
+                return interval.To > on ?
+                    interval with { To = on } : interval;
+            }
+
+            var newIntervals = query
+                .Intervals
+                .Select(interval => queryOrder is OrderDirection.Ascending ? CutLeft(interval) : CutRight(interval))
+                .Where(inteval => inteval is not null)
+                .ToArray();
+            var result = query.Copy().Intervals(newIntervals!);
+            return result;
         }
     }
 
-    public interface TopN_GroupBy<TResult, TDimensions> :
-        Base<WithTimestamp<TResult>, Implementation_WithTimeOrderedResults_AndMultipleResultsPerTimestamp_Context<TDimensions>>,
+    public interface WithOrdered_MultiplePerTimestamp_Results<TResult, TEquatableResultPart>
+        : WithOrdered_MultiplePerTimestamp_Results<
+            TResult,
+            TEquatableResultPart,
+            WithOrdered_MultiplePerTimestamp_Results<TResult, TEquatableResultPart>.Context_>
+    {
+        public sealed class Context_ : Context
+        {
+        }
+    }
+
+    public interface WithOrdered_MultiplePerTimestamp_Results_AndLimit<TResult, TEquatableResultPart, TContext>
+        : WithOrdered_MultiplePerTimestamp_Results<TResult, TEquatableResultPart, TContext>
+        where TContext : WithOrdered_MultiplePerTimestamp_Results_AndLimit<TResult, TEquatableResultPart, TContext>.Context_, new()
+    {
+        public class Context_ : Context
+        {
+            internal int ReturnCount;
+            internal override void OnReturn(TResult result) => ReturnCount++;
+        }
+
+        private protected abstract void SetLimit(int returnCount);
+
+        void WithOrdered_MultiplePerTimestamp_Results<TResult, TEquatableResultPart, TContext>.OnTruncatedResults(TContext context)
+            => SetLimit(context.ReturnCount);
+    }
+
+    public interface WithOrdered_MultiplePerTimestamp_Results_AndLimit<TResult, TEquatableResultPart>
+        : WithOrdered_MultiplePerTimestamp_Results_AndLimit<
+            TResult,
+            TEquatableResultPart,
+            WithOrdered_MultiplePerTimestamp_Results_AndLimit<TResult, TEquatableResultPart>.Context__>
+    {
+        public sealed class Context__ : Context_
+        {
+        }
+    }
+
+    public interface TimeSeries<TResult> :
+        WithOrdered_MultiplePerTimestamp_Results_AndLimit<WithTimestamp<TResult>, TimeSeries<TResult>.None>,
+        IQueryWith.DescendingFlag,
+        IQueryWith.Limit
+    {
+        public readonly struct None
+        {
+        }
+
+        None WithOrdered_MultiplePerTimestamp_Results<WithTimestamp<TResult>, None, Context__>.GetEquatablePart(
+            WithTimestamp<TResult> result) => default;
+        DateTimeOffset WithOrdered_MultiplePerTimestamp_Results<WithTimestamp<TResult>, None, Context__>.GetTimestamp(
+            WithTimestamp<TResult> result) => result.Timestamp;
+        OrderDirection WithOrdered_MultiplePerTimestamp_Results<WithTimestamp<TResult>, None, Context__>.Order
+            => Descending ? OrderDirection.Descending : OrderDirection.Ascending;
+
+        void WithOrdered_MultiplePerTimestamp_Results_AndLimit<WithTimestamp<TResult>, None, Context__>.SetLimit(int returnCount)
+        {
+            if (Limit is int existing)
+                this.Limit(existing - returnCount);
+        }
+    }
+
+    public interface TopN<TResult, TDimension> :
+        WithOrdered_MultiplePerTimestamp_Results<WithTimestamp<TResult>, TDimension>,
+        IDimensionsProvider<TResult, TDimension>
+        where TDimension : IEquatable<TDimension>
+    {
+        TDimension WithOrdered_MultiplePerTimestamp_Results<WithTimestamp<TResult>, TDimension, Context_>.GetEquatablePart(
+            WithTimestamp<TResult> result) => GetDimensions(result.Value);
+        DateTimeOffset WithOrdered_MultiplePerTimestamp_Results<WithTimestamp<TResult>, TDimension, Context_>.GetTimestamp(
+            WithTimestamp<TResult> result) => result.Timestamp;
+        OrderDirection WithOrdered_MultiplePerTimestamp_Results<WithTimestamp<TResult>, TDimension, Context_>.Order
+            => OrderDirection.Ascending;
+    }
+
+    public interface GroupBy<TResult, TDimensions> :
+        IQueryWith.LimitSpec,
+        WithOrdered_MultiplePerTimestamp_Results_AndLimit<WithTimestamp<TResult>, TDimensions>,
         IDimensionsProvider<TResult, TDimensions>
         where TDimensions : IEquatable<TDimensions>
     {
-        IAsyncEnumerable<WithTimestamp<TResult>> Base<WithTimestamp<TResult>, Implementation_WithTimeOrderedResults_AndMultipleResultsPerTimestamp_Context<TDimensions>>.OnTruncatedResultsSetQueryForRemaining(
-            IAsyncEnumerable<WithTimestamp<TResult>> results,
-            Implementation_WithTimeOrderedResults_AndMultipleResultsPerTimestamp_Context<TDimensions> context,
-            Mutable<IQueryWith.Source<TSource>> setter,
-            CancellationToken token)
-            => Implementation_WithTimeOrderedResults_AndMultipleResultsPerTimestamp(
-                results,
-                context,
-                setter,
-                result => GetDimensions(result.Value),
-                static result => result.Timestamp,
-                this,
-                token);
+        TDimensions WithOrdered_MultiplePerTimestamp_Results<WithTimestamp<TResult>, TDimensions, Context__>.GetEquatablePart(
+            WithTimestamp<TResult> result) => GetDimensions(result.Value);
+        DateTimeOffset WithOrdered_MultiplePerTimestamp_Results<WithTimestamp<TResult>, TDimensions, Context__>.GetTimestamp(
+            WithTimestamp<TResult> result) => result.Timestamp;
+        OrderDirection WithOrdered_MultiplePerTimestamp_Results<WithTimestamp<TResult>, TDimensions, Context__>.Order
+            => OrderDirection.Ascending;
+
+        void WithOrdered_MultiplePerTimestamp_Results_AndLimit<WithTimestamp<TResult>, TDimensions, Context__>.SetLimit(int returnCount)
+        {
+            if (Limit is int existing)
+                Set(limit: existing - returnCount, offset: 0);
+        }
     }
 
     public interface Scan<TResult> :
-        Base<ScanResult<TResult>, Scan<TResult>.LatestResult>,
+        WithOrdered_MultiplePerTimestamp_Results_AndLimit<ScanResult<TResult>, TResult, Scan<TResult>.Context>,
         IQueryWith.OffsetAndLimit,
         IQueryWith.Order
     {
-        public sealed class LatestResult : Implementation_WithTimeOrderedResults_AndMultipleResultsPerTimestamp_Context<TResult>
+        public new sealed class Context : Context_
         {
-            public int Count;
             public Func<ScanResult<TResult>, DateTimeOffset>? GetTimestamp;
         }
 
@@ -221,7 +291,7 @@ public static class TruncatedQueryResultHandler<TSource>
                 .GetProperty(propertyName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                 ?.GetMethod
                 ?? throw new InvalidOperationException($"No getter {propertyName} in type {typeof(TResult)}.");
-            if (getMethod.ReturnType == typeof(DateTimeOffset)) 
+            if (getMethod.ReturnType == typeof(DateTimeOffset))
             {
                 var getter = (Func<TResult, DateTimeOffset>)Delegate.CreateDelegate(typeof(Func<TResult, DateTimeOffset>), getMethod);
                 return result => getter(result.Value);
@@ -235,16 +305,16 @@ public static class TruncatedQueryResultHandler<TSource>
                 throw new NotSupportedException($"Unsupported {DataSourceTimeColumnAttribute.Name} column type {getMethod.ReturnType}.");
         }
 
-        async IAsyncEnumerable<ScanResult<TResult>> Base<ScanResult<TResult>, LatestResult>.OnTruncatedResultsSetQueryForRemaining(
+        async IAsyncEnumerable<ScanResult<TResult>> Base<ScanResult<TResult>, Context>.OnTruncatedResultsSetQueryForRemaining(
             IAsyncEnumerable<ScanResult<TResult>> results,
-            LatestResult latestResult,
+            Context latestResult,
             Mutable<IQueryWith.Source<TSource>> setter,
             PropertyColumnNameMapping.IProvider mappings,
             [EnumeratorCancellation] CancellationToken token)
         {
-            string? TryGetTimestampProperty() 
+            string? TryGetTimestampProperty()
             {
-                if (!resultImplementsIEquatable || Order is null)
+                if (!resultImplementsIEquatable || (this as IQueryWith.Order).Order is null)
                     return null;
                 var resultMappings = mappings.Get<TResult>();
                 return resultMappings
@@ -252,17 +322,10 @@ public static class TruncatedQueryResultHandler<TSource>
                     ?.Property;
             }
 
-            latestResult.GetTimestamp ??= TryGetTimestampProperty() is string property ?  GetTimestampGetter(property) : null;
+            latestResult.GetTimestamp ??= TryGetTimestampProperty() is string property ? GetTimestampGetter(property) : null;
             if (latestResult.GetTimestamp is not null)
             {
-                results = Implementation_WithTimeOrderedResults_AndMultipleResultsPerTimestamp(
-                    results,
-                    latestResult,
-                    setter,
-                    static result => result.Value,
-                    latestResult.GetTimestamp,
-                    this,
-                    token);
+                results = OnTruncatedResultsSetQueryForRemaining(results, latestResult, setter, token);
                 await foreach (var result in results)
                     yield return result;
                 yield break;
@@ -272,15 +335,15 @@ public static class TruncatedQueryResultHandler<TSource>
             results = OnTruncatedResultsInvoke(results, () => truncated = true, token);
             await foreach (var result in results)
             {
-                latestResult.Count++;
+                latestResult.ReturnCount++;
                 yield return result;
             }
 
-            if (!truncated || (Limit is not null && latestResult.Count >= Limit))
+            if (!truncated || (Limit is not null && latestResult.ReturnCount >= Limit))
                 yield break;
-            var newQuery = this.Copy().Offset(latestResult.Count);
+            var newQuery = this.Copy().Offset(latestResult.ReturnCount);
             if (Limit is not null)
-                newQuery = newQuery.Limit(Limit.Value - latestResult.Count);
+                newQuery = newQuery.Limit(Limit.Value - latestResult.ReturnCount);
             setter.Value = newQuery;
         }
     }
