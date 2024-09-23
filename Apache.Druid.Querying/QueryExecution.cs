@@ -42,12 +42,6 @@ namespace Apache.Druid.Querying
         }
     }
 
-    internal sealed class Mutable<TValue>
-    {
-        public TValue? Value;
-    }
-
-
     public static partial class IQueryWith
     {
         public interface Result<out TResult>

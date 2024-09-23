@@ -90,7 +90,7 @@ public static class TruncatedQueryResultHandler<TSource>
             return result;
         }
 
-        private sealed class LatestReturned<TEquatableResultPart>
+        internal sealed class LatestReturned<TEquatableResultPart>
         {
             public DateTimeOffset? Timestamp;
             public Queue<TEquatableResultPart> ResultEquatableParts = new();
@@ -103,7 +103,7 @@ public static class TruncatedQueryResultHandler<TSource>
             OrderDirection Order { get; }
         }
 
-        internal abstract class ReturnCountBasedAdditionalHandling<TQuery>
+        internal abstract class ReturnCountBasedAdditionalHandlingState<TQuery>
         {
             public int ReturnCount { get; private set; }
             public void OnReturn() => ReturnCount++;
@@ -114,7 +114,7 @@ public static class TruncatedQueryResultHandler<TSource>
             IQueryWith.SourceAndResult<TSource, TResult>.TruncatedResultHandlingContext context,
             IGetters<TResult, TEquatableResultPart> getters,
             TQuery query,
-            ReturnCountBasedAdditionalHandling<TQuery>? more,
+            ReturnCountBasedAdditionalHandlingState<TQuery>? more,
             [EnumeratorCancellation] CancellationToken token)
             where TQuery : IQueryWith.Intervals, IQueryWith.Source<TSource>
         {
@@ -160,14 +160,10 @@ public static class TruncatedQueryResultHandler<TSource>
         IQueryWith.Intervals,
         IQueryWith.DescendingFlag,
         IQueryWith.Limit,
-        GivenOrdered_MultiplePerTimestamp_Results.IGetters<WithTimestamp<TResult>, TimeSeries<TResult>.None>
+        GivenOrdered_MultiplePerTimestamp_Results.IGetters<WithTimestamp<TResult>, None>
     {
-        public readonly struct None
-        {
-        }
-
         None GivenOrdered_MultiplePerTimestamp_Results.IGetters<WithTimestamp<TResult>, None>.GetEquatablePart(WithTimestamp<TResult> result)
-            => default;
+            => None.Singleton;
         DateTimeOffset GivenOrdered_MultiplePerTimestamp_Results.IGetters<WithTimestamp<TResult>, None>.GetTimestamp(WithTimestamp<TResult> result)
             => result.Timestamp;
         OrderDirection GivenOrdered_MultiplePerTimestamp_Results.IGetters<WithTimestamp<TResult>, None>.Order
@@ -175,9 +171,9 @@ public static class TruncatedQueryResultHandler<TSource>
 
         IAsyncEnumerable<WithTimestamp<TResult>> IQueryWith.SourceAndResult<TSource, WithTimestamp<TResult>>.OnTruncatedResultsSetQueryForRemaining(
             TruncatedResultHandlingContext context, CancellationToken token)
-            => GivenOrdered_MultiplePerTimestamp_Results.Handle(context, this, this, context.State.GetOrAdd<Limiting>(), token);
+            => GivenOrdered_MultiplePerTimestamp_Results.Handle(context, this, this, context.State.GetOrAdd<LimitingState>(), token);
 
-        private sealed class Limiting : GivenOrdered_MultiplePerTimestamp_Results.ReturnCountBasedAdditionalHandling<TimeSeries<TResult>>
+        internal sealed class LimitingState : GivenOrdered_MultiplePerTimestamp_Results.ReturnCountBasedAdditionalHandlingState<TimeSeries<TResult>>
         {
             public override void OnTruncatedResults(TimeSeries<TResult> query)
             {
@@ -223,9 +219,9 @@ public static class TruncatedQueryResultHandler<TSource>
 
         IAsyncEnumerable<WithTimestamp<TResult>> IQueryWith.SourceAndResult<TSource, WithTimestamp<TResult>>.OnTruncatedResultsSetQueryForRemaining(
             TruncatedResultHandlingContext context, CancellationToken token)
-            => GivenOrdered_MultiplePerTimestamp_Results.Handle(context, this, this, context.State.GetOrAdd<Limiting>(), token);
+            => GivenOrdered_MultiplePerTimestamp_Results.Handle(context, this, this, context.State.GetOrAdd<LimitingState>(), token);
 
-        private sealed class Limiting : GivenOrdered_MultiplePerTimestamp_Results.ReturnCountBasedAdditionalHandling<GroupBy<TResult, TDimensions>>
+        private sealed class LimitingState : GivenOrdered_MultiplePerTimestamp_Results.ReturnCountBasedAdditionalHandlingState<GroupBy<TResult, TDimensions>>
         {
             public override void OnTruncatedResults(GroupBy<TResult, TDimensions> query)
             {
@@ -242,7 +238,7 @@ public static class TruncatedQueryResultHandler<TSource>
         IQueryWith.Order
     {
         private sealed class GivenOrderedResults :
-            GivenOrdered_MultiplePerTimestamp_Results.ReturnCountBasedAdditionalHandling<Scan<TResult>>,
+            GivenOrdered_MultiplePerTimestamp_Results.ReturnCountBasedAdditionalHandlingState<Scan<TResult>>,
             GivenOrdered_MultiplePerTimestamp_Results.IGetters<ScanResult<TResult>, TResult>
         {
             public override void OnTruncatedResults(Scan<TResult> query)
@@ -332,7 +328,7 @@ public static class TruncatedQueryResultHandler<TSource>
             context.NextQuerySetter = newQuery;
         }
 
-        private sealed class UnorderedQueryHandlingState
+        internal sealed class UnorderedQueryHandlingState
         {
             public int ReturnCount;
         }

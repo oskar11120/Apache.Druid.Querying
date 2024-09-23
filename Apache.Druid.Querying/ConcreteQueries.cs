@@ -10,8 +10,12 @@ using System.Text.Json.Nodes;
 
 namespace Apache.Druid.Querying
 {
-    public sealed class None
+    public sealed record None
     {
+        private None()
+        {            
+        }
+
         public static readonly None Singleton = new();
     }
 
