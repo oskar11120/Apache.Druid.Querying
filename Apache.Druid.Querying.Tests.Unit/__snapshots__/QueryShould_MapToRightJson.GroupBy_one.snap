@@ -3,13 +3,7 @@
   "intervals": [
     "2000-01-02T01:01:00.0000000\u002B00:00/2000-01-02T01:01:00.0000000\u002B00:00"
   ],
-  "virtualColumns": [
-    {
-      "type": "expression",
-      "name": "VirtualColumns",
-      "expression": "\u0022__time\u0022"
-    }
-  ],
+  "granularity": "minute",
   "dimensions": [
     {
       "type": "default",
@@ -22,19 +16,6 @@
       "dimension": "signal"
     }
   ],
-  "aggregations": [
-    {
-      "type": "longMax",
-      "name": "TMax",
-      "fieldName": "__time"
-    },
-    {
-      "type": "doubleLast",
-      "name": "LastValue",
-      "fieldName": "value"
-    }
-  ],
-  "granularity": "minute",
   "limitSpec": {
     "limit": 5000,
     "columns": [
@@ -61,5 +42,24 @@
       "type": "range"
     },
     "type": "filter"
-  }
+  },
+  "aggregations": [
+    {
+      "type": "longMax",
+      "name": "TMax",
+      "fieldName": "__time"
+    },
+    {
+      "type": "doubleLast",
+      "name": "LastValue",
+      "fieldName": "value"
+    }
+  ],
+  "virtualColumns": [
+    {
+      "type": "expression",
+      "name": "VirtualColumns",
+      "expression": "\u0022__time\u0022"
+    }
+  ]
 }

@@ -172,13 +172,13 @@ namespace Apache.Druid.Querying
                 QueryBase<TSource, Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>.TimeSeries,
                 IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithVirtualColumns<TVirtualColumns>>
             {
-                IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+                IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get; set; }
 
                 public class WithAggregations<TAggregations> :
                     QueryBase<TSource, Source_VirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>.TimeSeries<TAggregations>,
                     IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithAggregations<TAggregations>>
                 {
-                    IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+                    IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get; set; }
 
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<
@@ -188,7 +188,7 @@ namespace Apache.Druid.Querying
                         .TimeSeries<TAggregations, TPostAggregations>,
                         IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithPostAggregations<TPostAggregations>>
                     {
-                        IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+                        IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get; set; }
                     }
                 }
             }
@@ -216,7 +216,7 @@ namespace Apache.Druid.Querying
                 QueryBase<TSource, Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>.TopN<TDimension>,
                 IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithVirtualColumns<TVirtualColumns>>
             {
-                IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+                IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get; set; }
 
                 public class WithAggregations<TAggregations> :
                     QueryBase<
@@ -226,7 +226,7 @@ namespace Apache.Druid.Querying
                     .TopN<TDimension, TAggregations>,
                     IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithAggregations<TAggregations>>
                 {
-                    IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+                    IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get; set; }
 
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<
@@ -236,7 +236,7 @@ namespace Apache.Druid.Querying
                         .TopN<TDimension, TAggregations, TPostAggregations>,
                         IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithPostAggregations<TPostAggregations>>
                     {
-                        IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+                        IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get; set; }
                     }
                 }
             }
@@ -269,13 +269,13 @@ namespace Apache.Druid.Querying
                 QueryBase<TSource, Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>.GroupBy<TDimensions>,
                 IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithVirtualColumns<TVirtualColumns>>
             {
-                IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+                IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get; set; }
 
                 public class WithAggregations<TAggregations> :
                     QueryBase<TSource, Source_VirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>.GroupBy<TDimensions, TAggregations>,
                     IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithAggregations<TAggregations>>
                 {
-                    IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+                    IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get; set; }
 
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<
@@ -285,7 +285,7 @@ namespace Apache.Druid.Querying
                         .GroupBy<TDimensions, TAggregations, TPostAggregations>,
                         IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithPostAggregations<TPostAggregations>>
                     {
-                        IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+                        IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get; set; }
                     }
                 }
             }
