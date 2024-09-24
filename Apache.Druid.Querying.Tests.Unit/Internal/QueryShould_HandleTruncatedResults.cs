@@ -109,8 +109,8 @@ namespace Apache.Druid.Querying.Tests.Unit.Internal
         public async Task TopN_GroupBy()
         {
             var t0 = DateTime.Today;
-            var latest = new TruncatedQueryResultHandler<bool>.GivenOrdered_MultiplePerTimestamp_Results.LatestReturned<bool>();
             var state = new TopN_GroupBy.TruncatedResultHandlingContextState();
+            var latest = state.GetOrAdd<TruncatedQueryResultHandler<bool>.GivenOrdered_MultiplePerTimestamp_Results.LatestReturned<bool>>();
             var deltaT = TimeSpan.FromHours(1);
             var query = new Query<bool>.GroupBy<bool>().Interval(new(t0, t0.AddDays(1))) as TopN_GroupBy;
             IQueryWith.Source<bool>? nextQuery = null;
