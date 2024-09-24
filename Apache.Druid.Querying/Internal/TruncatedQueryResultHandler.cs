@@ -325,7 +325,7 @@ public static class TruncatedQueryResultHandler<TSource>
 
             if (!truncated || (Limit is not null && state.ReturnCount >= Limit))
                 yield break;
-            var newQuery = this.Copy().Offset(state.ReturnCount);
+            var newQuery = this.Copy().Offset(Offset + state.ReturnCount);
             if (Limit is not null)
                 newQuery = newQuery.Limit(Limit.Value - state.ReturnCount);
             context.NextQuerySetter = newQuery;
