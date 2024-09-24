@@ -207,7 +207,8 @@ public static class TruncatedQueryResultHandler<TSource>
     public interface GroupBy<TResult, TDimensions> :
         IQueryWith.SourceAndResult<TSource, WithTimestamp<TResult>>,
         IQueryWith.Intervals,
-        IQueryWith.LimitSpec,
+        IQueryWith.Limit,
+        IQueryWith.Offset,
         IDimensionsProvider<TResult, TDimensions>,
         GivenOrdered_MultiplePerTimestamp_Results.IGetters<WithTimestamp<TResult>, TDimensions>
         where TDimensions : IEquatable<TDimensions>
@@ -229,7 +230,8 @@ public static class TruncatedQueryResultHandler<TSource>
             {
                 if (query.Limit is null && query.Offset is 0)
                     return;
-                query.Set(limit: query.Limit is int existing ? existing - ReturnCount : null, offset: 0);
+                query.Limit = query.Limit is int existing ? existing - ReturnCount : null;
+                query.Offset = 0;
             }
         }
     }

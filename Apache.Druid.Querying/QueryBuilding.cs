@@ -8,9 +8,7 @@ using System.Linq.Expressions;
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text.Json.Nodes;
-using System.Collections.Immutable;
 using Apache.Druid.Querying.Internal.Elements;
-using static System.Collections.Specialized.BitVector32;
 
 namespace Apache.Druid.Querying
 {
@@ -252,23 +250,33 @@ namespace Apache.Druid.Querying
             string Section<CreateSection<IMetric>>.Key => nameof(Metric);
         }
 
-        public interface LimitSpec : StateMappedToSection<LimitSpec.InternalState, ILimitSpec>
+        public interface LimitSpec : StateMappedToSection<LimitSpec.InternalState, ILimitSpec?>, Limit, Offset
         {
-            ILimitSpec StateMappedToSection<InternalState, ILimitSpec>.ToSection(
-                InternalState state, QueryToJsonMappingContext context)
-                => state.Factory(state, context);
-
-            string Section<InternalState>.Key => nameof(LimitSpec);
             public sealed record InternalState(
                 int? Limit,
                 int? Offset,
-                Func<InternalState, QueryToJsonMappingContext, ILimitSpec> Factory);
+                Func<InternalState, QueryToJsonMappingContext, ILimitSpec>? Factory)
+            {
+                public static readonly InternalState Empty = new(null, null, null);
+            }
 
-            public int? Limit => State?.Limit;
-            public int Offset => State?.Offset ?? 0;
+            ILimitSpec? StateMappedToSection<InternalState, ILimitSpec?>.ToSection(
+                InternalState state, QueryToJsonMappingContext context)
+                => state.Factory?.Invoke(state, context);
 
-            internal void Set(int? limit, int offset)
-                => State = Require() with { Limit = limit, Offset = offset };
+            string Section<InternalState>.Key => nameof(LimitSpec);
+
+            int? Limit.Limit 
+            { 
+                get => State?.Limit;
+                set => State = (State ?? InternalState.Empty) with { Limit = value };
+            }
+
+            int Offset.Offset 
+            {
+                get => State?.Offset ?? 0;
+                set => State = (State ?? InternalState.Empty) with { Offset = value };
+            }
         }
 
         public interface LimitSpec<out TArguments, out TSelf> : Self<TSelf>, LimitSpec
