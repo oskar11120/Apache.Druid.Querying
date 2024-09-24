@@ -1,5 +1,4 @@
-﻿using Apache.Druid.Querying.Internal;
-using FluentAssertions;
+﻿using FluentAssertions;
 using LinqKit;
 using Snapshooter;
 using Snapshooter.NUnit;

@@ -308,6 +308,31 @@ internal sealed class GroupBy_Ascending_WithLimit_AndOffset : GroupBy_
     }
 }
 
+internal sealed class DataSourceMetadata_ : Base<None, WithTimestamp<DataSourceMetadata>, Query<None>.DataSourceMetadata>
+{
+    private static DateTimeOffset Parse(string text) => DateTimeOffset.Parse(text, CultureInfo.InvariantCulture);
+    private static readonly DateTimeOffset t0 = Parse("2024-09-24T15:00:00Z");
+    private static WithTimestamp<DataSourceMetadata> New(DateTimeOffset t) => new(t, new(t));
+
+    public DataSourceMetadata_() : base(new Query<None>.DataSourceMetadata())
+    {
+    }
+
+    protected override IEnumerable<QueryResultSimulationAction> SetUpQueryResults()
+    {
+        yield return Return_ToPassOn(New(t0));
+        yield return Return_ToPassOn(New(t0.AddHours(1)));
+        yield return Return_ToPassOn(New(t0.AddHours(2)));
+        yield return Truncate_ExpectingNextQueryWith;
+
+        yield return Return_ToSkip(New(t0));
+        yield return Return_ToSkip(New(t0.AddHours(1)));
+        yield return Return_ToSkip(New(t0.AddHours(2)));
+        yield return Return_ToPassOn(New(t0.AddHours(3)));
+        yield return Return_ToPassOn(New(t0.AddHours(4)));
+    }
+}
+
 internal abstract class Base<TSource, TResult, TQuery> where TQuery
     : IQueryWith.State, IQueryWith.SourceAndResult<TSource, TResult>
 {
