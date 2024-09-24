@@ -6,6 +6,7 @@ using Apache.Druid.Querying.Json;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
 using System.Linq.Expressions;
@@ -41,19 +42,43 @@ namespace Apache.Druid.Querying
         }
     }
 
-    internal sealed class Mutable<TValue>
+    internal sealed class TruncatedResultHandlingContext<TSource>
     {
-        public TValue? Value;
+        public readonly PropertyColumnNameMapping.IProvider Mappings;
+        public readonly TruncatedResultHandlingContextState State = new();
+        public IQueryWith.Source<TSource>? NextQuerySetter;
+
+        public TruncatedResultHandlingContext(PropertyColumnNameMapping.IProvider mappings)
+            => Mappings = mappings;
     }
 
-    internal sealed class TruncatedQueryResultHandlingContext
+    internal sealed class TruncatedResultHandlingContextState
     {
-        public object? State;
-        public PropertyColumnNameMapping.IProvider ColumnNameMappings;
-
-        public TruncatedQueryResultHandlingContext(PropertyColumnNameMapping.IProvider columnNameMappings)
+        private readonly Dictionary<Type, object> data = new();
+        public bool TryGet<TState>([MaybeNullWhen(false)] out TState state)
         {
-            ColumnNameMappings = columnNameMappings;
+            if (data.TryGetValue(typeof(TState), out var existing))
+            {
+                state = (TState)existing;
+                return true;
+            }
+
+            state = default;
+            return false;
+        }
+
+        public void Add<TState>(TState state)
+            where TState : notnull
+            => data.Add(typeof(TState), state);
+
+        public TState GetOrAdd<TState>()
+            where TState : notnull, new()
+        {
+            if (TryGet<TState>(out var existing))
+                return existing;
+            var @new = new TState();
+            Add(@new);
+            return @new;
         }
     }
 
@@ -71,7 +96,7 @@ namespace Apache.Druid.Querying
         public interface SourceAndResult<TSource, TResult> : Source<TSource>, Result<TResult>
         {
             internal IAsyncEnumerable<TResult> OnTruncatedResultsSetQueryForRemaining(
-                IAsyncEnumerable<TResult> results, TruncatedQueryResultHandlingContext context, Mutable<Source<TSource>> setter, CancellationToken token);
+                IAsyncEnumerable<TResult> currentQueryResults, TruncatedResultHandlingContext<TSource> context, CancellationToken token);
         }
     }
 
@@ -175,8 +200,8 @@ namespace Apache.Druid.Querying
         public Func<HttpClient> HttpClientFactory => Options.Value.HttpClientFactory;
 
         private JsonSerializerOptions? querySerializerOptionsIndented;
-        public JsonSerializerOptions QuerySerializerOptionsIndented => querySerializerOptionsIndented ??= 
-            QuerySerializerOptions.WriteIndented ? QuerySerializerOptions : new (QuerySerializerOptions) { WriteIndented = true };
+        public JsonSerializerOptions QuerySerializerOptionsIndented => querySerializerOptionsIndented ??=
+            QuerySerializerOptions.WriteIndented ? QuerySerializerOptions : new(QuerySerializerOptions) { WriteIndented = true };
     }
 
     public class DataSource<TSource>
@@ -206,32 +231,39 @@ namespace Apache.Druid.Querying
             bool onTruncatedResultsQueryRemaining = true,
             [EnumeratorCancellation] CancellationToken token = default)
         {
-            var queryForRemaining = new Mutable<IQueryWith.Source<TSource>> { Value = query };
             var atomicity = SectionAtomicity.ImmutableBuilder.Combine(query.SectionAtomicity, Context.SectionAtomicity);
             var mappings = query.ApplyPropertyColumnNameMappingChanges(Context.ColumnNameMappings);
             var deserializer = query;
             var truncatedResultHandler = query;
+            var truncatedResultHandlingContext = new TruncatedResultHandlingContext<TSource>(mappings);
             byte[]? buffer = null;
-            var resultContext = new TruncatedQueryResultHandlingContext(mappings);
+
             async IAsyncEnumerable<TResult> Deserialize(Stream utf8Json, [EnumeratorCancellation] CancellationToken token)
             {
                 buffer ??= ArrayPool<byte>.Shared.Rent(Context.DataSerializerOptions.DefaultBufferSize);
                 var read = await utf8Json.ReadAsync(buffer, token);
                 var streamReader = new JsonStreamReader(utf8Json, buffer, read);
-                var results = deserializer
-                    .Deserialize(new(streamReader, Context.DataSerializerOptions, atomicity, mappings), token);
-                queryForRemaining.Value = null;
+                var results = deserializer.Deserialize(new(streamReader, Context.DataSerializerOptions, atomicity, mappings), token);
+                truncatedResultHandlingContext.NextQuerySetter = null;
                 if (onTruncatedResultsQueryRemaining)
-                    results = truncatedResultHandler.OnTruncatedResultsSetQueryForRemaining(results, resultContext, queryForRemaining, token);
-                await foreach (var result in results)
-                    yield return result;
+                {
+                    results = query.OnTruncatedResultsSetQueryForRemaining(results, truncatedResultHandlingContext, token);
+                    await foreach (var result in results)
+                        yield return result;
+                }
+                else
+                {
+                    await foreach (var result in results)
+                        yield return result;
+                }
             }
 
             try
             {
-                while (queryForRemaining.Value != null)
+                truncatedResultHandlingContext.NextQuerySetter = query;
+                while (truncatedResultHandlingContext.NextQuerySetter is IQueryWith.Source<TSource> nextQuery)
                 {
-                    var results = ExecuteQuery(queryForRemaining.Value, Deserialize, token);
+                    var results = ExecuteQuery(nextQuery, Deserialize, token);
                     await foreach (var result in results)
                         yield return result;
                 }
@@ -278,7 +310,7 @@ namespace Apache.Druid.Querying
                 yield return result;
         }
 
-        public virtual DataSource<TResult> ToQueryDataSource<TResult>(IQueryWith.SourceAndResult<TSource, TResult> query) 
+        public virtual DataSource<TResult> ToQueryDataSource<TResult>(IQueryWith.SourceAndResult<TSource, TResult> query)
             => New<TResult>(
                 () => new JsonObject
                 {

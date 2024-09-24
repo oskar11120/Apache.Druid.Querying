@@ -6,11 +6,16 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Apache.Druid.Querying
 {
-    public sealed class None
+    public sealed record None
     {
+        private None()
+        {            
+        }
+
         public static readonly None Singleton = new();
     }
 
@@ -167,10 +172,14 @@ namespace Apache.Druid.Querying
                 QueryBase<TSource, Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>.TimeSeries,
                 IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithVirtualColumns<TVirtualColumns>>
             {
+                IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get; set; }
+
                 public class WithAggregations<TAggregations> :
                     QueryBase<TSource, Source_VirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>.TimeSeries<TAggregations>,
                     IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithAggregations<TAggregations>>
                 {
+                    IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get; set; }
+
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<
                             TSource,
@@ -179,6 +188,7 @@ namespace Apache.Druid.Querying
                         .TimeSeries<TAggregations, TPostAggregations>,
                         IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithPostAggregations<TPostAggregations>>
                     {
+                        IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get; set; }
                     }
                 }
             }
@@ -206,6 +216,8 @@ namespace Apache.Druid.Querying
                 QueryBase<TSource, Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>.TopN<TDimension>,
                 IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithVirtualColumns<TVirtualColumns>>
             {
+                IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get; set; }
+
                 public class WithAggregations<TAggregations> :
                     QueryBase<
                         TSource,
@@ -214,6 +226,8 @@ namespace Apache.Druid.Querying
                     .TopN<TDimension, TAggregations>,
                     IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithAggregations<TAggregations>>
                 {
+                    IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get; set; }
+
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<
                             TSource,
@@ -222,6 +236,7 @@ namespace Apache.Druid.Querying
                         .TopN<TDimension, TAggregations, TPostAggregations>,
                         IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithPostAggregations<TPostAggregations>>
                     {
+                        IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get; set; }
                     }
                 }
             }
@@ -254,10 +269,14 @@ namespace Apache.Druid.Querying
                 QueryBase<TSource, Source_VirtualColumns<TSource, TVirtualColumns>, WithVirtualColumns<TVirtualColumns>>.GroupBy<TDimensions>,
                 IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithVirtualColumns<TVirtualColumns>>
             {
+                IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get; set; }
+
                 public class WithAggregations<TAggregations> :
                     QueryBase<TSource, Source_VirtualColumns<TSource, TVirtualColumns>, WithAggregations<TAggregations>>.GroupBy<TDimensions, TAggregations>,
                     IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithAggregations<TAggregations>>
                 {
+                    IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get; set; }
+
                     public class WithPostAggregations<TPostAggregations> :
                         QueryBase<
                             TSource,
@@ -266,6 +285,7 @@ namespace Apache.Druid.Querying
                         .GroupBy<TDimensions, TAggregations, TPostAggregations>,
                         IQueryWith.VirtualColumns<TSource, TVirtualColumns, WithPostAggregations<TPostAggregations>>
                     {
+                        IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>? IQueryWithInternal.State<IQueryWithInternal.SectionFactoryExpressionState<IQueryWithInternal.SectionKind.VirtualColumns>>.State { get; set; }
                     }
                 }
             }
@@ -292,10 +312,32 @@ namespace Apache.Druid.Querying
             public class WithColumns<TColumns> :
                 QueryBase<TSource, TSource, WithColumns<TColumns>>.Scan<TColumns>,
                 IQueryWithInternal.PropertyColumnNameMappingChanges,
-                IQueryWithInternal.SectionFactory<SelectedProperty[]>
+                IQueryWithInternal.Section<WithColumns<TColumns>.PropertyMapping[]>
             {
-                private IQueryWithInternal.SectionFactory<SelectedProperty[]> SelectedProperties => this;
-                private IQueryWithInternal.PropertyColumnNameMappingChanges MappingChanges => this;
+                public sealed record PropertyMapping(string ColumnProperty, SelectedProperty SourceProperty);
+
+                string IQueryWithInternal.Section<PropertyMapping[]>.Key => "columns";
+                JsonNode? IQueryWithInternal.Section<PropertyMapping[]>.ToJson(PropertyMapping[] section, QueryToJsonMappingContext context) 
+                {
+                    var properties = Get(context.ColumnNames, section).Select(pair => pair.SourceMapping.ColumnName);
+                    return JsonSerializer.SerializeToNode(properties, context.QuerySerializerOptions);
+                }
+
+                private static IEnumerable<(string ColumnProperty, PropertyColumnNameMapping SourceMapping)> Get(
+                    PropertyColumnNameMapping.IProvider mappings,
+                    PropertyMapping[] propertyMappings)
+                {
+                    var sourceColumnMappings = mappings.Get<TSource>();
+                    foreach (var (columnProperty, sourceProperty) in propertyMappings)
+                    {
+                        var mapping = sourceColumnMappings
+                            .SingleOrDefault(column => column.Property == sourceProperty.Name)
+                            ?? throw new InvalidOperationException(
+                                $"Property: {sourceProperty.SelectedFromType}.{sourceProperty.Name} does not " +
+                                $"correspond to any {typeof(TSource)} data source column.");
+                        yield return (columnProperty, mapping);
+                    }
+                }
 
                 public WithColumns<TColumns> Columns(Expression<Func<TSource, TColumns>> mapSourceToColumns)
                 {
@@ -305,31 +347,12 @@ namespace Apache.Druid.Querying
                             .Body
                             .UnwrapUnary()
                             .GetPropertyAssignments(default(None), (_, error) => new InvalidOperationException(error))
-                            .Select(pair => (ColumnProperty: pair.PropertyName, SourceProperty: SelectedProperty.Get(pair.AssignedValue)))
+                            .Select(pair => new PropertyMapping(pair.PropertyName, SelectedProperty.Get(pair.AssignedValue)))
                             .ToArray();
-                        IEnumerable<(string ColumnProperty, PropertyColumnNameMapping SourceMapping)> Get(PropertyColumnNameMapping.IProvider mappings)
-                        {
-                            var sourceColumnMappings = mappings.Get<TSource>();
-                            foreach (var (columnProperty, sourceProperty) in propertyMappings)
-                            {
-                                var mapping = sourceColumnMappings
-                                    .SingleOrDefault(column => column.Property == sourceProperty.Name)
-                                    ?? throw new InvalidOperationException(
-                                        $"Property: {sourceProperty.SelectedFromType}.{sourceProperty.Name} does not " +
-                                        $"correspond to any {typeof(TSource)} data source column.");
-                                yield return (columnProperty, mapping);
-                            }
-                        }
-                        SelectedProperties.SetState(
-                            "columns",
-                            context =>
-                            {
-                                var columnNames = Get(context.ColumnNames).Select(pair => pair.SourceMapping.ColumnName);
-                                return JsonSerializer.SerializeToNode(columnNames, context.QuerySerializerOptions);
-                            });
+                        SelectedProperties.State = propertyMappings;
                         MappingChanges.Set<TColumns>(mappings =>
                         {
-                            var columnMappings = Get(mappings)
+                            var columnMappings = Get(mappings, SelectedProperties.State)
                                 .Select(pair => pair.SourceMapping with { Property = pair.ColumnProperty });
                             return columnMappings.ToImmutableArray();
                         });
@@ -341,7 +364,10 @@ namespace Apache.Druid.Querying
                     }
                 }
 
-                QuerySectionFactoryState<SelectedProperty[]>? IQueryWithInternal.State<QuerySectionFactoryState<SelectedProperty[]>>.State { get; set; }
+                private IQueryWithInternal.Section<PropertyMapping[]> SelectedProperties => this;
+                private IQueryWithInternal.PropertyColumnNameMappingChanges MappingChanges => this;
+
+                PropertyMapping[]? IQueryWithInternal.State<PropertyMapping[]>.State { get; set; }
             }
         }
 
@@ -349,18 +375,13 @@ namespace Apache.Druid.Querying
         {
             public SegmentMetadata Merge(bool merge)
             {
-                MergeSection.SetState(nameof(Merge), new(merge), state => state.Merge);
+                MergeSection.State = new(merge);
                 return this;
             }
 
             public SegmentMetadata AnalysisTypes(IReadOnlyCollection<Querying.SegmentMetadata.AnalysisType> types)
             {
-                AnalysisTypesSection.SetState(
-                    nameof(AnalysisTypes),
-                    types,
-                    (types, context) => JsonSerializer.SerializeToNode(
-                        types.Select(type => AnalysisTypeStrings[type]),
-                        context.QuerySerializerOptions));
+                AnalysisTypesSection.State = types;
                 return this;
             }
 
@@ -369,7 +390,7 @@ namespace Apache.Druid.Querying
 
             public SegmentMetadata AggregatorMergeStrategy(Querying.SegmentMetadata.AggregatorMergeStrategy strategy)
             {
-                MergeStrategySection.SetState(nameof(AggregatorMergeStrategy), strategy);
+                MergeStrategySection.State = strategy;
                 return this;
             }
         }
@@ -378,9 +399,9 @@ namespace Apache.Druid.Querying
             QueryBase,
             IQueryWith.Context<Context, DataSourceMetadata>,
             QueryResultDeserializer.ArrayOfObjectsWithTimestamp<Querying.DataSourceMetadata>,
-            TruncatedQueryResultHandler<TSource>.TimeSeries<Querying.DataSourceMetadata>
+            TruncatedQueryResultHandler<TSource>.DataSourceMetadata
         {
-            QuerySectionState<Context>? IQueryWithInternal.State<QuerySectionState<Context>>.State { get; set; }
+            Context? IQueryWithInternal.State<Context>.State { get; set; }
         }
     }
 }

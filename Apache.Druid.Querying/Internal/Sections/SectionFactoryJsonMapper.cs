@@ -6,7 +6,7 @@ using System.Text.Json.Nodes;
 
 namespace Apache.Druid.Querying.Internal.Sections
 {
-    internal static class SectionFactoryJsonMapper
+    public static class SectionFactoryJsonMapper
     {
         public static JsonNode Map<TArguments>(
             IReadOnlyList<ElementFactoryCall> calls,

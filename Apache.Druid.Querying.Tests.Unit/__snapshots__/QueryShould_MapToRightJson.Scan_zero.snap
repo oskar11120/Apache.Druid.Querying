@@ -4,6 +4,7 @@
     "2000-01-02T01:01:00.0000000\u002B00:00/2000-01-02T01:01:00.0000000\u002B00:00"
   ],
   "order": "Ascending",
+  "offset": 4000,
   "filter": {
     "lower": 100,
     "lowerOpen": false,
@@ -13,6 +14,5 @@
     "type": "range"
   },
   "limit": 10000,
-  "batchSize": 2000,
-  "offset": 4000
+  "batchSize": 2000
 }

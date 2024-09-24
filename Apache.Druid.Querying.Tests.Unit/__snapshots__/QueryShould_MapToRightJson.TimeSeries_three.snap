@@ -3,13 +3,23 @@
   "intervals": [
     "2000-01-02T01:01:00.0000000\u002B00:00/2000-01-02T01:01:00.0000000\u002B00:00"
   ],
-  "virtualColumns": [
-    {
-      "type": "expression",
-      "name": "TReal",
-      "expression": "__time"
-    }
-  ],
+  "descending": false,
+  "granularity": "minute",
+  "filter": {
+    "fields": [
+      {
+        "column": "TReal",
+        "type": "null"
+      },
+      {
+        "matchValue": "e3af0803-3fc1-407c-9071-29c5f1cdc8d2",
+        "matchValueType": "String",
+        "column": "iotObjectId",
+        "type": "equals"
+      }
+    ],
+    "type": "or"
+  },
   "aggregations": [
     {
       "type": "longMax",
@@ -35,21 +45,11 @@
       ]
     }
   ],
-  "descending": false,
-  "granularity": "minute",
-  "filter": {
-    "fields": [
-      {
-        "column": "TReal",
-        "type": "null"
-      },
-      {
-        "matchValue": "e3af0803-3fc1-407c-9071-29c5f1cdc8d2",
-        "matchValueType": "String",
-        "column": "iotObjectId",
-        "type": "equals"
-      }
-    ],
-    "type": "or"
-  }
+  "virtualColumns": [
+    {
+      "type": "expression",
+      "name": "TReal",
+      "expression": "__time"
+    }
+  ]
 }

@@ -66,7 +66,7 @@ namespace Apache.Druid.Querying.Internal
         }
     }
 
-    internal readonly record struct SelectedProperty(Type Type, string Name, Type SelectedFromType)
+    public readonly record struct SelectedProperty(Type Type, string Name, Type SelectedFromType)
     {
         public static bool TryGet(Expression selectorBody, out SelectedProperty result)
         {

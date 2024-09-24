@@ -3,23 +3,6 @@
   "intervals": [
     "2000-01-02T01:01:00.0000000\u002B00:00/2000-01-02T01:01:00.0000000\u002B00:00"
   ],
-  "dimension": {
-    "type": "default",
-    "outputName": "Dimension",
-    "dimension": "iotObjectId"
-  },
-  "aggregations": [
-    {
-      "type": "longMax",
-      "name": "TMax",
-      "fieldName": "__time"
-    },
-    {
-      "type": "doubleLast",
-      "name": "LastValue",
-      "fieldName": "value"
-    }
-  ],
   "granularity": "minute",
   "filter": {
     "fields": [
@@ -36,6 +19,11 @@
     ],
     "type": "or"
   },
+  "dimension": {
+    "type": "default",
+    "outputName": "Dimension",
+    "dimension": "iotObjectId"
+  },
   "metric": {
     "metric": "LastValue",
     "type": "numeric"
@@ -43,5 +31,17 @@
   "threshold": 5,
   "context": {
     "minTopNThreshold": 5
-  }
+  },
+  "aggregations": [
+    {
+      "type": "longMax",
+      "name": "TMax",
+      "fieldName": "__time"
+    },
+    {
+      "type": "doubleLast",
+      "name": "LastValue",
+      "fieldName": "value"
+    }
+  ]
 }

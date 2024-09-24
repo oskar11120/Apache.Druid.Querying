@@ -1,5 +1,4 @@
-﻿using Apache.Druid.Querying.Internal;
-using FluentAssertions;
+﻿using FluentAssertions;
 using LinqKit;
 using Snapshooter;
 using Snapshooter.NUnit;
@@ -53,11 +52,10 @@ internal record SomeEditColumns(
 [Order(0)]
 internal class QueryShould_ReturnRightData
 {
-    private static async Task VerifyMatch<TSource, TResult, TContext>(
+    private static async Task VerifyMatch<TSource, TResult>(
         DataSource<TSource> dataSource,
-        TruncatedQueryResultHandler<TSource>.Base<TResult, TContext> query,
+        IQueryWith.SourceAndResult<TSource, TResult> query,
         [CallerArgumentExpression(nameof(query))] string snapshotNameSuffix = "")
-        where TContext : new()
     {
         var spanshotName = Snapshot.FullName(new SnapshotNameExtension(snapshotNameSuffix));
         var json = dataSource.MapQueryToJson(query);
@@ -76,10 +74,9 @@ internal class QueryShould_ReturnRightData
         Match(withNoTruncatedResultHandling);
     }
 
-    private static Task VerifyMatch<TResult, TContext>(
-        TruncatedQueryResultHandler<Edit>.Base<TResult, TContext> query,
+    private static Task VerifyMatch<TResult>(
+        IQueryWith.SourceAndResult<Edit, TResult> query,
         [CallerArgumentExpression(nameof(query))] string snapshotNameSuffix = "")
-        where TContext : new()
         => VerifyMatch(Wikipedia.Edits, query, snapshotNameSuffix);
 
     [Test]
