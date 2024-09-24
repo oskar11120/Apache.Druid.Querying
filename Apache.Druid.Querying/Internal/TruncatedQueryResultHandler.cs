@@ -225,10 +225,11 @@ public static class TruncatedQueryResultHandler<TSource>
 
         private sealed class LimitingState : GivenOrdered_MultiplePerTimestamp_Results.ReturnCountBasedAdditionalHandlingState<GroupBy<TResult, TDimensions>>
         {
-            public override void OnTruncatedResults(GroupBy<TResult, TDimensions> query)
+            public override void OnTruncatedResults(GroupBy<TResult, TDimensions> query) 
             {
-                if (query.Limit is int existing)
-                    query.Set(limit: existing - ReturnCount, offset: 0);
+                if (query.Limit is null && query.Offset is 0)
+                    return;
+                query.Set(limit: query.Limit is int existing ? existing - ReturnCount : null, offset: 0);
             }
         }
     }
@@ -245,8 +246,9 @@ public static class TruncatedQueryResultHandler<TSource>
         {
             public override void OnTruncatedResults(Scan<TResult> query)
             {
+                query.Offset(0);
                 if (query.Limit is int existing)
-                    query.Limit(existing - ReturnCount).Offset(0);
+                    query.Limit(existing - ReturnCount);
             }
 
             public OrderDirection Order { get; }

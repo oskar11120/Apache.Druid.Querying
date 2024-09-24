@@ -169,9 +169,98 @@ internal sealed class Scan_Ascending_WithLimit_ButNoOffset : Scan_Ordered
     }
 }
 
+internal sealed class Scan_Ascending_WithNoLimit_ButWithOffset : Scan_Ordered
+{
+    public Scan_Ascending_WithNoLimit_ButWithOffset() : base(new Query<Data>.Scan().Order(OrderDirection.Ascending).Offset(5))
+    {
+    }
+
+    protected override IEnumerable<QueryResultSimulationAction> SetUpQueryResults()
+    {
+        yield return Return_ToPassOn(new(I0.From, 1));
+        var t1 = I0.From.AddMinutes(1);
+        yield return Return_ToPassOn(new(t1, 1));
+        yield return Truncate_ExpectingNextQueryWith.Intervals(I0 with { From = t1 }, I1).Offset(0);
+
+        yield return Return_ToSkip(new(t1, 1));
+        yield return Return_ToPassOn(new(t1, 2));
+        yield return Return_ToPassOn(new(I1.From, 3));
+        var t2 = I1.From.AddMinutes(1);
+        yield return Return_ToPassOn(new(t2, 4));
+        yield return Truncate_ExpectingNextQueryWith.Interval(I1 with { From = t2 }).Offset(0);
+
+        yield return Return_ToSkip(new(t2, 4));
+        yield return Return_ToPassOn(new(t2.AddMinutes(1), 5));
+    }
+}
+
+internal sealed class Scan_Ascending_WithLimit_AndOffset : Scan_Ordered
+{
+    public Scan_Ascending_WithLimit_AndOffset() : base(new Query<Data>.Scan().Order(OrderDirection.Ascending).Limit(6).Offset(5))
+    {
+    }
+
+    protected override IEnumerable<QueryResultSimulationAction> SetUpQueryResults()
+    {
+        yield return Return_ToPassOn(new(I0.From, 1));
+        var t1 = I0.From.AddMinutes(1);
+        yield return Return_ToPassOn(new(t1, 1));
+        yield return Truncate_ExpectingNextQueryWith.Intervals(I0 with { From = t1 }, I1).Limit(6 - 2).Offset(0);
+
+        yield return Return_ToSkip(new(t1, 1));
+        yield return Return_ToPassOn(new(t1, 2));
+        yield return Return_ToPassOn(new(I1.From, 3));
+        var t2 = I1.From.AddMinutes(1);
+        yield return Return_ToPassOn(new(t2, 4));
+        yield return Truncate_ExpectingNextQueryWith.Interval(I1 with { From = t2 }).Limit(6 - 5).Offset(0);
+
+        yield return Return_ToSkip(new(t2, 4));
+        yield return Return_ToPassOn(new(t2.AddMinutes(1), 5));
+    }
+}
+
 internal sealed class Scan_Descending_NoLimit_NoOffset : Scan_Ordered
 {
     public Scan_Descending_NoLimit_NoOffset() : base(new Query<Data>.Scan().Order(OrderDirection.Descending))
+    {
+    }
+
+    protected override IEnumerable<QueryResultSimulationAction> SetUpQueryResults()
+    {
+        var t2 = I1.From.AddMinutes(1);
+        yield return Return_ToPassOn(new(t2.AddMinutes(1), 5));
+        yield return Return_ToPassOn(new(t2, 4));
+        yield return Truncate_ExpectingNextQueryWith.Intervals(I0, I1 with { To = t2.AddMilliseconds(1) });
+
+        yield return Return_ToSkip(new(t2, 4));
+        yield return Return_ToPassOn(new(I1.From, 3));
+        var t1 = I0.From.AddMinutes(1);
+        yield return Return_ToPassOn(new(t1, 2));
+        yield return Return_ToPassOn(new(t1, 1));
+        yield return Truncate_ExpectingNextQueryWith.Interval(I0 with { To = t1.AddMilliseconds(1) });
+
+        yield return Return_ToSkip(new(t1, 1));
+        yield return Return_ToPassOn(new(I0.From, 1));
+    }
+}
+
+internal abstract class GroupBy_Ordered : Base<GroupBy_Ordered.Data, WithTimestamp<int>, Query<GroupBy_Ordered.Data>.GroupBy<int>>
+{
+    private static DateTimeOffset Parse(string text) => DateTimeOffset.Parse(text, CultureInfo.InvariantCulture);
+    private static readonly DateTimeOffset t0 = Parse("2024-09-24T15:00:00Z");
+    protected static readonly Interval I0 = new(t0, t0.AddHours(1));
+    protected static readonly Interval I1 = new(t0.AddHours(3), t0.AddHours(4));
+
+    protected GroupBy_Ordered(Query<Data>.GroupBy<int> query) : base(query.Intervals(I0, I1))
+    {
+    }
+
+    public sealed record Data([property: DataSourceTimeColumn] DateTimeOffset Timestamp, int Value);
+}
+
+internal sealed class GroupBy_Descending_NoLimit_NoOffset : GroupBy_Ordered
+{
+    public GroupBy_Descending_NoLimit_NoOffset() : base(new Query<Data>.GroupBy<int>())
     {
     }
 

@@ -244,9 +244,9 @@ namespace Apache.Druid.Querying
                 var read = await utf8Json.ReadAsync(buffer, token);
                 var streamReader = new JsonStreamReader(utf8Json, buffer, read);
                 var results = deserializer.Deserialize(new(streamReader, Context.DataSerializerOptions, atomicity, mappings), token);
+                truncatedResultHandlingContext.NextQuerySetter = null;
                 if (onTruncatedResultsQueryRemaining)
                 {
-                    truncatedResultHandlingContext.NextQuerySetter = null;
                     results = query.OnTruncatedResultsSetQueryForRemaining(results, truncatedResultHandlingContext, token);
                     await foreach (var result in results)
                         yield return result;
