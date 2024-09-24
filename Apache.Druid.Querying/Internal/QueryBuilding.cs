@@ -7,6 +7,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using static Apache.Druid.Querying.Internal.IQueryWithInternal;
+using static Apache.Druid.Querying.IQueryWith;
 
 namespace Apache.Druid.Querying.Internal;
 
@@ -88,6 +89,14 @@ public static class IQueryWithInternal
         }
     }
 
+    public interface LimitSection : Limit, StateMappedToSection<LimitSection.InternalState, int?>
+    {
+        int? Limit.Limit { get => State?.Limit; set => State = new(value); }
+        int? StateMappedToSection<InternalState, int?>.ToSection(InternalState state) => state.Limit;
+        string Section<InternalState>.Key => nameof(Limit);
+        public sealed record InternalState(int? Limit);
+    }
+
     public interface SectionAtomicity : State<Sections.SectionAtomicity.ImmutableBuilder>
     {
         internal Sections.SectionAtomicity.ImmutableBuilder SectionAtomicity { get => State ??= new(); }
@@ -99,7 +108,7 @@ public static class IQueryWithInternal
     }
 
     public sealed record SectionFactoryExpressionState<TSectionKind>(
-        IReadOnlyList<ElementFactoryCall> Calls, 
+        IReadOnlyList<ElementFactoryCall> Calls,
         Sections.SectionAtomicity Atomicity,
         SectionFactoryJsonMapper.Options? MapperOptions);
     public interface SectionFactoryExpression<out TArguments, TSection, TSectionKind> :

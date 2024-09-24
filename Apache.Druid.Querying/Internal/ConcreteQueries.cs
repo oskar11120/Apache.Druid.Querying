@@ -111,7 +111,7 @@ namespace Apache.Druid.Querying.Internal
             IQueryWith.Intervals,
             IQueryWith.DescendingFlag,
             IQueryWith.Granularity,
-            IQueryWith.Limit,
+            IQueryWithInternal.LimitSection,
             IQueryWith.Filter<TArguments, TSelf>,
             IQueryWith.Context<QueryContext.TimeSeries, TSelf>,
             QueryResultDeserializer.ArrayOfObjectsWithTimestamp<TResult>,
@@ -125,7 +125,7 @@ namespace Apache.Druid.Querying.Internal
             Granularity? IQueryWithInternal.State<Granularity>.State { get; set; }
             IQueryWithInternal.CreateSection<IFilter>? IQueryWithInternal.State<IQueryWithInternal.CreateSection<IFilter>>.State { get; set; }
             QueryContext.TimeSeries? IQueryWithInternal.State<QueryContext.TimeSeries>.State { get; set; }
-            IQueryWith.Limit.InternalState? IQueryWithInternal.State<IQueryWith.Limit.InternalState>.State { get; set; }
+            IQueryWithInternal.LimitSection.InternalState? IQueryWithInternal.State<IQueryWithInternal.LimitSection.InternalState>.State { get; set; }
             IReadOnlyCollection<Interval>? IQueryWithInternal.State<IReadOnlyCollection<Interval>>.State { get; set; }
         }
 
@@ -263,7 +263,7 @@ namespace Apache.Druid.Querying.Internal
             IQueryWith.Order,
             IQueryWithInternal.Section<OrderDirection?>,
             IQueryWith.Filter<TArguments, TSelf>,
-            IQueryWith.Limit,
+            IQueryWithInternal.LimitSection,
             IQueryWith.BatchSize,
             IQueryWith.Context<QueryContext.Scan, TSelf>,
             QueryResultDeserializer.ArrayOfScanResults<TColumns>,
@@ -278,8 +278,8 @@ namespace Apache.Druid.Querying.Internal
             OrderDirection? IQueryWith.Order.Order { get => AsOrder.State; set => AsOrder.State = value; }
 
             OrderDirection? IQueryWithInternal.State<OrderDirection?>.State { get; set; }
+            IQueryWithInternal.LimitSection.InternalState? IQueryWithInternal.State<IQueryWithInternal.LimitSection.InternalState>.State { get; set; }
             IQueryWithInternal.CreateSection<IFilter>? IQueryWithInternal.State<IQueryWithInternal.CreateSection<IFilter>>.State { get; set; }
-            IQueryWith.Limit.InternalState? IQueryWithInternal.State<IQueryWith.Limit.InternalState>.State { get; set; }
             IQueryWith.BatchSize.InternalState? IQueryWithInternal.State<IQueryWith.BatchSize.InternalState>.State { get; set; }
             QueryContext.Scan? IQueryWithInternal.State<QueryContext.Scan>.State { get; set; }
             IQueryWith.Offset.InternalState? IQueryWithInternal.State<IQueryWith.Offset.InternalState>.State { get; set; }

@@ -237,12 +237,9 @@ namespace Apache.Druid.Querying
             int Offset => State?.Offset ?? 0;
         }
 
-        public interface Limit : StateMappedToSection<Limit.InternalState, int?>
+        public interface Limit
         {
-            int? StateMappedToSection<InternalState, int?>.ToSection(InternalState state) => state.Limit;
-            string Section<InternalState>.Key => nameof(Limit);
-            public sealed record InternalState(int? Limit);
-            int? Limit => State?.Limit;
+            int? Limit { get; set; }
         }
 
         public interface Threshold : StateMappedToSection<Threshold.InternalState, int>
@@ -503,10 +500,10 @@ namespace Apache.Druid.Querying
             return query;
         }
 
-        public static TQuery Limit<TQuery>(this TQuery query, int limit)
+        public static TQuery Limit<TQuery>(this TQuery query, int? limit)
             where TQuery : IQueryWith.Limit
         {
-            query.State = new(limit);
+            query.Limit = limit;
             return query;
         }
 
