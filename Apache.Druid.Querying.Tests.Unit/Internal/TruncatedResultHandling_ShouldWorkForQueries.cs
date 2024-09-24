@@ -1,20 +1,23 @@
 ﻿using Apache.Druid.Querying.Internal;
 using Apache.Druid.Querying.Json;
 using FluentAssertions;
+using System.Globalization;
 
 namespace Apache.Druid.Querying.Tests.Unit.Internal;
 
-internal abstract class Scan_Unordered : Base<int, ScanResult<int>, Query<int>.Scan>
+internal abstract class Scan<TResult> : Base<TResult, ScanResult<TResult>, Query<TResult>.Scan>
 {
-    protected Scan_Unordered(Query<int>.Scan query) : base(query)
+    protected Scan(Query<TResult>.Scan query) : base(query)
     {
     }
 
-    protected static QueryResultSimulationAction Return_ToPassOn(int result)
-        => Return_ToPassOn(new ScanResult<int>(null, result));
+    protected static QueryResultSimulationAction Return_ToPassOn(TResult result)
+        => Return_ToPassOn(new ScanResult<TResult>(null, result));
+    protected static QueryResultSimulationAction Return_ToSkip(TResult result)
+        => Return_ToSkip(new ScanResult<TResult>(null, result));
 }
 
-internal sealed class Scan_Unordered_WithNoLimit_NoOffset : Scan_Unordered
+internal sealed class Scan_Unordered_WithNoLimit_NoOffset : Scan<int>
 {
     public Scan_Unordered_WithNoLimit_NoOffset() : base(new Query<int>.Scan())
     {
@@ -36,7 +39,7 @@ internal sealed class Scan_Unordered_WithNoLimit_NoOffset : Scan_Unordered
     }
 }
 
-internal sealed class Scan_Unordered_WithNoLimit_ButExistingOffset : Scan_Unordered
+internal sealed class Scan_Unordered_WithNoLimit_ButExistingOffset : Scan<int>
 {
     public Scan_Unordered_WithNoLimit_ButExistingOffset() : base(new Query<int>.Scan().Offset(5))
     {
@@ -58,7 +61,7 @@ internal sealed class Scan_Unordered_WithNoLimit_ButExistingOffset : Scan_Unorde
     }
 }
 
-internal sealed class Scan_Unordered_WithLimit_ButNoOffset : Scan_Unordered
+internal sealed class Scan_Unordered_WithLimit_ButNoOffset : Scan<int>
 {
     public Scan_Unordered_WithLimit_ButNoOffset() : base(new Query<int>.Scan().Limit(7))
     {
@@ -80,7 +83,7 @@ internal sealed class Scan_Unordered_WithLimit_ButNoOffset : Scan_Unordered
     }
 }
 
-internal sealed class Scan_Unordered_WithLimit_AndOffset : Scan_Unordered
+internal sealed class Scan_Unordered_WithLimit_AndOffset : Scan<int>
 {
     public Scan_Unordered_WithLimit_AndOffset() : base(new Query<int>.Scan().Limit(7).Offset(3))
     {
@@ -99,6 +102,70 @@ internal sealed class Scan_Unordered_WithLimit_AndOffset : Scan_Unordered
 
         yield return Return_ToPassOn(6);
         yield return Return_ToPassOn(7);
+    }
+}
+
+internal abstract class Scan_Ordered : Scan<Scan_Ordered.Data>
+{
+    private static DateTimeOffset Parse(string text) => DateTimeOffset.Parse(text, CultureInfo.InvariantCulture);
+    private static readonly DateTimeOffset t0 = Parse("2024-09-24T15:00:00Z");
+    protected static readonly Interval I0 = new(t0, t0.AddHours(1));
+    protected static readonly Interval I1 = new(t0.AddHours(3), t0.AddHours(4));
+
+    protected Scan_Ordered(Query<Data>.Scan query) : base(query.Intervals(I0, I1))
+    {
+    }
+
+    public sealed record Data([property: DataSourceTimeColumn] DateTimeOffset Timestamp, int Value);
+}
+
+internal sealed class Scan_Ascending_NoLimit_NoOffset : Scan_Ordered
+{
+    public Scan_Ascending_NoLimit_NoOffset() : base(new Query<Data>.Scan().Order(OrderDirection.Ascending))
+    {
+    }
+
+    protected override IEnumerable<QueryResultSimulationAction> SetUpQueryResults()
+    {
+        yield return Return_ToPassOn(new(I0.From, 1));
+        var t1 = I0.From.AddMinutes(1);
+        yield return Return_ToPassOn(new(t1, 1));
+        yield return Truncate_ExpectingNextQueryWith.Intervals(I0 with { From = t1 }, I1);
+
+        yield return Return_ToSkip(new(t1, 1));
+        yield return Return_ToPassOn(new(t1, 2));
+        yield return Return_ToPassOn(new(I1.From, 3));
+        var t2 = I1.From.AddMinutes(1);
+        yield return Return_ToPassOn(new(t2, 4));
+        yield return Truncate_ExpectingNextQueryWith.Interval(I1 with { From = t2 });
+
+        yield return Return_ToSkip(new(t2, 4));
+        yield return Return_ToPassOn(new(t2.AddMinutes(1), 5));
+    }
+}
+
+internal sealed class Scan_Descending_NoLimit_NoOffset : Scan_Ordered
+{
+    public Scan_Descending_NoLimit_NoOffset() : base(new Query<Data>.Scan().Order(OrderDirection.Descending))
+    {
+    }
+
+    protected override IEnumerable<QueryResultSimulationAction> SetUpQueryResults()
+    {
+        var t2 = I1.From.AddMinutes(1);
+        yield return Return_ToPassOn(new(t2.AddMinutes(1), 5));
+        yield return Return_ToPassOn(new(t2, 4));
+        yield return Truncate_ExpectingNextQueryWith.Intervals(I0, I1 with { To = t2.AddMilliseconds(1) });
+
+        yield return Return_ToSkip(new(t2, 4));
+        yield return Return_ToPassOn(new(I1.From, 3));
+        var t1 = I0.From.AddMinutes(1);
+        yield return Return_ToPassOn(new(t1, 2));
+        yield return Return_ToPassOn(new(t1, 1));
+        yield return Truncate_ExpectingNextQueryWith.Interval(I0 with { To = t1.AddMilliseconds(1) });
+
+        yield return Return_ToSkip(new(t1, 1));
+        yield return Return_ToPassOn(new(I0.From, 1));
     }
 }
 

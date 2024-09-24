@@ -78,7 +78,8 @@ public static class TruncatedQueryResultHandler<TSource>
                 if (interval.From >= on)
                     return null;
                 return interval.To > on ?
-                    interval with { To = on } : interval;
+                    interval with { To = on.AddMilliseconds(1) } : // on.AddMilliseconds(1) makes interval right-inclusive
+                    interval;
             }
 
             var newIntervals = query

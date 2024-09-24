@@ -455,6 +455,10 @@ namespace Apache.Druid.Querying
             return query;
         }
 
+        public static TQuery Intervals<TQuery>(this TQuery query, params Interval[] intervals)
+            where TQuery : IQueryWith.Intervals
+            => query.Intervals(intervals as IReadOnlyCollection<Interval>);
+
         public static TQuery Interval<TQuery>(this TQuery query, Interval interval)
             where TQuery : IQueryWith.Intervals
             => Intervals(query, new[] { interval });
