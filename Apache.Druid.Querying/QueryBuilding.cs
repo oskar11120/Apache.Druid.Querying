@@ -209,18 +209,18 @@ namespace Apache.Druid.Querying
             IReadOnlyCollection<Interval> Intervals => Require();
         }
 
-        public interface DescendingFlag : StateMappedToSection<DescendingFlag.InternalState, bool>
+        public interface Order
         {
-            bool StateMappedToSection<InternalState, bool>.ToSection(InternalState state) => state.Descending;
-            string Section<InternalState>.Key => nameof(Descending);
-            public sealed record InternalState(bool Descending);
-            bool Descending => State?.Descending ?? false;
+            OrderDirection? Order { get; set; }
         }
 
-        public interface Order : Section<OrderDirection?>
+        public interface DescendingFlag : StateMappedToSection<OrderDirection?, bool>, Order
         {
-            string Section<OrderDirection?>.Key => nameof(Order);
-            OrderDirection? Order => State;
+            bool StateMappedToSection<OrderDirection?, bool>.ToSection(OrderDirection? state)
+                => state is OrderDirection.Descending;
+            string Section<OrderDirection?>.Key => nameof(Descending);
+            bool Descending => State is OrderDirection.Descending;
+            OrderDirection? Order.Order { get => State; set => State = value; }
         }
 
         public interface Granularity : Section<Querying.Granularity>
@@ -243,10 +243,6 @@ namespace Apache.Druid.Querying
             string Section<InternalState>.Key => nameof(Limit);
             public sealed record InternalState(int? Limit);
             int? Limit => State?.Limit;
-        }
-
-        public interface OffsetAndLimit : Offset, Limit
-        {
         }
 
         public interface Threshold : StateMappedToSection<Threshold.InternalState, int>
@@ -465,15 +461,12 @@ namespace Apache.Druid.Querying
 
         public static TQuery Descending<TQuery>(this TQuery query, bool descending)
             where TQuery : IQueryWith.DescendingFlag
-        {
-            query.State = new(descending);
-            return query;
-        }
+            => query.Order(descending ? OrderDirection.Descending : OrderDirection.Ascending);
 
         public static TQuery Order<TQuery>(this TQuery query, OrderDirection? order)
             where TQuery : IQueryWith.Order
         {
-            query.State = order;
+            query.Order = order;
             return query;
         }
 

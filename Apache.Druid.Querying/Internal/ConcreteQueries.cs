@@ -121,7 +121,7 @@ namespace Apache.Druid.Querying.Internal
             {
             }
 
-            IQueryWith.DescendingFlag.InternalState? IQueryWithInternal.State<IQueryWith.DescendingFlag.InternalState>.State { get; set; }
+            OrderDirection? IQueryWithInternal.State<OrderDirection?>.State { get; set; }
             Granularity? IQueryWithInternal.State<Granularity>.State { get; set; }
             IQueryWithInternal.CreateSection<IFilter>? IQueryWithInternal.State<IQueryWithInternal.CreateSection<IFilter>>.State { get; set; }
             QueryContext.TimeSeries? IQueryWithInternal.State<QueryContext.TimeSeries>.State { get; set; }
@@ -261,6 +261,7 @@ namespace Apache.Druid.Querying.Internal
             QueryBase,
             IQueryWith.Intervals,
             IQueryWith.Order,
+            IQueryWithInternal.Section<OrderDirection?>,
             IQueryWith.Filter<TArguments, TSelf>,
             IQueryWith.Limit,
             IQueryWith.BatchSize,
@@ -271,6 +272,10 @@ namespace Apache.Druid.Querying.Internal
             public Scan() : base("scan")
             {
             }
+
+            private IQueryWithInternal.State<OrderDirection?> AsOrder => this;
+            string IQueryWithInternal.Section<OrderDirection?>.Key => nameof(IQueryWith.Order);
+            OrderDirection? IQueryWith.Order.Order { get => AsOrder.State; set => AsOrder.State = value; }
 
             OrderDirection? IQueryWithInternal.State<OrderDirection?>.State { get; set; }
             IQueryWithInternal.CreateSection<IFilter>? IQueryWithInternal.State<IQueryWithInternal.CreateSection<IFilter>>.State { get; set; }

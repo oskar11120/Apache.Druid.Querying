@@ -237,7 +237,8 @@ public static class TruncatedQueryResultHandler<TSource>
     public interface Scan<TResult> :
         IQueryWith.SourceAndResult<TSource, ScanResult<TResult>>,
         IQueryWith.Intervals,
-        IQueryWith.OffsetAndLimit,
+        IQueryWith.Offset,
+        IQueryWith.Limit,
         IQueryWith.Order
     {
         private sealed class GivenOrderedResults :
