@@ -144,6 +144,31 @@ internal sealed class Scan_Ascending_NoLimit_NoOffset : Scan_Ordered
     }
 }
 
+internal sealed class Scan_Ascending_WithLimit_ButNoOffset : Scan_Ordered
+{
+    public Scan_Ascending_WithLimit_ButNoOffset() : base(new Query<Data>.Scan().Order(OrderDirection.Ascending).Limit(6).Offset(0))
+    {
+    }
+
+    protected override IEnumerable<QueryResultSimulationAction> SetUpQueryResults()
+    {
+        yield return Return_ToPassOn(new(I0.From, 1));
+        var t1 = I0.From.AddMinutes(1);
+        yield return Return_ToPassOn(new(t1, 1));
+        yield return Truncate_ExpectingNextQueryWith.Intervals(I0 with { From = t1 }, I1).Limit(6 - 2);
+
+        yield return Return_ToSkip(new(t1, 1));
+        yield return Return_ToPassOn(new(t1, 2));
+        yield return Return_ToPassOn(new(I1.From, 3));
+        var t2 = I1.From.AddMinutes(1);
+        yield return Return_ToPassOn(new(t2, 4));
+        yield return Truncate_ExpectingNextQueryWith.Interval(I1 with { From = t2 }).Limit(6 - 5);
+
+        yield return Return_ToSkip(new(t2, 4));
+        yield return Return_ToPassOn(new(t2.AddMinutes(1), 5));
+    }
+}
+
 internal sealed class Scan_Descending_NoLimit_NoOffset : Scan_Ordered
 {
     public Scan_Descending_NoLimit_NoOffset() : base(new Query<Data>.Scan().Order(OrderDirection.Descending))

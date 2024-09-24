@@ -285,20 +285,33 @@ public static class TruncatedQueryResultHandler<TSource>
                     throw new NotSupportedException($"Unsupported {DataSourceTimeColumnAttribute.Name} column type {getMethod.ReturnType}.");
             }
 
+            private static readonly GivenOrderedResults notApplicableSentinel = new(static _ => throw new NotSupportedException(), default);
             public static IAsyncEnumerable<ScanResult<TResult>>? TryHandle(
                 IAsyncEnumerable<ScanResult<TResult>> results, Scan<TResult> query, TruncatedResultHandlingContext<TSource> context, CancellationToken token)
             {
-                if (!resultImplementsIEquatable || query.Order is null)
-                    return null;
-                var resultMappings = context.Mappings.Get<TResult>();
-                var timestampProperty = resultMappings
-                    .FirstOrDefault(mapping => mapping.ColumnName == DataSourceTimeColumnAttribute.Name)
-                    ?.Property;
-                if (timestampProperty is null)
-                    return null;
-                var timestampGetter = GetTimestampGetter(timestampProperty);
-                var handling = new GivenOrderedResults(timestampGetter, query.Order.Value);
-                return GivenOrdered_MultiplePerTimestamp_Results.Handle(results, context, handling, query, handling, token);
+                GivenOrderedResults Create()
+                {
+                    if (!resultImplementsIEquatable || query.Order is null)
+                        return notApplicableSentinel;
+                    var resultMappings = context.Mappings.Get<TResult>();
+                    var timestampProperty = resultMappings
+                        .FirstOrDefault(mapping => mapping.ColumnName == DataSourceTimeColumnAttribute.Name)
+                        ?.Property;
+                    if (timestampProperty is null)
+                        return notApplicableSentinel;
+                    var timestampGetter = GetTimestampGetter(timestampProperty);
+                    return new GivenOrderedResults(timestampGetter, query.Order.Value);
+                }
+
+                if (!context.State.TryGet<GivenOrderedResults>(out var handling))
+                {
+                    handling = Create();
+                    context.State.Add(handling);
+                }
+
+                return handling == notApplicableSentinel ? 
+                    null :
+                    GivenOrdered_MultiplePerTimestamp_Results.Handle(results, context, handling, query, handling, token);
             }
         }
 
@@ -338,7 +351,7 @@ public static class TruncatedQueryResultHandler<TSource>
         }
     }
 
-    public interface Metadata<TMetadata, TEquatablePart> : 
+    public interface Metadata<TMetadata, TEquatablePart> :
         IQueryWith.SourceAndResult<TSource, TMetadata>
         where TEquatablePart : IEquatable<TEquatablePart>
     {
