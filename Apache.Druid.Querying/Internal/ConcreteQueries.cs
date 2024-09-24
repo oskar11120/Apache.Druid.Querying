@@ -262,6 +262,8 @@ namespace Apache.Druid.Querying.Internal
             IQueryWith.Intervals,
             IQueryWith.Order,
             IQueryWithInternal.Section<OrderDirection?>,
+            IQueryWith.Offset,
+            IQueryWithInternal.StateMappedToSection<Scan<TColumns>.OffsetInternalState, int>,
             IQueryWith.Filter<TArguments, TSelf>,
             IQueryWithInternal.LimitSection,
             IQueryWith.BatchSize,
@@ -269,20 +271,28 @@ namespace Apache.Druid.Querying.Internal
             QueryResultDeserializer.ArrayOfScanResults<TColumns>,
             TruncatedQueryResultHandler<TSource>.Scan<TColumns>
         {
+            public sealed record OffsetInternalState(int Offset);
+
             public Scan() : base("scan")
             {
             }
 
-            private IQueryWithInternal.State<OrderDirection?> AsOrder => this;
+            IQueryWithInternal.State<OrderDirection?> AsOrder => this;
             string IQueryWithInternal.Section<OrderDirection?>.Key => nameof(IQueryWith.Order);
             OrderDirection? IQueryWith.Order.Order { get => AsOrder.State; set => AsOrder.State = value; }
+
+            IQueryWithInternal.State<OffsetInternalState> AsOffset => this;
+            string IQueryWithInternal.Section<OffsetInternalState>.Key => nameof(IQueryWith.Offset);
+            int IQueryWithInternal.StateMappedToSection<OffsetInternalState, int>.ToSection(OffsetInternalState state)
+                => state.Offset;
+            int IQueryWith.Offset.Offset { get => AsOffset.State?.Offset ?? 0; set => AsOffset.State = new(value); }
 
             OrderDirection? IQueryWithInternal.State<OrderDirection?>.State { get; set; }
             IQueryWithInternal.LimitSection.InternalState? IQueryWithInternal.State<IQueryWithInternal.LimitSection.InternalState>.State { get; set; }
             IQueryWithInternal.CreateSection<IFilter>? IQueryWithInternal.State<IQueryWithInternal.CreateSection<IFilter>>.State { get; set; }
             IQueryWith.BatchSize.InternalState? IQueryWithInternal.State<IQueryWith.BatchSize.InternalState>.State { get; set; }
             QueryContext.Scan? IQueryWithInternal.State<QueryContext.Scan>.State { get; set; }
-            IQueryWith.Offset.InternalState? IQueryWithInternal.State<IQueryWith.Offset.InternalState>.State { get; set; }
+            OffsetInternalState? IQueryWithInternal.State<OffsetInternalState>.State { get; set; }
             IReadOnlyCollection<Interval>? IQueryWithInternal.State<IReadOnlyCollection<Interval>>.State { get; set; }
         }
     }

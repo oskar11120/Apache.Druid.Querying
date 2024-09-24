@@ -229,12 +229,9 @@ namespace Apache.Druid.Querying
             Querying.Granularity Granularity => Require();
         }
 
-        public interface Offset : StateMappedToSection<Offset.InternalState, int>
+        public interface Offset
         {
-            int StateMappedToSection<InternalState, int>.ToSection(InternalState state) => state.Offset;
-            string Section<InternalState>.Key => nameof(Offset);
-            public sealed record InternalState(int Offset);
-            int Offset => State?.Offset ?? 0;
+            int Offset { get; set; }
         }
 
         public interface Limit
@@ -496,7 +493,7 @@ namespace Apache.Druid.Querying
         public static TQuery Offset<TQuery>(this TQuery query, int offset)
             where TQuery : IQueryWith.Offset
         {
-            query.State = new(offset);
+            query.Offset = offset;
             return query;
         }
 
