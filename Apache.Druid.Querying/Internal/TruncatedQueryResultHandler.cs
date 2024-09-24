@@ -111,7 +111,8 @@ public static class TruncatedQueryResultHandler<TSource>
         }
 
         internal static async IAsyncEnumerable<TResult> Handle<TResult, TEquatableResultPart, TQuery>(
-            IQueryWith.SourceAndResult<TSource, TResult>.TruncatedResultHandlingContext context,
+            IAsyncEnumerable<TResult> currentQueryResults,
+            TruncatedResultHandlingContext<TSource> context,
             IGetters<TResult, TEquatableResultPart> getters,
             TQuery query,
             ReturnCountBasedAdditionalHandlingState<TQuery>? more,
@@ -120,7 +121,7 @@ public static class TruncatedQueryResultHandler<TSource>
         {
             var latestReturned = context.State.GetOrAdd<LatestReturned<TEquatableResultPart>>();
             var truncated = false;
-            var results = OnTruncatedResultsInvoke(context.CurrentQueryResults, () => truncated = true, token);
+            var results = OnTruncatedResultsInvoke(currentQueryResults, () => truncated = true, token);
             var timestampChangedAtLeastOnce = false;
             await foreach (var result in results)
             {
@@ -170,8 +171,8 @@ public static class TruncatedQueryResultHandler<TSource>
             => Descending ? OrderDirection.Descending : OrderDirection.Ascending;
 
         IAsyncEnumerable<WithTimestamp<TResult>> IQueryWith.SourceAndResult<TSource, WithTimestamp<TResult>>.OnTruncatedResultsSetQueryForRemaining(
-            TruncatedResultHandlingContext context, CancellationToken token)
-            => GivenOrdered_MultiplePerTimestamp_Results.Handle(context, this, this, context.State.GetOrAdd<LimitingState>(), token);
+            IAsyncEnumerable<WithTimestamp<TResult>> currentQueryResults, TruncatedResultHandlingContext<TSource> context, CancellationToken token)
+            => GivenOrdered_MultiplePerTimestamp_Results.Handle(currentQueryResults, context, this, this, context.State.GetOrAdd<LimitingState>(), token);
 
         internal sealed class LimitingState : GivenOrdered_MultiplePerTimestamp_Results.ReturnCountBasedAdditionalHandlingState<TimeSeries<TResult>>
         {
@@ -198,8 +199,8 @@ public static class TruncatedQueryResultHandler<TSource>
             => OrderDirection.Ascending;
 
         IAsyncEnumerable<WithTimestamp<TResult>> IQueryWith.SourceAndResult<TSource, WithTimestamp<TResult>>.OnTruncatedResultsSetQueryForRemaining(
-            TruncatedResultHandlingContext context, CancellationToken token)
-            => GivenOrdered_MultiplePerTimestamp_Results.Handle(context, this, this, null, token);
+            IAsyncEnumerable<WithTimestamp<TResult>> currentQueryResults, TruncatedResultHandlingContext<TSource> context, CancellationToken token)
+            => GivenOrdered_MultiplePerTimestamp_Results.Handle(currentQueryResults, context, this, this, null, token);
     }
 
     public interface GroupBy<TResult, TDimensions> :
@@ -218,8 +219,8 @@ public static class TruncatedQueryResultHandler<TSource>
             => OrderDirection.Ascending;
 
         IAsyncEnumerable<WithTimestamp<TResult>> IQueryWith.SourceAndResult<TSource, WithTimestamp<TResult>>.OnTruncatedResultsSetQueryForRemaining(
-            TruncatedResultHandlingContext context, CancellationToken token)
-            => GivenOrdered_MultiplePerTimestamp_Results.Handle(context, this, this, context.State.GetOrAdd<LimitingState>(), token);
+            IAsyncEnumerable<WithTimestamp<TResult>> currentQueryResults, TruncatedResultHandlingContext<TSource> context, CancellationToken token)
+            => GivenOrdered_MultiplePerTimestamp_Results.Handle(currentQueryResults, context, this, this, context.State.GetOrAdd<LimitingState>(), token);
 
         private sealed class LimitingState : GivenOrdered_MultiplePerTimestamp_Results.ReturnCountBasedAdditionalHandlingState<GroupBy<TResult, TDimensions>>
         {
@@ -283,7 +284,8 @@ public static class TruncatedQueryResultHandler<TSource>
                     throw new NotSupportedException($"Unsupported {DataSourceTimeColumnAttribute.Name} column type {getMethod.ReturnType}.");
             }
 
-            public static IAsyncEnumerable<ScanResult<TResult>>? TryHandle(Scan<TResult> query, TruncatedResultHandlingContext context, CancellationToken token)
+            public static IAsyncEnumerable<ScanResult<TResult>>? TryHandle(
+                IAsyncEnumerable<ScanResult<TResult>> results, Scan<TResult> query, TruncatedResultHandlingContext<TSource> context, CancellationToken token)
             {
                 if (!resultImplementsIEquatable || query.Order is null)
                     return null;
@@ -295,15 +297,16 @@ public static class TruncatedQueryResultHandler<TSource>
                     return null;
                 var timestampGetter = GetTimestampGetter(timestampProperty);
                 var handling = new GivenOrderedResults(timestampGetter, query.Order.Value);
-                return GivenOrdered_MultiplePerTimestamp_Results.Handle(context, handling, query, handling, token);
+                return GivenOrdered_MultiplePerTimestamp_Results.Handle(results, context, handling, query, handling, token);
             }
         }
 
         async IAsyncEnumerable<ScanResult<TResult>> IQueryWith.SourceAndResult<TSource, ScanResult<TResult>>.OnTruncatedResultsSetQueryForRemaining(
-            TruncatedResultHandlingContext context,
+            IAsyncEnumerable<ScanResult<TResult>> currentQueryResults,
+            TruncatedResultHandlingContext<TSource> context,
             [EnumeratorCancellation] CancellationToken token)
         {
-            var results = GivenOrderedResults.TryHandle(this, context, token);
+            var results = GivenOrderedResults.TryHandle(currentQueryResults, this, context, token);
             if (results is not null)
             {
                 await foreach (var result in results)
@@ -313,7 +316,7 @@ public static class TruncatedQueryResultHandler<TSource>
 
             var state = context.State.GetOrAdd<UnorderedQueryHandlingState>();
             var truncated = false;
-            results = OnTruncatedResultsInvoke(context.CurrentQueryResults, () => truncated = true, token);
+            results = OnTruncatedResultsInvoke(currentQueryResults, () => truncated = true, token);
             await foreach (var result in results)
             {
                 state.ReturnCount++;
@@ -341,12 +344,13 @@ public static class TruncatedQueryResultHandler<TSource>
         private protected abstract TEquatablePart GetEquatablePart(TMetadata metadata);
 
         async IAsyncEnumerable<TMetadata> IQueryWith.SourceAndResult<TSource, TMetadata>.OnTruncatedResultsSetQueryForRemaining(
-            TruncatedResultHandlingContext context,
+            IAsyncEnumerable<TMetadata> currentQueryResults,
+            TruncatedResultHandlingContext<TSource> context,
             [EnumeratorCancellation] CancellationToken token)
         {
             var returnedSegmentIds = context.State.GetOrAdd<HashSet<TEquatablePart>>();
             var truncated = false;
-            var results = OnTruncatedResultsInvoke(context.CurrentQueryResults, () => truncated = true, token);
+            var results = OnTruncatedResultsInvoke(currentQueryResults, () => truncated = true, token);
             await foreach (var result in results)
                 if (returnedSegmentIds.Add(GetEquatablePart(result)))
                     yield return result;

@@ -42,6 +42,46 @@ namespace Apache.Druid.Querying
         }
     }
 
+    internal sealed class TruncatedResultHandlingContext<TSource>
+    {
+        public readonly PropertyColumnNameMapping.IProvider Mappings;
+        public readonly TruncatedResultHandlingContextState State = new();
+        public IQueryWith.Source<TSource>? NextQuerySetter;
+
+        public TruncatedResultHandlingContext(PropertyColumnNameMapping.IProvider mappings)
+            => Mappings = mappings;
+    }
+
+    internal sealed class TruncatedResultHandlingContextState
+    {
+        private readonly Dictionary<Type, object> data = new();
+        public bool TryGet<TState>([MaybeNullWhen(false)] out TState state)
+        {
+            if (data.TryGetValue(typeof(TState), out var existing))
+            {
+                state = (TState)existing;
+                return true;
+            }
+
+            state = default;
+            return false;
+        }
+
+        public void Add<TState>(TState state)
+            where TState : notnull
+            => data.Add(typeof(TState), state);
+
+        public TState GetOrAdd<TState>()
+            where TState : notnull, new()
+        {
+            if (TryGet<TState>(out var existing))
+                return existing;
+            var @new = new TState();
+            Add(@new);
+            return @new;
+        }
+    }
+
     public static partial class IQueryWith
     {
         public interface Result<out TResult>
@@ -55,55 +95,8 @@ namespace Apache.Druid.Querying
 
         public interface SourceAndResult<TSource, TResult> : Source<TSource>, Result<TResult>
         {
-            internal IAsyncEnumerable<TResult> OnTruncatedResultsSetQueryForRemaining(TruncatedResultHandlingContext context, CancellationToken token);
-
-            internal sealed class TruncatedResultHandlingContext
-            {
-                public readonly IAsyncEnumerable<TResult> CurrentQueryResults;
-                public readonly PropertyColumnNameMapping.IProvider Mappings;
-                public readonly TruncatedResultHandlingContextState State;
-                public Source<TSource>? NextQuerySetter;
-
-                public TruncatedResultHandlingContext(
-                    PropertyColumnNameMapping.IProvider mappings,
-                    IAsyncEnumerable<TResult> currentQueryResults,
-                    TruncatedResultHandlingContextState state)
-                {
-                    Mappings = mappings;
-                    CurrentQueryResults = currentQueryResults;
-                    State = state;
-                }
-            }
-
-            internal sealed class TruncatedResultHandlingContextState
-            {
-                private readonly Dictionary<Type, object> data = new();
-                public bool TryGet<TState>([MaybeNullWhen(false)] out TState state)
-                {
-                    if (data.TryGetValue(typeof(TState), out var existing))
-                    {
-                        state = (TState)existing;
-                        return true;
-                    }
-
-                    state = default;
-                    return false;
-                }
-
-                public void Add<TState>(TState state)
-                    where TState : notnull
-                    => data.Add(typeof(TState), state);
-
-                public TState GetOrAdd<TState>()
-                    where TState : notnull, new()
-                {
-                    if (TryGet<TState>(out var existing))
-                        return existing;
-                    var @new = new TState();
-                    Add(@new);
-                    return @new;
-                }
-            }
+            internal IAsyncEnumerable<TResult> OnTruncatedResultsSetQueryForRemaining(
+                IAsyncEnumerable<TResult> currentQueryResults, TruncatedResultHandlingContext<TSource> context, CancellationToken token);
         }
     }
 
@@ -242,34 +235,33 @@ namespace Apache.Druid.Querying
             var mappings = query.ApplyPropertyColumnNameMappingChanges(Context.ColumnNameMappings);
             var deserializer = query;
             var truncatedResultHandler = query;
-            var truncatedResultHandlingState = new IQueryWith.SourceAndResult<TSource, TResult>.TruncatedResultHandlingContextState();
+            var truncatedResultHandlingContext = new TruncatedResultHandlingContext<TSource>(mappings);
             byte[]? buffer = null;
-            IQueryWith.Source<TSource>? nextQuery = query;
 
             async IAsyncEnumerable<TResult> Deserialize(Stream utf8Json, [EnumeratorCancellation] CancellationToken token)
             {
                 buffer ??= ArrayPool<byte>.Shared.Rent(Context.DataSerializerOptions.DefaultBufferSize);
                 var read = await utf8Json.ReadAsync(buffer, token);
                 var streamReader = new JsonStreamReader(utf8Json, buffer, read);
-                var results = deserializer
-                    .Deserialize(new(streamReader, Context.DataSerializerOptions, atomicity, mappings), token);
-                if (!onTruncatedResultsQueryRemaining)
+                var results = deserializer.Deserialize(new(streamReader, Context.DataSerializerOptions, atomicity, mappings), token);
+                if (onTruncatedResultsQueryRemaining)
+                {
+                    truncatedResultHandlingContext.NextQuerySetter = null;
+                    results = query.OnTruncatedResultsSetQueryForRemaining(results, truncatedResultHandlingContext, token);
+                    await foreach (var result in results)
+                        yield return result;
+                }
+                else
                 {
                     await foreach (var result in results)
                         yield return result;
                 }
-
-                var context = new IQueryWith.SourceAndResult<TSource, TResult>.TruncatedResultHandlingContext(
-                    mappings, results, truncatedResultHandlingState);
-                results = query.OnTruncatedResultsSetQueryForRemaining(context, token);
-                await foreach (var result in results)
-                    yield return result;
-                nextQuery = context.NextQuerySetter;
             }
 
             try
             {
-                while (nextQuery is not null)
+                truncatedResultHandlingContext.NextQuerySetter = query;
+                while (truncatedResultHandlingContext.NextQuerySetter is IQueryWith.Source<TSource> nextQuery)
                 {
                     var results = ExecuteQuery(nextQuery, Deserialize, token);
                     await foreach (var result in results)
