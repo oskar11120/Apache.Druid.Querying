@@ -6,7 +6,6 @@ using System.Linq.Expressions;
 using System.Linq;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using static Apache.Druid.Querying.Internal.IQueryWithInternal;
 using static Apache.Druid.Querying.IQueryWith;
 
 namespace Apache.Druid.Querying.Internal;
