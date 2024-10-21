@@ -40,8 +40,23 @@ namespace Apache.Druid.Querying.Internal.Sections
 
                     var (value, columnNames) = DruidExpression.Map(expression.Value, context.ColumnNames, context.DataSerializerOptions);
                     result.Add(expression.Name, value);
+                    
                     if (options.ExpressionColumnNamesKey is string existing)
-                        result.Add(existing, JsonSerializer.SerializeToNode(columnNames, context.QuerySerializerOptions));
+                    {
+                        if (!result.ContainsKey(existing))
+                        {
+                            result.Add(existing, JsonSerializer.SerializeToNode(columnNames, context.QuerySerializerOptions));
+                        }
+                        else
+                        {
+                            result.TryGetPropertyValue(existing, out JsonNode? node);
+                            
+                            string[] fields = node.Deserialize<string[]>()!;
+                            
+                            result.Remove(existing);
+                            result.Add(existing, JsonSerializer.SerializeToNode(fields.Concat(columnNames), context.QuerySerializerOptions));
+                        }
+                    }
                 },
                 (filterFactory, result) =>
                 {
