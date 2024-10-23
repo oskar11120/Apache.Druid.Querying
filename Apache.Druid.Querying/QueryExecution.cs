@@ -282,7 +282,7 @@ namespace Apache.Druid.Querying
         {
             var json = MapQueryToJson(query);
             using var content = JsonContent.Create(json, options: Context.QuerySerializerOptions);
-            using var request = new HttpRequestMessage(HttpMethod.Post, "druid/v2")
+            using var request = new HttpRequestMessage(HttpMethod.Post, Context.Options.Value.NativeQueryEndpointUri)
             {
                 Content = content,
                 Headers = { AcceptEncoding = { gzip } }

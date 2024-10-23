@@ -22,6 +22,7 @@ namespace Apache.Druid.Querying.Microsoft.Extensions.DependencyInjection
         public IHttpClientBuilder ClientBuilder { get; }
         public JsonSerializerOptions QuerySerializerOptions { get; }
         public JsonSerializerOptions DataSerializerOptions { get; }
+        public string NativeQueryEndpointUri { get; private set; } = "druid/v2";
 
         public DataSourceProviderBuilder ConfigureClient(Action<IHttpClientBuilder> configure)
         {
@@ -40,6 +41,12 @@ namespace Apache.Druid.Querying.Microsoft.Extensions.DependencyInjection
             configure(DataSerializerOptions);
             return this;
         }
+
+        public DataSourceProviderBuilder SetNativeQueryEndpointUri(string toValue)
+        {
+            NativeQueryEndpointUri = toValue;
+            return this;
+        }
     }
 
     public static class ServiceCollectionExtensions
@@ -53,6 +60,7 @@ namespace Apache.Druid.Querying.Microsoft.Extensions.DependencyInjection
             clientBuilder.ConfigureHttpClient(client => client.BaseAddress = druidRouterUri);
             var querySerlializerOptions = DefaultSerializerOptions.Query.Create();
             var dataSerializerOptions = DefaultSerializerOptions.Data.Create();
+            var providerBuilder = new DataSourceProviderBuilder(clientBuilder, querySerlializerOptions, dataSerializerOptions);
             services
                 .AddSingleton<IDataSourceInitializer, TProvider>()
                 .AddSingleton(services =>
@@ -65,10 +73,15 @@ namespace Apache.Druid.Querying.Microsoft.Extensions.DependencyInjection
                         match[0] :
                         throw new InvalidOperationException($"{typeof(TProvider)} has been registered multiple times.");
                     var factory = services.GetRequiredService<IHttpClientFactory>();
-                    matchSingle.Initialize(new(querySerlializerOptions, dataSerializerOptions, () => factory.CreateClient(clientId)));
+                    var options = new DataSourceOptions(
+                        querySerlializerOptions,
+                        dataSerializerOptions,
+                        () => factory.CreateClient(clientId),
+                        () => providerBuilder.NativeQueryEndpointUri);
+                    matchSingle.Initialize(options);
                     return (TProvider)matchSingle;
                 });
-            return new(clientBuilder, querySerlializerOptions, dataSerializerOptions);
+            return providerBuilder;
         }
     }
 }
