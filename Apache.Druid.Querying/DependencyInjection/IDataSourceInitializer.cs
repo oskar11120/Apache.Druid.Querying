@@ -15,7 +15,7 @@ namespace Apache.Druid.Querying.DependencyInjection
             QuerySerializer = querySerializer;
             DataSerializer = dataSerializer;
             HttpClientFactory = httpClientFactory;
-            getNativeQueryEndpointUri ??= static () => "druid/v2";
+            this.getNativeQueryEndpointUri = getNativeQueryEndpointUri ?? (static () => "druid/v2");
         }
 
         public JsonSerializerOptions QuerySerializer { get; }
