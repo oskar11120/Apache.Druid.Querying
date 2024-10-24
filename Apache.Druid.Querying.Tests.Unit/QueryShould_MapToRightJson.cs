@@ -123,6 +123,42 @@ namespace Apache.Druid.Querying.Tests.Unit
             var eight = query.Granularity("T1M", "utc", t);
             AssertMatch(eight);
         }
+        
+        private sealed record Activity(
+            [property: DataSourceTimeColumn] DateTimeOffset Timestamp,
+            int Duration,
+            int DomainID,
+            int UserID
+        );
+        private sealed record ActivityDimensions(int DomainID);
+        private sealed record ActivityAggregations(List<long> UserIds, int Duration);
+    
+        [Test]
+        public void ExpressionAggregationWithCombine()
+        {
+            var query = new Query<Activity>
+                    .GroupBy<ActivityDimensions>
+                    .WithNoVirtualColumns
+                    .WithAggregations<ActivityAggregations>()
+                .Dimensions(type => new ActivityDimensions(type.Default(activity => activity.DomainID)))
+                .Aggregations(type => new ActivityAggregations(
+                    type.Expression<List<long>, string>(
+                        "ARRAY<LONG>[]",
+                        "__acc",
+                        data => $"array_set_add(__acc, {data.UserID})",
+                        data => $"array_set_add_all(__acc, {data.Duration})",
+                        null,
+                        null,
+                        data => "ARRAY<LONG>[]",
+                        true,
+                        true,
+                        false,
+                        1024 * 10
+                    ),
+                    type.Sum(activity => activity.Duration))
+                );
+            AssertMatch(query);
+        }
 
         private record IotMeasurementTimestamps(DateTimeOffset Normal, DateTimeOffset Processed);
         [Test]

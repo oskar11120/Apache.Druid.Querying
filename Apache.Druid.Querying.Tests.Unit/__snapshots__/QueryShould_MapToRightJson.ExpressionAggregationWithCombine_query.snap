@@ -1,0 +1,34 @@
+﻿{
+  "queryType": "groupBy",
+  "dimensions": [
+    {
+      "type": "default",
+      "outputName": "DomainID",
+      "dimension": "DomainID"
+    }
+  ],
+  "aggregations": [
+    {
+      "type": "expression",
+      "name": "UserIds",
+      "initialValue": "ARRAY\u003CLONG\u003E[]",
+      "accumulatorIdentifier": "__acc",
+      "fold": "array_set_add(__acc, \u0022UserID\u0022)",
+      "combine": "array_set_add_all(__acc, \u0022Duration\u0022)",
+      "initialValueCombine": "ARRAY\u003CLONG\u003E[]",
+      "fields": [
+        "\u0022UserID\u0022",
+        "\u0022Duration\u0022"
+      ],
+      "isNullUnlessAggregated": true,
+      "shouldAggregateNullInputs": true,
+      "shouldCombineAggregateNullInputs": false,
+      "maxSizeBytes": 10240
+    },
+    {
+      "type": "longSum",
+      "name": "Duration",
+      "fieldName": "Duration"
+    }
+  ]
+}

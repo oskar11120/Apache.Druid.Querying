@@ -30,6 +30,7 @@ internal class DataSerializerShould_ApplyTo
     private sealed record Aggregations(
         DateTimeOffset Time,
         bool Bool);
+    
     [Test]
     public void ExpressionAggregation()
     {
