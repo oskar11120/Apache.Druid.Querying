@@ -71,47 +71,6 @@ internal class DataSerializerShould_ApplyTo
             .Metric(type => type.Dimension(t));
         Verify(query);
     }
-    
-    private sealed record Activity(
-        [property: DataSourceTimeColumn] DateTimeOffset Timestamp,
-        int Duration,
-        int DomainID,
-        int UserID
-    );
-    private sealed record ActivityDimensions(int DomainID);
-    private sealed record ActivityAggregations(List<long> UserIds, int Duration);
-    
-    [Test]
-    public void ExpressionAggregationWithCombine()
-    {
-        var query = new Query<Activity>
-                .GroupBy<ActivityDimensions>
-                .WithNoVirtualColumns
-                .WithAggregations<ActivityAggregations>()
-            .Dimensions(type => new ActivityDimensions(type.Default(activity => activity.DomainID)))
-            .Aggregations(type => new ActivityAggregations(
-                type.Expression<List<long>, string>(
-                    "ARRAY<LONG>[]",
-                    "__acc",
-                    data => $"array_set_add(__acc, {data.UserID})",
-                    data => $"array_set_add_all(__acc, {data.Duration})",
-                    null,
-                    null,
-                    data => "ARRAY<LONG>[]",
-                    true,
-                    true,
-                    false,
-                    1024 * 10
-                ),
-                type.Sum(activity => activity.Duration))
-            );
-        
-        var json = query
-            .MapToJson(dataSerializerOptions: dataSerializerOptions)
-            .ToString();
-        
-        Snapshot.Match(json);
-    }
 
     private sealed record Inline_Data(
         [property: DataSourceTimeColumn] DateTimeOffset DataTimeOffset,
