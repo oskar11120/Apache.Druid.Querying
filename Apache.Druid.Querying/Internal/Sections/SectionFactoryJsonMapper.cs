@@ -43,19 +43,12 @@ namespace Apache.Druid.Querying.Internal.Sections
                     
                     if (options.ExpressionColumnNamesKey is string existing)
                     {
-                        if (!result.ContainsKey(existing))
+                        if (result.Remove(existing, out var node))
                         {
-                            result.Add(existing, JsonSerializer.SerializeToNode(columnNames, context.QuerySerializerOptions));
+                            var existingColumnNames = node.Deserialize<IEnumerable<string>>()!;
+                            columnNames = existingColumnNames.Concat(columnNames).Distinct().ToArray();
                         }
-                        else
-                        {
-                            result.TryGetPropertyValue(existing, out JsonNode? node);
-                            
-                            string[] fields = node.Deserialize<string[]>()!;
-                            
-                            result.Remove(existing);
-                            result.Add(existing, JsonSerializer.SerializeToNode(fields.Concat(columnNames), context.QuerySerializerOptions));
-                        }
+                        result.Add(existing, JsonSerializer.SerializeToNode(columnNames, context.QuerySerializerOptions));
                     }
                 },
                 (filterFactory, result) =>
