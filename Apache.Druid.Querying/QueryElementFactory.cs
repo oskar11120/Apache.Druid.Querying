@@ -212,6 +212,26 @@ namespace Apache.Druid.Querying
             TColumn Max<TColumn>(
                 ColumnSelector<TColumn> fieldName,
                 DruidExpression expression);
+            
+            TColumn HLLBuild<TColumn>(ColumnSelector<TColumn> fieldName);
+            TColumn HLLBuild<TColumn>(
+                ColumnSelector<TColumn> fieldName,
+                int lgK);
+            TColumn HLLBuild<TColumn>(
+                ColumnSelector<TColumn> fieldName,
+                int lgK,
+                string tgtHllType);
+            TColumn HLLBuild<TColumn>(
+                ColumnSelector<TColumn> fieldName,
+                int lgK,
+                string tgtHllType,
+                bool round);
+            TColumn HLLBuild<TColumn>(
+                ColumnSelector<TColumn> fieldName,
+                int lgK,
+                string tgtHllType,
+                bool round,
+                bool shouldFinalize);
 
             TColumn First<TColumn, TTimeColumn>(
                 ColumnSelector<TColumn> fieldName,
