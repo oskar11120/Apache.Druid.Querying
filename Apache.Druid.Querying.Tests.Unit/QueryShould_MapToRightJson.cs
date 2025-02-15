@@ -168,7 +168,7 @@ namespace Apache.Druid.Querying.Tests.Unit
                     .GroupBy<ActivityDimensions>
                     .WithNoVirtualColumns
                     .WithAggregations<AggregateByDurationAndApproximateUserCount>()
-                .Interval(new(DateTimeOffset.UtcNow.AddYears(-1), DateTimeOffset.Now))
+                .Interval(new(t.AddYears(-1), t))
                 .Dimensions(type => new ActivityDimensions(type.Default(activity => activity.DomainID)))
                 .Aggregations(type => new AggregateByDurationAndApproximateUserCount(
                     type.Sum(activity => activity.Duration),
