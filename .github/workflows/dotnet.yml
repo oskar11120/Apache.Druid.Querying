@@ -26,7 +26,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 8.0.x
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
@@ -44,9 +44,9 @@ jobs:
       with:
         fetch-depth: 0
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/c
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 8.0.x
     - name: Pack
       run: dotnet pack --configuration Release --output ${{ env.NuGetDirectory }}
     - name: Upload
@@ -69,7 +69,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 8.0.x
       - name: Publish
         run: |
           foreach($file in (Get-ChildItem "${{ env.NuGetDirectory }}" -Recurse -Include *.nupkg)) {
