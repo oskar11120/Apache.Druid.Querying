@@ -132,7 +132,8 @@ namespace Apache.Druid.Querying.Tests.Unit
         );
         private sealed record ActivityDimensions(int DomainID);
         private sealed record ActivityAggregations(List<long> UserIds, int Duration);
-    
+        private sealed record AggregateByDurationAndApproximateUserCount(int Duration, long userCount);
+
         [Test]
         public void ExpressionAggregationWithCombine()
         {
@@ -157,6 +158,23 @@ namespace Apache.Druid.Querying.Tests.Unit
                     ),
                     type.Sum(activity => activity.Duration))
                 );
+            AssertMatch(query);
+        }
+
+        [Test]
+        public void HllSketchBuildAggregation()
+        {
+            var query = new Query<Activity>
+                    .GroupBy<ActivityDimensions>
+                    .WithNoVirtualColumns
+                    .WithAggregations<AggregateByDurationAndApproximateUserCount>()
+                .Interval(new(DateTimeOffset.UtcNow.AddYears(-1), DateTimeOffset.Now))
+                .Dimensions(type => new ActivityDimensions(type.Default(activity => activity.DomainID)))
+                .Aggregations(type => new AggregateByDurationAndApproximateUserCount(
+                    type.Sum(activity => activity.Duration),
+                    type.HLLBuild(activity => activity.UserID)
+                ))
+                .Granularity(SimpleGranularity.All);
             AssertMatch(query);
         }
 

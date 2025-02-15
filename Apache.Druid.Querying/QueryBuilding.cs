@@ -371,6 +371,7 @@ namespace Apache.Druid.Querying
                 MapType: static call => call.MethodName switch
                 {
                     nameof(QueryElementFactory<TArguments>.IAggregations.Mean) => "doubleMean",
+                    nameof(QueryElementFactory<TArguments>.IAggregations.HLLBuild) => "HLLSketchBuild",
 
                     nameof(QueryElementFactory<TArguments>.IAggregations.Sum) or
                     nameof(QueryElementFactory<TArguments>.IAggregations.Min) or

@@ -1,0 +1,26 @@
+﻿{
+  "queryType": "groupBy",
+  "intervals": [
+    "2024-02-04T10:35:47.5717860\u002B00:00/2025-02-04T11:35:47.5717910\u002B01:00"
+  ],
+  "granularity": "all",
+  "dimensions": [
+    {
+      "type": "default",
+      "outputName": "DomainID",
+      "dimension": "DomainID"
+    }
+  ],
+  "aggregations": [
+    {
+      "type": "longSum",
+      "name": "Duration",
+      "fieldName": "Duration"
+    },
+    {
+      "type": "HLLSketchBuild",
+      "name": "userCount",
+      "fieldName": "UserID"
+    }
+  ]
+}
