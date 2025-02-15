@@ -1,4 +1,4 @@
-# [Apache Druid](http://druid.io/) client library/orm for dotnet 6+ inspired by [EF Core](https://learn.microsoft.com/pl-pl/ef/core/).
+# [Apache Druid](http://druid.io/) client library/orm for dotnet 8+ inspired by [EF Core](https://learn.microsoft.com/pl-pl/ef/core/).
 
 https://www.nuget.org/packages/Apache.Druid.Querying
 

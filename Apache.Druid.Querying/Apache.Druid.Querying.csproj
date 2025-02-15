@@ -6,7 +6,7 @@
     <NoWarn>IDE1006</NoWarn>
     
     <Version>0.7</Version>
-    <Description>Apache Druid client library for dotnet 6+.</Description>
+    <Description>Apache Druid client library/orm for dotnet 8+.</Description>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
