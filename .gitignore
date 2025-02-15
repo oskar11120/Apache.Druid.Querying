@@ -362,5 +362,8 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
+# Ignore macOS folder metadata files
+.DS_Store
+
 # JetBrains IDEs config files
 .idea
